@@ -1,0 +1,755 @@
+diff -Naur uboot_org/arch/arm/include/asm/arch-aspeed/platform.h uboot/arch/arm/include/asm/arch-aspeed/platform.h
+--- uboot_org/arch/arm/include/asm/arch-aspeed/platform.h	2020-11-20 17:00:27.000000000 +0800
++++ uboot/arch/arm/include/asm/arch-aspeed/platform.h	2021-05-07 15:24:12.000000000 +0800
+@@ -53,7 +53,7 @@
+ #define ASPEED_MAC_COUNT	4
+ #define ASPEED_DRAM_BASE	0x80000000
+ #define ASPEED_SRAM_BASE	0x10000000
+-#define ASPEED_SRAM_SIZE	0x10000
++#define ASPEED_SRAM_SIZE	0x16000
+ #define ASPEED_FMC_CS0_BASE	0x20000000
+ #else
+ #err "No define for platform.h"
+diff -Naur uboot_org/arch/arm/mach-aspeed/ast2600/platform.S uboot/arch/arm/mach-aspeed/ast2600/platform.S
+--- uboot_org/arch/arm/mach-aspeed/ast2600/platform.S	2020-11-20 17:00:27.000000000 +0800
++++ uboot/arch/arm/mach-aspeed/ast2600/platform.S	2021-05-07 15:20:56.000000000 +0800
+@@ -60,6 +60,8 @@
+ 
+ /* Revision ID */
+ #define REV_ID_AST2600A0	0x05000303
++#define REV_ID_AST2600A1	0x05010303
++#define REV_ID_AST2620A1	0x05020203
+ 
+ .macro scu_unlock
+ 	movw	r0, #0xA8A8
+@@ -73,8 +75,8 @@
+ 
+ .macro timer_init
+ #ifdef CONFIG_FPGA_ASPEED
+-	movw	r0, #0xf080
+-	movt	r0, #0x02fa
++	movw	r0, #0x6c00
++	movt	r0, #0x02dc
+ #else
+ 	ldr	r0, =AST_SCU_REV_ID
+ 	ldr	r0, [r0]
+@@ -204,14 +206,27 @@
+ 	beq	wait_lock
+ 
+ 	/* skip A1 only area */
+-	b 1f
++	b 2f
+ 
+ 0:
+-	/* LPC/eSPI mode selection (A1 only) */
++	/* identify AST2600/AST2620 A1 */
++	ldr	r0, =AST_SCU_REV_ID
++	ldr	r0, [r0]
++
++	ldr	r1, =REV_ID_AST2600A1
++	cmp	r0, r1
++	beq	1f
++
++	ldr	r1, =REV_ID_AST2620A1
++	cmp	r0, r1
++	bne	2f
++
++1:
++	/* LPC/eSPI mode selection by SW (AST2600/AST2620 A1 only) */
+ 	ldr	r0, =AST_GPIOYZ_DATA_VALUE
+ 	ldr	r0, [r0]
+ 	tst	r0, #0x1000
+-	beq	1f
++	beq	2f
+ 
+ 	/* switch to LPC mode if GPIOZ[4]=1 */
+ 	ldr	r0, =AST_SCU_HW_STRAP2
+@@ -219,7 +234,7 @@
+ 	orr	r1, #0x40
+ 	str	r1, [r0]
+ 
+-1:
++2:
+ 	/* MMIO decode setting */
+ 	ldr	r0, =AST_SCU_MMIO_DEC_SET
+ 	mov	r1, #0x2000
+diff -Naur uboot_org/arch/arm/mach-aspeed/ast2600/scu_info.c uboot/arch/arm/mach-aspeed/ast2600/scu_info.c
+--- uboot_org/arch/arm/mach-aspeed/ast2600/scu_info.c	2020-11-20 17:00:27.000000000 +0800
++++ uboot/arch/arm/mach-aspeed/ast2600/scu_info.c	2021-05-07 15:21:44.000000000 +0800
+@@ -24,6 +24,9 @@
+ 	SOC_ID("AST2600-A2", 0x0502030305010303),
+ 	SOC_ID("AST2620-A2", 0x0502020305010203),
+ 	SOC_ID("AST2605-A2", 0x0502010305010103),
++	SOC_ID("AST2600-A3", 0x0503030305030303),
++	SOC_ID("AST2620-A3", 0x0503020305030203),
++	SOC_ID("AST2605-A3", 0x0503010305030103),
+ };
+ 
+ void aspeed_print_soc_id(void)
+diff -Naur uboot_org/cmd/otp.c uboot/cmd/otp.c
+--- uboot_org/cmd/otp.c	2020-11-20 17:00:27.000000000 +0800
++++ uboot/cmd/otp.c	2021-05-06 17:51:43.000000000 +0800
+@@ -2076,6 +2076,7 @@
+ 		info_cb.key_info_len = ARRAY_SIZE(a2_key_type);
+ 		break;
+ 	default:
++		printf("SOC is not supported\n");
+ 		return CMD_RET_FAILURE;
+ 	}
+ 
+diff -Naur uboot_org/cmd/otp_info.h uboot/cmd/otp_info.h
+--- uboot_org/cmd/otp_info.h	2020-11-20 17:00:27.000000000 +0800
++++ uboot/cmd/otp_info.h	2021-05-06 17:52:11.000000000 +0800
+@@ -42,6 +42,7 @@
+ 	{ 7, 2, 1, "CPU Frequency : 800MHz" },
+ 	{ 7, 2, 2, "CPU Frequency : 1.2GHz" },
+ 	{ 7, 2, 3, "CPU Frequency : 1.4GHz" },
++	{ 10, 2, 0, "HCLK ratio AXI:AHB = default" },
+ 	{ 10, 2, 1, "HCLK ratio AXI:AHB = 2:1" },
+ 	{ 10, 2, 2, "HCLK ratio AXI:AHB = 3:1" },
+ 	{ 10, 2, 3, "HCLK ratio AXI:AHB = 4:1" },
+@@ -164,6 +165,7 @@
+ 	{ 7, 3, 5, "CPU Frequency : 800MHz" },
+ 	{ 7, 3, 6, "CPU Frequency : 800MHz" },
+ 	{ 7, 3, 7, "CPU Frequency : 800MHz" },
++	{ 10, 2, 0, "HCLK ratio AXI:AHB = default" },
+ 	{ 10, 2, 1, "HCLK ratio AXI:AHB = 2:1" },
+ 	{ 10, 2, 2, "HCLK ratio AXI:AHB = 3:1" },
+ 	{ 10, 2, 3, "HCLK ratio AXI:AHB = 4:1" },
+@@ -286,6 +288,7 @@
+ 	{ 7, 3, 5, "CPU Frequency : 800MHz" },
+ 	{ 7, 3, 6, "CPU Frequency : 800MHz" },
+ 	{ 7, 3, 7, "CPU Frequency : 800MHz" },
++	{ 10, 2, 0, "HCLK ratio AXI:AHB = default" },
+ 	{ 10, 2, 1, "HCLK ratio AXI:AHB = 2:1" },
+ 	{ 10, 2, 2, "HCLK ratio AXI:AHB = 3:1" },
+ 	{ 10, 2, 3, "HCLK ratio AXI:AHB = 4:1" },
+diff -Naur uboot_org/common/image-fdt.c uboot/common/image-fdt.c
+--- uboot_org/common/image-fdt.c	2021-05-11 16:14:00.981895991 +0800
++++ uboot/common/image-fdt.c	2021-05-07 15:25:00.000000000 +0800
+@@ -402,6 +402,9 @@
+ 					&fit_uname_config,
+ 					arch, &load, &len);
+ 
++				if (fdt_noffset < 0)
++					goto error;
++
+ 				images->fit_hdr_fdt = map_sysmem(fdt_addr, 0);
+ 				images->fit_uname_fdt = fit_uname_fdt;
+ 				images->fit_noffset_fdt = fdt_noffset;
+diff -Naur uboot_org/drivers/clk/aspeed/clk_ast2600.c uboot/drivers/clk/aspeed/clk_ast2600.c
+--- uboot_org/drivers/clk/aspeed/clk_ast2600.c	2020-11-20 17:00:27.000000000 +0800
++++ uboot/drivers/clk/aspeed/clk_ast2600.c	2021-05-06 16:32:22.000000000 +0800
+@@ -285,7 +285,7 @@
+ 		if (hwstrap1 & BIT(16)) {
+ 			ast2600_a1_axi_ahb_div1_table[0] =
+ 				ast2600_a1_axi_ahb_default_table[(hwstrap1 >> 8) &
+-								 0x3];
++								 0x7] * 2;
+ 			axi_div = 1;
+ 			ahb_div =
+ 				ast2600_a1_axi_ahb_div1_table[(hwstrap1 >> 11) &
+@@ -293,7 +293,7 @@
+ 		} else {
+ 			ast2600_a1_axi_ahb_div0_table[0] =
+ 				ast2600_a1_axi_ahb_default_table[(hwstrap1 >> 8) &
+-								 0x3];
++								 0x7];
+ 			axi_div = 2;
+ 			ahb_div =
+ 				ast2600_a1_axi_ahb_div0_table[(hwstrap1 >> 11) &
+@@ -1006,10 +1006,10 @@
+ {
+ 	u32 clk_sel = readl(&scu->clk_sel1);
+ 
+-	/* Configure RSA clock = HPLL/3 */
++	/* Configure RSA clock = HPLL/4 */
+ 	clk_sel |= SCU_CLK_ECC_RSA_FROM_HPLL_CLK;
+ 	clk_sel &= ~SCU_CLK_ECC_RSA_CLK_MASK;
+-	clk_sel |= SCU_CLK_ECC_RSA_CLK_DIV(2);
++	clk_sel |= SCU_CLK_ECC_RSA_CLK_DIV(3);
+ 
+ 	writel(clk_sel, &scu->clk_sel1);
+ }
+diff -Naur uboot_org/drivers/mtd/spi/spi-nor-core.c uboot/drivers/mtd/spi/spi-nor-core.c
+--- uboot_org/drivers/mtd/spi/spi-nor-core.c	2021-05-11 16:14:01.161890984 +0800
++++ uboot/drivers/mtd/spi/spi-nor-core.c	2021-05-06 17:40:13.000000000 +0800
+@@ -298,6 +298,7 @@
+ 	/* Do some manufacturer fixups first */
+ 	switch (JEDEC_MFR(info)) {
+ 	case SNOR_MFR_SPANSION:
++	case SNOR_MFR_CYPRESS:
+ 		/* No small sector erase for 4-byte command set */
+ 		nor->erase_opcode = SPINOR_OP_SE;
+ 		nor->mtd.erasesize = info->sector_size;
+@@ -330,6 +331,7 @@
+ 	case SNOR_MFR_WINBOND:
+ 	case SNOR_MFR_GIGADEVICE:
+ 	case SNOR_MFR_ISSI:
++	case SNOR_MFR_CYPRESS:
+ 		if (need_wren)
+ 			write_enable(nor);
+ 
+@@ -593,6 +595,71 @@
+ 	return ret;
+ }
+ 
++#ifdef CONFIG_SPI_FLASH_SPANSION
++/*
++ * Erase for Spansion/Cypress Flash devices that has overlaid 4KB sectors at
++ * the top and/or bottom.
++ */
++static int spansion_overlaid_erase(struct mtd_info *mtd,
++				   struct erase_info *instr)
++{
++	struct spi_nor *nor = mtd_to_spi_nor(mtd);
++	struct erase_info instr_4k;
++	u8 opcode;
++	u32 erasesize;
++	int ret;
++
++	/* Perform default erase operation (non-overlaid portion is erased) */
++	ret = spi_nor_erase(mtd, instr);
++	if (ret)
++		return ret;
++
++	/* Backup default erase opcode and size */
++	opcode = nor->erase_opcode;
++	erasesize = mtd->erasesize;
++
++	/*
++	 * Erase 4KB sectors. Use the possible max length of 4KB sector region.
++	 * The Flash just ignores the command if the address is not configured
++	 * as 4KB sector and reports ready status immediately.
++	 */
++	instr_4k.len = SZ_128K;
++	nor->erase_opcode = SPINOR_OP_BE_4K_4B;
++	mtd->erasesize = SZ_4K;
++	if (instr->addr == 0) {
++		instr_4k.addr = 0;
++		ret = spi_nor_erase(mtd, &instr_4k);
++	}
++	if (!ret && instr->addr + instr->len == mtd->size) {
++		instr_4k.addr = mtd->size - instr_4k.len;
++		ret = spi_nor_erase(mtd, &instr_4k);
++	}
++
++	/* Restore erase opcode and size */
++	nor->erase_opcode = opcode;
++	mtd->erasesize = erasesize;
++
++	return ret;
++}
++#endif
++
++static bool cypress_s25hx_t(const struct flash_info *info)
++{
++	if (JEDEC_MFR(info) == SNOR_MFR_CYPRESS) {
++		switch (info->id[1]) {
++		case 0x2a: /* S25HL (QSPI, 3.3V) */
++		case 0x2b: /* S25HS (QSPI, 1.8V) */
++			return true;
++			break;
++
++		default:
++			break;
++		}
++	}
++
++	return false;
++}
++
+ #if defined(CONFIG_SPI_FLASH_STMICRO) || defined(CONFIG_SPI_FLASH_SST)
+ /* Write status register and ensure bits in mask match written values */
+ static int write_sr_and_check(struct spi_nor *nor, u8 status_new, u8 mask)
+@@ -1338,6 +1405,62 @@
+ 	int (*quad_enable)(struct spi_nor *nor);
+ };
+ 
++#ifdef CONFIG_SPI_FLASH_SPANSION
++/**
++ * spansion_quad_enable_volatile() - enable Quad I/O mode in volatile register.
++ * @nor:	pointer to a 'struct spi_nor'
++ *
++ * It is recommended to update volatile registers in the field application due
++ * to a risk of the non-volatile registers corruption by power interrupt. This
++ * function sets Quad Enable bit in CFR1 volatile.
++ *
++ * Return: 0 on success, -errno otherwise.
++ */
++static int spansion_quad_enable_volatile(struct spi_nor *nor)
++{
++	struct spi_mem_op op =
++			SPI_MEM_OP(SPI_MEM_OP_CMD(SPINOR_OP_WRAR, 1),
++				   SPI_MEM_OP_ADDR(nor->addr_width,
++						   SPINOR_REG_ADDR_CFR1V, 1),
++				   SPI_MEM_OP_NO_DUMMY,
++				   SPI_MEM_OP_DATA_OUT(1, NULL, 1));
++	u8 cr;
++	int ret;
++
++	/* Check current Quad Enable bit value. */
++	ret = read_cr(nor);
++	if (ret < 0) {
++		dev_dbg(nor->dev,
++			"error while reading configuration register\n");
++		return -EINVAL;
++	}
++
++	if (ret & CR_QUAD_EN_SPAN)
++		return 0;
++
++	cr = ret | CR_QUAD_EN_SPAN;
++
++	write_enable(nor);
++
++	ret = spi_nor_read_write_reg(nor, &op, &cr);
++
++	if (ret < 0) {
++		dev_dbg(nor->dev,
++			"error while writing configuration register\n");
++		return -EINVAL;
++	}
++
++	/* Read back and check it. */
++	ret = read_cr(nor);
++	if (!(ret > 0 && (ret & CR_QUAD_EN_SPAN))) {
++		dev_dbg(nor->dev, "Spansion Quad bit not set\n");
++		return -EINVAL;
++	}
++
++	return 0;
++}
++#endif
++
+ static void
+ spi_nor_set_read_settings(struct spi_nor_read_command *read,
+ 			  u8 num_mode_clocks,
+@@ -1382,13 +1505,16 @@
+ 			     size_t len, void *buf)
+ {
+ 	u8 addr_width, read_opcode, read_dummy;
++	enum spi_nor_protocol	read_proto;
+ 	int ret;
+ 
+ 	read_opcode = nor->read_opcode;
+ 	addr_width = nor->addr_width;
+ 	read_dummy = nor->read_dummy;
++	read_proto = nor->read_proto;
+ 
+ 	nor->read_opcode = SPINOR_OP_RDSFDP;
++	nor->read_proto = SNOR_PROTO_1_1_1;
+ 	nor->addr_width = 3;
+ 	nor->read_dummy = 8;
+ 
+@@ -1411,6 +1537,7 @@
+ 	nor->read_opcode = read_opcode;
+ 	nor->addr_width = addr_width;
+ 	nor->read_dummy = read_dummy;
++	nor->read_proto = read_proto;
+ 
+ 	return ret;
+ }
+@@ -1949,6 +2076,10 @@
+ 		spi_nor_set_read_settings(&params->reads[SNOR_CMD_READ_FAST],
+ 					  0, 8, SPINOR_OP_READ_FAST,
+ 					  SNOR_PROTO_1_1_1);
++#ifdef CONFIG_SPI_FLASH_SPANSION
++		if (cypress_s25hx_t(info))
++			params->reads[SNOR_CMD_READ_FAST].num_mode_clocks = 8;
++#endif
+ 	}
+ 
+ 	if (info->flags & SPI_NOR_DUAL_READ) {
+@@ -1989,6 +2120,13 @@
+ 		case SNOR_MFR_MICRON:
+ 		case SNOR_MFR_ISSI:
+ 			break;
++#ifdef CONFIG_SPI_FLASH_SPANSION
++		case SNOR_MFR_CYPRESS:
++			if (info->id[1] == 0x2a || info->id[1] == 0x2b) {
++				params->quad_enable = spansion_quad_enable_volatile;
++			}
++			break;
++#endif
+ 
+ 		default:
+ #if defined(CONFIG_SPI_FLASH_SPANSION) || defined(CONFIG_SPI_FLASH_WINBOND)
+@@ -2012,6 +2150,20 @@
+ 			nor->mtd.erasesize = 0;
+ 		} else {
+ 			memcpy(params, &sfdp_params, sizeof(*params));
++#ifdef CONFIG_SPI_FLASH_SPANSION
++			if (cypress_s25hx_t(info)) {
++				/* Default page size is 256-byte, but BFPT reports 512-byte */
++				params->page_size = 256;
++				/* Reset erase size in case it is set to 4K from BFPT */
++				nor->mtd.erasesize = info->sector_size ;
++				/* READ_FAST_4B (0Ch) requires mode cycles*/
++				params->reads[SNOR_CMD_READ_FAST].num_mode_clocks = 8;
++				/* PP_1_1_4 is not supported */
++				params->hwcaps.mask &= ~SNOR_HWCAPS_PP_1_1_4;
++				/* Use volatile register to enable quad */
++				params->quad_enable = spansion_quad_enable_volatile;
++			}
++#endif
+ 		}
+ 	}
+ 
+@@ -2162,9 +2314,15 @@
+ 	shared_mask = hwcaps->mask & params->hwcaps.mask;
+ 
+ 	/* SPI n-n-n protocols are not supported yet. */
+-	ignored_mask = (SNOR_HWCAPS_READ_2_2_2 |
++	ignored_mask = (SNOR_HWCAPS_READ_1_1_1_DTR |
++			SNOR_HWCAPS_READ_1_2_2 |
++			SNOR_HWCAPS_READ_1_2_2_DTR |
++			SNOR_HWCAPS_READ_2_2_2 |
++			SNOR_HWCAPS_READ_1_4_4 |
++			SNOR_HWCAPS_READ_1_4_4_DTR |
+ 			SNOR_HWCAPS_READ_4_4_4 |
+ 			SNOR_HWCAPS_READ_8_8_8 |
++			SNOR_HWCAPS_PP_1_4_4 |
+ 			SNOR_HWCAPS_PP_4_4_4 |
+ 			SNOR_HWCAPS_PP_8_8_8);
+ 	if (shared_mask & ignored_mask) {
+@@ -2339,6 +2497,24 @@
+ 	nor->page_size = params.page_size;
+ 	mtd->writebufsize = nor->page_size;
+ 
++#ifdef CONFIG_SPI_FLASH_SPANSION
++	if (cypress_s25hx_t(info)) {
++		/*
++		 * The Cypress Semper family has transparent ECC. To preserve
++		 * ECC enabled, multi-pass programming within the same 16-byte
++		 * ECC data unit needs to be avoided. Set writesize to the page
++		 * size and remove the MTD_BIT_WRITEABLE flag in mtd_info to
++		 * prevent multi-pass programming.
++		 */
++		nor->mtd.writesize = params.page_size;
++		nor->mtd.flags &= ~MTD_BIT_WRITEABLE;
++
++		/* Emulate uniform sector architecure by this erase hook*/
++		nor->mtd._erase = spansion_overlaid_erase;
++		set_4byte(nor, info, true);
++	}
++#endif
++
+ 	/* Some devices cannot do fast-read, no matter what DT tells us */
+ 	if ((info->flags & SPI_NOR_NO_FR) || (spi->mode & SPI_RX_SLOW))
+ 		params.hwcaps.mask &= ~SNOR_HWCAPS_READ_FAST;
+diff -Naur uboot_org/drivers/mtd/spi/spi-nor-ids.c uboot/drivers/mtd/spi/spi-nor-ids.c
+--- uboot_org/drivers/mtd/spi/spi-nor-ids.c	2021-05-11 16:14:01.261888202 +0800
++++ uboot/drivers/mtd/spi/spi-nor-ids.c	2021-05-06 17:43:55.000000000 +0800
+@@ -126,6 +126,11 @@
+ 			SECT_4K | SPI_NOR_DUAL_READ | SPI_NOR_QUAD_READ |
+ 			SPI_NOR_HAS_LOCK | SPI_NOR_HAS_TB)
+ 	},
++	{
++		INFO("gd55b02ge", 0xc8471c, 0, 64 * 1024, 4096,
++			SECT_4K | SPI_NOR_DUAL_READ | SPI_NOR_QUAD_READ |
++			SPI_NOR_HAS_LOCK | SPI_NOR_HAS_TB)
++	},
+ #endif
+ #ifdef CONFIG_SPI_FLASH_ISSI		/* ISSI */
+ 	/* ISSI */
+@@ -136,9 +141,11 @@
+ 	{ INFO("is25lp128",  0x9d6018, 0, 64 * 1024, 256,
+ 			SECT_4K | SPI_NOR_DUAL_READ) },
+ 	{ INFO("is25lp256",  0x9d6019, 0, 64 * 1024, 512,
+-			SECT_4K | SPI_NOR_DUAL_READ | SPI_NOR_QUAD_READ) },
++			SECT_4K | SPI_NOR_DUAL_READ) },
+ 	{ INFO("is25lp512m",  0x9d601a, 0, 64 * 1024, 1024,
+ 			SECT_4K | SPI_NOR_DUAL_READ | SPI_NOR_QUAD_READ) },
++	{ INFO("is25lp01g",  0x9d601b, 0, 64 * 1024, 2048,
++			SECT_4K | SPI_NOR_DUAL_READ | SPI_NOR_QUAD_READ) },
+ 	{ INFO("is25wp032",  0x9d7016, 0, 64 * 1024,  64,
+ 			SECT_4K | SPI_NOR_DUAL_READ | SPI_NOR_QUAD_READ) },
+ 	{ INFO("is25wp064",  0x9d7017, 0, 64 * 1024, 128,
+@@ -183,6 +190,7 @@
+ 	{ INFO("n25q512a",    0x20bb20, 0, 64 * 1024, 1024, SECT_4K | USE_FSR | SPI_NOR_QUAD_READ | SPI_NOR_4B_OPCODES) },
+ 	{ INFO("n25q512ax3",  0x20ba20, 0, 64 * 1024, 1024, SECT_4K | USE_FSR | SPI_NOR_QUAD_READ | SPI_NOR_4B_OPCODES) },
+ 	{ INFO("n25q00",      0x20ba21, 0, 64 * 1024, 2048, SECT_4K | USE_FSR | SPI_NOR_QUAD_READ | NO_CHIP_ERASE) },
++	{ INFO("mt25ql02g",   0x20ba22, 0, 64 * 1024, 4096, SECT_4K | USE_FSR | SPI_NOR_QUAD_READ | NO_CHIP_ERASE) },
+ 	{ INFO("n25q00a",     0x20bb21, 0, 64 * 1024, 2048, SECT_4K | USE_FSR | SPI_NOR_QUAD_READ | NO_CHIP_ERASE) },
+ 	{ INFO("mt25qu02g",   0x20bb22, 0, 64 * 1024, 4096, SECT_4K | USE_FSR | SPI_NOR_QUAD_READ | NO_CHIP_ERASE) },
+ #endif
+@@ -212,6 +220,17 @@
+ 	{ INFO("s25fl208k",  0x014014,      0,  64 * 1024,  16, SECT_4K | SPI_NOR_DUAL_READ) },
+ 	{ INFO("s25fl128l",  0x016018,      0,  64 * 1024, 256, SECT_4K | SPI_NOR_DUAL_READ | SPI_NOR_QUAD_READ | SPI_NOR_4B_OPCODES) },
+ 	{ INFO("s25fl256l",  0x016019,      0,  64 * 1024, 512, SECT_4K | SPI_NOR_DUAL_READ | SPI_NOR_QUAD_READ | SPI_NOR_4B_OPCODES) },
++	/* S25HL/HS-T (Semper Flash with Quad SPI) Family has overlaid 4KB
++	 * sectors at top and/or bottom, depending on the device configuration.
++	 * To support this, an erase hook makes overlaid sectors appear as
++	 * uniform sectors.
++	 */
++	{ INFO6("s25hl256t",  0x342a19, 0x0f0390, 256 * 1024, 128, SPI_NOR_DUAL_READ | SPI_NOR_QUAD_READ | SPI_NOR_4B_OPCODES |	USE_CLSR) },
++	{ INFO6("s25hl512t",  0x342a1a, 0x0f0390, 256 * 1024, 256, SPI_NOR_DUAL_READ | SPI_NOR_QUAD_READ | SPI_NOR_4B_OPCODES | USE_CLSR) },
++	{ INFO6("s25hl01gt",  0x342a1b, 0x0f0390, 256 * 1024, 512, SPI_NOR_DUAL_READ | SPI_NOR_QUAD_READ | SPI_NOR_4B_OPCODES |	USE_CLSR) },
++	{ INFO6("s25hs256t",  0x342b19, 0x0f0390, 256 * 1024, 128, SPI_NOR_DUAL_READ | SPI_NOR_QUAD_READ | SPI_NOR_4B_OPCODES |	USE_CLSR) },
++	{ INFO6("s25hs512t",  0x342b1a, 0x0f0390, 256 * 1024, 256, SPI_NOR_DUAL_READ | SPI_NOR_QUAD_READ | SPI_NOR_4B_OPCODES |	USE_CLSR) },
++	{ INFO6("s25hs01gt",  0x342b1b, 0x0f0390, 256 * 1024, 512, SPI_NOR_DUAL_READ | SPI_NOR_QUAD_READ | SPI_NOR_4B_OPCODES |	USE_CLSR) },
+ #endif
+ #ifdef CONFIG_SPI_FLASH_SST		/* SST */
+ 	/* SST -- large erase sizes are "overlays", "sectors" are 4K */
+@@ -327,6 +346,11 @@
+ 			SECT_4K | SPI_NOR_DUAL_READ | SPI_NOR_QUAD_READ |
+ 			SPI_NOR_HAS_LOCK | SPI_NOR_HAS_TB)
+ 	},
++	{
++		INFO("w25q02jv", 0xef7022, 0, 64 * 1024, 4096,
++			SECT_4K | SPI_NOR_DUAL_READ | SPI_NOR_QUAD_READ |
++			SPI_NOR_HAS_LOCK | SPI_NOR_HAS_TB)
++	},
+ 	{
+ 		INFO("w25q01jvfim", 0xef7021, 0, 64 * 1024, 2048,
+ 			SECT_4K | SPI_NOR_DUAL_READ | SPI_NOR_QUAD_READ |
+diff -Naur uboot_org/drivers/ram/aspeed/sdram_ast2600.c uboot/drivers/ram/aspeed/sdram_ast2600.c
+--- uboot_org/drivers/ram/aspeed/sdram_ast2600.c	2021-05-11 16:14:02.369857384 +0800
++++ uboot/drivers/ram/aspeed/sdram_ast2600.c	2021-05-06 17:45:45.000000000 +0800
+@@ -804,6 +804,28 @@
+ {
+ 	struct ast2600_sdrammc_regs *regs = info->regs;
+ 	size_t hw_size;
++	size_t ram_size = SDRAM_MAX_SIZE;
++	u32 cap_param;
++
++	cap_param = (readl(&info->regs->config) & SDRAM_CONF_CAP_MASK) >> SDRAM_CONF_CAP_SHIFT;
++	switch (cap_param)
++	{
++	case SDRAM_CONF_CAP_2048M:
++		ram_size = 2048 * SDRAM_SIZE_1MB;
++		break;
++	case SDRAM_CONF_CAP_1024M:
++		ram_size = 1024 * SDRAM_SIZE_1MB;
++		break;
++	case SDRAM_CONF_CAP_512M:
++		ram_size = 512 * SDRAM_SIZE_1MB;
++		break;
++	case SDRAM_CONF_CAP_256M:
++		ram_size = 256 * SDRAM_SIZE_1MB;
++		break;
++	}
++
++	info->info.base = CONFIG_SYS_SDRAM_BASE;
++	info->info.size = ram_size - ast2600_sdrammc_get_vga_mem_size(info) - CONFIG_ASPEED_SSP_RERV_MEM;
+ 
+ 	if (0 == (readl(&regs->config) & SDRAM_CONF_ECC_SETUP))
+ 		return;
+@@ -870,7 +892,6 @@
+ 
+ 	if (readl(priv->scu + AST_SCU_HANDSHAKE) & SCU_SDRAM_INIT_READY_MASK) {
+ 		printf("already initialized, ");
+-		ast2600_sdrammc_calc_size(priv);
+ 		ast2600_sdrammc_update_size(priv);
+ 		return 0;
+ 	}
+diff -Naur uboot_org/drivers/spi/aspeed_spi.c uboot/drivers/spi/aspeed_spi.c
+--- uboot_org/drivers/spi/aspeed_spi.c	2020-11-20 17:00:27.000000000 +0800
++++ uboot/drivers/spi/aspeed_spi.c	2021-05-06 17:47:40.000000000 +0800
+@@ -73,6 +73,7 @@
+ #define CE_CTRL_IO_MODE_MASK		GENMASK(31, 28)
+ #define CE_CTRL_IO_QPI_DATA			BIT(31)
+ #define CE_CTRL_IO_DUAL_DATA		BIT(29)
++#define CE_CTRL_IO_SINGLE			0
+ #define CE_CTRL_IO_DUAL_ADDR_DATA	(BIT(29) | BIT(28))
+ #define CE_CTRL_IO_QUAD_DATA		BIT(30)
+ #define CE_CTRL_IO_QUAD_ADDR_DATA	(BIT(30) | BIT(28))
+@@ -101,6 +102,9 @@
+ #define	  CE_CTRL_WRITEMODE		0x2
+ #define	  CE_CTRL_USERMODE		0x3
+ 
++#define SPI_READ_FROM_FLASH		0x00000001
++#define SPI_WRITE_TO_FLASH		0x00000002
++
+ /* Auto Soft-Reset Command Control */
+ #define SOFT_RST_CMD_EN     GENMASK(1, 0)
+ 
+@@ -162,7 +166,8 @@
+ 	u32		ahb_size;	/* AHB Window segment size */
+ 	u32		ce_ctrl_user;	/* CE Control Register for USER mode */
+ 	u32		ce_ctrl_fread;	/* CE Control Register for FREAD mode */
+-	u32		iomode;
++	u32 	read_iomode;
++	u32 	write_iomode;
+ 
+ 	struct spi_flash *spi;		/* Associated SPI Flash device */
+ };
+@@ -634,7 +639,7 @@
+ 
+ static void aspeed_spi_send_cmd_addr(struct aspeed_spi_priv *priv,
+ 				     struct aspeed_spi_flash *flash,
+-				     const u8 *cmdbuf, unsigned int cmdlen)
++				     const u8 *cmdbuf, unsigned int cmdlen, uint32_t flag)
+ {
+ 	int i;
+ 	u8 byte0 = 0x0;
+@@ -643,8 +648,10 @@
+ 	/* First, send the opcode */
+ 	aspeed_spi_write_to_ahb(flash->ahb_base, &cmdbuf[0], 1);
+ 
+-	if(flash->iomode == CE_CTRL_IO_QUAD_ADDR_DATA)
+-		writel(flash->ce_ctrl_user | flash->iomode, &priv->regs->ce_ctrl[flash->cs]);
++	if(flash->write_iomode == CE_CTRL_IO_QUAD_ADDR_DATA && (flag & SPI_WRITE_TO_FLASH))
++		writel(flash->ce_ctrl_user | flash->write_iomode, &priv->regs->ce_ctrl[flash->cs]);
++	else if(flash->read_iomode == CE_CTRL_IO_QUAD_ADDR_DATA && (flag & SPI_READ_FROM_FLASH))
++		writel(flash->ce_ctrl_user | flash->read_iomode, &priv->regs->ce_ctrl[flash->cs]);
+ 
+ 	/*
+ 	 * The controller is configured for 4BYTE address mode. Fix
+@@ -671,15 +678,15 @@
+ 
+ 	/* cmd buffer = cmd + addr + dummies */
+ 	aspeed_spi_send_cmd_addr(priv, flash, cmdbuf,
+-				 cmdlen - (flash->spi->read_dummy/8));
++				 cmdlen - (flash->spi->read_dummy/8), SPI_READ_FROM_FLASH);
+ 
+ 	for (i = 0 ; i < (flash->spi->read_dummy/8); i++)
+ 		aspeed_spi_write_to_ahb(flash->ahb_base, &dummy, 1);
+ 
+-	if (flash->iomode) {
++	if (flash->read_iomode) {
+ 		clrbits_le32(&priv->regs->ce_ctrl[flash->cs],
+ 			     CE_CTRL_IO_MODE_MASK);
+-		setbits_le32(&priv->regs->ce_ctrl[flash->cs], flash->iomode);
++		setbits_le32(&priv->regs->ce_ctrl[flash->cs], flash->read_iomode);
+ 	}
+ 
+ 	aspeed_spi_read_from_ahb(flash->ahb_base, read_buf, len);
+@@ -696,11 +703,11 @@
+ 	aspeed_spi_start_user(priv, flash);
+ 
+ 	/* cmd buffer = cmd + addr : normally cmd is use signle mode*/
+-	aspeed_spi_send_cmd_addr(priv, flash, cmdbuf, cmdlen);
++	aspeed_spi_send_cmd_addr(priv, flash, cmdbuf, cmdlen, SPI_WRITE_TO_FLASH);
+ 
+ 	/* data will use io mode */
+-	if(flash->iomode == CE_CTRL_IO_QUAD_DATA)
+-		writel(flash->ce_ctrl_user | flash->iomode, &priv->regs->ce_ctrl[flash->cs]);
++	if(flash->write_iomode == CE_CTRL_IO_QUAD_DATA)
++		writel(flash->ce_ctrl_user | flash->write_iomode, &priv->regs->ce_ctrl[flash->cs]);
+ 
+ 	aspeed_spi_write_to_ahb(flash->ahb_base, write_buf, len);
+ 
+@@ -873,13 +880,7 @@
+ 	struct spi_slave *slave = dev_get_parent_priv(dev);
+ 	u32 read_hclk;
+ 
+-
+-	/*
+-	 * The SPI flash device slave should not change, so initialize
+-	 * it only once.
+-	 */
+-	if (flash->init)
+-		return 0;
++	flash->spi = spi_flash;
+ 
+ 	/*
+ 	 * The flash device has not been probed yet. Initial transfers
+@@ -889,6 +890,13 @@
+ 	if (!spi_flash->name)
+ 		return 0;
+ 
++	/*
++	 * The SPI flash device slave should not change, so initialize
++	 * it only once.
++	 */
++	if (flash->init)
++		return 0;
++
+ 	debug("CS%u: init %s flags:%x size:%d page:%d sector:%d erase:%d "
+ 	      "cmds [ erase:%x read=%x write:%x ] dummy:%d\n",
+ 	      flash->cs,
+@@ -898,8 +906,6 @@
+ 	      spi_flash->read_opcode, spi_flash->program_opcode,
+ 	      spi_flash->read_dummy);
+ 
+-	flash->spi = spi_flash;
+-
+ 	flash->ce_ctrl_user = CE_CTRL_USERMODE;
+ 
+ 	if(priv->new_ver)
+@@ -910,28 +916,44 @@
+ 	switch(flash->spi->read_opcode) {
+ 		case SPINOR_OP_READ_1_1_2:
+ 		case SPINOR_OP_READ_1_1_2_4B:
+-			flash->iomode = CE_CTRL_IO_DUAL_DATA;
++			flash->read_iomode = CE_CTRL_IO_DUAL_DATA;
+ 			break;
+ 		case SPINOR_OP_READ_1_1_4:
+ 		case SPINOR_OP_READ_1_1_4_4B:
+-			flash->iomode = CE_CTRL_IO_QUAD_DATA;
++			flash->read_iomode = CE_CTRL_IO_QUAD_DATA;
+ 			break;
+ 		case SPINOR_OP_READ_1_4_4:
+ 		case SPINOR_OP_READ_1_4_4_4B:
+-			flash->iomode = CE_CTRL_IO_QUAD_ADDR_DATA;
++			flash->read_iomode = CE_CTRL_IO_QUAD_ADDR_DATA;
++			printf("need modify dummy for 3 bytes\n");
++			break;
++	}
++
++	switch(flash->spi->program_opcode) {
++		case SPINOR_OP_PP:
++		case SPINOR_OP_PP_4B:
++			flash->write_iomode = CE_CTRL_IO_SINGLE;
++			break;
++		case SPINOR_OP_PP_1_1_4:
++		case SPINOR_OP_PP_1_1_4_4B:
++			flash->write_iomode = CE_CTRL_IO_QUAD_DATA;
++			break;
++		case SPINOR_OP_PP_1_4_4:
++		case SPINOR_OP_PP_1_4_4_4B:
++			flash->write_iomode = CE_CTRL_IO_QUAD_ADDR_DATA;
+ 			printf("need modify dummy for 3 bytes");
+ 			break;
+ 	}
+ 
+ 	if(priv->new_ver) {
+ 		flash->ce_ctrl_fread = CE_G6_CTRL_CLOCK_FREQ(read_hclk) |
+-			flash->iomode |
++			flash->read_iomode |
+ 			CE_CTRL_CMD(flash->spi->read_opcode) |
+ 			CE_CTRL_DUMMY((flash->spi->read_dummy/8)) |
+ 			CE_CTRL_FREADMODE;
+ 	} else {
+ 		flash->ce_ctrl_fread = CE_CTRL_CLOCK_FREQ(read_hclk) |
+-			flash->iomode |
++			flash->read_iomode |
+ 			CE_CTRL_CMD(flash->spi->read_opcode) |
+ 			CE_CTRL_DUMMY((flash->spi->read_dummy/8)) |
+ 			CE_CTRL_FREADMODE;
+diff -Naur uboot_org/include/configs/evb_ast2600_spl.h uboot/include/configs/evb_ast2600_spl.h
+--- uboot_org/include/configs/evb_ast2600_spl.h	2021-05-11 16:14:02.181862612 +0800
++++ uboot/include/configs/evb_ast2600_spl.h	2021-05-06 17:48:38.000000000 +0800
+@@ -29,8 +29,8 @@
+ 
+ /* SPL */
+ #define CONFIG_SPL_TEXT_BASE		0x00000000
+-#define CONFIG_SPL_MAX_SIZE		0x0000E800
+-#define CONFIG_SPL_STACK		0x10010000
++#define CONFIG_SPL_MAX_SIZE		0x00010000
++#define CONFIG_SPL_STACK		0x10016000
+ #define CONFIG_SPL_BSS_START_ADDR	0x90000000
+ #define CONFIG_SPL_BSS_MAX_SIZE		0x00100000
+ 
+diff -Naur uboot_org/include/linux/mtd/spi-nor.h uboot/include/linux/mtd/spi-nor.h
+--- uboot_org/include/linux/mtd/spi-nor.h	2020-11-20 17:00:27.000000000 +0800
++++ uboot/include/linux/mtd/spi-nor.h	2021-05-06 17:49:31.000000000 +0800
+@@ -27,6 +27,7 @@
+ #define SNOR_MFR_SST		CFI_MFR_SST
+ #define SNOR_MFR_WINBOND	0xef /* Also used by some Spansion */
+ #define SNOR_MFR_ISSI		0x9d
++#define SNOR_MFR_CYPRESS	0x34
+ 
+ /*
+  * Note on opcode nomenclature: some opcodes have a format like
+@@ -108,6 +109,8 @@
+ #define SPINOR_OP_BRWR		0x17	/* Bank register write */
+ #define SPINOR_OP_BRRD		0x16	/* Bank register read */
+ #define SPINOR_OP_CLSR		0x30	/* Clear status register 1 */
++#define SPINOR_OP_WRAR		0x71	/* Write any register */
++#define SPINOR_REG_ADDR_CFR1V	0x00800002
+ 
+ /* Used for Micron flashes only. */
+ #define SPINOR_OP_RD_EVCR      0x65    /* Read EVCR register */

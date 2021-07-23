@@ -1,0 +1,3199 @@
+diff -Naur uboot/drivers/net/ftgmac100.c uboot_new/drivers/net/ftgmac100.c
+--- uboot/drivers/net/ftgmac100.c	2021-01-27 10:24:17.176410641 +0800
++++ uboot_new/drivers/net/ftgmac100.c	2021-01-27 10:23:18.875042354 +0800
+@@ -45,6 +45,8 @@
+  */
+ #define MDC_CYCTHR			0x34
+ 
++long unsigned int ftgmac100_mac_register[4] = {0x1e660000, 0x1e680000, 0x1e670000, 0x1e690000};
++
+ /*
+  * ftgmac100 model variants
+  */
+@@ -201,17 +203,25 @@
+ 	maccr = readl(&ftgmac100->maccr) &
+ 		~(FTGMAC100_MACCR_GIGA_MODE |
+ 		  FTGMAC100_MACCR_FAST_MODE |
+-		  FTGMAC100_MACCR_FULLDUP);
+-
+-	if (phy_interface_is_rgmii(phydev) && phydev->speed == 1000)
+-		maccr |= FTGMAC100_MACCR_GIGA_MODE;
+-
+-	if (phydev->speed == 100)
++		  FTGMAC100_MACCR_FULLDUP);	
++		  	
++	if(((phydev->phy_id & 0xFFFF) != 0xFFFF) && ((phydev->phy_id & 0xFFFF0000) != 0xFFFF0000)){		
++		if (phy_interface_is_rgmii(phydev) && phydev->speed == 1000)
++			maccr |= FTGMAC100_MACCR_GIGA_MODE;
++		  	
++		if (phydev->speed == 100)
++			maccr |= FTGMAC100_MACCR_FAST_MODE;
++		 	
++		if (phydev->duplex)
++			maccr |= FTGMAC100_MACCR_FULLDUP;
++	}else{
++		/* Since PHY ID 1 or 2 is 0xFFFF, it maybe NCSI interface */
++		phydev->speed = 100;
++		phydev->duplex = 1;
+ 		maccr |= FTGMAC100_MACCR_FAST_MODE;
+-
+-	if (phydev->duplex)
+ 		maccr |= FTGMAC100_MACCR_FULLDUP;
+-
++	}
++	
+ 	/* update MII config into maccr */
+ 	writel(maccr, &ftgmac100->maccr);
+ 
+@@ -577,6 +587,50 @@
+ 	return clk_get_bulk(dev, &priv->clks);
+ }
+ 
++//Change hwstrap by DTS file, it reference "phy-mode"
++static int ftgmac100_write_hwstrap(long unsigned int iobase ,int phy_mode)
++{
++	int i;
++	for(i = 0; i < 4; i++){
++		if(iobase == ftgmac100_mac_register[i])
++			break;
++	}
++	
++	if(i >= 4)
++		return -1;
++	
++	switch(i) {
++		case 0:		
++			if(phy_mode == 6)
++				*(volatile u32 *)(0x1e6e2000 + 0x504) |= BIT(6);
++			else
++				*(volatile u32 *)(0x1e6e2000 + 0x500) |= BIT(6);
++			break;
++		case 1:
++			if(phy_mode == 6)
++				*(volatile u32 *)(0x1e6e2000 + 0x504) |= BIT(7);				
++			else
++				*(volatile u32 *)(0x1e6e2000 + 0x500) |= BIT(7);						
++			break;
++#ifdef ASPEED_HW_STRAP2			
++		case 2:
++			if(phy_mode == 6)
++				*(volatile u32 *)(0x1e6e2000 + 0x514) |= BIT(0);				
++			else
++				*(volatile u32 *)(0x1e6e2000 + 0x510) |= BIT(0);				
++			break;
++		case 3:
++			if(phy_mode == 6)
++				*(volatile u32 *)(0x1e6e2000 + 0x514) |= BIT(1);				
++			else
++				*(volatile u32 *)(0x1e6e2000 + 0x510) |= BIT(1);				
++			break;
++#endif			
++	}	
++		
++	return 0;
++}
++
+ static int ftgmac100_probe(struct udevice *dev)
+ {
+ 	struct eth_pdata *pdata = dev_get_platdata(dev);
+@@ -592,6 +646,8 @@
+ 	priv->phy_mode = pdata->phy_interface;
+ 	priv->max_speed = pdata->max_speed;
+ 
++	ftgmac100_write_hwstrap(pdata->iobase, pdata->phy_interface);
++
+ 	ret = clk_enable_bulk(&priv->clks);
+ 	if (ret)
+ 		goto out;
+diff -Naur uboot/drivers/net/phy/phy.c uboot_new/drivers/net/phy/phy.c
+--- uboot/drivers/net/phy/phy.c	2021-01-27 10:24:00.597158993 +0800
++++ uboot_new/drivers/net/phy/phy.c	2021-01-27 10:23:50.045635279 +0800
+@@ -718,8 +718,13 @@
+ 						 interface);
+ 		}
+ 		phy_mask &= ~(1 << addr);
+-	}
+-	return NULL;
++	
++	}	
++	//printf("Can't find PHY, enable it for NCSI usage\n");
++	is_c45 = (devad == MDIO_DEVAD_NONE) ? false : true;
++	return phy_device_create(bus, 0, phy_id, is_c45,
++			interface);
++	//return NULL;	
+ }
+ 
+ static struct phy_device *search_for_existing_phy(struct mii_dev *bus,
+diff -Naur uboot/net/net.c uboot_new/net/net.c
+--- uboot/net/net.c	2021-01-27 10:23:57.273309025 +0800
++++ uboot_new/net/net.c	2021-01-27 10:23:25.094761581 +0800
+@@ -211,6 +211,8 @@
+ 
+ int __maybe_unused net_busy_flag;
+ 
++extern void NCSI_Start(void);
++
+ /**********************************************************************/
+ 
+ static int on_ipaddr(const char *name, const char *value, enum env_op op,
+@@ -567,11 +569,10 @@
+                     tftp_start(TFTPGET);
+                        break;
+ #endif
+-#if defined(CONFIG_CMD_NCSI)
+ 		case NCSI:
+-			ncsi_probe_packages();
++			NCSI_Start();
++			net_state = NETLOOP_SUCCESS;			
+ 			break;
+-#endif
+ 		default:
+ 			break;
+ 		}
+diff -Naur uboot/oem/ami/ncsi/cmd_ncsi.c uboot_new/oem/ami/ncsi/cmd_ncsi.c
+--- uboot/oem/ami/ncsi/cmd_ncsi.c	1970-01-01 08:00:00.000000000 +0800
++++ uboot_new/oem/ami/ncsi/cmd_ncsi.c	2021-01-27 10:26:07.295440753 +0800
+@@ -0,0 +1,15 @@
++# include <common.h>
++# include <config.h>
++# include <command.h>
++# include <net.h>
++# include "cmd_ncsi.h"
++
++//#ifdef CONFIG_NCSI_SUPPORT
++/* U-boot's cmd function enter ncsi discovery */
++int  
++do_ncsi (cmd_tbl_t *cmdtp, int flag , int argc, char * const argv[])
++{
++	net_loop(NCSI);
++	return 0;
++}
++//#endif
+diff -Naur uboot/oem/ami/ncsi/cmd_ncsi.h uboot_new/oem/ami/ncsi/cmd_ncsi.h
+--- uboot/oem/ami/ncsi/cmd_ncsi.h	1970-01-01 08:00:00.000000000 +0800
++++ uboot_new/oem/ami/ncsi/cmd_ncsi.h	2021-01-27 10:26:09.291350686 +0800
+@@ -0,0 +1,15 @@
++#ifndef __AMI_CMD_NCSI_H__
++#define __AMI_CMD_NCSI_H__
++
++/* U-boot's cmd function start ncsi discovery */
++extern int  do_ncsi (cmd_tbl_t *, int, int, char * const []);
++
++//#ifdef CONFIG_NCSI_SUPPORT
++U_BOOT_CMD(				
++	ncsi,	1,	0,	do_ncsi,				
++	"Configure NCSI Interfaces",
++	""	
++);
++//#endif
++
++#endif
+diff -Naur uboot/oem/ami/ncsi/datadisp.c uboot_new/oem/ami/ncsi/datadisp.c
+--- uboot/oem/ami/ncsi/datadisp.c	1970-01-01 08:00:00.000000000 +0800
++++ uboot_new/oem/ami/ncsi/datadisp.c	2021-01-27 10:26:07.295440753 +0800
+@@ -0,0 +1,126 @@
++/*************************************************************************
++RexDebug  - Generic Debugger 
++
++Copyright (c) 2000-2005, Samvinesh Christopher
++Written by Samvinesh Christopher.  Not derived from licensed software.
++
++Permission is granted to anyone to use this software for any purpose 
++on any computer system, and to redistribute it freely,subject to the 
++following restrictions:
++
++1. The author is not responsible for the consequences of use of this 
++   software, no matter how awful, even if they arise from defects in 
++   it.
++
++2. The origin of this software must not be misrepresented, either by 
++   explicit claim or by omission.
++
++3. Altered versions must be plainly marked as such, and must not  be 
++   misrepresented as being the original software.
++
++4. This notice may not be removed or altered.
++
++5. Commercial use of this software is allowed freely subject to prior
++   notificaiton to the author.
++**************************************************************************/
++#if 0
++#include <stdio.h>
++#include <ctype.h>
++#include "config.h"
++#include "types.h"
++#include "console.h"
++#include "datadisp.h"
++#else
++#include <common.h>
++#include <exports.h>
++#include "types.h"
++#include "datadisp.h"
++#define BYTES_PER_LINE 16
++#define ConsolePrintf printf
++#define isprint(x) (((x) >=32) && ((x) < 127))
++#endif
++
++void
++DumpContents(UINT32 Address, char *Buffer, UINT16 BufLen, UINT8 Format, void (*WaitFn)(void))
++{
++	UINT32 Index;		/* Index to the Buffer */
++	UINT8  x;			/* No of Bytes written in a line */
++	char   charBuf[BYTES_PER_LINE+1];
++	UINT32 Data;
++	
++	/* Reduce BufLen to nearest Format boundary */
++	BufLen = (BufLen/Format) *Format;	
++
++	/* Null terminate the character buffer */
++	charBuf[BYTES_PER_LINE] = 0;
++
++	/* Initialize No of Bytes written in line to zero */
++	x = 0;
++
++	
++	for (Index=0;Index<BufLen;Index+=Format)
++	{
++		/* Beginning of New Line. Write Address */
++		if (x == 0)
++			ConsolePrintf("0x%08lX : ",Address);
++
++
++		/* Print the Value according to the format */
++		
++		switch (Format)
++		{
++			case FORMAT_BYTE:
++				Data = (UINT32)(*((UINT8 *)(Buffer+Index)));
++				ConsolePrintf("%02X",(UINT8)Data);
++				break;
++			case FORMAT_WORD:
++				Data = (UINT32)(*((UINT16 *)(Buffer+Index)));
++				ConsolePrintf("%04X",(UINT16)Data);
++				break;
++			case FORMAT_DWORD:
++				Data = (UINT32)(*((UINT32 *)(Buffer+Index)));
++				ConsolePrintf("%08lX",(UINT32)Data);
++				break;
++			default:
++				Data = 0;
++				ConsolePrintf("INTERNAL ERROR: Unknown Format type in Data Display\n");
++				break;
++		}			
++
++		/* Add character to Character Buffer */
++		if (Format == FORMAT_BYTE)
++		{
++			if (isprint((UINT8)Data))
++				charBuf[x] = (UINT8)(Data);
++			else
++				charBuf[x] = '.';
++		}
++
++		/* Increment number of bytes written */
++		x+=Format;
++		
++		/* Print Spaces between every data and an '-' in the middle of line */
++		if (x == (BYTES_PER_LINE/2))
++			ConsolePrintf(" - ");
++		else
++			ConsolePrintf(" ");
++
++		/* If end of line */
++		if (x == BYTES_PER_LINE)
++		{
++			if (Format == FORMAT_BYTE)
++				ConsolePrintf(  "%s",charBuf);		/* Print Character Bytes	*/
++			ConsolePrintf("\n");					/* Begin a new Line			*/
++			x = 0;							/* Reset No of bytes in line*/
++			Address+=BYTES_PER_LINE;		/* Increment Address		*/
++		}
++
++		if (WaitFn)
++			(*WaitFn)();
++
++	}  /* for */
++	if (x!=0)
++		ConsolePrintf("\n");	
++	return ;
++}
++
+diff -Naur uboot/oem/ami/ncsi/datadisp.h uboot_new/oem/ami/ncsi/datadisp.h
+--- uboot/oem/ami/ncsi/datadisp.h	1970-01-01 08:00:00.000000000 +0800
++++ uboot_new/oem/ami/ncsi/datadisp.h	2021-01-27 10:26:09.291350686 +0800
+@@ -0,0 +1,37 @@
++/*************************************************************************
++RexDebug  - Generic Debugger 
++
++Copyright (c) 2000-2005, Samvinesh Christopher
++Written by Samvinesh Christopher.  Not derived from licensed software.
++
++Permission is granted to anyone to use this software for any purpose 
++on any computer system, and to redistribute it freely,subject to the 
++following restrictions:
++
++1. The author is not responsible for the consequences of use of this 
++   software, no matter how awful, even if they arise from defects in 
++   it.
++
++2. The origin of this software must not be misrepresented, either by 
++   explicit claim or by omission.
++
++3. Altered versions must be plainly marked as such, and must not  be 
++   misrepresented as being the original software.
++
++4. This notice may not be removed or altered.
++
++5. Commercial use of this software is allowed freely subject to prior
++   notificaiton to the author.
++**************************************************************************/
++#ifndef REX_DBG_DATADISP_H
++#define REX_DBG_DATADISP_H
++#include "config.h"
++#include "types.h"
++
++#define FORMAT_BYTE		sizeof(UBYTE)
++#define FORMAT_WORD		sizeof(UWORD)
++#define FORMAT_DWORD	sizeof(UDWORD)
++
++void DumpContents(UINT32 Address, char *Buffer, UINT16 BufLen, UINT8 Format, void (*WaitFn)(void));
++
++#endif  
+diff -Naur uboot/oem/ami/ncsi/endian.h uboot_new/oem/ami/ncsi/endian.h
+--- uboot/oem/ami/ncsi/endian.h	1970-01-01 08:00:00.000000000 +0800
++++ uboot_new/oem/ami/ncsi/endian.h	2021-01-27 10:26:09.291350686 +0800
+@@ -0,0 +1,171 @@
++/****************************************************************
++ ****************************************************************
++ **                                                            **
++ **    (C)Copyright 2005-2007, American Megatrends Inc.        **
++ **                                                            **
++ **            All Rights Reserved.                            **
++ **                                                            **
++ **        6145-F, Northbelt Parkway, Norcross,                **
++ **                                                            **
++ **        Georgia - 30071, USA. Phone-(770)-246-8600.         **
++ **                                                            **
++ ****************************************************************
++ ****************************************************************/
++/****************************************************************
++  Author	: Samvinesh Christopher
++
++  Module	: Endian Macros
++
++  Revision	: 1.0  
++
++  Changelog : 1.0 - Initial Version [SC]
++
++ *****************************************************************/
++#ifndef __ENDIAN_H__
++#define __ENDIAN_H__
++
++typedef unsigned long  uint32;
++typedef unsigned short uint16;
++typedef unsigned char  uint8;
++
++#ifdef  CONFIG_SPX_FEATURE_GLOBAL_ENDIAN_LITTLE 
++#define CPU_BYTE_ORDER_LITTLE_ENDIAN
++#endif
++
++#ifdef  CONFIG_SPX_FEATURE_GLOBAL_ENDIAN_BIG
++#define CPU_BYTE_ORDER_BIG_ENDIAN
++#endif
++
++#if !defined (CPU_BYTE_ORDER_BIG_ENDIAN) && ! defined (CPU_BYTE_ORDER_LITTLE_ENDIAN)
++#error Cannot determine CPU endianess. define CPU_BYTE_ORDER
++#endif
++
++#if defined (CPU_BYTE_ORDER_BIG_ENDIAN) && defined (CPU_BYTE_ORDER_LITTLE_ENDIAN)
++#error Cannot determine CPU endianess as both Little and Big endian specified
++#endif
++
++/* Generic Swap Functions */
++#define swap8(x)	((uint8)(x))
++#define swap16(x)	((uint16)(((x) << 8) | ((x) >> 8)))	
++#define swap32(x)   ((uint32)(((x) >> 24)|((x) << 24)|(((x)&0x00ff0000) >> 8)|(((x)&0x0000ff00) << 8)))
++
++#if defined (CPU_BYTE_ORDER_BIG_ENDIAN)	/* Big Endian CPU*/
++
++#ifndef cpu_to_be32
++#define cpu_to_be32(x)	((uint32)(x))
++#endif
++
++#ifndef cpu_to_be16
++#define cpu_to_be16(x)	((uint16)(x))
++#endif
++
++#ifndef cpu_to_be8
++#define cpu_to_be8(x)	((uint8)(x))
++#endif
++
++#ifndef be32_to_cpu
++#define be32_to_cpu(x)	((uint32)(x))
++#endif
++
++#ifndef be16_to_cpu
++#define be16_to_cpu(x)	((uint16)(x))
++#endif
++
++#ifndef be8_to_cpu
++#define be8_to_cpu(x)	((uint8)(x))
++#endif
++
++#ifndef cpu_to_le32
++#define cpu_to_le32(x)	((uint32)(swap32((x))))
++#endif
++
++#ifndef cpu_to_le16
++#define cpu_to_le16(x)	((uint16)(swap16((x))))
++#endif
++
++#ifndef cpu_to_le8
++#define cpu_to_le8(x)	((uint8) (swap8 ((x))))
++#endif
++
++#ifndef le32_to_cpu
++#define le32_to_cpu(x)	((uint32)(swap32((x))))
++#endif
++
++#ifndef le16_to_cpu
++#define le16_to_cpu(x)	((uint16)(swap16((x))))
++#endif
++
++#ifndef le8_to_cpu
++#define le8_to_cpu(x)	((uint8) (swap8 ((x))))
++#endif
++
++#endif
++
++#if defined (CPU_BYTE_ORDER_LITTLE_ENDIAN)	/* Little Endian CPU*/
++
++#ifndef cpu_to_le32
++#define cpu_to_le32(x)	((uint32)(x))
++#endif
++
++#ifndef cpu_to_le16
++#define cpu_to_le16(x)	((uint16)(x))
++#endif
++
++#ifndef cpu_to_le8
++#define cpu_to_le8(x)	((uint8)(x))
++#endif
++
++
++#ifndef le32_to_cpu
++#define le32_to_cpu(x)	((uint32)(x))
++#endif
++
++#ifndef le16_to_cpu
++#define le16_to_cpu(x)	((uint16)(x))
++#endif
++
++#ifndef le8_to_cpu
++#define le8_to_cpu(x)	((uint8)(x))
++#endif
++
++
++#ifndef cpu_to_be32
++#define cpu_to_be32(x)	((uint32)(swap32((x))))
++#endif
++
++#ifndef cpu_to_be16
++#define cpu_to_be16(x)	((uint16)(swap16((x))))
++#endif
++
++#ifndef cpu_to_be8
++#define cpu_to_be8(x)	((uint8) (swap8 ((x))))
++#endif
++
++#ifndef be32_to_cpu
++#define be32_to_cpu(x)	((uint32)(swap32((x))))
++#endif
++
++#ifndef be16_to_cpu
++#define be16_to_cpu(x)	((uint16)(swap16((x))))
++#endif
++
++#ifndef be8_to_cpu
++#define be8_to_cpu(x)	((uint8) (swap8 ((x))))
++#endif
++
++#endif
++
++
++/* Non endian dependent conversion functions */
++#define le32_to_be32(x)	((uint32)(swap32((x))))
++#define le16_to_be16(x)	((uint16)(swap16((x))))
++#define le8_to_be8(x)	((uint8) (swap8 ((x))))
++
++#define be32_to_le32(x)	((uint32)(swap32((x))))
++#define be16_to_le16(x)	((uint16)(swap16((x))))
++#define be8_to_le8(x)	((uint8) (swap8 ((x))))
++
++
++
++
++#endif  /* __ENDIAN_H__ */
+diff -Naur uboot/oem/ami/ncsi/getmac.c uboot_new/oem/ami/ncsi/getmac.c
+--- uboot/oem/ami/ncsi/getmac.c	1970-01-01 08:00:00.000000000 +0800
++++ uboot_new/oem/ami/ncsi/getmac.c	2021-01-27 10:26:07.295440753 +0800
+@@ -0,0 +1,89 @@
++/****************************************************************
++ ****************************************************************
++ **                                                            **
++ **    (C)Copyright 2005-2006, American Megatrends Inc.        **
++ **                                                            **
++ **            All Rights Reserved.                            **
++ **                                                            **
++ **        6145-F, Northbelt Parkway, Norcross,                **
++ **                                                            **
++ **        Georgia - 30071, USA. Phone-(770)-246-8600.         **
++ **                                                            **
++ ****************************************************************
++ ****************************************************************/
++/****************************************************************
++
++  Author	: Samvinesh Christopher
++
++  Module	: NCSI - Get MAC Address from U-boot
++			
++  Revision	: 1.0  
++
++  Changelog : 1.0 - Initial Version [SC]
++
++*****************************************************************/
++#include <common.h>
++//#ifdef CONFIG_NCSI_SUPPORT
++#if 1
++#include <exports.h>
++#include "types.h"
++#include <net.h>
++#include <dm.h>
++
++int 
++GetDefaultPort(void)
++{
++	char PortNum[8];
++	if (env_get_f("ncsiport",PortNum,sizeof(PortNum)) == -1)
++		return 0;
++	if ((PortNum[0] < '0') || (PortNum[0] > '9'))
++		return 0;
++	return PortNum[0]-'0';
++}
++
++
++/* Get MAC Address of the current interface */
++void 
++GetMACAddr(UINT8 *MACAddr)
++{
++#ifdef CONFIG_DM_ETH
++	struct udevice *dev;
++	struct eth_pdata *pdata;
++#else
++	struct eth_device *dev;
++#endif		
++
++	memset(MACAddr,0,6);
++
++	dev = eth_get_dev();
++	if (dev == NULL)
++		return;
++#ifdef CONFIG_DM_ETH
++	pdata = dev_get_platdata(dev);
++	MACAddr[5] = pdata->enetaddr[0];
++	MACAddr[4] = pdata->enetaddr[1];
++	MACAddr[3] = pdata->enetaddr[2];
++	MACAddr[2] = pdata->enetaddr[3];
++	MACAddr[1] = pdata->enetaddr[4];
++	MACAddr[0] = pdata->enetaddr[5];
++#else	
++//	memcpy(MACAddr,&dev->enetaddr[0],6);
++// 	For some reason, it is stored backward in MACAddr. Why?
++	MACAddr[5] = dev->enetaddr[0];
++	MACAddr[4] = dev->enetaddr[1];
++	MACAddr[3] = dev->enetaddr[2];
++	MACAddr[2] = dev->enetaddr[3];
++	MACAddr[1] = dev->enetaddr[4];
++	MACAddr[0] = dev->enetaddr[5];
++#endif
++	#ifdef NCSI_DEBUG
++	printf("NC-SI (%s) MAC Address  = %02X:%02X:%02X:%02X:%02X:%02X\n",
++						dev->name,
++						MACAddr[5],MACAddr[4],MACAddr[3],
++					  	MACAddr[2],MACAddr[1],MACAddr[0]);
++	#endif
++	return;
++}
++
++#endif
++	
+diff -Naur uboot/oem/ami/ncsi/Makefile uboot_new/oem/ami/ncsi/Makefile
+--- uboot/oem/ami/ncsi/Makefile	1970-01-01 08:00:00.000000000 +0800
++++ uboot_new/oem/ami/ncsi/Makefile	2021-01-27 10:26:28.374489542 +0800
+@@ -0,0 +1,24 @@
++#
++# (C) Copyright 2013 
++# American Megatrends Inc
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation; either version 2 of
++# the License, or (at your option) any later version.
++#
++# This program is distributed in the hope that it will be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write to the Free Software
++# Foundation, Inc., 59 Temple Place, Suite 330, Boston,
++# MA 02111-1307 USA
++#
++
++LIB	:= $(obj)libncsi.o
++
++obj-y	+= ncsistart.o ncsi.o 
++obj-y	+= getmac.o cmd_ncsi.o
+diff -Naur uboot/oem/ami/ncsi/ncsi.c uboot_new/oem/ami/ncsi/ncsi.c
+--- uboot/oem/ami/ncsi/ncsi.c	1970-01-01 08:00:00.000000000 +0800
++++ uboot_new/oem/ami/ncsi/ncsi.c	2021-01-27 10:26:07.295440753 +0800
+@@ -0,0 +1,1266 @@
++/****************************************************************
++ ****************************************************************
++ **                                                            **
++ **    (C)Copyright 2005-2007, American Megatrends Inc.        **
++ **                                                            **
++ **            All Rights Reserved.                            **
++ **                                                            **
++ **        6145-F, Northbelt Parkway, Norcross,                **
++ **                                                            **
++ **        Georgia - 30071, USA. Phone-(770)-246-8600.         **
++ **                                                            **
++ ****************************************************************
++ ****************************************************************/
++/****************************************************************
++  Author	: Samvinesh Christopher
++
++  Module	: NCSI Core API
++
++  Revision	: 1.0  
++
++  Changelog : 1.0 - Initial Version  [SC]
++
++ *****************************************************************/
++#include <common.h>
++#include <exports.h>
++#include <net.h>
++//#ifdef CONFIG_NCSI_SUPPORT
++#if 1
++#include "endian.h"
++#include "ncsi.h"
++#ifdef NCSI_DEBUG
++#include "datadisp.h"
++#endif
++
++
++
++#define BUFFER_SIZE  (2+1522+2)	
++/* First two bytes are not used to make the NCSI fileds align at boundaries*/
++
++/* Make sure these two buffers are aligned at 32 byte boundary */
++static UINT8  gSendBuffer[BUFFER_SIZE];
++static UINT8  gRecvBuffer[BUFFER_SIZE];
++
++static UINT8  *SendPkt = &gSendBuffer[2];
++static UINT8  *RecvPkt = &gRecvBuffer[2];
++
++//static UINT8  OurMacAddr[] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
++
++static UINT8  InstanceID=0x1;
++static int ReceivedNCSILen = 0;
++
++static int verbose = SHOW_MESSAGES;
++
++
++int
++EnableVerbose(int level)
++{
++	int prev = verbose;
++	verbose = level;
++	return prev;
++}
++
++int
++CheckIfAEN(unsigned char *RecvPkt,unsigned Len)
++{
++	AEN_PKT *aen;
++	
++	aen = (AEN_PKT *)RecvPkt;
++	
++	if (aen->hdr.MC_ID	!= 0x00)
++		return 0;
++	if (aen->hdr.ONE   	!= 0x01)
++		return 0;
++	if (aen->hdr.IID   	!= 0x00)
++		return 0;
++	if (aen->hdr.ALL_FF	!= 0xFF)
++		return 0;
++	printf("AEN Received : ");
++
++	switch (aen->AEN_Type)
++	{
++		case AEN_TYPE_LINK_STATUS_CHANGE:
++			if (aen->hdr.PayLen !=  AEN_TYPE_LINK_STATUS_CHANGE_LEN)
++				break;
++			printf("Link Status Change \n");
++	//		EnableChannelOnLink(GET_PACKAGE_ID(aen->hdr.OrgChannelID),
++	//				    GET_CHANNEL_ID(aen->hdr.OrgChannelID));
++			return 1;
++
++		case  AEN_TYPE_CONFIG_REQUIRED:
++			if (aen->hdr.PayLen !=  AEN_TYPE_CONFIG_REQUIRED_LEN)
++				break;
++			printf("Config Required\n");
++			return 1;
++
++		case  AEN_TYPE_HOST_DRIVER_CHANGE:
++			if (aen->hdr.PayLen !=  AEN_TYPE_HOST_DRIVER_CHANGE_LEN)
++				break;
++			printf("Host driver Status Change\n");
++			return 1;
++	}
++	printf("Unknown AEN %d\n",aen->AEN_Type);
++	return 0;
++}
++
++void
++NCSIHandler(unsigned char *Buffer,unsigned Unused1,struct in_addr sip,unsigned Unused2, unsigned Len)
++{
++	ETH_HDR  *EthHdr;
++	int i;
++
++	if (ReceivedNCSILen !=0)
++		return;
++
++#ifdef CONFIG_ETH_HEADER_NOCRC	  /* Some network hardware and drivers does not return CRC in the data packet */		
++	Len-=(sizeof(ETH_HDR)) ; /* Strip Ethernet header */
++#else
++	Len-=(sizeof(ETH_HDR)+4) ; /* Strip Ethernet header, crc32 */
++#endif
++	
++	EthHdr = (ETH_HDR *)Buffer;
++	if (be16_to_cpu(EthHdr->EtherType) != NCSI_ETHER_TYPE)
++	{
++//		printf("Received a Non NCSI Packet (EtherType = 0x%04X). Ignored\n",
++//			be16_to_cpu(EthHdr->EtherType));
++		return;
++	}	
++	for (i=0;i<MAC_ADDR_LEN;i++)
++	{	
++		if (EthHdr->DestMACAddr[i] != 0xFF)
++		{
++			printf("Received a Invalid NCSI Packet (Dest Mac != All 0xFF). Ignored\n");
++			return;
++		}
++	}
++//	printf("Received a NCSI Packet of Length %d\n",Len);
++#ifdef NCSI_DEBUG
++	if (verbose & DUMP_BUFFER)
++	{
++		printf ("NCSI: Receiving Response ...\n");
++		DumpContents(0,(char *)Buffer,Len+sizeof(ETH_HDR),FORMAT_BYTE,NULL);
++	}
++#endif
++	Buffer += sizeof(ETH_HDR);
++	memcpy(RecvPkt,Buffer,Len);
++
++	if (CheckIfAEN(RecvPkt,Len) == 0)
++		ReceivedNCSILen = Len;
++	return;
++}
++
++static
++int 
++SendNCSICommand (UINT8* pBuf, int Size)
++{
++	int i;
++	unsigned long counter;
++	int err;
++	NCSI_HDR *send_hdr,*recv_hdr;
++	
++	err = NCSI_ERR_SUCCESS;
++
++	Size+=sizeof(ETH_HDR);
++	send_hdr = (NCSI_HDR *)(pBuf +sizeof(ETH_HDR));
++
++#ifdef NCSI_DEBUG
++	if (verbose & DUMP_BUFFER)
++	{
++		printf ("NCSI: Sending Request ...\n");
++		DumpContents(0,(char *)pBuf,Size,FORMAT_BYTE,NULL);
++	}
++#endif
++	
++	for (i = 0; i < NCSI_RETRIES; i++)
++	{
++		counter=0x10000;
++		ReceivedNCSILen = 0;
++		if (-1 == eth_send(pBuf, Size))
++		{
++			printf ("NCSI: eth_send failed\n");
++			return NCSI_ERR_NETWORK;
++		}
++		while (counter--)
++		{
++			eth_rx();
++			if (ReceivedNCSILen != 0)
++			{
++		//		printf("NCSI: Received Response of Len %d\n",ReceivedNCSILen);
++				recv_hdr = (NCSI_HDR *)(RecvPkt);
++				err = NCSI_ERR_SUCCESS;
++				if (recv_hdr->I_ID != send_hdr->I_ID)
++				{
++					printf("NCSI: SeqNo Mismatch %02X != %02X\n",
++							send_hdr->I_ID, recv_hdr->I_ID);
++					err = NCSI_ERR_SEQNO;
++				}
++				if (recv_hdr->Command != (send_hdr->Command | 0x80))
++				{
++					printf("NCSI: Invalid Response Command. Expected = %02X, Got = %02X\n",
++						send_hdr->Command|0x80,recv_hdr->Command);
++					err = NCSI_ERR_RESPONSE_NUM;
++				}
++				if (err != NCSI_ERR_SUCCESS)
++				{
++					/* Ignore the junk packet and try receive next */
++					ReceivedNCSILen = 0;
++					continue;
++				}
++				return NCSI_ERR_SUCCESS;
++			}
++		}
++		if (verbose & SHOW_MESSAGES)
++			printf ("NCSI: Resending Command (Retry = %d)...\n",i+1);
++	}
++	if (verbose & SHOW_MESSAGES)
++		printf ("NCSI:Receive Timeout out\n");
++	if (err == NCSI_ERR_SUCCESS)
++		return NCSI_ERR_TIMEOUT;
++	return err;
++}
++
++static
++UINT32
++NCSICalculateCheckSum (UINT16* pData, int Size)
++{
++	UINT32 CheckSum = 0;	
++	while (Size != 0)
++	{		
++		CheckSum += be16_to_cpu(*pData);
++		pData++;
++		Size -= 2;
++	}	
++	CheckSum = ~CheckSum + 1;
++	return cpu_to_be32(CheckSum);	
++}
++
++static
++UINT32
++NCSIValidateCheckSum (UINT16* pData,int cs_offset)
++{
++	UINT32 CheckSum = 0, GotCS;
++	UINT32 i;
++
++	/* Aligned copy */
++	UINT8 *pCS;
++	pCS =(UINT8*)(((UINT8*)pData) + cs_offset);
++	GotCS=(UINT32)pCS[3] << 24 | (UINT32) pCS[2] << 16 | (UINT32) pCS[1] << 8 | (UINT32) pCS[0];
++	
++	GotCS = be32_to_cpu(GotCS);
++	for(i=0;i<cs_offset;i+=2)
++	{
++		CheckSum += be16_to_cpu(*pData);
++		pData++;
++	}
++	CheckSum = ~CheckSum + 1;
++
++	if ((GotCS == CheckSum) || (GotCS == 0))
++		return NCSI_ERR_SUCCESS;
++
++	printf("NCSI: CheckSum Error: Received = 0x%08lx, Calculated = 0x%08lx\n",
++									GotCS,CheckSum);
++	return NCSI_ERR_CHECKSUM;
++}
++
++static
++int
++ProcessResponseCode(UINT16 ResponseCode, UINT16 ReasonCode)
++{
++	if (!(verbose & SHOW_MESSAGES))
++	{
++		if (be16_to_cpu(ResponseCode) == COMMAND_COMPLETED)
++			return NCSI_ERR_SUCCESS;
++		return NCSI_ERR_FAILED;
++	}
++	
++	switch (be16_to_cpu(ResponseCode))
++	{
++		case  COMMAND_COMPLETED:
++			return NCSI_ERR_SUCCESS;
++		case  COMMAND_FAILED:
++			printf("NCSI:Command Failed.");		
++			break;
++		case  COMMAND_UNAVAILABLE:			
++			printf("NCSI:Command Unavailable.");		
++			break;
++		case  COMMAND_UNSUPPORTED:
++			printf("NCSI:Command Unsupported.");		
++			break;
++		default:
++			printf("NCSI:Unknown ResponseCode. ");		
++			break;
++	}
++
++	switch (be16_to_cpu(ReasonCode))
++	{
++		case  REASON_NONE:
++			printf("No Reason\n");
++			break;
++		case  REASON_INIT_REQUIRED:		
++			printf("Init Required\n");
++			break;
++		case  REASON_PARAMS_INVALID:				
++			printf("Parameters Invalid\n");
++			break;
++		case  REASON_CHANNEL_NOT_READY:			
++			printf("Channel Not Ready\n");
++			break;
++		case  REASON_PACKAGE_NOT_READY:			
++			printf("Package Not Ready\n");
++			break;
++		case  REASON_LENGTH_INVALID:				
++			printf("Invalid Length\n");
++			break;
++		case  REASON_MAC_ADDR_ZERO:
++			printf("MAC Address is zero\n");
++			break;
++		default:
++			printf("Unknown Reason\n");
++			break;			
++	}
++
++	return NCSI_ERR_FAILED;
++}
++
++static
++int
++ProcessSetLinkResponseCode(UINT16 ResponseCode, UINT16 ReasonCode)
++{
++	if (!(verbose & SHOW_MESSAGES))
++	{
++		if (be16_to_cpu(ResponseCode) == COMMAND_COMPLETED)
++			return NCSI_ERR_SUCCESS;
++		return NCSI_ERR_FAILED;
++	}
++	
++	switch (be16_to_cpu(ResponseCode))
++	{
++		case  COMMAND_COMPLETED:
++			return NCSI_ERR_SUCCESS;
++		case  COMMAND_FAILED:
++			printf("NCSI:Command Failed.");		
++			break;
++		case  COMMAND_UNAVAILABLE:			
++			printf("NCSI:Command Unavailable.");		
++			break;
++		case  COMMAND_UNSUPPORTED:
++			printf("NCSI:Command Unsupported.");		
++			break;
++		default:
++			printf("NCSI:Unknown ResponseCode. ");		
++			break;
++	}
++
++	switch (be16_to_cpu(ReasonCode))
++	{
++		case  REASON_NONE:
++			printf("No Reason\n");
++			break;
++		case  SET_LINK_REASON_HOST_CONFLICT:
++			printf("Host OS/Driver Conflict\n");
++			break;
++		case  SET_LINK_REASON_MEDIA_CONFLICT:
++			printf("Media Conflict\n");
++			break;
++		case  SET_LINK_REASON_PARAMETER_CONFLICT:
++			printf("Parameter Conflict\n");
++			break;
++		case  SET_LINK_REASON_POWERMODE_CONFLICT:
++			printf("Power Mode Conflict\n");
++			break;
++		case  SET_LINK_REASON_SPEED_CONFLICT:
++			printf("Speed  Conflict\n");
++			break;
++		case  SET_LINK_REASON_HW_ACCESS_FAILED:
++			printf("Hardware Failure\n");
++			break;
++		default:
++			printf("Unknown Reason\n");
++			break;			
++	}
++
++	return NCSI_ERR_FAILED;
++}
++
++
++static
++void
++FormNCSIPacket(UINT8 Command,UINT8 Channel,UINT8 *PayLoad, int cs_offset)
++{
++	ETH_HDR  		*EthHdr;
++	NCSI_HDR		*NcsiHdr;
++	UINT8   		*NcsiPkt,*NcsiPayLoad;
++	UINT32			*CheckSum;
++	UINT32			PayLoadLen;
++	UINT32			CheckSum_val = 0;
++	
++	memset(gSendBuffer,0,BUFFER_SIZE);
++	/* Get the locations of various fields */
++	EthHdr  	= (ETH_HDR *)(SendPkt);
++	NcsiPkt		=  SendPkt + sizeof(ETH_HDR);
++	NcsiHdr 	= (NCSI_HDR *)NcsiPkt;
++	NcsiPayLoad     =  SendPkt + sizeof(ETH_HDR) + sizeof(NCSI_HDR);
++	CheckSum	= (UINT32 *)(NcsiPkt+cs_offset);
++	PayLoadLen	=  (UINT32)CheckSum - (UINT32)NcsiPayLoad;	
++	/* Fill in Ethernet Header */
++	memset(EthHdr->DestMACAddr,0xFF,6);
++	memset(EthHdr->SrcMACAddr,0xFF,6);
++	EthHdr->EtherType = cpu_to_be16(NCSI_ETHER_TYPE);	
++	/* Fill in NCSI Header */
++	memset(NcsiHdr,0, sizeof(NCSI_HDR));
++	NcsiHdr->MC_ID 		= NCSI_MC_ID;
++	NcsiHdr->HdrRev 	= NCSI_HDR_REV;
++	NcsiHdr->I_ID		= InstanceID++;
++	InstanceID= (InstanceID == 0)?1:InstanceID;	// IID = 1 to 0xFF . 0 is invalid
++	NcsiHdr->Command 	= Command;
++	NcsiHdr->CH_ID		= Channel;
++	NcsiHdr->PayloadLen = cpu_to_be16(PayLoadLen);	
++	/* Copy the PayLoad */
++	memcpy(NcsiPayLoad,PayLoad,PayLoadLen);	
++	/* Calculate the checksum for NCSI packet */	
++	CheckSum_val = NCSICalculateCheckSum((UINT16 *)(NcsiPkt),PayLoadLen+sizeof(NCSI_HDR));
++	memcpy(CheckSum, &CheckSum_val, sizeof(CheckSum_val));	
++	return;
++}
++
++/*****************************************************************************************
++								NC-SI Commands
++*****************************************************************************************/
++
++int
++NCSI_Issue_SelectPackage(UINT8 PackageID,UINT8 HwArbitDisable)
++{
++	SELECT_PACKAGE_REQ_PKT Pkt;
++	SELECT_PACKAGE_RES_PKT *ResPkt;
++
++	UINT8 Channel;
++	UINT8 *PayLoad;
++	int cs_offset;
++	int retval;
++
++	/* Basic Initialization */
++	memset(&Pkt ,0, sizeof(Pkt));
++	PayLoad = ((UINT8 *)&Pkt) + sizeof(NCSI_HDR);
++	cs_offset = (UINT32)(&(Pkt.CheckSum)) - (UINT32)(&Pkt);
++
++	/* "Select Package" Specific Parameters */
++	Channel = MK_CH_ID(PackageID,0x1F);
++	Pkt.HwArbitDisable = HwArbitDisable;
++
++	/* Form NCSI Packet and send */
++	FormNCSIPacket(CMD_SELECT_PACKAGE,Channel,PayLoad,cs_offset);
++	retval = SendNCSICommand (SendPkt,sizeof(Pkt));
++	if (retval != NCSI_ERR_SUCCESS)
++		return retval;
++
++	/* Validate Response pkt */
++	ResPkt = (SELECT_PACKAGE_RES_PKT *)RecvPkt;
++	if (ReceivedNCSILen != sizeof(SELECT_PACKAGE_RES_PKT))
++	{
++		printf("NCSI: Expected Response Size = %d Got %d\n",
++			sizeof(SELECT_PACKAGE_RES_PKT),ReceivedNCSILen);
++		return NCSI_ERR_RESPONSE;
++	}
++
++	/* Validate Response checksum */
++	cs_offset = (UINT32)(&(ResPkt->CheckSum)) - (UINT32)(ResPkt);
++	retval = NCSIValidateCheckSum((UINT16*)RecvPkt,cs_offset);
++	if (retval != NCSI_ERR_SUCCESS)
++		return retval;
++
++	/* Check the Response code and reason */
++	return ProcessResponseCode(ResPkt->ResponseCode,ResPkt->ReasonCode);
++
++}
++
++
++int
++NCSI_Issue_DeSelectPackage(UINT8 PackageID)
++{
++	DESELECT_PACKAGE_REQ_PKT Pkt;
++	DESELECT_PACKAGE_RES_PKT *ResPkt;
++
++	UINT8 Channel;
++	UINT8 *PayLoad;
++	int cs_offset;
++	int retval;
++
++	/* Basic Initialization */
++	memset(&Pkt ,0, sizeof(Pkt));
++	PayLoad = ((UINT8 *)&Pkt) + sizeof(NCSI_HDR);
++	cs_offset = (UINT32)(&(Pkt.CheckSum)) - (UINT32)(&Pkt);
++
++	/* "DeSelect Package" Specific Parameters */
++	Channel = MK_CH_ID(PackageID,0x1F);
++
++	/* Form NCSI Packet and send */
++	FormNCSIPacket(CMD_DESELECT_PACKAGE,Channel,PayLoad,cs_offset);
++	retval = SendNCSICommand (SendPkt,sizeof(Pkt));
++	if (retval != NCSI_ERR_SUCCESS)
++		return retval;
++
++	/* Validate Response pkt */
++	ResPkt = (DESELECT_PACKAGE_RES_PKT *)RecvPkt;
++	if (ReceivedNCSILen != sizeof(DESELECT_PACKAGE_RES_PKT))
++	{
++		printf("NCSI: Expected Response Size = %d Got %d\n",
++			sizeof(DESELECT_PACKAGE_RES_PKT),ReceivedNCSILen);
++		return NCSI_ERR_RESPONSE;
++	}
++
++	/* Validate Response checksum */
++	cs_offset = (UINT32)(&(ResPkt->CheckSum)) - (UINT32)(ResPkt);
++	retval = NCSIValidateCheckSum((UINT16*)RecvPkt,cs_offset);
++	if (retval != NCSI_ERR_SUCCESS)
++		return retval;
++
++	/* Check the Response code and reason */
++	return ProcessResponseCode(ResPkt->ResponseCode,ResPkt->ReasonCode);
++}
++
++
++int
++NCSI_Issue_ClearInitialState(UINT8 PackageID,UINT8 ChannelID)
++{
++	CLEAR_INITIAL_STATE_REQ_PKT Pkt;
++	CLEAR_INITIAL_STATE_RES_PKT *ResPkt;
++
++	UINT8 Channel;
++	UINT8 *PayLoad;
++	int cs_offset;
++	int retval;
++
++	/* Basic Initialization */
++	memset(&Pkt ,0, sizeof(Pkt));
++	PayLoad = ((UINT8 *)&Pkt) + sizeof(NCSI_HDR);
++	cs_offset = (UINT32)(&(Pkt.CheckSum)) - (UINT32)(&Pkt);
++
++	Channel = MK_CH_ID(PackageID,ChannelID);
++
++	/* Form NCSI Packet and send */
++	FormNCSIPacket(CMD_CLEAR_INITIAL_STATE,Channel,PayLoad,cs_offset);
++	retval = SendNCSICommand (SendPkt,sizeof(Pkt));
++	if (retval != NCSI_ERR_SUCCESS)
++		return retval;
++
++	/* Validate Response pkt */
++	ResPkt = (CLEAR_INITIAL_STATE_RES_PKT *)RecvPkt;
++	if (ReceivedNCSILen != sizeof(CLEAR_INITIAL_STATE_RES_PKT))
++	{
++		printf("NCSI: Expected Response Size = %d Got %d\n",
++			sizeof(CLEAR_INITIAL_STATE_RES_PKT),ReceivedNCSILen);
++		return NCSI_ERR_RESPONSE;
++	}
++
++	/* Validate Response checksum */
++	cs_offset = (UINT32)(&(ResPkt->CheckSum)) - (UINT32)(ResPkt);
++	retval = NCSIValidateCheckSum((UINT16*)RecvPkt,cs_offset);
++	if (retval != NCSI_ERR_SUCCESS)
++		return retval;
++
++	/* Check the Response code and reason */
++	return ProcessResponseCode(ResPkt->ResponseCode,ResPkt->ReasonCode);
++}
++
++
++int
++NCSI_Issue_ChannelCommands(UINT8 Command, UINT8 PackageID,UINT8 ChannelID)
++{
++	NCSI_DEFAULT_REQ_PKT Pkt;
++	NCSI_DEFAULT_RES_PKT *ResPkt;
++
++	UINT8 Channel;
++	UINT8 *PayLoad;
++	int cs_offset;
++	int retval;
++
++	/* Basic Initialization */
++	memset(&Pkt ,0, sizeof(Pkt));
++	PayLoad = ((UINT8 *)&Pkt) + sizeof(NCSI_HDR);
++	cs_offset = (UINT32)(&(Pkt.CheckSum)) - (UINT32)(&Pkt);
++
++	Channel = MK_CH_ID(PackageID,ChannelID);
++
++	/* Form NCSI Packet and send */
++	FormNCSIPacket(Command,Channel,PayLoad,cs_offset);
++	retval = SendNCSICommand (SendPkt,sizeof(Pkt));
++	if (retval != NCSI_ERR_SUCCESS)
++		return retval;
++
++	/* Validate Response pkt */
++	ResPkt = (NCSI_DEFAULT_RES_PKT *)RecvPkt;
++	if (ReceivedNCSILen != sizeof(NCSI_DEFAULT_RES_PKT))
++	{
++		printf("NCSI: Expected Response Size = %d Got %d\n",
++			sizeof(NCSI_DEFAULT_RES_PKT),ReceivedNCSILen);
++		return NCSI_ERR_RESPONSE;
++	}
++
++	/* Validate Response checksum */
++	cs_offset = (UINT32)(&(ResPkt->CheckSum)) - (UINT32)(ResPkt);
++	retval = NCSIValidateCheckSum((UINT16*)RecvPkt,cs_offset);
++	if (retval != NCSI_ERR_SUCCESS)
++		return retval;
++
++	/* Check the Response code and reason */
++	return ProcessResponseCode(ResPkt->ResponseCode,ResPkt->ReasonCode);
++}
++
++
++int
++NCSI_Issue_DisableChannel(UINT8 PackageID,UINT8 ChannelID,UINT8 AllowLinkDown)
++{
++	DISABLE_CHANNEL_REQ_PKT Pkt;
++	DISABLE_CHANNEL_RES_PKT *ResPkt;
++
++	UINT8 Channel;
++	UINT8 *PayLoad;
++	int cs_offset;
++	int retval;
++
++	/* Basic Initialization */
++	memset(&Pkt ,0, sizeof(Pkt));
++	PayLoad = ((UINT8 *)&Pkt) + sizeof(NCSI_HDR);
++	cs_offset = (UINT32)(&(Pkt.CheckSum)) - (UINT32)(&Pkt);
++
++	/* i"Disable Channel" Specific Parameters */
++	Channel = MK_CH_ID(PackageID,ChannelID);
++	Pkt.AllowLinkDown = AllowLinkDown;
++
++	/* Form NCSI Packet and send */
++	FormNCSIPacket(CMD_DISABLE_CHANNEL,Channel,PayLoad,cs_offset);
++	retval = SendNCSICommand (SendPkt,sizeof(Pkt));
++	if (retval != NCSI_ERR_SUCCESS)
++		return retval;
++
++	/* Validate Response pkt */
++	ResPkt = (DISABLE_CHANNEL_RES_PKT *)RecvPkt;
++	if (ReceivedNCSILen != sizeof(DISABLE_CHANNEL_RES_PKT))
++	{
++		printf("NCSI: Expected Response Size = %d Got %d\n",
++			sizeof(DISABLE_CHANNEL_RES_PKT),ReceivedNCSILen);
++		return NCSI_ERR_RESPONSE;
++	}
++
++	/* Validate Response checksum */
++	cs_offset = (UINT32)(&(ResPkt->CheckSum)) - (UINT32)(ResPkt);
++	retval = NCSIValidateCheckSum((UINT16*)RecvPkt,cs_offset);
++	if (retval != NCSI_ERR_SUCCESS)
++		return retval;
++
++	/* Check the Response code and reason */
++	return ProcessResponseCode(ResPkt->ResponseCode,ResPkt->ReasonCode);
++}
++
++int
++NCSI_Issue_ResetChannel(UINT8 PackageID,UINT8 ChannelID)
++{
++	RESET_CHANNEL_REQ_PKT Pkt;
++	RESET_CHANNEL_RES_PKT *ResPkt;
++
++	UINT8 Channel;
++	UINT8 *PayLoad;
++	int cs_offset;
++	int retval;
++
++	/* Basic Initialization */
++	memset(&Pkt ,0, sizeof(Pkt));
++	PayLoad = ((UINT8 *)&Pkt) + sizeof(NCSI_HDR);
++	cs_offset = (UINT32)(&(Pkt.CheckSum)) - (UINT32)(&Pkt);
++
++	/* "Reset Channel" Specific Parameters */
++	Channel = MK_CH_ID(PackageID,ChannelID);
++	Pkt.Reserved = 0;
++
++	/* Form NCSI Packet and send */
++	FormNCSIPacket(CMD_RESET_CHANNEL,Channel,PayLoad,cs_offset);
++	retval = SendNCSICommand (SendPkt,sizeof(Pkt));
++	if (retval != NCSI_ERR_SUCCESS)
++		return retval;
++
++	/* Validate Response pkt */
++	ResPkt = (RESET_CHANNEL_RES_PKT *)RecvPkt;
++	if (ReceivedNCSILen != sizeof(RESET_CHANNEL_RES_PKT))
++	{
++		printf("NCSI: Expected Response Size = %d Got %d\n",
++			sizeof(RESET_CHANNEL_RES_PKT),ReceivedNCSILen);
++		return NCSI_ERR_RESPONSE;
++	}
++
++	/* Validate Response checksum */
++	cs_offset = (UINT32)(&(ResPkt->CheckSum)) - (UINT32)(ResPkt);
++	retval = NCSIValidateCheckSum((UINT16*)RecvPkt,cs_offset);
++	if (retval != NCSI_ERR_SUCCESS)
++		return retval;
++
++	/* Check the Response code and reason */
++	return ProcessResponseCode(ResPkt->ResponseCode,ResPkt->ReasonCode);
++}
++
++
++int 
++NCSI_Issue_GetVersionID(UINT8 PackageID, UINT8 ChannelID, UINT32 *Ver1,UINT32 *Ver2)
++{
++	GET_VERSION_ID_REQ_PKT Pkt;
++	GET_VERSION_ID_RES_PKT *ResPkt;
++
++	UINT8 Channel;
++	UINT8 *PayLoad;
++	int cs_offset;
++	int retval;
++
++	*Ver1 = *Ver2 = 0;
++
++	/* Basic Initialization */
++	memset(&Pkt ,0, sizeof(Pkt));
++	PayLoad = ((UINT8 *)&Pkt) + sizeof(NCSI_HDR);
++	cs_offset = (UINT32)(&(Pkt.CheckSum)) - (UINT32)(&Pkt);
++
++	Channel = MK_CH_ID(PackageID,ChannelID);
++
++	/* Form NCSI Packet and send */
++	FormNCSIPacket(CMD_GET_VERSION_ID,Channel,PayLoad,cs_offset);
++	retval = SendNCSICommand (SendPkt,sizeof(Pkt));
++	if (retval != NCSI_ERR_SUCCESS)
++		return retval;
++
++	/* Validate Response pkt */
++	ResPkt = (GET_VERSION_ID_RES_PKT *)RecvPkt;
++	if (ReceivedNCSILen != sizeof(GET_VERSION_ID_RES_PKT))
++	{
++		printf("NCSI: Expected Response Size = %d Got %d\n",
++			sizeof(GET_VERSION_ID_RES_PKT),ReceivedNCSILen);
++		return NCSI_ERR_RESPONSE;
++	}
++
++	/* Validate Response checksum */
++	cs_offset = (UINT32)(&(ResPkt->CheckSum)) - (UINT32)(ResPkt);
++	retval = NCSIValidateCheckSum((UINT16*)RecvPkt,cs_offset);
++	if (retval != NCSI_ERR_SUCCESS)
++		return retval;
++
++	/* Check the Response code and reason */
++	retval =  ProcessResponseCode(ResPkt->ResponseCode,ResPkt->ReasonCode);
++	if (retval == NCSI_ERR_SUCCESS)
++	{
++		*Ver1 |= ResPkt->NCSIVerMajor << 24;
++		*Ver1 |= ResPkt->NCSIVerMinor << 16;
++		*Ver1 |= ResPkt->NCSIVerUpdate<< 8;
++		*Ver1 |= ResPkt->NCSIVerAlpha1<< 0;
++
++		*Ver2 = ResPkt->NCSIVerAlpha2;
++	}
++
++	return retval;
++}
++
++int 
++NCSI_Issue_GetCapabiliites(UINT8 PackageID, UINT8 ChannelID,UINT32 *Caps)
++{
++
++	GET_CAPABILITIES_REQ_PKT Pkt;
++	GET_CAPABILITIES_RES_PKT *ResPkt;
++
++	UINT8 Channel;
++	UINT8 *PayLoad;
++	int cs_offset;
++	int retval;
++
++	/* Basic Initialization */
++	memset(&Pkt ,0, sizeof(Pkt));
++	PayLoad = ((UINT8 *)&Pkt) + sizeof(NCSI_HDR);
++	cs_offset = (UINT32)(&(Pkt.CheckSum)) - (UINT32)(&Pkt);
++
++	Channel = MK_CH_ID(PackageID,ChannelID);
++
++	/* Form NCSI Packet and send */
++	FormNCSIPacket(CMD_GET_CAPABILITIES,Channel,PayLoad,cs_offset);
++	retval = SendNCSICommand (SendPkt,sizeof(Pkt));
++	if (retval != NCSI_ERR_SUCCESS)
++		return retval;
++
++	/* Validate Response pkt */
++	ResPkt = (GET_CAPABILITIES_RES_PKT *)RecvPkt;
++	if (ReceivedNCSILen != sizeof(GET_CAPABILITIES_RES_PKT))
++	{
++		printf("NCSI: Expected Response Size = %d Got %d\n",
++			sizeof(GET_CAPABILITIES_RES_PKT),ReceivedNCSILen);
++		return NCSI_ERR_RESPONSE;
++	}
++
++	/* Validate Response checksum */
++	cs_offset = (UINT32)(&(ResPkt->CheckSum)) - (UINT32)(ResPkt);
++	retval = NCSIValidateCheckSum((UINT16*)RecvPkt,cs_offset);
++	if (retval != NCSI_ERR_SUCCESS)
++		return retval;
++
++	/* Check the Response code and reason */
++	retval =  ProcessResponseCode(ResPkt->ResponseCode,ResPkt->ReasonCode);
++	if (retval == NCSI_ERR_SUCCESS)
++	{
++		*Caps = be32_to_cpu(ResPkt->CapFlags);
++	}
++
++	return retval;
++}
++
++int 
++NCSI_Issue_SetMacAddress(UINT8 PackageID, UINT8 ChannelID, UINT8 *MacAddr,
++					UINT8 MacFilterNo,UINT8 MacType)
++{
++	SET_MAC_ADDR_REQ_PKT Pkt;
++	SET_MAC_ADDR_RES_PKT *ResPkt;
++
++	UINT8 Channel;
++	UINT8 *PayLoad;
++	int cs_offset;
++	int retval;
++
++	/* Basic Initialization */
++	memset(&Pkt ,0, sizeof(Pkt));
++	PayLoad = ((UINT8 *)&Pkt) + sizeof(NCSI_HDR);
++	cs_offset = (UINT32)(&(Pkt.CheckSum)) - (UINT32)(&Pkt);
++
++	/* "SetMacAddr" Specific Parameters */
++	Channel = MK_CH_ID(PackageID,ChannelID);
++	Pkt.MACAddr5   = MacAddr[5];
++	Pkt.MACAddr4   = MacAddr[4];
++	Pkt.MACAddr3   = MacAddr[3];
++	Pkt.MACAddr2   = MacAddr[2];
++	Pkt.MACAddr1   = MacAddr[1];
++	Pkt.MACAddr0   = MacAddr[0];
++	Pkt.MacAddrNum = MacFilterNo;
++	Pkt.TypeEnable  = (MacType << 5) | ENABLE_MAC_FILTER;	
++
++	/* Form NCSI Packet and send */
++	FormNCSIPacket(CMD_SET_MAC_ADDR,Channel,PayLoad,cs_offset);
++	retval = SendNCSICommand (SendPkt,sizeof(Pkt));
++	if (retval != NCSI_ERR_SUCCESS)
++		return retval;
++
++	/* Validate Response pkt */
++	ResPkt = (SET_MAC_ADDR_RES_PKT *)RecvPkt;
++	if (ReceivedNCSILen != sizeof(SET_MAC_ADDR_RES_PKT))
++	{
++		printf("NCSI: Expected Response Size = %d Got %d\n",
++			sizeof(SET_MAC_ADDR_RES_PKT),ReceivedNCSILen);
++		return NCSI_ERR_RESPONSE;
++	}
++
++	/* Validate Response checksum */
++	cs_offset = (UINT32)(&(ResPkt->CheckSum)) - (UINT32)(ResPkt);
++	retval = NCSIValidateCheckSum((UINT16*)RecvPkt,cs_offset);
++	if (retval != NCSI_ERR_SUCCESS)
++		return retval;
++
++	/* Check the Response code and reason */
++	return ProcessResponseCode(ResPkt->ResponseCode,ResPkt->ReasonCode);
++}
++
++
++int 
++NCSI_Issue_EnableBcastFilter(UINT8 PackageID,UINT8 ChannelID, 
++					UINT8 Arp,UINT8 DhcpC,UINT8 DhcpS,UINT8 NetBios)
++{
++	ENABLE_BCAST_FILTER_REQ_PKT Pkt;
++	ENABLE_BCAST_FILTER_RES_PKT *ResPkt;
++
++	UINT8 Channel;
++	UINT8 *PayLoad;
++	int cs_offset;
++	int retval;
++
++	/* Basic Initialization */
++	memset(&Pkt ,0, sizeof(Pkt));
++	PayLoad = ((UINT8 *)&Pkt) + sizeof(NCSI_HDR);
++	cs_offset = (UINT32)(&(Pkt.CheckSum)) - (UINT32)(&Pkt);
++
++	Channel = MK_CH_ID(PackageID,ChannelID);
++	Pkt.Settings = cpu_to_be32(Arp | DhcpC << 1 | DhcpS << 2 | NetBios << 3);
++
++	/* Form NCSI Packet and send */
++	FormNCSIPacket(CMD_ENABLE_BCAST_FILTER,Channel,PayLoad,cs_offset);
++	retval = SendNCSICommand (SendPkt,sizeof(Pkt));
++	if (retval != NCSI_ERR_SUCCESS)
++		return retval;
++
++	/* Validate Response pkt */
++	ResPkt = (ENABLE_BCAST_FILTER_RES_PKT *)RecvPkt;
++	if (ReceivedNCSILen != sizeof(ENABLE_BCAST_FILTER_RES_PKT))
++	{
++		printf("NCSI: Expected Response Size = %d Got %d\n",
++			sizeof(ENABLE_BCAST_FILTER_RES_PKT),ReceivedNCSILen);
++		return NCSI_ERR_RESPONSE;
++	}
++
++	/* Validate Response checksum */
++	cs_offset = (UINT32)(&(ResPkt->CheckSum)) - (UINT32)(ResPkt);
++	retval = NCSIValidateCheckSum((UINT16*)RecvPkt,cs_offset);
++	if (retval != NCSI_ERR_SUCCESS)
++		return retval;
++
++	/* Check the Response code and reason */
++	return ProcessResponseCode(ResPkt->ResponseCode,ResPkt->ReasonCode);
++}
++
++int 
++NCSI_Issue_DisableBcastFilter(UINT8 PackageID,UINT8 ChannelID)
++{
++	DISABLE_BCAST_FILTER_REQ_PKT Pkt;
++	DISABLE_BCAST_FILTER_RES_PKT *ResPkt;
++
++	UINT8 Channel;
++	UINT8 *PayLoad;
++	int cs_offset;
++	int retval;
++
++	/* Basic Initialization */
++	memset(&Pkt ,0, sizeof(Pkt));
++	PayLoad = ((UINT8 *)&Pkt) + sizeof(NCSI_HDR);
++	cs_offset = (UINT32)(&(Pkt.CheckSum)) - (UINT32)(&Pkt);
++
++	Channel = MK_CH_ID(PackageID,ChannelID);
++
++	/* Form NCSI Packet and send */
++	FormNCSIPacket(CMD_DISABLE_BCAST_FILTER,Channel,PayLoad,cs_offset);
++	retval = SendNCSICommand (SendPkt,sizeof(Pkt));
++	if (retval != NCSI_ERR_SUCCESS)
++		return retval;
++
++	/* Validate Response pkt */
++	ResPkt = (DISABLE_BCAST_FILTER_RES_PKT *)RecvPkt;
++	if (ReceivedNCSILen != sizeof(DISABLE_BCAST_FILTER_RES_PKT))
++	{
++		printf("NCSI: Expected Response Size = %d Got %d\n",
++			sizeof(DISABLE_BCAST_FILTER_RES_PKT),ReceivedNCSILen);
++		return NCSI_ERR_RESPONSE;
++	}
++
++	/* Validate Response checksum */
++	cs_offset = (UINT32)(&(ResPkt->CheckSum)) - (UINT32)(ResPkt);
++	retval = NCSIValidateCheckSum((UINT16*)RecvPkt,cs_offset);
++	if (retval != NCSI_ERR_SUCCESS)
++		return retval;
++
++	/* Check the Response code and reason */
++	return ProcessResponseCode(ResPkt->ResponseCode,ResPkt->ReasonCode);
++}
++
++int 
++NCSI_Issue_EnableMcastFilter(UINT8 PackageID,UINT8 ChannelID, 
++		UINT8 IPv6_Neighbour_Adv, UINT8 IPv6_Router_Adv, UINT8 IPv6_Multicast)
++{
++	ENABLE_MCAST_FILTER_REQ_PKT Pkt;
++	ENABLE_MCAST_FILTER_RES_PKT *ResPkt;
++
++	UINT8 Channel;
++	UINT8 *PayLoad;
++	int cs_offset;
++	int retval;
++
++	/* Basic Initialization */
++	memset(&Pkt ,0, sizeof(Pkt));
++	PayLoad = ((UINT8 *)&Pkt) + sizeof(NCSI_HDR);
++	cs_offset = (UINT32)(&(Pkt.CheckSum)) - (UINT32)(&Pkt);
++
++	Channel = MK_CH_ID(PackageID,ChannelID);
++	Pkt.Settings =cpu_to_be32(IPv6_Neighbour_Adv |  IPv6_Router_Adv << 1 | IPv6_Multicast << 2);
++
++	/* Form NCSI Packet and send */
++	FormNCSIPacket(CMD_ENABLE_MCAST_FILTER,Channel,PayLoad,cs_offset);
++	retval = SendNCSICommand (SendPkt,sizeof(Pkt));
++	if (retval != NCSI_ERR_SUCCESS)
++		return retval;
++
++	/* Validate Response pkt */
++	ResPkt = (ENABLE_MCAST_FILTER_RES_PKT *)RecvPkt;
++	if (ReceivedNCSILen != sizeof(ENABLE_MCAST_FILTER_RES_PKT))
++	{
++		printf("NCSI: Expected Response Size = %d Got %d\n",
++			sizeof(ENABLE_MCAST_FILTER_RES_PKT),ReceivedNCSILen);
++		return NCSI_ERR_RESPONSE;
++	}
++
++	/* Validate Response checksum */
++	cs_offset = (UINT32)(&(ResPkt->CheckSum)) - (UINT32)(ResPkt);
++	retval = NCSIValidateCheckSum((UINT16*)RecvPkt,cs_offset);
++	if (retval != NCSI_ERR_SUCCESS)
++		return retval;
++
++	/* Check the Response code and reason */
++	return ProcessResponseCode(ResPkt->ResponseCode,ResPkt->ReasonCode);
++}
++
++
++
++int 
++NCSI_Issue_DisableMcastFilter(UINT8 PackageID,UINT8 ChannelID)
++{
++	DISABLE_MCAST_FILTER_REQ_PKT Pkt;
++	DISABLE_MCAST_FILTER_RES_PKT *ResPkt;
++
++	UINT8 Channel;
++	UINT8 *PayLoad;
++	int cs_offset;
++	int retval;
++
++	/* Basic Initialization */
++	memset(&Pkt ,0, sizeof(Pkt));
++	PayLoad = ((UINT8 *)&Pkt) + sizeof(NCSI_HDR);
++	cs_offset = (UINT32)(&(Pkt.CheckSum)) - (UINT32)(&Pkt);
++
++	Channel = MK_CH_ID(PackageID,ChannelID);
++
++	/* Form NCSI Packet and send */
++	FormNCSIPacket(CMD_DISABLE_MCAST_FILTER,Channel,PayLoad,cs_offset);
++	retval = SendNCSICommand (SendPkt,sizeof(Pkt));
++	if (retval != NCSI_ERR_SUCCESS)
++		return retval;
++
++	/* Validate Response pkt */
++	ResPkt = (DISABLE_MCAST_FILTER_RES_PKT *)RecvPkt;
++	if (ReceivedNCSILen != sizeof(DISABLE_MCAST_FILTER_RES_PKT))
++	{
++		printf("NCSI: Expected Response Size = %d Got %d\n",
++			sizeof(DISABLE_MCAST_FILTER_RES_PKT),ReceivedNCSILen);
++		return NCSI_ERR_RESPONSE;
++	}
++
++	/* Validate Response checksum */
++	cs_offset = (UINT32)(&(ResPkt->CheckSum)) - (UINT32)(ResPkt);
++	retval = NCSIValidateCheckSum((UINT16*)RecvPkt,cs_offset);
++	if (retval != NCSI_ERR_SUCCESS)
++		return retval;
++
++	/* Check the Response code and reason */
++	return ProcessResponseCode(ResPkt->ResponseCode,ResPkt->ReasonCode);
++}
++
++
++int 
++NCSI_Issue_EnableAEN(UINT8 PackageID,UINT8 ChannelID,UINT8 LinkAEN,
++						UINT8 ConfigAEN,UINT8 HostAEN)
++{
++	AEN_ENABLE_REQ_PKT Pkt;
++	AEN_ENABLE_RES_PKT *ResPkt;
++
++	UINT8 Channel;
++	UINT8 *PayLoad;
++	int cs_offset;
++	int retval;
++
++	/* Basic Initialization */
++	memset(&Pkt ,0, sizeof(Pkt));
++	PayLoad = ((UINT8 *)&Pkt) + sizeof(NCSI_HDR);
++	cs_offset = (UINT32)(&(Pkt.CheckSum)) - (UINT32)(&Pkt);
++
++	Channel = MK_CH_ID(PackageID,ChannelID);
++	Pkt.AenCtrl   = cpu_to_be32(LinkAEN | ConfigAEN << 1 | HostAEN << 2);
++	Pkt.AEN_MC_ID = NCSI_MC_ID;
++
++	/* Form NCSI Packet and send */
++	FormNCSIPacket(CMD_AEN_ENABLE,Channel,PayLoad,cs_offset);
++	retval = SendNCSICommand (SendPkt,sizeof(Pkt));
++	if (retval != NCSI_ERR_SUCCESS)
++		return retval;
++
++	/* Validate Response pkt */
++	ResPkt = (AEN_ENABLE_RES_PKT *)RecvPkt;
++	if (ReceivedNCSILen != sizeof(AEN_ENABLE_RES_PKT))
++	{
++		printf("NCSI: Expected Response Size = %d Got %d\n",
++			sizeof(AEN_ENABLE_RES_PKT),ReceivedNCSILen);
++		return NCSI_ERR_RESPONSE;
++	}
++
++	/* Validate Response checksum */
++	cs_offset = (UINT32)(&(ResPkt->CheckSum)) - (UINT32)(ResPkt);
++	retval = NCSIValidateCheckSum((UINT16*)RecvPkt,cs_offset);
++	if (retval != NCSI_ERR_SUCCESS)
++		return retval;
++
++	/* Check the Response code and reason */
++	return ProcessResponseCode(ResPkt->ResponseCode,ResPkt->ReasonCode);
++}
++
++
++
++
++int 
++NCSI_Issue_GetLinkStatus(UINT8 PackageID, UINT8 ChannelID, UINT32 *LinkStatus)
++{
++
++	GET_LINK_STATUS_REQ_PKT Pkt;
++	GET_LINK_STATUS_RES_PKT *ResPkt;
++
++	UINT8 Channel;
++	UINT8 *PayLoad;
++	int cs_offset;
++	int retval;
++
++	/* This command does not return proper link status if 
++           send immediatly after a NCSI command (I seen it after
++	   SelectPackage). So added a delay of one second */
++	udelay(1000*1000);
++
++	*LinkStatus = 0;
++
++	/* Basic Initialization */
++	memset(&Pkt ,0, sizeof(Pkt));
++	PayLoad = ((UINT8 *)&Pkt) + sizeof(NCSI_HDR);
++	cs_offset = (UINT32)(&(Pkt.CheckSum)) - (UINT32)(&Pkt);
++
++	Channel = MK_CH_ID(PackageID,ChannelID);
++
++	/* Form NCSI Packet and send */
++	FormNCSIPacket(CMD_GET_LINK_STATUS,Channel,PayLoad,cs_offset);
++	retval = SendNCSICommand (SendPkt,sizeof(Pkt));
++	if (retval != NCSI_ERR_SUCCESS)
++		return retval;
++
++	/* Validate Response pkt */
++	ResPkt = (GET_LINK_STATUS_RES_PKT *)RecvPkt;
++	if (ReceivedNCSILen != sizeof(GET_LINK_STATUS_RES_PKT))
++	{
++		printf("NCSI: Expected Response Size = %d Got %d\n",
++			sizeof(GET_LINK_STATUS_RES_PKT),ReceivedNCSILen);
++		return NCSI_ERR_RESPONSE;
++	}
++
++	/* Validate Response checksum */
++	cs_offset = (UINT32)(&(ResPkt->CheckSum)) - (UINT32)(ResPkt);
++	retval = NCSIValidateCheckSum((UINT16*)RecvPkt,cs_offset);
++	if (retval != NCSI_ERR_SUCCESS)
++		return retval;
++
++	/* Check the Response code and reason */
++	retval =  ProcessResponseCode(ResPkt->ResponseCode,ResPkt->ReasonCode);
++	if (retval == NCSI_ERR_SUCCESS)
++	{
++		*LinkStatus = be32_to_cpu(ResPkt->LinkStatus);
++//		printf("Link Status = 0x%08X\n",be32_to_cpu(ResPkt->LinkStatus));
++//		printf("OEM Link Status = 0x%08X\n",be32_to_cpu(ResPkt->OEMLinkStatus));
++//		printf("Other Indicators = 0x%08X\n",be32_to_cpu(ResPkt->OtherIndicators));
++	}
++
++	return retval;
++}
++
++int 
++NCSI_Issue_GetParameters(UINT8 PackageID, UINT8 ChannelID)
++{
++	GET_PARAMETERS_REQ_PKT Pkt;
++	GET_PARAMETERS_RES_PKT *ResPkt;
++
++	UINT8 Channel;
++	UINT8 *PayLoad;
++	int cs_offset;
++	int retval;
++
++	/* Basic Initialization */
++	memset(&Pkt ,0, sizeof(Pkt));
++	PayLoad = ((UINT8 *)&Pkt) + sizeof(NCSI_HDR);
++	cs_offset = (UINT32)(&(Pkt.CheckSum)) - (UINT32)(&Pkt);
++
++	Channel = MK_CH_ID(PackageID,ChannelID);
++
++	/* Form NCSI Packet and send */
++	FormNCSIPacket(CMD_GET_PARAMETERS,Channel,PayLoad,cs_offset);
++	retval = SendNCSICommand (SendPkt,sizeof(Pkt));
++	if (retval != NCSI_ERR_SUCCESS)
++		return retval;
++
++	/* Validate Response pkt */
++	ResPkt = (GET_PARAMETERS_RES_PKT *)RecvPkt;
++	if (ReceivedNCSILen != sizeof(GET_PARAMETERS_RES_PKT))
++	{
++			printf("NCSI: Expected Response Size = %d Got %d\n",
++				sizeof(GET_PARAMETERS_RES_PKT),ReceivedNCSILen);
++			return NCSI_ERR_RESPONSE;
++	}
++
++	/* Validate Response checksum */
++	cs_offset = (UINT32)(&(ResPkt->CheckSum)) - (UINT32)(ResPkt);
++	retval = NCSIValidateCheckSum((UINT16*)RecvPkt,cs_offset);
++	if (retval != NCSI_ERR_SUCCESS)
++		return retval;
++
++	/* Check the Response code and reason */
++	retval =  ProcessResponseCode(ResPkt->ResponseCode,ResPkt->ReasonCode);
++	if (retval == NCSI_ERR_SUCCESS)
++	{
++			/*TODO: Send back some useful info ? */
++	}
++
++	return retval;
++}
++
++int
++NCSI_Issue_SetLink(UINT8 PackageID,UINT8 ChannelID, UINT8 AutoNeg,
++	UINT32 Speed, UINT32 Duplex)
++{
++	SET_LINK_REQ_PKT Pkt;
++	SET_LINK_RES_PKT *ResPkt;
++	UINT32 LinkSettings;
++
++	UINT8 Channel;
++	UINT8 *PayLoad;
++	int cs_offset;
++	int retval;
++
++	/* Basic Initialization */
++	memset(&Pkt ,0, sizeof(Pkt));
++	PayLoad = ((UINT8 *)&Pkt) + sizeof(NCSI_HDR);
++	cs_offset = (UINT32)(&(Pkt.CheckSum)) - (UINT32)(&Pkt);
++
++	/* "SetLink" Specific Parameters */
++	Channel = MK_CH_ID(PackageID,ChannelID);
++
++	LinkSettings = LINK_ENABLE_PAUSE_CAPS;
++	LinkSettings |= LINK_ENABLE_ASYNC_PAUSE_CAPS;
++	if (AutoNeg)
++	{
++		LinkSettings |= LINK_ENABLE_AUTO_NEG;
++		LinkSettings |= LINK_ENABLE_10_MBPS;
++		LinkSettings |= LINK_ENABLE_100_MBPS;
++#if NCSI_1G_SUPPORT
++		LinkSettings |= LINK_ENABLE_1000_MBPS;
++#endif
++#if NCSI_10G_SUPPORT
++		LinkSettings |= LINK_ENABLE_10_GBPS;
++#endif
++		LinkSettings |= LINK_ENABLE_HALF_DUPLEX;
++		LinkSettings |= LINK_ENABLE_FULL_DUPLEX;
++	}
++	else
++	{
++		LinkSettings |= Speed | Duplex;
++	}
++	Pkt.LinkSettings = cpu_to_be32(LinkSettings);
++	
++
++	/* Form NCSI Packet and send */
++	FormNCSIPacket(CMD_SET_LINK,Channel,PayLoad,cs_offset);
++	retval = SendNCSICommand (SendPkt,sizeof(Pkt));
++	if (retval != NCSI_ERR_SUCCESS)
++		return retval;
++
++	/* Validate Response pkt */
++	ResPkt = (SET_LINK_RES_PKT *)RecvPkt;
++	if (ReceivedNCSILen != sizeof(SET_LINK_RES_PKT))
++	{
++		printf("NCSI: Expected Response Size = %d Got %d\n",
++			sizeof(DISABLE_CHANNEL_RES_PKT),ReceivedNCSILen);
++		return NCSI_ERR_RESPONSE;
++	}
++
++	/* Validate Response checksum */
++	cs_offset = (UINT32)(&(ResPkt->CheckSum)) - (UINT32)(ResPkt);
++	retval = NCSIValidateCheckSum((UINT16*)RecvPkt,cs_offset);
++	if (retval != NCSI_ERR_SUCCESS)
++		return retval;
++
++	/* Check the Response code and reason */
++	return ProcessSetLinkResponseCode(ResPkt->ResponseCode,ResPkt->ReasonCode);
++}
++#endif
+diff -Naur uboot/oem/ami/ncsi/ncsi.h uboot_new/oem/ami/ncsi/ncsi.h
+--- uboot/oem/ami/ncsi/ncsi.h	1970-01-01 08:00:00.000000000 +0800
++++ uboot_new/oem/ami/ncsi/ncsi.h	2021-01-27 10:26:09.291350686 +0800
+@@ -0,0 +1,739 @@
++/****************************************************************
++ ****************************************************************
++ **                                                            **
++ **    (C)Copyright 2005-2007, American Megatrends Inc.        **
++ **                                                            **
++ **            All Rights Reserved.                            **
++ **                                                            **
++ **        6145-F, Northbelt Parkway, Norcross,                **
++ **                                                            **
++ **        Georgia - 30071, USA. Phone-(770)-246-8600.         **
++ **                                                            **
++ ****************************************************************
++ ****************************************************************/
++/****************************************************************
++  Author	: Samvinesh Christopher
++
++  Module	: NC-SI Definitions
++
++  Revision	: 1.0  
++
++  Changelog : 1.0 - Initial Version  [SC]
++
++ *****************************************************************/
++#ifndef __NCSI_H__
++#define __NCSI_H__
++
++#include <net.h>
++#include "types.h"
++
++#define NCSI_RETRIES		3	/* Command retries for response */
++#define NCSI_1G_SUPPORT		0
++#define NCSI_10G_SUPPORT	0
++
++/*---------------------NCSI Commands  ----------------------------*/
++#define CMD_RESPONSE						0x80
++#define CMD_REQUEST							0x00
++
++#define CMD_CLEAR_INITIAL_STATE				0x00
++#define CMD_SELECT_PACKAGE					0x01
++#define CMD_DESELECT_PACKAGE				0x02
++#define CMD_ENABLE_CHANNEL					0x03
++#define CMD_DISABLE_CHANNEL					0x04
++#define CMD_RESET_CHANNEL					0x05
++#define CMD_ENABLE_CHANNEL_TX				0x06
++#define CMD_DISABLE_CHANNEL_TX				0x07
++#define CMD_AEN_ENABLE						0x08
++#define CMD_SET_LINK						0x09
++#define CMD_GET_LINK_STATUS					0x0A
++#define CMD_SET_VLAN_FILTER					0x0B
++#define CMD_ENABLE_VLAN						0x0C
++#define CMD_DISABLE_VLAN					0x0D
++#define CMD_SET_MAC_ADDR					0x0E
++/* No Command with Number 0x0F */
++#define CMD_ENABLE_BCAST_FILTER				0x10
++#define CMD_DISABLE_BCAST_FILTER			0x11
++#define CMD_ENABLE_MCAST_FILTER				0x12
++#define CMD_DISABLE_MCAST_FILTER			0x13
++#define CMD_SET_NCSI_FLOW_CONTROL			0x14
++#define CMD_GET_VERSION_ID					0x15
++#define CMD_GET_CAPABILITIES				0x16
++#define CMD_GET_PARAMETERS					0x17
++#define CMD_GET_CONTROLLER_PKT_STATS		0x18
++#define CMD_GET_NCSI_STATS					0x19
++#define CMD_GET_NCSI_PASSTHRU_STATS			0x1A
++
++#define CMD_OEM_CMD							0x50
++
++
++
++/*---------------------NCSI Response Code ----------------------------*/
++#define COMMAND_COMPLETED					0x00
++#define COMMAND_FAILED						0x01
++#define COMMAND_UNAVAILABLE					0x02	/* Busy */
++#define COMMAND_UNSUPPORTED					0x03
++
++/*---------------------NCSI Reason Code -----------------------------*/
++#define REASON_NONE							0x00
++#define REASON_INIT_REQUIRED				0x01
++#define REASON_PARAMS_INVALID				0x02
++#define REASON_CHANNEL_NOT_READY			0x03
++#define REASON_PACKAGE_NOT_READY			0x04
++#define REASON_LENGTH_INVALID				0x05
++#define REASON_MAC_ADDR_ZERO				0x08	/* For Command 0xE*/
++
++
++/*---------------------NCSI Related defines -------------------------*/
++#define NCSI_ETHER_TYPE					0x88F8
++#define NCSI_MC_ID						0x00
++#define NCSI_HDR_REV					0x01
++#define MAC_ADDR_LEN					6
++
++#define PACKED __attribute__ ((packed))
++
++
++/*----------------------- Ethernet Header ---------------------------*/
++typedef struct
++{
++	UINT8	DestMACAddr [MAC_ADDR_LEN];
++	UINT8  	SrcMACAddr [MAC_ADDR_LEN];
++	UINT16	EtherType;
++} PACKED ETH_HDR;			/* 14 Bytes */
++
++#define MIN_ETH_SIZE		(64)	
++#define ETH_FCS_SIZE		(4)
++#define NCSI_PAD_SIZE 	(MIN_ETH_SIZE - (sizeof(ETH_HDR) + ETH_FCS_SIZE))
++/*------------------------ AEN Header  -----------------------------*/
++typedef struct
++{
++	UINT8	MC_ID;		/* 0x00*/
++	UINT8	ONE;		/* 0x01*/
++	UINT8   Reserved1;	
++	UINT8	IID;		/* 0x00*/
++	UINT8   ALL_FF;		/* 0xFF*/
++	UINT8	OrgChannelID;
++	UINT8	Reserved2;  	/* 0x00*/
++	UINT8	PayLen;		/* Minimum 0x4 */
++	UINT32	Reserved3;
++	UINT32	Reserved4;
++} PACKED AEN_HDR;
++
++typedef struct
++{
++	AEN_HDR hdr;
++	UINT8	Reserved5[3];
++	UINT8	AEN_Type;
++	/* Optional Extra Data */
++	/* CheckSum */
++} PACKED AEN_PKT;
++
++
++#define AEN_TYPE_LINK_STATUS_CHANGE		0x00
++#define AEN_TYPE_LINK_STATUS_CHANGE_LEN		12
++#define AEN_TYPE_LINK_STATUS_CHANGE_CHKSUM	28
++
++#define AEN_TYPE_CONFIG_REQUIRED		0x01
++#define AEN_TYPE_CONFIG_REQUIRED_LEN		4
++#define AEN_TYPE_CONFIG_REQUIRED_CHKSUM		20
++
++#define AEN_TYPE_HOST_DRIVER_CHANGE		0x02
++#define AEN_TYPE_HOST_DRIVER_CHANGE_LEN		8
++#define AEN_TYPE_HOST_DRIVER_CHANGE_CHKSUM	24
++
++/*------------------------ NCSI Header  -----------------------------*/
++typedef struct
++{
++	UINT8	MC_ID;
++	UINT8 	HdrRev;
++	UINT8	Reserved1;
++	UINT8	I_ID;
++	UINT8   Command;
++	UINT8   CH_ID;
++	UINT16	PayloadLen;		/* 12 Bits only */
++	UINT16 	Reserved2[4];
++} PACKED NCSI_HDR;			/* 16 Bytes */
++
++#define MK_CH_ID(p,c)    ((((p) & 0x7) << 5) | ((c) & 0x1F))
++#define GET_PACKAGE_ID(id)    (((id) >> 5) & 0x7) 	
++#define GET_CHANNEL_ID(id)    ((id) & 0x1F)
++
++#ifdef CONFIG_SPX_FEATURE_NCSI_MAXIMUM_CHANNELID
++#define MAX_CHANNEL_ID  CONFIG_SPX_FEATURE_NCSI_MAXIMUM_CHANNELID
++#else
++#define MAX_CHANNEL_ID	 0x1F
++#endif
++#ifdef CONFIG_SPX_FEATURE_NCSI_MAXIMUM_PACKAGEID
++#define MAX_PACKAGE_ID  CONFIG_SPX_FEATURE_NCSI_MAXIMUM_PACKAGEID
++#else
++#define MAX_PACKAGE_ID	 0x7
++#endif
++
++/*----------- NCSI Default (No Payload) Request and Response  -------*/
++typedef struct 
++{
++	NCSI_HDR	NcsiHdr;	
++	UINT16		ResponseCode;
++	UINT16		ReasonCode;
++	UINT32		CheckSum;
++	UINT8		Pad[NCSI_PAD_SIZE-(2+2+4+sizeof(NCSI_HDR))];
++} PACKED NCSI_DEFAULT_RES_PKT;
++
++typedef struct 
++{
++	NCSI_HDR	NcsiHdr;	
++	UINT32		CheckSum;
++	UINT8		Pad[NCSI_PAD_SIZE-(4+sizeof(NCSI_HDR))];
++} PACKED NCSI_DEFAULT_REQ_PKT;
++
++/*-------------------------------------------------------------------*/
++
++typedef NCSI_DEFAULT_REQ_PKT CLEAR_INITIAL_STATE_REQ_PKT;
++typedef NCSI_DEFAULT_RES_PKT CLEAR_INITIAL_STATE_RES_PKT;
++
++/*-------------------------------------------------------------------*/
++
++typedef struct 
++{
++	NCSI_HDR	NcsiHdr;	
++	UINT8		Reserved[3];
++	UINT8		HwArbitDisable;
++	UINT32		CheckSum;
++	UINT8		Pad[NCSI_PAD_SIZE-(3+1+4+sizeof(NCSI_HDR))];
++} PACKED SELECT_PACKAGE_REQ_PKT;
++
++#define HW_ARBITRATION_ENABLE  0x00
++#define HW_ARBITRATION_DISABLE 0x01
++
++typedef NCSI_DEFAULT_RES_PKT SELECT_PACKAGE_RES_PKT;
++
++/*-------------------------------------------------------------------*/
++
++typedef NCSI_DEFAULT_REQ_PKT DESELECT_PACKAGE_REQ_PKT;
++typedef NCSI_DEFAULT_RES_PKT DESELECT_PACKAGE_RES_PKT;
++
++/*-------------------------------------------------------------------*/
++
++typedef NCSI_DEFAULT_REQ_PKT ENABLE_CHANNEL_REQ_PKT;
++typedef NCSI_DEFAULT_RES_PKT ENABLE_CHANNEL_RES_PKT;
++
++/*-------------------------------------------------------------------*/
++
++typedef struct 
++{
++	NCSI_HDR	NcsiHdr;	
++	UINT8		Reserved[3];
++	UINT8		AllowLinkDown;
++	UINT32		CheckSum;
++	UINT8		Pad[NCSI_PAD_SIZE-(3+1+4+sizeof(NCSI_HDR))];
++} PACKED DISABLE_CHANNEL_REQ_PKT;
++
++#define KEEP_LINK_UP  0x00
++#define ALLOW_LINK_DOWN 0x01
++
++typedef NCSI_DEFAULT_RES_PKT DISABLE_CHANNEL_RES_PKT;
++
++/*-------------------------------------------------------------------*/
++
++typedef struct 
++{
++	NCSI_HDR	NcsiHdr;	
++	UINT32		Reserved;
++	UINT32		CheckSum;
++	UINT8		Pad[NCSI_PAD_SIZE-(4+4+sizeof(NCSI_HDR))];
++} PACKED RESET_CHANNEL_REQ_PKT;
++
++typedef NCSI_DEFAULT_RES_PKT RESET_CHANNEL_RES_PKT;
++
++/*-------------------------------------------------------------------*/
++
++typedef NCSI_DEFAULT_REQ_PKT ENABLE_CHANNEL_TX_REQ_PKT;
++typedef NCSI_DEFAULT_RES_PKT ENABLE_CHANNEL_TX_RES_PKT;
++
++/*-------------------------------------------------------------------*/
++
++typedef NCSI_DEFAULT_REQ_PKT DISABLE_CHANNEL_TX_REQ_PKT;
++typedef NCSI_DEFAULT_RES_PKT DISABLE_CHANNEL_TX_RES_PKT;
++
++/*-------------------------------------------------------------------*/
++
++typedef struct 
++{
++	NCSI_HDR	NcsiHdr;	
++	UINT8		Reserved[3];
++	UINT8		AEN_MC_ID;
++	UINT32		AenCtrl;
++	UINT32		CheckSum;
++	UINT8		Pad[NCSI_PAD_SIZE-(3+1+4+4+sizeof(NCSI_HDR))];
++} PACKED AEN_ENABLE_REQ_PKT;
++
++#define ENABLE_LINK_STATUS_AEN		0x01
++#define ENABLE_CFG_REQ_AEN			0x02
++#define ENABLE_HOST_DRIVER_AEN		0x04
++
++typedef NCSI_DEFAULT_RES_PKT AEN_ENABLE_RES_PKT;
++
++/*-------------------------------------------------------------------*/
++
++typedef struct 
++{
++	NCSI_HDR	NcsiHdr;	
++	UINT32		LinkSettings;
++	UINT32		OemLinkSettings;
++	UINT32		CheckSum;
++	UINT8		Pad[NCSI_PAD_SIZE-(4+4+4+sizeof(NCSI_HDR))];
++} PACKED SET_LINK_REQ_PKT;
++
++#define	LINK_ENABLE_AUTO_NEG			0x0001
++#define LINK_ENABLE_10_MBPS				0x0002
++#define LINK_ENABLE_100_MBPS			0x0004
++#define LINK_ENABLE_1000_MBPS			0x0008
++#define LINK_ENABLE_10_GBPS				0x0010
++#define LINK_ENABLE_HALF_DUPLEX			0x0100
++#define LINK_ENABLE_FULL_DUPLEX			0x0200
++#define LINK_ENABLE_PAUSE_CAPS			0x0400
++#define LINK_ENABLE_ASYNC_PAUSE_CAPS	0x0800
++#define LINK_OEM_LINK_FIELD_VALID		0x1000
++
++typedef NCSI_DEFAULT_RES_PKT SET_LINK_RES_PKT;
++
++#define SET_LINK_REASON_HOST_CONFLICT		0x01
++#define SET_LINK_REASON_MEDIA_CONFLICT		0x02
++#define SET_LINK_REASON_PARAMETER_CONFLICT	0x03
++#define SET_LINK_REASON_POWERMODE_CONFLICT	0x04
++#define SET_LINK_REASON_SPEED_CONFLICT		0x05
++#define SET_LINK_REASON_HW_ACCESS_FAILED	0x06
++/*-------------------------------------------------------------------*/
++
++typedef NCSI_DEFAULT_REQ_PKT GET_LINK_STATUS_REQ_PKT;
++
++typedef struct 
++{
++	NCSI_HDR	NcsiHdr;	
++	UINT16		ResponseCode;
++	UINT16		ReasonCode;
++	UINT32		LinkStatus;
++	UINT32		OtherIndicators;
++	UINT32		OEMLinkStatus;
++	UINT32		CheckSum;
++	UINT8		Pad[NCSI_PAD_SIZE-(2+2+4+4+4+4+sizeof(NCSI_HDR))];
++} PACKED GET_LINK_STATUS_RES_PKT;
++
++/* Link Partner values valid SerDes=0 AutoNegFlag=1 and AutoNegComplete=1 */
++
++#define LINK_STATUS_UP			0x00000001
++#define LINK_AUTO_NEG_FLAG		0x00000020
++#define LINK_AUTO_NEG_COMPLETE	0x00000040
++#define LINK_PARALLEL_DET_FLAG	0x00000080
++#define LINK_PARTNER_1000TFD	0x00000200
++#define LINK_PARTNER_1000THD	0x00000400
++#define LINK_PARTNER_100T4		0x00000800
++#define LINK_PARTNER_100TXFD	0x00001000
++#define LINK_PARTNER_100TXHD	0x00002000
++#define LINK_PARTNER_10TXFD		0x00004000
++#define LINK_PARTNER_10TXHD		0x00008000
++#define LINK_TX_FLOW_FLAG		0x00010000
++#define LINK_RX_FLOW_FLAG		0x00020000
++#define LINK_SERDES				0x00100000
++#define LINK_OEM_FIELD_VALID	0x00200000
++
++#define LINK_PARTNER_FLOW_MASK	0x000C0000
++#define LINK_PARTNER_NO_PAUSE	0x00000000
++#define LINK_PARTNER_SYM_PAUSE	0x00040000
++#define LINK_PARTNER_ASYM_PAUSE	0x00080000
++#define LINK_PARTNER_BOTH_PAUSE	0x000C0000
++
++#define LINK_SPEED_DUPLEX_MASK	0x0000001E
++#define LINK_10THD			(0x1 << 1)			
++#define LINK_10TFD			(0x2 << 1)			
++#define LINK_100THD			(0x3 << 1)			
++#define LINK_100T4			(0x4 << 1)			
++#define LINK_100TFD			(0x5 << 1)			
++#define LINK_1000THD			(0x6 << 1)			
++#define LINK_1000TFD		(0x7 << 1)			
++#define LINK_10GT			(0x8 << 1)			
++
++#define OTHER_INDICATOR_HOST_UP		0x01
++
++/*-------------------------------------------------------------------*/
++typedef struct 
++{
++	NCSI_HDR	NcsiHdr;	
++	UINT16		Reserved1;
++	UINT16		UserPri_CFI_VLANID;		/* 3:1:12 */
++	UINT16		Reserved2;
++	UINT8		FilterSelector;
++	UINT8		Enable;
++	UINT32		CheckSum;
++	UINT8		Pad[NCSI_PAD_SIZE-(2+2+2+1+1+4+sizeof(NCSI_HDR))];
++} PACKED SET_VLAN_FILTER_REQ_PKT;
++
++
++typedef NCSI_DEFAULT_RES_PKT SET_VLAN_FILTER_RES_PKT;
++/*-------------------------------------------------------------------*/
++typedef struct 
++{
++	NCSI_HDR	NcsiHdr;	
++	UINT8		Reserved[3];
++	UINT8		Mode;
++	UINT32		CheckSum;
++	UINT8		Pad[NCSI_PAD_SIZE-(3+1+4+sizeof(NCSI_HDR))];
++} PACKED ENABLE_VLAN_REQ_PKT;
++
++#define VLAN_MODE_RESERVED			0x00
++#define VLAN_MODE_VLAN_ONLY			0x01
++#define VLAN_MODE_VLAN_NON_VLAN		0x02
++#define VLAN_MODE_ANY_VLAN_NON_VLAN	0x03
++
++
++typedef NCSI_DEFAULT_RES_PKT ENABLE_VLAN_RES_PKT;
++/*-------------------------------------------------------------------*/
++typedef NCSI_DEFAULT_REQ_PKT DISABLE_VLAN_REQ_PKT;
++typedef NCSI_DEFAULT_RES_PKT DISABLE_VLAN_RES_PKT;
++/*-------------------------------------------------------------------*/
++typedef struct
++{
++	NCSI_HDR	NcsiHdr;	
++	UINT8		MACAddr5;
++	UINT8		MACAddr4;
++	UINT8		MACAddr3;
++	UINT8		MACAddr2;
++	UINT8		MACAddr1;
++	UINT8		MACAddr0;
++	UINT8		MacAddrNum;
++	UINT8		TypeEnable;		/*	3:4:1 = Type:Reserved:Enable */
++	UINT32		CheckSum;
++	UINT8		Pad[NCSI_PAD_SIZE-(6+1+1+4+sizeof(NCSI_HDR))];
++} PACKED SET_MAC_ADDR_REQ_PKT;
++
++#define ENABLE_MAC_FILTER	0x01
++#define DISABLE_MAC_FILTER	0x00
++
++#define UNICAST_MAC_ADDR	(0x00 << 5)
++#define MULTICAST_MAC_ADDR	(0x01 << 5)
++
++typedef NCSI_DEFAULT_RES_PKT SET_MAC_ADDR_RES_PKT;
++/*-------------------------------------------------------------------*/
++typedef struct
++{
++	NCSI_HDR	NcsiHdr;	
++	UINT32		Settings;
++	UINT32		CheckSum;
++	UINT8		Pad[NCSI_PAD_SIZE-(4+4+sizeof(NCSI_HDR))];
++} PACKED ENABLE_BCAST_FILTER_REQ_PKT;
++
++#define FORWARD_ARP_PACKETS				0x01
++#define FORWARD_DHCP_CLIENT_PACKETS		0x02
++#define FORWARD_DHCP_SERVER_PACKETS		0x04
++#define FORWARD_NETBIOS_PACKETS			0x08
++
++
++typedef NCSI_DEFAULT_RES_PKT ENABLE_BCAST_FILTER_RES_PKT;
++/*-------------------------------------------------------------------*/
++typedef NCSI_DEFAULT_REQ_PKT DISABLE_BCAST_FILTER_REQ_PKT;
++typedef NCSI_DEFAULT_RES_PKT DISABLE_BCAST_FILTER_RES_PKT;
++/*-------------------------------------------------------------------*/
++typedef struct
++{
++	NCSI_HDR	NcsiHdr;	
++	UINT32		Settings;
++	UINT32		CheckSum;
++	UINT8		Pad[NCSI_PAD_SIZE-(4+4+sizeof(NCSI_HDR))];
++} PACKED ENABLE_MCAST_FILTER_REQ_PKT;
++
++#define FORWARD_IPV6_NEIGHBOR_ADV		0x01
++#define FORWARD_IPV6_ROUTER_ADV			0x02
++#define FORWARD_DHCPV6_RELAY_SERVER		0x04
++
++typedef NCSI_DEFAULT_RES_PKT ENABLE_MCAST_FILTER_RES_PKT;
++/*-------------------------------------------------------------------*/
++typedef NCSI_DEFAULT_REQ_PKT DISABLE_MCAST_FILTER_REQ_PKT;
++typedef NCSI_DEFAULT_RES_PKT DISABLE_MCAST_FILTER_RES_PKT;
++/*-------------------------------------------------------------------*/
++typedef struct
++{
++	NCSI_HDR	NcsiHdr;	
++	UINT8		Reserved[3];
++	UINT8		FlowControl;
++	UINT32		CheckSum;
++	UINT8		Pad[NCSI_PAD_SIZE-(3+1+4+sizeof(NCSI_HDR))];
++} PACKED SET_NCSI_FLOW_CONTROL_REQ_PKT;
++
++#define DISABLE_FLOW_CONTROL				0x00
++#define ENABLE_NC_TO_MC_FLOW_CONTROL		0x01
++#define ENABLE_MC_TO_NC_FLOW_CONTROL		0x02
++#define ENABLE_BI_DIR_FLOW_CONTROL			0x03
++
++typedef NCSI_DEFAULT_RES_PKT SET_NCSI_FLOW_CONTROL_RES_PKT;
++/*-------------------------------------------------------------------*/
++typedef NCSI_DEFAULT_REQ_PKT GET_VERSION_ID_REQ_PKT;
++
++typedef struct
++{
++	NCSI_HDR	NcsiHdr;	
++	UINT16		ResponseCode;
++	UINT16		ReasonCode;
++	UINT8		NCSIVerMajor;
++	UINT8		NCSIVerMinor;
++	UINT8		NCSIVerUpdate;
++	UINT8		NCSIVerAlpha1;
++	UINT8		Reserved[3];
++	UINT8		NCSIVerAlpha2;
++	UINT8		FirmwareName[12];
++	UINT8		FirmwareVerByte3;
++	UINT8		FirmwareVerByte2;
++	UINT8		FirmwareVerByte1;
++	UINT8		FirmwareVerByte0;
++	UINT16		PCI_DID;
++	UINT16		PCI_VID;
++	UINT16		PCI_SSID;
++	UINT16		PCI_SVID;
++	UINT32		IANA_ManID;
++	UINT32		CheckSum;
++} PACKED GET_VERSION_ID_RES_PKT;
++/*-------------------------------------------------------------------*/
++typedef NCSI_DEFAULT_REQ_PKT GET_CAPABILITIES_REQ_PKT;
++
++typedef struct
++{
++	NCSI_HDR	NcsiHdr;	
++	UINT16		ResponseCode;
++	UINT16		ReasonCode;
++	UINT32		CapFlags;
++	UINT32		BcastFilterCaps;
++	UINT32		McastFilterCaps;
++	UINT32		BufferingCaps;
++	UINT32		AENControlSupport;
++	UINT8		VlanFilterCount;
++	UINT8		MixedFilterCount;
++	UINT8		McastFilterCount;
++	UINT8		UcastFilterCount;
++	UINT16		Reserved;
++	UINT8		VlanModeSupport;
++	UINT8		ChannelCount;
++	UINT32		CheckSum;
++} PACKED GET_CAPABILITIES_RES_PKT;
++
++#define HW_ARBITRATION_SUPPORT			0x00000001
++#define OS_PRESENCE_SUPPORT				0x00000002
++#define NC_TO_MC_FLOW_SUPPORT			0x00000004
++#define MC_TO_NC_FLOW_SUPPORT			0x00000008
++#define ALL_MCAST_ADDR_SUPPORT			0x00000010
++
++/*-------------------------------------------------------------------*/
++typedef NCSI_DEFAULT_REQ_PKT GET_PARAMETERS_REQ_PKT;
++
++typedef struct
++{
++	NCSI_HDR	NcsiHdr;	
++	UINT16		ResponseCode;
++	UINT16		ReasonCode;
++	UINT8		MacAddrCount;
++	UINT8		Reserved1[2];
++	UINT8		MacAddrFlags;
++	UINT8		VLAN_TagCount;
++	UINT8		Reserved2;
++	UINT16		VLAN_TagFlags;
++	UINT32		LinkSettings;
++	UINT32		BcastFilterSettings;
++	UINT32		ConfigurationFlags;
++	UINT8		VLAN_Mode;
++	UINT8		FlowControlEnable;
++	UINT16		Reserved3;
++	UINT32		AENControl;
++	UINT8		MacAddr1[6];	
++	UINT8		MacAddr2[6];	/* Can be from 1 to  8  */
++	UINT16		VLAN1_Tag;	/* Can be from 1 to 15  */
++	UINT16		VLAN2_Tag;	
++	UINT16		VLAN3_Tag;	
++	UINT16		VLAN4_Tag;	
++	UINT16		VLAN5_Tag;	
++	UINT16		VLAN6_Tag;	
++	UINT16		VLAN7_Tag;	
++	UINT16		VLAN8_Tag;	
++	/* May require Padding if not aligned to dword boundary */
++	UINT32		CheckSum;
++} PACKED GET_PARAMETERS_RES_PKT;
++/*TODO : The above structure is variable sized. So create a proper structure and 
++         in the code, handle this variable fields, paddding and checksum location */
++
++#define MAC_ADDRESS_ENABLED_FLAG(x)		(1 <<((x)-1))	/* 1 to 8 */
++#define VLAN_TAG_ENABLED_FLAG(x)		(1 <<((x)-1))	/* 1 to 15 */
++
++#define BCAST_FILTER_ENABLED			0x01
++#define CHANNEL_ENABLED					0x02
++#define CHANNEL_NETWORK_TX_ENABLED		0x04
++#define MCAST_FILTER_ENABLED			0x08
++/*-------------------------------------------------------------------*/
++typedef NCSI_DEFAULT_REQ_PKT GET_CTRL_PKT_STATS_REQ_PKT;
++
++typedef struct
++{
++	NCSI_HDR	NcsiHdr;	
++	UINT16		ResponseCode;
++	UINT16		ReasonCode;
++	UINT32		ClearedCounter_MS;			/* Bites 0-6 = Counters 32-38*/
++	UINT32		ClearedCounter_LS;			/* Bites 0-31 = Counters 0-31*/
++	UINT32		RecvBytes;
++	UINT32		XmitBytes;
++	UINT32		RecvUnicastPkts;
++	UINT32		RecvMcastPkts;
++	UINT32		RecvBcastPkts;
++	UINT32		XmitUnicastPkts;
++	UINT32		XmitMcastPkts;
++	UINT32		XmitBcastPkts;
++	UINT32		RecvFcsErrs;
++	UINT32		AlignmentErrs;
++	UINT32		FalseCarrierDetections;
++	UINT32		RecvRuntPkts;
++	UINT32		RecvJabberPkts;
++	UINT32		RecvPauseXON;
++	UINT32		RecvPauseXOFF;
++	UINT32		XmitPauseXON;
++	UINT32		XmitPauseXOFF;
++	UINT32		XmitSingleCollisions;
++	UINT32		XmitMultipleCollisions;
++	UINT32		LateCollisions;
++	UINT32		ExcessiveCollisions;
++	UINT32		RecvControlFrames;
++	UINT32		RecvFrameSize_64;
++	UINT32		RecvFrameSize_127;
++	UINT32		RecvFrameSize_255;
++	UINT32		RecvFrameSize_511;
++	UINT32		RecvFrameSize_1023;
++	UINT32		RecvFrameSize_1522;
++	UINT32		RecvFrameSize_9022;
++	UINT32		XmitFrameSize_64;
++	UINT32		XmitFrameSize_127;
++	UINT32		XmitFrameSize_255;
++	UINT32		XmitFrameSize_511;
++	UINT32		XmitFrameSize_1023;
++	UINT32		XmitFrameSize_1522;
++	UINT32		XmitFrameSize_9022;
++	UINT32		RecvValidPkts;
++	UINT32		RecvErrRuntPkts;
++	UINT32		RecvErrJabbePkts;
++	UINT32		CheckSum;
++} PACKED GET_CTRL_PKT_STATS_RES_PKT;
++/*-------------------------------------------------------------------*/
++typedef NCSI_DEFAULT_REQ_PKT GET_NCSI_STATS_REQ_PKT;
++
++typedef struct
++{
++	NCSI_HDR	NcsiHdr;	
++	UINT16		ResponseCode;
++	UINT16		ReasonCode;
++	UINT32		RecvCommands;
++	UINT32		DroppedCtrlPkts;;
++	UINT32		CommandTypeErrs;
++	UINT32		CommandChecksumErrs;
++	UINT32		RecvCtrlPkts;
++	UINT32		XmitCtrlPkts;
++	UINT32		AENsSent;
++	UINT32		CheckSum;
++} PACKED GET_NCSI_STATS_RES_PKT;
++/*-------------------------------------------------------------------*/
++typedef NCSI_DEFAULT_REQ_PKT GET_NCSI_PASS_THRUSTATS_REQ_PKT;
++
++typedef struct
++{
++	NCSI_HDR	NcsiHdr;	
++	UINT16		ResponseCode;
++	UINT16		ReasonCode;
++	UINT32		XmitPkts;		/* Received on NCSI RX interface of NC*/
++	UINT32		XmitPktsDropped;
++	UINT32		XmitPktsChannelStateErr;
++	UINT32		XmitPktsUndersizedErrs;
++	UINT32		XmitPktsOversizedErrs;
++	UINT32		RecvPkts;		/* Received on LAN interface of NC */
++	UINT32		RecvPktsDropped;
++	UINT32		RecvPktsChannelStateErr;
++	UINT32		RecvPktsUndersizedErrs;
++	UINT32		RecvPktsOversizedErrs;
++	UINT32		CommandTypeErrs;
++	UINT32		CommandChecksumErrs;
++	UINT32		RecvCtrlPkts;
++	UINT32		XmitCtrlPkts;
++	UINT32		AENsSent;
++	UINT32		CheckSum;
++} PACKED GET_NCSI_PASS_THRU_STATS_RES_PKT;
++/*-------------------------------------------------------------------*/
++
++
++/*---------------------------- AEN Packets ------------------------------*/
++#define AEN_TYPE_LINK_STATUS_CHANGE				0x00
++#define AEN_TYPE_CONFIG_REQUIRED				0x01
++#define AEN_TYPE_HOST_NC_DRIVER_STATUS_CHANGE	0x02
++typedef struct
++{
++	AEN_HDR		AenHdr;
++	UINT8		Reserved[3];
++	UINT8		AENType;
++	UINT32		LinkStatus;
++	UINT32		OEMLinkStatus;
++	UINT32		CheckSum;
++} PACKED AEN_LINK_STATUS_CHANGE_PKT;
++
++typedef struct
++{
++	AEN_HDR		AenHdr;
++	UINT8		Reserved[3];
++	UINT8		AENType;
++	UINT32		CheckSum;
++} PACKED AEN_CONFIG_REQUIRED_PKT;
++
++typedef struct
++{
++	AEN_HDR		AenHdr;
++	UINT8		Reserved[3];
++	UINT8		AENType;
++	UINT32		HostNC_DriverStatus;
++	UINT32		CheckSum;
++} PACKED AEN_HOST_NC_DRIVER_STATUS_CHANGE_PKT;
++
++/*------------------------------- NCSI Functions ----------------------------*/
++int NCSI_Issue_SelectPackage(UINT8 PackageID,UINT8 HwArbitDisable);
++int NCSI_Issue_DeSelectPackage(UINT8 PackageID);
++int NCSI_Issue_ClearInitialState(UINT8 PackageID, UINT8 ChannelID);
++int NCSI_Issue_DisableChannel(UINT8 PackageID, UINT8 ChannelID, UINT8 AllowLinkDown);
++int NCSI_Issue_ResetChannel(UINT8 PackageID, UINT8 ChannelID);
++int NCSI_Issue_ChannelCommands(UINT8 Command,UINT8 PackageID, UINT8 ChannelID);
++int NCSI_Issue_GetVersionID(UINT8 PackageID,UINT8 ChannelID,UINT32 *Ver1,UINT32 *Ver2);
++int NCSI_Issue_GetCapabiliites(UINT8 PackageID,UINT8 ChannelID, UINT32 *Caps);
++int NCSI_Issue_SetMacAddress(UINT8 PackageID,UINT8 ChannelID,UINT8 *MacAddr,
++							UINT8 MacFilterNo,UINT8 MacType);
++int NCSI_Issue_EnableBcastFilter(UINT8 PackageID,UINT8 ChannelID, 
++					UINT8 Arp,UINT8 DhcpC,UINT8 DhcpS,UINT8 NetBios);
++int NCSI_Issue_DisableBcastFilter(UINT8 PackageID,UINT8 ChannelID);
++int NCSI_Issue_EnableMcastFilter(UINT8 PackageID,UINT8 ChannelID, 
++		UINT8 IPv6_Neighbour_Adv, UINT8 IPv6_Router_Adv, UINT8 IPv6_Multicast);
++int NCSI_Issue_DisableMcastFilter(UINT8 PackageID,UINT8 ChannelID);
++int NCSI_Issue_EnableAEN(UINT8 PackageID,UINT8 ChannelID,UINT8 LinkAEN,
++						UINT8 ConfigAEN,UINT8 HostAEN);
++int NCSI_Issue_GetLinkStatus(UINT8 PackageID,UINT8 ChannelID,UINT32 *LinkStatus);
++int NCSI_Issue_GetParameters(UINT8 PackageID,UINT8 ChannelID);
++int NCSI_Issue_SetLink(UINT8 PackageID,UINT8 ChannelID,UINT8 AutoNeg,
++						UINT32 Speed, UINT32 Duplex);
++
++void NCSI_Start(void);
++void NCSIHandler(unsigned char *Buffer,unsigned Unused1,struct in_addr sip,unsigned Unused2, unsigned Len);
++int  EnableChannel(UINT8 PackageID,UINT8 ChannelID); 
++int  EnableChannelOnLink(UINT8 PackageID,UINT8 ChannelID); /* Called on Link Change AEN */
++
++/* Miscellaneous functions */
++#define DUMP_BUFFER 	0x02
++#define SHOW_MESSAGES	0x01
++int EnableVerbose(int level);
++
++/* Return codes from NCSI functions */
++#define NCSI_ERR_SUCCESS	0
++#define NCSI_ERR_FAILED		1	/* Remote send Response error */
++#define NCSI_ERR_NETWORK	2
++#define NCSI_ERR_TIMEOUT	3
++#define NCSI_ERR_RESPONSE	4
++#define NCSI_ERR_CHECKSUM	5
++#define NCSI_ERR_SEQNO		6
++#define NCSI_ERR_RESPONSE_NUM	7
++
++
++
++#endif
+diff -Naur uboot/oem/ami/ncsi/ncsistart.c uboot_new/oem/ami/ncsi/ncsistart.c
+--- uboot/oem/ami/ncsi/ncsistart.c	1970-01-01 08:00:00.000000000 +0800
++++ uboot_new/oem/ami/ncsi/ncsistart.c	2021-01-27 10:26:07.299440573 +0800
+@@ -0,0 +1,407 @@
++/****************************************************************
++ ****************************************************************
++ **                                                            **
++ **    (C)Copyright 2005-2006, American Megatrends Inc.        **
++ **                                                            **
++ **            All Rights Reserved.                            **
++ **                                                            **
++ **        6145-F, Northbelt Parkway, Norcross,                **
++ **                                                            **
++ **        Georgia - 30071, USA. Phone-(770)-246-8600.         **
++ **                                                            **
++ ****************************************************************
++ ****************************************************************/
++/****************************************************************
++
++  Author	: Samvinesh Christopher
++
++  Module	: NCSI Startup code.
++		  Calls the necessary NCSI functions to enable
++		  NCSI Pass thru.
++			
++  Revision	: 1.0  
++
++  Changelog : 1.0 - Initial Version [SC]
++
++*****************************************************************/
++#include <common.h>
++//#ifdef CONFIG_NCSI_SUPPORT
++#if 1
++#include <exports.h>
++#include <net.h>
++#include "ncsi.h"
++
++#define RESET_CHANNEL_COMPLIANCE 1
++
++extern void GetMACAddr(UINT8 *MACAddr);
++extern int  GetDefaultPort(void);
++
++#define MAX_CHANNELS 4
++
++typedef struct
++{	
++	UINT8 Valid;
++	UINT8 PackageID;
++	UINT8 ChannelID;
++	UINT8 ArbitSupport;
++//	UINT32 Caps;
++//	UINT32 BcastCaps;
++//	UINT32 McastCaps;
++//	UINT32 AENCaps;
++	/* Add Vlan if needed */
++} CHANNEL_INFO;
++
++
++static CHANNEL_INFO ChannelInfo[MAX_CHANNELS];
++
++
++void
++NCSI_Start(void)
++{
++	UINT8 PrevPackageID;
++	UINT8 PackageID;
++	UINT8 ChannelID;
++	UINT8 MACAddr[6];
++	int saved_verbose;
++	int i;
++	int ValidPackages =0;
++	int TotalChannels =0;
++	UINT32 Caps,Ver1,Ver2;
++	UINT8 Major;
++	int DefaultPort = 0;
++	int BlindEnable = 0;
++	int retval;
++
++
++	//NetSetHandler (NCSIHandler);
++	net_set_udp_handler (NCSIHandler);
++
++	/* Cleanup Channel Info */
++	for (i=0;i<MAX_CHANNELS;i++)
++		ChannelInfo[i].Valid = 0;
++
++	/* Get MAC Address to use */
++	GetMACAddr(MACAddr);
++	if ((MACAddr[0] == 0) && (MACAddr[1] == 0) && (MACAddr[2] == 0) &&
++	    (MACAddr[3] == 0) && (MACAddr[4] == 0) && (MACAddr[5] == 0))
++	{
++		printf("NCSI: Error! Mac Address is 0. Cannot enable NCSI\n");
++		return;
++	}
++
++	/* Disable Verbose messages */
++#ifdef  NCSI_DEBUG
++	saved_verbose = EnableVerbose(DUMP_BUFFER| SHOW_MESSAGES);
++#else
++	saved_verbose = EnableVerbose(0);
++#endif
++
++	/* Blindly deselect all  packages */
++	for (PackageID = 0; PackageID < MAX_PACKAGE_ID; PackageID++)
++	{
++		retval = NCSI_Issue_DeSelectPackage(PackageID);
++		if (retval == NCSI_ERR_NETWORK)
++			return;
++	}
++
++	/* Discover Packages and Channels */
++	for (PackageID = 0; PackageID < MAX_PACKAGE_ID; PackageID++)
++	{
++		/* Issue Select Package with Hw Arbit Disable*/
++		if (NCSI_Issue_SelectPackage(PackageID,1) != 0)
++			continue;
++
++
++		/* Find the number of channels support by this packages */
++		for (ChannelID = 0; ChannelID < MAX_CHANNEL_ID; ChannelID++)
++		{
++			/* Issue Cleear Init State  for each channel */
++			if (NCSI_Issue_ClearInitialState(PackageID,ChannelID) != 0)
++				break;
++
++			/* Get Version ID and verify it is > 1.0  */
++			if (NCSI_Issue_GetVersionID(PackageID,ChannelID,&Ver1,&Ver2) != 0)
++			{
++				printf("NCSI:%d.%d Get Version IDFailed\n",PackageID, ChannelID);	
++				continue;
++			}
++			Major = (Ver1 >> 24) & 0xFF;
++			if ((Major & 0xF0)== 0xF0)
++				Major = Major & 0x0F;
++			if (Major < 1)
++			{
++				printf("NCSI:%d.%d Version(0x%08lx) is < 1.0  Not supported\n",
++						PackageID, ChannelID,Ver1);
++				continue;
++			}
++
++			/* Get Capabilities and set ArbitSupport */
++			if (NCSI_Issue_GetCapabiliites(PackageID,ChannelID, &Caps) != 0)
++			{
++				printf("NCSI:%d.%d Get Capabilities Failed\n",PackageID, ChannelID);	
++				continue;
++			}
++			if (Caps & HW_ARBITRATION_SUPPORT)
++				ChannelInfo[TotalChannels].ArbitSupport = 1;
++			else
++				ChannelInfo[TotalChannels].ArbitSupport = 0;
++
++			ChannelInfo[TotalChannels].PackageID = PackageID;
++			ChannelInfo[TotalChannels].ChannelID = ChannelID;
++			printf("Found NC-SI at Package:Channel (%d:%d)\n", PackageID,ChannelID);
++			TotalChannels++;
++	
++		}
++		/* Deselect previusly selected package */
++		NCSI_Issue_DeSelectPackage(PackageID);
++	}
++
++	/* Get the Default Port and Validate it */
++	DefaultPort = GetDefaultPort();
++	if ((DefaultPort > 0) && (DefaultPort <= TotalChannels))
++		BlindEnable = 1;
++
++#ifdef CONFIG_NCSI_FORCE_DEFAULT_PORT
++	/* If the env default port is not valid, try the default port if any */
++	if (!BlindEnable)
++	{
++		DefaultPort=CONFIG_NCSI_FORCE_DEFAULT_PORT;
++		if ((DefaultPort > 0) && (DefaultPort <= TotalChannels))
++			BlindEnable = 1;
++	}
++#endif
++			
++
++
++
++	PrevPackageID = -1;
++	/* Configure the detected channels */
++	for(i=0;i<TotalChannels;i++)
++	{
++
++		PackageID = ChannelInfo[i].PackageID;
++		ChannelID = ChannelInfo[i].ChannelID;
++
++		/* Issue Select Package with Hw Arbit Disable*/
++		if (NCSI_Issue_SelectPackage(PackageID,1) != 0)
++		{
++			printf("NCSI:%d.%d Select Package Failed\n",PackageID, ChannelID);	
++			continue;
++		}
++
++
++		
++		/* Issue a Reset Channel to clear all previous config */
++#if RESET_CHANNEL_COMPLIANCE
++		if (NCSI_Issue_ResetChannel(PackageID,ChannelID) != 0)
++#else
++		if (NCSI_Issue_ChannelCommands(CMD_RESET_CHANNEL,PackageID,ChannelID) != 0)
++#endif
++		{
++			printf("NCSI:%d.%d Reset Channel Failed. Will issue a Clear Init State command and try again\n",PackageID, ChannelID);	
++		
++			/* Some NCSI controllers requires a ClearInitialState command before issuing ResetChannel command  */	
++			/* Issue Cleear Init State to enter into init state  */
++			if (NCSI_Issue_ClearInitialState(PackageID,ChannelID) != 0)
++			{
++				printf("NCSI:%d.%d Clear Init State Failed\n",PackageID, ChannelID);	
++				continue;
++			}
++		
++			/* Issue a Reset Channel again to clear all previous config */
++#if RESET_CHANNEL_COMPLIANCE
++			if (NCSI_Issue_ResetChannel(PackageID,ChannelID) != 0)
++#else
++			if (NCSI_Issue_ChannelCommands(CMD_RESET_CHANNEL,PackageID,ChannelID) != 0)
++#endif
++			{
++				printf("NCSI:%d.%d Reset Channel Failed.\n",PackageID, ChannelID);	
++				continue;
++			}
++		}
++ 
++		/* Issue Cleear Init State to enter into init state  */
++		if (NCSI_Issue_ClearInitialState(PackageID,ChannelID) != 0)
++		{
++			printf("NCSI:%d.%d Clear Init State Failed\n",PackageID, ChannelID);	
++			continue;
++		}
++
++		/* Setup MAC Address */
++		if (NCSI_Issue_SetMacAddress(PackageID,ChannelID,MACAddr,1,0) != 0)
++		{
++			printf("NCSI:%d.%d Set Mac Address Failed\n",PackageID, ChannelID);	
++			continue;
++		}
++	
++		/* Enable Broaccast filter */
++		if (NCSI_Issue_EnableBcastFilter(PackageID,ChannelID,1,1,1,1) != 0)
++		{
++			printf("NCSI:%d.%d Enable Bcast Filter Failed\n",PackageID, ChannelID);	
++			continue;
++		}
++		/* Setup AEN Messages */
++		if (NCSI_Issue_EnableAEN((UINT8)PackageID,(UINT8)ChannelID,1,0,0) != 0)
++		{
++			printf("NCSI:%d.%d Enable AEN Failed\n",PackageID, ChannelID);	
++			continue;
++		}
++
++		/* Enable Auto Negotiation */
++		if (NCSI_Issue_SetLink((UINT8)PackageID,(UINT8)ChannelID,1,0,0) != 0)
++		{
++			printf("NCSI:%d.%d Set Link Failed\n",PackageID, ChannelID);	
++	// When Host driver is loaded, we cannot SetLink. 
++	// So don't quit on SetLink failure
++	//		continue;
++		}
++		else
++		{
++			/* Wait for one second for Set Link to complete */
++			udelay(1000*1000);
++		}
++
++
++		/* Set this channel info is setup */
++		ChannelInfo[i].Valid = 1;
++
++		/* Count the number of valid packages*/
++		if (PrevPackageID != PackageID)
++		{
++			ValidPackages++;
++			PrevPackageID = PackageID;
++		}
++
++		/* Deselect previusly selected package */
++		NCSI_Issue_DeSelectPackage(PackageID);
++	}
++
++	if (ValidPackages > 1)
++	{
++		printf("Multiple Packages Found\n");
++		for(i=0;i<TotalChannels;i++)
++		{
++			if (ChannelInfo[i].Valid == 0)
++				continue;
++			if (ChannelInfo[i].ArbitSupport == 0)
++			{
++				PackageID = ChannelInfo[i].PackageID;
++				ChannelID = ChannelInfo[i].ChannelID;
++				printf("WARNING: Channel (%d:%d) does not support Arbitration.Disabled Channel\n", PackageID, ChannelID);
++			}	
++		}
++	}
++
++	/* Enable the Valid channels */
++	for(i=0;i<TotalChannels;i++)
++	{
++		if (ChannelInfo[i].Valid == 0)
++			continue;
++
++		PackageID = ChannelInfo[i].PackageID;
++		ChannelID = ChannelInfo[i].ChannelID;
++
++		if (BlindEnable)
++		{
++			DefaultPort--;
++			if (DefaultPort != 0)
++				continue;
++			if (EnableChannel(PackageID,ChannelID) != 0)
++			{
++				printf("ERROR: Unable to Enable Package:Channel (%d:%d)\n",
++															PackageID,ChannelID);
++				break;
++			}
++		}
++		else
++		{
++			if (EnableChannelOnLink(PackageID,ChannelID) != 0)
++				continue;
++		}
++
++		/* Only one channel should be enable at a time */
++		printf("NC-SI Enabled for Package:Channel (%d:%d)\n",PackageID,ChannelID);
++		break;
++	}
++
++	if (TotalChannels == 0)
++		printf("No NC-SI Controllers present\n");
++
++	EnableVerbose(saved_verbose);
++	return;
++}
++
++
++int
++EnableChannelOnLink(UINT8 PackageID,UINT8 ChannelID)
++{
++
++	UINT32 LinkStatus;
++
++	/* Issue Select Package with Hw Arbit Enable */
++	if (NCSI_Issue_SelectPackage(PackageID,0) != 0)
++	{
++		printf("NCSI:%d.%d Select Package (Hw Arbit Enable)Failed\n",PackageID, ChannelID);	
++		return 1;
++	}
++
++	/* Get Link Status to check if Channel can be enabled */	
++	if (NCSI_Issue_GetLinkStatus((UINT8)PackageID,(UINT8)ChannelID,&LinkStatus) != 0)
++	{
++		printf("NCSI:%d.%d Link Status Failed\n",PackageID, ChannelID);	
++		return 1;
++	}
++
++	if (!(LinkStatus & 0x01))
++	{
++		printf("NCSI:%d.%d Link is down\n",PackageID,ChannelID);
++		return 1;
++	}
++	else
++		printf("NCSI:%d.%d Link Status = 0x%08lX\n",PackageID,ChannelID,LinkStatus);
++
++	/* Issue an Enable TX for the channel */
++	if (NCSI_Issue_ChannelCommands(CMD_ENABLE_CHANNEL_TX,PackageID,ChannelID) != 0)
++	{
++		printf("NCSI:%d.%d Enable Channel Tx Failed\n",PackageID, ChannelID);	
++		return 1;
++	}
++		
++	/* Enable the channel */
++	if (NCSI_Issue_ChannelCommands(CMD_ENABLE_CHANNEL,PackageID,ChannelID) != 0)
++	{
++		printf("NCSI:%d.%d Enable Channel Failed\n",PackageID, ChannelID);	
++		return 1;
++	}
++
++	return 0;
++}
++
++int
++EnableChannel(UINT8 PackageID,UINT8 ChannelID)
++{
++
++	/* Issue Select Package with Hw Arbit Enable */
++	if (NCSI_Issue_SelectPackage(PackageID,0) != 0)
++	{
++		printf("NCSI:%d.%d Select Package (Hw Arbit Enable)Failed\n",PackageID, ChannelID);	
++		return 1;
++	}
++
++	/* Issue an Enable TX for the channel */
++	if (NCSI_Issue_ChannelCommands(CMD_ENABLE_CHANNEL_TX,PackageID,ChannelID) != 0)
++	{
++		printf("NCSI:%d.%d Enable Channel Tx Failed\n",PackageID, ChannelID);	
++		return 1;
++	}
++		
++	/* Enable the channel */
++	if (NCSI_Issue_ChannelCommands(CMD_ENABLE_CHANNEL,PackageID,ChannelID) != 0)
++	{
++		printf("NCSI:%d.%d Enable Channel Failed\n",PackageID, ChannelID);	
++		return 1;
++	}
++
++	return 0;
++}
++#endif
+diff -Naur uboot/oem/ami/ncsi/types.h uboot_new/oem/ami/ncsi/types.h
+--- uboot/oem/ami/ncsi/types.h	1970-01-01 08:00:00.000000000 +0800
++++ uboot_new/oem/ami/ncsi/types.h	2021-01-27 10:26:09.291350686 +0800
+@@ -0,0 +1,105 @@
++/*************************************************************************
++RexDebug  - Generic Debugger 
++
++Copyright (c) 2000-2005, Samvinesh Christopher
++Written by Samvinesh Christopher.  Not derived from licensed software.
++
++Permission is granted to anyone to use this software for any purpose 
++on any computer system, and to redistribute it freely,subject to the 
++following restrictions:
++
++1. The author is not responsible for the consequences of use of this 
++   software, no matter how awful, even if they arise from defects in 
++   it.
++
++2. The origin of this software must not be misrepresented, either by 
++   explicit claim or by omission.
++
++3. Altered versions must be plainly marked as such, and must not  be 
++   misrepresented as being the original software.
++
++4. This notice may not be removed or altered.
++
++5. Commercial use of this software is allowed freely subject to prior
++   notificaiton to the author.
++**************************************************************************/
++#ifndef REX_TYPES_H
++#define REX_TYPES_H
++
++/*
++  Removed these as the names don't reflect their type 
++  (signed/unsigned) explicilty. These are replaced with
++  equivalent type defines  prefixed with U (unsigned) 
++  and S (signed)
++*/
++	
++#if 1
++typedef unsigned char	BYTE;
++typedef unsigned short	WORD;
++typedef unsigned long	DWORD;
++typedef signed  char	INT8;
++typedef signed  short	INT16;
++typedef signed 	long	INT32;
++#endif
++
++typedef unsigned char	UBYTE;
++typedef signed   char	SBYTE;
++
++typedef unsigned short	UWORD;
++typedef signed   short	SWORD;
++
++typedef unsigned long	UDWORD;
++typedef signed   long	SDWORD;
++
++typedef unsigned char	UINT8;
++typedef signed   char	SINT8;
++
++typedef unsigned char	INT8U;
++typedef signed   char	INT8S;
++
++typedef unsigned short	UINT16;
++typedef signed   short	SINT16;
++
++typedef unsigned short	INT16U;
++typedef signed   short	INT16S;
++
++
++#ifdef WIN32
++	#include <windows.h>
++	/* The following are already defined by windows.h 
++       but in different form  as belows :
++			typedef unsigned  int	UINT32;
++			typedef signed	  int	INT32;
++	*/
++#else
++	typedef unsigned long	UINT32;
++	typedef signed   long	SINT32;
++
++	typedef unsigned long	INT32U;
++	typedef signed   long	INT32S;
++
++	typedef void *			HANDLE;
++	typedef void *			LPVOID;
++#endif
++
++typedef int				BOOL;
++#define FALSE           0
++#define TRUE            1
++
++/* Define Windows Socket Specific types and defines */
++#ifdef WIN32
++	#include <winsock.h>
++#else
++	typedef int				SOCKET;
++	typedef UBYTE *			LPBYTE;
++	#define INVALID_SOCKET	-1
++	#define SOCKET_ERROR	-1
++	#define closesocket		close
++	#define WINAPI
++	typedef char			TCHAR;
++	typedef UBYTE		INT4U;
++#endif
++
++
++
++#endif		/* REX_TYPES_H*/
+diff -Naur uboot/oem/Makefile uboot_new/oem/Makefile
+--- uboot/oem/Makefile	2021-01-27 10:25:21.401511900 +0800
++++ uboot_new/oem/Makefile	2021-01-27 10:25:13.797855064 +0800
+@@ -1,4 +1,5 @@
+ obj-y += ami/fmh/
++obj-y += ami/ncsi/
+ ifeq ($(CONFIG_SPX_FEATURE_LAN_AND_DRAM_TEST_CMD),"YES")
+ ifndef CONFIG_SANDBOX
+ ifdef FTRACE

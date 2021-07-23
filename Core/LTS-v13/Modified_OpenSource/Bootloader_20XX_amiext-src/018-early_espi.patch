@@ -1,0 +1,113 @@
+diff -Naur uboot.old/arch/arm/cpu/armv7/start.S uboot/arch/arm/cpu/armv7/start.S
+--- uboot.old/arch/arm/cpu/armv7/start.S	2019-07-23 10:57:52.000000000 +0800
++++ uboot/arch/arm/cpu/armv7/start.S	2020-09-15 16:33:45.577424651 +0800
+@@ -99,6 +99,14 @@
+ 	orr	r0, r0, #0xc0		@ disable FIQ and IRQ
+ 	msr	cpsr,r0
+ 
++#ifdef CONFIG_BOARD_EARLY_INIT_F
++	/*Timing from ESPI master requires OOB channel ready bit be set early */
++	ldr	r0, =0x1e6ee000
++	ldr	r1, [r0]				@ ESPI000: ESPI Engine Control Reg
++	orr	r1, r1, #0x10			@ Set OOB Channel Ready bit
++	str	r1, [r0]
++#endif
++
+ /*
+  * Setup vector:
+  * (OMAP4 spl TEXT_BASE is not 32 byte aligned.
+diff -Naur uboot.old/board/aspeed/evb_ast2600/evb_ast2600.c uboot/board/aspeed/evb_ast2600/evb_ast2600.c
+--- uboot.old/board/aspeed/evb_ast2600/evb_ast2600.c	2019-07-23 10:57:53.000000000 +0800
++++ uboot/board/aspeed/evb_ast2600/evb_ast2600.c	2020-09-11 19:28:14.026954824 +0800
+@@ -16,6 +16,11 @@
+ 
+ #define AST_GPIO_BASE	0x1e780000
+ 
++#define AST_ESPI_BASE        0x1E6EE000
++
++#define AST_SCU_UNLOCK     0x1688A8A8
++#define AST_SCU_LOCK        0x0
++
+ /* HICR5 Bits */
+ #define HICR5_EN_SIOGIO (1 << 31)		/* Enable SIOGIO */
+ #define HICR5_EN80HGIO (1 << 30)		/* Enable 80hGIO */
+@@ -72,11 +77,79 @@
+ 		SCU_BASE | SCU_414);
+ }
+ 
++void el_espi_init(void)
++{
++	/*
++	 * Aspeed STRONGLY NOT recommend to use eSPI early init.
++	 *
++	 * This eSPI early init sequence merely set OOB_FREE. It
++	 * is NOT able to actually handle OOB requests from PCH.
++	 *
++	 * During the power on stage, PCH keep waiting OOB_FREE
++	 * to continue its booting. In general, OOB_FREE is set
++	 * when BMC firmware is ready. That is, the eSPI kernel
++	 * driver is mounted and ready to serve eSPI. However,
++	 * it means that PCH must wait until BMC kernel ready.
++	 *
++	 * For customers that request PCH booting as soon as
++	 * possible. You may use this early init to set OOB_FREE
++	 * to prevent PCH from blocking by OOB_FREE before BMC
++	 * kernel ready.
++	 *
++	 * If you are not sure what you are doing, DO NOT use it.
++	 */
++
++	uint32_t value = 0, reg;
++
++	//SCU514: SCU514: Hardware Strap2 Clear Register (default)
++	value = readl(SCU_BASE | 0x514);
++	value |= 1 << 6; //eSPI Mode
++	writel(value, SCU_BASE | 0x514);
++	
++	//SCU434: Multi-function Pin Control #9 (default)
++	value = readl(SCU_BASE | 0x434);
++	value |= 1 << 16;
++	writel(value, SCU_BASE | 0x434);
++
++	//SCU454: Multi-function Pin Control #15
++	value = readl(SCU_BASE | 0x454);
++	value &= 0x00FFFFFF; //Clear BIT[31:24]
++	value |= 0xAA000000; //BIT[31:24] = LAD3ESPID3~0 Driving Strength
++	writel(value, SCU_BASE | 0x454);
++	
++	reg = readl(AST_ESPI_BASE + 0x000);
++	reg |= 0xef;
++	writel(reg, AST_ESPI_BASE + 0x000);
++
++	writel(0x0, AST_ESPI_BASE + 0x110);
++	writel(0x0, AST_ESPI_BASE + 0x114);
++
++	reg = readl(AST_ESPI_BASE + 0x00c);
++	reg |= 0x80000000;
++	writel(reg, AST_ESPI_BASE + 0x00c);
++
++	writel(0xffffffff, AST_ESPI_BASE + 0x094);
++	writel(0x1, AST_ESPI_BASE + 0x100);
++	writel(0x1, AST_ESPI_BASE + 0x120);
++
++	reg = readl(AST_ESPI_BASE + 0x080);
++	reg |= 0x50;
++	writel(reg, AST_ESPI_BASE + 0x080);
++
++	reg = readl(AST_ESPI_BASE + 0x000);
++	reg |= 0x10;
++	writel(reg, AST_ESPI_BASE + 0x000);
++}
++
+ int board_early_init_f(void)
+ {
+ #if 0
+ 	port80h_snoop_init();
+ 	sgpio_init();
+ #endif
++
++	//early initialization
++	el_espi_init();
++
+ 	return 0;
+ }

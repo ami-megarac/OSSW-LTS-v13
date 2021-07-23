@@ -1,0 +1,26 @@
+--- uboot_ori/oem/ami/fmh/cmd_fmh.c	2021-04-05 22:15:37.609802662 +0530
++++ uboot/oem/ami/fmh/cmd_fmh.c	2021-04-07 15:27:09.667398325 +0530
+@@ -29,6 +29,11 @@
+ int recover_both_spi=0;
+ #endif
+ 
++#ifdef CONFIG_SPX_FEATURE_PLATGUARD_SUPPORT
++extern void CheckAndRecoverPrimarySPI(void);
++#endif
++
++
+ # define  KERNEL_LOADADDR	0xC00000
+ # define  KERNEL_FILE		"/boot/uImage"
+ # define  KERNEL_DTB		"/boot/kernel.dtb"
+@@ -1267,6 +1272,11 @@
+         	hang();
+     	}
+ #endif
++
++#ifdef CONFIG_SPX_FEATURE_PLATGUARD_SUPPORT
++CheckAndRecoverPrimarySPI();
++#endif
++
+ #ifdef CONFIG_SPX_FEATURE_GLOBAL_DUAL_IMAGE_SUPPORT
+     if( GetBootImage(&imagetoboot) != 0 )
+ 	 return -1;

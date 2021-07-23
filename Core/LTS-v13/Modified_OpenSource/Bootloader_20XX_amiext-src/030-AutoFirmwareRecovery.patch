@@ -1,0 +1,69 @@
+diff -Naur uboot/oem/ami/fmh/ast_wdt.c uboot_new/oem/ami/fmh/ast_wdt.c
+--- uboot/oem/ami/fmh/ast_wdt.c	2021-03-25 17:49:52.125309540 -0400
++++ uboot_new/oem/ami/fmh/ast_wdt.c	2021-03-25 17:49:04.000000000 -0400
+@@ -65,10 +65,6 @@
+        {
+ 	       *((volatile unsigned long *)(FMC_WDT2_REG)) |= WDT2_SECOND_BOOT_CODE;//clear boot src
+        }
+-#else
+-       /* Enable back the Watchdog timer to start the Watchdog */
+-       /* Also set the Flag to reset the CPU on Timeout */
+-       *((volatile unsigned long *)(WDT2_CONTROL_REG)) |= (WDT_RESET_SYSTEM | WDT_ENABLE);
+ #endif
+ #endif
+ #ifdef CONFIG_SPX_FEATURE_GLOBAL_DUAL_IMAGE_SUPPORT
+@@ -76,7 +72,12 @@
+        *((volatile unsigned long *)(FMC_WDT2_REG)) |= (0x1);//enable FMC WDT
+ #endif
+ #endif
+-
++// Other than Hardware Failsafe mechanism, Enable the Watchdog.
++#ifndef CONFIG_SPX_FEATURE_HW_FAILSAFE_BOOT
++       /* Enable back the Watchdog timer to start the Watchdog */
++       /* Also set the Flag to reset the CPU on Timeout */
++       *((volatile unsigned long *)(WDT2_CONTROL_REG)) |= (WDT_RESET_SYSTEM | WDT_ENABLE);
++#endif       
+ #ifdef CONFIG_SPX_FEATURE_HW_FAILSAFE_BOOT 
+ 	if (broken_spi_banks == 1) 
+            return 1;// if bank#0 is broken then dont clear address mapping and bootimage 1 
+diff -Naur uboot/oem/ami/fmh/cmd_fmh.c uboot_new/oem/ami/fmh/cmd_fmh.c
+--- uboot/oem/ami/fmh/cmd_fmh.c	2021-03-25 17:49:52.125309540 -0400
++++ uboot_new/oem/ami/fmh/cmd_fmh.c	2021-03-25 17:47:55.000000000 -0400
+@@ -1007,6 +1007,7 @@
+     char *pStr;
+     char value[2] = {0};
+     u8 force_recovery = 0, imgheadererr = 0, bootretry = CONFIG_SPX_FEATURE_BMC_FIRMWARE_REBOOT_RETRY_COUNT, currentbootretry = 0;
++    unsigned long wdt2TimeoutStatus = 0;
+ 
+     /*Check whether force recovery image boot is triggered.*/
+     pStr= env_get("forcerecovery");
+@@ -1036,13 +1037,25 @@
+         currentbootretry = (int)simple_strtoul(pStr,NULL,0);
+     }
+ 
+-    currentbootretry++;
+-    sprintf(value,"%d",currentbootretry);
+-    env_set("currentbootretry",(char *)value);
+-    env_save();
++
++    wdt2TimeoutStatus = *((volatile unsigned long *)(WDT2_TIMEOUT_STAT_REG));
++    *((volatile unsigned long *)(WDT2_CLR_TIMEOUT_STAT_REG)) = 0x76; //WDT_CLR_EVT_COUNTER;
++    // Increment the currentbootretry, if reboot happens on watchdog.
++    if(wdt2TimeoutStatus)
++    {
++		currentbootretry++;
++    	sprintf(value,"%d",currentbootretry);
++		env_set("currentbootretry",(char *)value);
++		env_save();
++		wdt2TimeoutStatus = 0;
++    }
+ 
+     if(force_recovery || imgheadererr || (currentbootretry > bootretry) )
+     {
++	    if (currentbootretry > bootretry)
++	    {
++	    	force_recovery = 1; //Exceeded the retry count. Setting the flag to enter into the recovery
++	    }
+         if ( Firmware_AutoRecovery(force_recovery, imgheadererr) != 0 )
+         {
+             if(force_recovery == 1)

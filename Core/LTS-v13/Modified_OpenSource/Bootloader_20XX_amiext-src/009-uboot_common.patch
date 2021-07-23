@@ -1,0 +1,36 @@
+diff -uNar uboot/common/bootm.c uboot.new/common/bootm.c
+--- uboot/common/bootm.c	2020-11-20 04:00:27.000000000 -0500
++++ uboot.new/common/bootm.c	2020-12-15 14:11:43.000000000 -0500
+@@ -835,7 +835,13 @@
+ 	switch (genimg_get_format(buf)) {
+ #if defined(CONFIG_IMAGE_FORMAT_LEGACY)
+ 	case IMAGE_FORMAT_LEGACY:
+-		printf("## Booting kernel from Legacy Image at %08lx ...\n",
++		/* Preventing ## symbols printed during boot. For IPV6 Conformance, 
++		 * the scripts will always be trying for command prompt(#) 
++		 * during reboots by giving enter to proceed further commands with the script.
++		 * During this if BMC is rebooting and if enter is issued from the script when trying for command prompt,
++		 * it will consider these hash prints as command prompt and will try to issue some command which won't work.
++		 * This will result in internal error */
++		printf("** Booting kernel from Legacy Image at %08lx ...\n",
+ 		       img_addr);
+ 		hdr = image_get_kernel(img_addr, images->verify);
+ 		if (!hdr)
+diff -uNar uboot/common/image-fdt.c uboot.new/common/image-fdt.c
+--- uboot/common/image-fdt.c	2020-11-20 04:00:27.000000000 -0500
++++ uboot.new/common/image-fdt.c	2020-12-15 14:12:34.000000000 -0500
+@@ -415,7 +415,13 @@
+ 				 * FDT blob
+ 				 */
+ 				debug("*  fdt: raw FDT blob\n");
+-				printf("## Flattened Device Tree blob at %08lx\n",
++		/* Preventing ## symbols printed during boot. For IPV6 Conformance, 
++		 * the scripts will always be trying for command prompt(#) 
++		 * during reboots by giving enter to proceed further commands with the script.
++		 * During this if BMC is rebooting and if enter is issued from the script when trying for command prompt,
++		 * it will consider these hash prints as command prompt and will try to issue some command which won't work.
++		 * This will result in internal error */
++				printf("** Flattened Device Tree blob at %08lx\n",
+ 				       (long)fdt_addr);
+ 			}
+ 			break;

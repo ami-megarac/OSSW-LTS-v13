@@ -1,0 +1,16 @@
+--- uboot/oem/ami/fmh/ast_wdt.c	2021-03-03 20:50:15.913372449 -0500
++++ uboot_new/oem/ami/fmh/ast_wdt.c	2021-03-03 20:09:15.766567259 -0500
+@@ -68,8 +68,12 @@
+        /* Enable back the Watchdog timer to start the Watchdog */
+        /* Also set the Flag to reset the CPU on Timeout */
+        *((volatile unsigned long *)(WDT2_CONTROL_REG)) |= (WDT_RESET_SYSTEM | WDT_ENABLE);
+-
++#ifdef CONFIG_SPX_FEATURE_GLOBAL_DUAL_IMAGE_SUPPORT
++#ifdef CONFIG_SPX_FEATURE_HW_FAILSAFE_BOOT
+        *((volatile unsigned long *)(FMC_WDT2_REG)) |= (0x1);//enable FMC WDT
++#endif
++#endif
++
+ #ifdef CONFIG_SPX_FEATURE_HW_FAILSAFE_BOOT 
+ 	if (broken_spi_banks == 1) 
+            return 1;// if bank#0 is broken then dont clear address mapping and bootimage 1 

@@ -1,0 +1,472 @@
+diff -uNar uboot.orig/arch/arm/mach-aspeed/ast2600/board_common.c uboot.new/arch/arm/mach-aspeed/ast2600/board_common.c
+--- uboot.orig/arch/arm/mach-aspeed/ast2600/board_common.c	2021-03-17 08:31:09.491069828 -0400
++++ uboot.new/arch/arm/mach-aspeed/ast2600/board_common.c	2021-03-17 08:53:24.644018885 -0400
+@@ -11,8 +11,14 @@
+ #include <linux/bitops.h>
+ #include <linux/err.h>
+ #include <dm/uclass.h>
++#include <mmc.h>
+ 
+ DECLARE_GLOBAL_DATA_PTR;
++#if defined(CONFIG_SYS_MMC_ENV_PART) && defined(CONFIG_SPX_FEATURE_HW_EMMC_BOOT)
++#define	eMMCDevName	"emmc_slot0@100"
++int 	eMMCDevNum = -1;
++int	part = -1;
++#endif
+ 
+ /*
+  * RMII daughtercard workaround
+@@ -222,3 +228,50 @@
+ 
+ }
+ 
++#if defined(CONFIG_SYS_MMC_ENV_PART) && defined(CONFIG_SPX_FEATURE_HW_EMMC_BOOT)
++int mmc_get_env_dev(void)
++{
++	struct udevice *dev;
++	struct mmc *m; 
++	if (eMMCDevNum != -1)
++		return eMMCDevNum; 
++	else {
++		for (uclass_first_device(UCLASS_MMC, &dev); dev; uclass_next_device(&dev)) {
++			m = mmc_get_mmc_dev(dev);
++			if (strncmp(m->cfg->name, eMMCDevName, sizeof(eMMCDevName)))
++				continue;
++			if (!(m->has_init)) 
++				mmc_init(m);
++			if (IS_MMC(m))
++				eMMCDevNum = mmc_get_blk_desc(m)->devnum;
++		}	
++	}
++	if (eMMCDevNum == -1)
++		printf("Error: No MMC Dev for Env is found\n");	
++	return eMMCDevNum;
++}
++
++uint mmc_get_env_part(struct mmc *emmc)
++{
++	struct mmc *mmc = NULL;
++	if (part != -1)
++		return (uint)part;
++	else {
++		if (eMMCDevNum == -1)
++			mmc_get_env_dev();
++		if (eMMCDevNum != -1) {
++			mmc = find_mmc_device(eMMCDevNum);
++			part = EXT_CSD_EXTRACT_BOOT_PART(mmc->part_config);
++	        	if ( part==1 || part==2 ) 
++				return (uint)part;
++			else 
++				printf("Error: part=%u, invalid partition number for env\n", part);
++
++		}	
++		else
++			printf("ERROR: Not found eMMC device\n");
++	}
++	return 0;
++}
++
++#endif
+diff -uNar uboot.orig/arch/arm/mach-aspeed/ast2600/spl_boot.c uboot.new/arch/arm/mach-aspeed/ast2600/spl_boot.c
+--- uboot.orig/arch/arm/mach-aspeed/ast2600/spl_boot.c	2021-03-17 08:31:09.491069828 -0400
++++ uboot.new/arch/arm/mach-aspeed/ast2600/spl_boot.c	2021-03-17 08:53:24.644018885 -0400
+@@ -52,6 +52,7 @@
+ 	struct mmc *mmc = NULL;
+ 	struct udevice *dev;
+ 	struct blk_desc *bd;
++	u8 part;
+ 
+ 	err = mmc_initialize(NULL);
+ 	if (err) {
+@@ -77,7 +78,31 @@
+ 		return err;
+ 	}
+ 
++	part = EXT_CSD_EXTRACT_BOOT_PART(mmc->part_config);
++
++	if ( part==1 || part==2 ) {
++		printf("boot from boot partition %u\n", part);	
++	}
++	else if ( part==0 ) {
++		printf("boot partition is disabled \n"); 
++		return -ENODEV;
++	}
++	else if ( part==7 ) {
++		printf("user area enabled for boot\n");
++		return -EACCES;
++	}
++	else {
++		printf("boot partition not defined\n");
++		return -EINVAL;
++	}
++
+ 	bd = mmc_get_blk_desc(mmc);
++        //printf("block hwpart is %d\n", bd->hwpart);
++        if ( 0 != blk_dselect_hwpart(bd, part)) {
++                printf("ERROR: block hwpart select %u part\n", part);
++		return -EACCES;
++	}
++        //printf("*block hwpart is %d\n", bd->hwpart);
+ 
+ 	count = blk_dread(bd, CONFIG_ASPEED_UBOOT_MMC_BASE, CONFIG_ASPEED_UBOOT_MMC_SIZE,
+ 			(void *)CONFIG_ASPEED_UBOOT_DRAM_BASE);
+@@ -257,4 +282,4 @@
+ 	return ret;
+ }
+ SPL_LOAD_IMAGE_METHOD("UART with Aspeed Secure Boot", 0, ASPEED_SECBOOT_DEVICE_UART, aspeed_secboot_spl_ymodem_load_image);
+-#endif
+\ No newline at end of file
++#endif
+diff -uNar uboot.orig/include/configs/aspeed-common.h uboot.new/include/configs/aspeed-common.h
+--- uboot.orig/include/configs/aspeed-common.h	2021-03-17 08:31:09.631072774 -0400
++++ uboot.new/include/configs/aspeed-common.h	2021-03-17 08:53:24.784021959 -0400
+@@ -49,6 +49,11 @@
+ #define CONFIG_SYS_SDRAM_SYS_USED      (CONFIG_SYS_SDRAM_LEN - CONFIG_SYS_SDRAM_ECC_USED)
+ #undef CONFIG_DRAM_ECC
+ #endif
++
++#ifdef CONFIG_SPX_FEATURE_MMC_BOOT
++#define CONFIG_SD_BOOT_SELECTOR    1
++#endif
++
+ /* BigPhys Area*/
+ #ifdef CONFIG_SPX_FEATURE_GLOBAL_FRAME_BUFFER_SUPPORT
+ #define CONFIG_BIGPHYSAREA          "8192"
+@@ -74,6 +79,18 @@
+ #define CONFIG_SYS_BOOTMAPSZ       (256 * 1024 * 1024)
+ #define CONFIG_SYS_BOOTM_LEN       (0x800000 * 2)
+ 
++
++#if defined(CONFIG_SPX_FEATURE_MMC_BOOT)
++#define CONFIG_EXTRA_ENV_SETTINGS \
++        "autoload=no\0"                 \
++        "verify=yes\0"  \
++        "spi_dma=no\0" \
++        "do_memtest=" __stringify(CONFIG_MEMTEST_ENABLE)        "\0" \
++        "bootselector=1\0" \
++        "recentlyprogfw=1\0" \
++	"sdbootselector=" __stringify(CONFIG_SD_BOOT_SELECTOR) "\0" \
++        ""
++#else
+ #define CONFIG_EXTRA_ENV_SETTINGS \
+ 	"autoload=no\0"			\
+ 	"verify=yes\0"	\
+@@ -82,7 +99,7 @@
+ 	"bootselector=1\0" \
+ 	"recentlyprogfw=1\0" \
+ 	""
+-
++#endif
+ /* Environment */
+ #ifdef CONFIG_ASPEED_PALLADIUM
+ #define CONFIG_ENV_IS_NOWHERE
+diff -uNar uboot.orig/include/configs/evb_ast2600_spl.h uboot.new/include/configs/evb_ast2600_spl.h
+--- uboot.orig/include/configs/evb_ast2600_spl.h	2021-03-17 08:31:09.631072774 -0400
++++ uboot.new/include/configs/evb_ast2600_spl.h	2021-03-17 08:53:24.784021959 -0400
+@@ -16,6 +16,7 @@
+ 
+ /* Memory Info */
+ #define CONFIG_SYS_LOAD_ADDR		0x83000000
++#define CONFIG_SYS_LOAD_DTB_ADDR	0X84000000
+ 
+ #define YAFU_IMAGE_UPLOAD_LOCATION    (CONFIG_SYS_SDRAM_BASE + 0x03000000)
+ #define YAFU_TEMP_SECTOR_BUFFER         (CONFIG_SYS_SDRAM_BASE + 0x07000000)
+diff -uNar uboot.orig/Makefile uboot.new/Makefile
+--- uboot.orig/Makefile	2021-03-17 08:31:09.427068480 -0400
++++ uboot.new/Makefile	2021-03-17 09:30:40.674167435 -0400
+@@ -1392,8 +1392,17 @@
+ endif  # binman
+ endif
+ 
++u-boot-size:= $(shell printf "%d" $(CONFIG_SPX_FEATURE_GLOBAL_UBOOT_MONITOR_SIZE))
++ifeq ($(CONFIG_SPX_FEATURE_HW_EMMC_BOOT), "YES")
++spl/u-boot-emmc-spl.bin: spl/u-boot-spl.bin
++	@echo "  Convert $< to $@"
++	@chmod a+x scripts/gen_emmc_boot_image.py
++	@scripts/gen_emmc_boot_image.py $< $@
++simage.bin: spl/u-boot-emmc-spl.bin u-boot.bin
++else
+ simage.bin: spl/u-boot-spl.bin u-boot.bin
+-	@dd if=/dev/zero of=$@ bs=64K count=14 2> /dev/null
++endif
++	@dd if=/dev/zero of=$@ bs=1 count=$(u-boot-size) 2> /dev/null
+ 	@dd if=$< of=$@ bs=512 seek=0 conv=notrunc 2> /dev/null
+ 	@dd if=u-boot.bin of=$@ bs=512 seek=128 conv=notrunc 2> /dev/null
+ 
+@@ -1758,7 +1767,7 @@
+ 			$(filter-out include, $(shell ls -1 $d 2>/dev/null))))
+ 
+ CLEAN_FILES += include/bmp_logo.h include/bmp_logo_data.h \
+-	       boot* u-boot* MLO* SPL System.map fit-dtb.blob
++              boot* u-boot* MLO* SPL System.map fit-dtb.blob simage.bin
+ 
+ # Directories & files removed with 'make mrproper'
+ MRPROPER_DIRS  += include/config include/generated spl tpl \
+diff -uNar uboot.orig/oem/ami/fmh/bootargs.c uboot.new/oem/ami/fmh/bootargs.c
+--- uboot.orig/oem/ami/fmh/bootargs.c	2021-03-17 08:31:09.671073617 -0400
++++ uboot.new/oem/ami/fmh/bootargs.c	2021-03-17 08:58:53.666908979 -0400
+@@ -4,18 +4,23 @@
+ int Get_bootargs(char *bootargs,int rootisinitrd,int RootMtdNo,int mmc)
+ {
+ 
+-#ifdef  CONFIG_SPX_FEATURE_MMC_BOOT 
++#if  defined(CONFIG_SPX_FEATURE_MMC_BOOT) || defined(CONFIG_SPX_FEATURE_HW_EMMC_BOOT)
+ 	char *bootselect = NULL;
+ 	char bootpart[256] = { 0 };
+ 	int len = 0;
+ 
+ 	len = strlen(CONFIG_SPX_FEATURE_MMC_BOOT_PARTITION);
+-	bootselect = getenv("sdbootselector");
++	bootselect = env_get("sdbootselector");
+ 	if(bootselect != NULL)
+ 	{
+ 		strncpy(bootpart, CONFIG_SPX_FEATURE_MMC_BOOT_PARTITION, (len-1));
+-		if(strncmp(bootselect, "2", sizeof("2")) == 0)
++		if(strncmp(bootselect, "2", sizeof("2")) == 0)  {
++#ifndef CONFIG_SPX_FEATURE_HW_EMMC_BOOT			
+ 			strncat(bootpart, "2", sizeof("2"));
++#else
++			strncat(bootpart, "3", sizeof("3"));
++#endif
++		}
+ 		else
+ 			strncat(bootpart, "1", sizeof("1"));
+ 	}
+@@ -24,11 +29,11 @@
+ 		strncpy(bootpart, CONFIG_SPX_FEATURE_MMC_BOOT_PARTITION, len);
+ 	}
+ 
+-	if (strspn(bootpart,"mmcblk0") == 7)
++	if (strncmp(bootpart,"mmcblk",strlen("mmcblk") ) == 0)
+ 	{
+ #if defined(CONFIG_AST2500) || defined(CONFIG_AST2530) || defined(CONFIG_PILOT4)
+ 		if ((CONFIG_SPX_FEATURE_GLOBAL_SD_SLOT_COUNT == 0) && (CONFIG_SPX_FEATURE_GLOBAL_EMMC_FLASH_COUNT == 1))
+-			sprintf(bootargs,"root=/dev/%s rootdelay=2 ro ip=none ramdisk_blocksize=4096",bootpart);
++			sprintf(bootargs,"root=/dev/%s rootdelay=2 ro ip=none ramdisk_blocksize=4096 ",bootpart);
+ 		else
+ #endif
+ 		{
+@@ -79,7 +84,7 @@
+ 	}
+ 	else
+ 	{
+-		sprintf(bootargs,"root=/dev/mtdblock%d ro ip=none  ",RootMtdNo);
+-   }
++		sprintf(bootargs,"root=/dev/mtdblock%d ro ip=none ",RootMtdNo);
++        }
+ 	return 0;
+ }
+diff -uNar uboot.orig/oem/ami/fmh/cmd_fmh.c uboot.new/oem/ami/fmh/cmd_fmh.c
+--- uboot.orig/oem/ami/fmh/cmd_fmh.c	2021-03-17 08:31:09.671073617 -0400
++++ uboot.new/oem/ami/fmh/cmd_fmh.c	2021-03-17 08:53:24.824022837 -0400
+@@ -31,7 +31,7 @@
+ 
+ # define  KERNEL_LOADADDR	0xC00000
+ # define  KERNEL_FILE		"/boot/uImage"
+-
++# define  KERNEL_DTB		"/boot/kernel.dtb"
+ #ifdef CONFIG_SPX_FEATURE_SECURE_BOOT_ENCRYPTION_SUPPORT
+ # define UIMAGE_LOADADDR	(ASPEED_DRAM_BASE + 0x8000 )
+ # define DTB_LOADADDR		(ASPEED_DRAM_BASE + 0x1000000 )
+@@ -1125,6 +1125,9 @@
+ #if 1
+ 	char Command[128] = "FMHEXECUTE";
+ 	char AddrStr[128] = "0xFFFFFFFF";
++#if defined(CONFIG_SPX_FEATURE_MMC_BOOT) || defined(CONFIG_SPX_FEATURE_HW_EMMC_BOOT)  
++	char AddrStr2[128] = "0xFFFFFFFF";
++#endif
+ 	char bootargs[256] = {0};
+ 	char imagebooted[16] = {0};
+     char goldenside[16];
+@@ -1137,7 +1140,6 @@
+ 	char aesCMD[5][128] = {"aes.256","dec","0xFFFFFFFF","0xFFFFFFFF","0xFFFFFFFF"};
+ #endif		
+ 	char baudrate_str[16] = {0};
+-	unsigned char mod_Name[9]={0};
+ 	char FSName[16] = {0};  /* Hope no filesystem name is bigger then 15 char long */
+ 	u8 imagetoboot = IMAGE_1; /* By default will boot image-1 */
+ #ifdef CONFIG_SPX_FEATURE_SECURE_BOOT_ENCRYPTION_SUPPORT		
+@@ -1147,12 +1149,18 @@
+ #endif	
+ 	char *s = NULL;
+ 	//flash_info_t *flinfo = NULL;
++#ifndef CONFIG_SPX_FEATURE_HW_EMMC_BOOT
+ 	FMH	*fmh = NULL;
++	unsigned char mod_Name[9]={0};
+ 	MODULE_INFO *mod = NULL;
+ 	unsigned long i=0,SectorSize=CONFIG_SPX_FEATURE_GLOBAL_ERASE_BLOCK_SIZE;//,flashsize=0;
+ 	unsigned long SectorCount,StartingSector =0, startaddress;	
+-	unsigned long initrd_address = 0xFFFFFFFF;
+ 	long SkipSize;
++	unsigned short Compression;
++	int MtdPartition = 1;		/* mtdblock0 is used for full flash */
++	int ret = 0;
++#endif
++	unsigned long initrd_address = 0xFFFFFFFF;
+ 	unsigned long ExecuteAddr = 0xFFFFFFFF;
+ 	unsigned long dtsaddr = 0xFFFFFFFF;
+ #ifdef CONFIG_SPX_FEATURE_SECURE_BOOT_ENCRYPTION_SUPPORT		
+@@ -1161,16 +1169,13 @@
+ 	unsigned long len = 0xFFFFFFFF;
+ #endif	
+ 	unsigned short ExecuteType = MODULE_BOOTLOADER;
+-	unsigned short Compression;
+ 	int retval = -1;
+ 	int  silent = 0;
+-	int MtdPartition = 1;		/* mtdblock0 is used for full flash */
+ 	int RootMtdNo = 0;
+ 	int rootisinitrd = 0; /*indicates root is actually an initrd*/
+ 	char *side = NULL;
+ 	u8 golden_side;
+ 	struct spi_flash *flash;
+-	int ret = 0;
+ #ifdef CONFIG_YAFU_SUPPORT
+ 	int  boot_fwupd = 0;
+ #endif
+@@ -1178,13 +1183,15 @@
+ 	char bootlogo_addr[20] = {0};
+ #endif
+ 
+-#if defined (CONFIG_CMD_EXT4) && defined (CONFIG_CMD_MMC) && defined (CONFIG_SPX_FEATURE_MMC_BOOT)
++#if defined (CONFIG_CMD_EXT4) && defined (CONFIG_CMD_MMC) && (defined (CONFIG_SPX_FEATURE_MMC_BOOT)|| defined (CONFIG_SPX_FEATURE_HW_EMMC_BOOT))
+ 	char bootpart[256] = {0};
+ 	int str_pos =0;
+ 	int devicenumber =0;
+ 	char partition[128] = {0};
++#if CONFIG_SD_BOOT_SELECTOR 
+ 	char *bootselect = NULL;
+ #endif
++#endif
+ 
+ 	sprintf(baudrate_str,"%d",CONFIG_BAUDRATE);
+ 
+@@ -1251,6 +1258,7 @@
+         BMCAutoRecovery();
+ #endif
+ 
++#ifndef  CONFIG_SPX_FEATURE_HW_EMMC_BOOT
+ 	printf("Image to be booted is %d\n",imagetoboot);
+ 
+     if(imagetoboot == IMAGE_1)
+@@ -1544,6 +1552,7 @@
+ 		}
+ 	}	/* For Scan */
+ 
++#endif
+         #ifdef CONFIG_SPX_FEATURE_SECURE_BOOT_SUPPORT
+                 retval = hrot_finish(startaddress);
+                 if(retval){
+@@ -1564,7 +1573,7 @@
+         #endif
+ 
+ 	/* Create the bootarguments */
+-#ifdef  CONFIG_SPX_FEATURE_MMC_BOOT 
++#if defined( CONFIG_SPX_FEATURE_MMC_BOOT ) || defined (CONFIG_SPX_FEATURE_HW_EMMC_BOOT)
+ 	if (1)
+ #else
+ 	if (RootMtdNo > 0) 
+@@ -1578,7 +1587,7 @@
+ 		argv[2] = "all";
+ 		argv[3] = NULL;
+ 		//do_protect (NULL,0,3,argv); //TBD
+-#ifdef  CONFIG_SPX_FEATURE_MMC_BOOT 
++#if  defined(CONFIG_SPX_FEATURE_MMC_BOOT ) || defined (CONFIG_SPX_FEATURE_HW_EMMC_BOOT) 
+ 		Get_bootargs(bootargs,rootisinitrd,RootMtdNo,1);
+ #else
+ 		Get_bootargs(bootargs,rootisinitrd,RootMtdNo,0);
+@@ -1821,7 +1830,7 @@
+ 		printf("Unable to locate %s\n",KERNEL_FILE);
+ 	}
+ 
+-#if defined (CONFIG_CMD_EXT4) && defined (CONFIG_CMD_MMC) && defined (CONFIG_SPX_FEATURE_MMC_BOOT)
++#if defined (CONFIG_CMD_EXT4) && defined (CONFIG_CMD_MMC) && ( defined (CONFIG_SPX_FEATURE_MMC_BOOT) || defined (CONFIG_SPX_FEATURE_HW_EMMC_BOOT) )
+ 	printf("Booting from emmc/sd using image %s ...\n",KERNEL_FILE);
+ 	printf("Bootargs = [%s]\n",bootargs);
+ 	env_set("bootargs",bootargs);
+@@ -1838,7 +1847,6 @@
+ 	str_pos = strspn(bootpart,"mmcblk");
+ 	devicenumber = simple_strtoul( (bootpart + str_pos), NULL, 10);
+ 	str_pos += 2;
+-
+ #if CONFIG_SD_BOOT_SELECTOR 
+ 	bootselect = env_get("sdbootselector");
+ 	str_pos = simple_strtoul(bootselect,NULL,10);	
+@@ -1859,16 +1867,36 @@
+ 	argv[3] = &AddrStr[0];
+ 	argv[4] = KERNEL_FILE;
+ 	argv[5] = NULL;
++	printf(" partition is %s addrstr %s \n", partition, AddrStr);
+ 
+ 	if(do_ext4_load(NULL,0,5,argv) == 0)
+ 	{
+-		argv[0] = &Command[0];
+-		argv[1] = &AddrStr[0];
+-		argv[2] = NULL;
+-		retval = do_bootm(NULL,0,2,argv);
+-		console_assign(stdout,"serial");
+-		printf("Failed\n");
+-		return retval;
++		
++		retval = snprintf(AddrStr2,128,"0x%x",CONFIG_SYS_LOAD_DTB_ADDR);
++		if(retval < 0 || retval >= 128)
++		{
++			return retval;
++		}
++	
++		argv[0] = "ext4load";
++		argv[1] = "mmc";
++		argv[2] = &partition[0]; /* It is assumed that boot partition will be in slot 0 */
++		argv[3] = &AddrStr2[0];
++		argv[4] = KERNEL_DTB;
++		argv[5] = NULL;
++
++		if(do_ext4_load(NULL,0,5,argv) == 0)
++		{
++			argv[0] = &Command[0];
++			argv[1] = &AddrStr[0];
++			argv[2] = "-";
++			argv[3] = &AddrStr2[0];
++			argv[4] = NULL;
++			retval = do_bootm(NULL,0,4,argv);
++			console_assign(stdout,"serial");
++			printf("Failed\n");
++			return retval;
++		}
+ 	}
+ 	console_assign(stdout,"nulldev");
+ 	printf("Unable to locate %s\n",KERNEL_FILE);
+diff -uNar uboot.orig/scripts/gen_emmc_boot_image.py uboot.new/scripts/gen_emmc_boot_image.py
+--- uboot.orig/scripts/gen_emmc_boot_image.py	1969-12-31 19:00:00.000000000 -0500
++++ uboot.new/scripts/gen_emmc_boot_image.py	2021-03-17 08:53:24.672019499 -0400
+@@ -0,0 +1,31 @@
++#!/usr/bin/env python3
++
++import sys
++import struct
++
++
++def insert_bytearray(src, dst, offset):
++    if offset+src.__len__() > dst.__len__():
++        dst.extend(bytearray(offset-dst.__len__()+src.__len__()))
++
++    dst[offset:offset+src.__len__()] = src
++
++
++with open(sys.argv[1], 'rb') as f:
++    image = bytearray(f.read())
++    f.close()
++
++image_len = (image.__len__() + 511) & (~511)
++
++if image_len > 64*1024:
++    raise ValueError('The maximum size of image is 64 KBytes.')
++
++len_bin = struct.pack('<I', image_len)
++
++
++insert_bytearray(len_bin, image, 0x28)
++image.extend(bytearray(image_len - image.__len__()))
++
++with open(sys.argv[2], 'w+b') as f:
++    f.write(bytes(image))
++    f.close()

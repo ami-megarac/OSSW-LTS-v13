@@ -1,0 +1,48 @@
+--- old_uboot/oem/ami/fmh/ast_wdt.c	2021-03-24 19:55:40.867723184 +0530
++++ uboot/oem/ami/fmh/ast_wdt.c	2021-03-24 20:35:36.278933890 +0530
+@@ -34,20 +34,22 @@
+ 
+ int Enable_watchdog(unsigned long *wdt_timeout_status)
+ {
+-       /* Setting the Watchdog Timer to prevent dead locks during booting */
+-       /* Disable the Watchdog Timer */
+-       *((volatile unsigned long *)(WDT2_CONTROL_REG)) &= ~(WDT_RESET_SYSTEM | WDT_ENABLE);
++
+ #ifdef CONFIG_SPX_FEATURE_HW_FAILSAFE_BOOT
+ 		*((volatile unsigned long *)(FMC_WDT2_REG)) &= (0xFFFE);//disable FMC WDT
+-#endif
++#else
++	   /* Setting the Watchdog Timer to prevent dead locks during booting */
++	   /* Disable the Watchdog Timer */
++	   *((volatile unsigned long *)(WDT2_CONTROL_REG)) &= ~(WDT_RESET_SYSTEM | WDT_ENABLE);
+        /* Set the Timeout value to max possible 5 Minutes */
+        *((volatile unsigned long *)(WDT2_RELOAD_REG)) = WDT_TIMEOUT;
+ 
+        /* Set the Trigger value to restart Timer freshly */
+        *((volatile unsigned long *)(WDT2_CNT_RESTART_REG)) = WDT_TRIGGER;
+-
+        /* Set the Watchdog clock to 1MHz clock */
+        //*((volatile unsigned long *)(WDT2_CONTROL_REG)) |= (WDT_CLOCK);
++#endif
++
+ #ifdef CONFIG_SPX_FEATURE_HW_FAILSAFE_BOOT
+        /* Reading the Watchdog Timeout event counter*/
+        *wdt_timeout_status = *((volatile unsigned long *)(FMC_WDT2_REG));
+@@ -60,14 +62,15 @@
+ 		if ((broken_spi_banks == 2) && (*wdt_timeout_status & WDT_CUR_BOOTSRC_MASK))
+ 			broken_spi_banks = 1;
+ 		else if (broken_spi_banks == 0)
+-#endif
+        {
+ 	       *((volatile unsigned long *)(FMC_WDT2_REG)) |= WDT2_SECOND_BOOT_CODE;//clear boot src
+        }
+-#endif
++#else
+        /* Enable back the Watchdog timer to start the Watchdog */
+        /* Also set the Flag to reset the CPU on Timeout */
+        *((volatile unsigned long *)(WDT2_CONTROL_REG)) |= (WDT_RESET_SYSTEM | WDT_ENABLE);
++#endif
++#endif
+ #ifdef CONFIG_SPX_FEATURE_GLOBAL_DUAL_IMAGE_SUPPORT
+ #ifdef CONFIG_SPX_FEATURE_HW_FAILSAFE_BOOT
+        *((volatile unsigned long *)(FMC_WDT2_REG)) |= (0x1);//enable FMC WDT

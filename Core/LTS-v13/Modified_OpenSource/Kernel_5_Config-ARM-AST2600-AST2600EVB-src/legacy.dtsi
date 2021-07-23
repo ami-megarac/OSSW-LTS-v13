@@ -1,0 +1,20 @@
+/* Contains Device Tree Mappings for Legacy AMI Drivers */
+/  {	
+	ami_drivers {
+
+		compatible = "non_dt_devices";
+			#address-cells = <0x1>;
+			#size-cells = <0x1>;
+			ranges;
+
+			ami_videocap {
+				interrupts = <GIC_SPI 7 IRQ_TYPE_LEVEL_HIGH>;
+				clocks = <&syscon ASPEED_CLK_GATE_VCLK>,
+					 <&syscon ASPEED_CLK_GATE_ECLK>;
+				clock-names = "vclk", "eclk";
+				//resets = <&syscon ASPEED_RESET_VIDEO>;
+				resets = <&syscon 0x00000006>;
+			};
+
+		};
+};

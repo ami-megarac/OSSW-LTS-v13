@@ -1,0 +1,23 @@
+--- old_uboot/oem/ami/fmh/cmd_fmh.c	2021-03-22 12:42:20.358289174 +0530
++++ uboot/oem/ami/fmh/cmd_fmh.c	2021-03-22 13:44:23.253377845 +0530
+@@ -768,6 +768,9 @@
+              printf("Invalid Boot option...\n");
+              return -1;
+          }
++#ifdef CONFIG_SPX_FEATURE_GLOBAL_DUAL_IMAGE_SUPPORT
++	 *((volatile unsigned long *)(WDT2_CLR_TIMEOUT_STAT_REG)) = WDT_CLR_EVT_COUNTER;
++#endif
+       }
+ 
+ return 0;
+--- old_uboot/oem/ami/fmh/ast_wdt.c	2021-03-22 12:42:55.526887270 +0530
++++ uboot/oem/ami/fmh/ast_wdt.c	2021-03-22 11:39:51.373584151 +0530
+@@ -36,7 +36,7 @@
+ {
+        /* Setting the Watchdog Timer to prevent dead locks during booting */
+        /* Disable the Watchdog Timer */
+-       //*((volatile unsigned long *)(WDT2_CONTROL_REG)) &= ~(WDT_RESET_SYSTEM | WDT_ENABLE);
++       *((volatile unsigned long *)(WDT2_CONTROL_REG)) &= ~(WDT_RESET_SYSTEM | WDT_ENABLE);
+ #ifdef CONFIG_SPX_FEATURE_HW_FAILSAFE_BOOT
+ 		*((volatile unsigned long *)(FMC_WDT2_REG)) &= (0xFFFE);//disable FMC WDT
+ #endif

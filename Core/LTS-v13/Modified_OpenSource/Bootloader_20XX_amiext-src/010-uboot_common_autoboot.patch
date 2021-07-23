@@ -1,0 +1,71 @@
+--- uboot/common/autoboot.c	2020-11-20 04:00:27.000000000 -0500
++++ uboot.new/common/autoboot.c	2020-12-15 14:21:32.000000000 -0500
+@@ -212,20 +212,29 @@
+ {
+ 	int abort = 0;
+ 	unsigned long ts;
++	char c;
+ 
+ #ifdef CONFIG_MENUPROMPT
+ 	printf(CONFIG_MENUPROMPT);
+ #else
+-	printf("Hit any key to stop autoboot: %2d ", bootdelay);
++	printf("Hit any key (except Enter/Return) to stop autoboot: %2d ", bootdelay);
+ #endif
+ 
+ 	/*
+ 	 * Check if key already pressed
+ 	 */
+ 	if (tstc()) {	/* we got a key press	*/
+-		(void) getc();  /* consume input	*/
++		c= getc();  /* consume input	*/
+ 		puts("\b\b\b 0");
+-		abort = 1;	/* don't auto boot	*/
++		
++		/* Preventing enter/return key to stop autoboot. For IPV6 Conformance, 
++		 * the scripts will always be trying for command prompt(#) 
++		 * during reboots by giving enter to proceed further commands with the script.
++		 * During this if BMC is rebooting and if enter is issued from the script when trying for command prompt,
++		 * it will stop autoboot and will be stuck in uboot being unable to proceed further */
++
++	if(c!=0x0D)
++			abort = 1;	/* don't auto boot	*/			
+ 	}
+ 
+ 	while ((bootdelay > 0) && (!abort)) {
+@@ -234,12 +243,33 @@
+ 		ts = get_timer(0);
+ 		do {
+ 			if (tstc()) {	/* we got a key press	*/
+-				abort  = 1;	/* don't auto boot	*/
++				c=getc();
++		/* Preventing enter/return key to stop autoboot. For IPV6 Conformance, 
++		 * the scripts will always be trying for command prompt(#) 
++		 * during reboots by giving enter to proceed further commands with the script.
++		 * During this if BMC is rebooting and if enter is issued from the script when trying for command prompt,
++		 * it will stop autoboot and will be stuck in uboot being unable to proceed further */
++				if(c!=0x0D)
++					abort  = 1;	/* don't auto boot	*/
+ 				bootdelay = 0;	/* no more delay	*/
+ # ifdef CONFIG_MENUKEY
+ 				menukey = getc();
++		/* Preventing enter/return key to stop autoboot. For IPV6 Conformance, 
++		 * the scripts will always be trying for command prompt(#) 
++		 * during reboots by giving enter to proceed further commands with the script.
++		 * During this if BMC is rebooting and if enter is issued from the script when trying for command prompt,
++		 * it will stop autoboot and will be stuck in uboot being unable to proceed further */
++				if(menukey!=0x0D)
++					abort  = 1;	/* don't auto boot	*/
+ # else
+-				(void) getc();  /* consume input	*/
++				c= getc();  /* consume input	*/
++		/* Preventing enter/return key to stop autoboot. For IPV6 Conformance, 
++		 * the scripts will always be trying for command prompt(#) 
++		 * during reboots by giving enter to proceed further commands with the script.
++		 * During this if BMC is rebooting and if enter is issued from the script when trying for command prompt,
++		 * it will stop autoboot and will be stuck in uboot being unable to proceed further */
++				if(c!=0x0D)
++					abort  = 1;	/* don't auto boot	*/
+ # endif
+ 				break;
+ 			}

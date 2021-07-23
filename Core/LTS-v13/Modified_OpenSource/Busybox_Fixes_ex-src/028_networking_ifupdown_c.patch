@@ -1,0 +1,26 @@
+--- busybox.ori/networking/ifupdown.c	2019-08-30 09:51:36.190517704 +0800
++++ busybox.new/networking/ifupdown.c	2019-08-30 09:57:12.515958432 +0800
+@@ -420,7 +420,7 @@
+     if (!execute("ifconfig %iface%[[ hw %hwaddress%]] up", ifd, exec))
+         return 0;
+ 
+-    if (!(result = execute("dhcp6.script %iface%", ifd, exec))){
++    if (!(result = execute("dhcp6.script", ifd, exec))){
+     	return execute("dhcp6c -p /var/run/dhcp6c.%iface%.pid %iface% ", ifd, exec);
+     }else{
+         return (result);
+@@ -432,10 +432,12 @@
+    int result = 0;
+ 
+ 	result = execute(
+-		"test -f /var/run/dhcp6c.%iface%.pid && "
+-		"kill `cat /var/run/dhcp6c.%iface%.pid` 2>/dev/null",
++		"test -f /var/run/dhcp6c.eth.pid && "
++		"kill `cat /var/run/dhcp6c.eth.pid` 2>/dev/null",
+ 		ifd, exec);
++	result = execute("dhcp6.script %iface%", ifd, exec);
+ 	usleep(100000);
++	
+ # if ENABLE_FEATURE_IFUPDOWN_IP
+ 	result= execute("ip link set %iface% down", ifd, exec);
+ # else

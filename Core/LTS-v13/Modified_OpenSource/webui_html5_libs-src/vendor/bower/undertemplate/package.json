@@ -1,0 +1,54 @@
+{
+  "name": "@silvermine/undertemplate",
+  "version": "1.0.0",
+  "description": "Replacement for _.template (underscore or lodash) without unsafe evals.",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "check-node-version --package --print && ./node_modules/.bin/istanbul cover --root src --include-all-sources ./node_modules/.bin/_mocha -- -r ./tests/setup/before.js -R spec 'tests/**/*.test.js'"
+  },
+  "engines": {
+    "node": ">= 4",
+    "npm": ">= 5.7.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/silvermine/undertemplate.git"
+  },
+  "keywords": [
+    "Underscore",
+    "Lodash",
+    "template",
+    "csp",
+    "content security policy",
+    "unsafe",
+    "inline",
+    "eval",
+    "_.template"
+  ],
+  "author": "Jeremy Thomerson",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/silvermine/undertemplate/issues"
+  },
+  "homepage": "https://github.com/silvermine/undertemplate#readme",
+  "devDependencies": {
+    "@silvermine/chai-strictly-equal": "1.0.0",
+    "@silvermine/eslint-config": "1.5.0",
+    "chai": "4.1.2",
+    "check-node-version": "3.2.0",
+    "coveralls": "3.0.0",
+    "eslint": "4.19.1",
+    "grunt": "1.0.3",
+    "grunt-cli": "1.2.0",
+    "grunt-eslint": "20.1.0",
+    "istanbul": "0.4.5",
+    "mocha": "5.0.5",
+    "mocha-lcov-reporter": "1.3.0",
+    "rewire": "3.0.2",
+    "silvermine-serverless-utils": "git+https://github.com/silvermine/serverless-utils.git#910f1149af824fc8d0fa840878079c7d3df0f414",
+    "sinon": "4.5.0"
+  },
+  "dependencies": {
+    "lodash": "4.x"
+  }
+}

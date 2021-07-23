@@ -1,0 +1,56 @@
+--- uboot/include/configs/aspeed-common.h	2021-01-22 13:05:50.528171040 +0800
++++ uboot_n/include/configs/aspeed-common.h	2021-01-22 10:26:25.403173000 +0800
+@@ -35,7 +35,20 @@
+ 
+ #define CONFIG_SYS_BOOTMAPSZ		(256 * 1024 * 1024)
+ #define CONFIG_SYS_MALLOC_LEN		(32 << 20)
++#define   CONFIG_SYS_SDRAM_LEN                    CONFIG_SPX_FEATURE_GLOBAL_MEMORY_SIZE
+ 
++/* ECC Support */
++#ifdef CONFIG_SPX_FEATURE_GLOBAL_MEMORY_ECC_ENABLE
++#define CONFIG_SYS_SDRAM_SYS_USED      ((((CONFIG_SYS_SDRAM_LEN >> 20 ) / 9) << 3) << 20)
++#define CONFIG_SYS_SDRAM_ECC_USED      (CONFIG_SYS_SDRAM_SYS_USED  >> 3)
++#define CONFIG_SYS_ECC_MAX_ADDR        ((CONFIG_SYS_SDRAM_SYS_USED - 0x1)&0x7FF00000)
++#define CONFIG_DRAM_ECC
++#else
++#define CONFIG_SYS_ECC_MAX_ADDR (0)
++#define CONFIG_SYS_SDRAM_ECC_USED       (0)
++#define CONFIG_SYS_SDRAM_SYS_USED      (CONFIG_SYS_SDRAM_LEN - CONFIG_SYS_SDRAM_ECC_USED)
++#undef CONFIG_DRAM_ECC
++#endif
+ /* BigPhys Area*/
+ #ifdef CONFIG_SPX_FEATURE_GLOBAL_FRAME_BUFFER_SUPPORT
+ #define CONFIG_BIGPHYSAREA          "8192"
+
+--- uboot/drivers/ram/aspeed/sdram_ast2600.c	2020-11-20 17:00:27.000000000 +0800
++++ uboot_n/drivers/ram/aspeed/sdram_ast2600.c	2021-01-22 10:27:46.070376000 +0800
+@@ -814,17 +814,17 @@
+ 
+ 	info->info.size = hw_size;
+ }
+-#ifdef CONFIG_ASPEED_ECC
++#ifdef CONFIG_DRAM_ECC
+ static void ast2600_sdrammc_ecc_enable(struct dram_info *info)
+ {
+ 	struct ast2600_sdrammc_regs *regs = info->regs;
+ 	size_t conf_size;
+ 	u32 reg;
+ 
+-	conf_size = CONFIG_ASPEED_ECC_SIZE * SDRAM_SIZE_1MB;
++	conf_size = CONFIG_SYS_SDRAM_ECC_USED * SDRAM_SIZE_1MB;
+ 	if (conf_size > info->info.size) {
+ 		printf("warning: ECC configured %dMB but actual size is %dMB\n",
+-		       CONFIG_ASPEED_ECC_SIZE,
++		       CONFIG_SYS_SDRAM_ECC_USED,
+ 		       info->info.size / SDRAM_SIZE_1MB);
+ 		conf_size = info->info.size;
+ 	} else if (conf_size == 0) {
+@@ -939,7 +939,7 @@
+ 	}
+ #endif
+ 
+-#ifdef CONFIG_ASPEED_ECC
++#ifdef CONFIG_DRAM_ECC
+ 	ast2600_sdrammc_ecc_enable(priv);
+ #endif
+ 

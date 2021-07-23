@@ -1,0 +1,153 @@
+diff -Naur uboot_old/arch/arm/mach-aspeed/ast2600/board_common.c uboot_new/arch/arm/mach-aspeed/ast2600/board_common.c
+--- uboot_old/arch/arm/mach-aspeed/ast2600/board_common.c	2021-01-11 21:21:23.896613838 +0530
++++ uboot_new/arch/arm/mach-aspeed/ast2600/board_common.c	2021-01-11 21:22:40.717182505 +0530
+@@ -77,6 +77,16 @@
+ 	}
+ 	// Hardware Strap 2, set decode 0x4E 
+ 	*(volatile u32 *)(0x1e6e2000) = 0x1688A8A8;
++#ifdef CONFIG_SPX_FEATURE_HW_FAILSAFE_BOOT
++        *((volatile u32 *)(0x1e6e2000 + 0x510)) &= ~(1 << 12 );//dual spi ABR mode
++        *((volatile u32 *)(0x1e6e2000 + 0x510)) |= 0x800;//enable ABR mode
++	*((volatile u32 *)(0x1E620000 + 0x64)) |= 0x01;//enable FMC WDT
++	*((volatile u32 *)(0x1E620000 + 0x68)) = 0x597d0;//10 min WDT time out
++	*((volatile u32 *)(0x1E620000 + 0x6c)) = 0x4755;//reload timer value
++#else
++	*((volatile u32 *)(0x1e6e2000 + 0x510)) &= ~(1 << 11 );//disable ABR mode
++	*((volatile u32 *)(0x1E620000 + 0x64)) = 0xEA;//disable FMC WDT
++#endif
+ 	*(volatile u32 *)(0x1e6e2000 + 0x510) |= 0x4;
+ 	//*(volatile u32 *)(0x1e6e2000) = 0;	
+ 	// End of setting decode to 0x4E
+diff -Naur uboot_old/oem/ami/fmh/ast_wdt.c uboot_new/oem/ami/fmh/ast_wdt.c
+--- uboot_old/oem/ami/fmh/ast_wdt.c	2021-01-11 21:21:24.964621750 +0530
++++ uboot_new/oem/ami/fmh/ast_wdt.c	2021-01-11 21:23:17.957457846 +0530
+@@ -37,7 +37,9 @@
+        /* Setting the Watchdog Timer to prevent dead locks during booting */
+        /* Disable the Watchdog Timer */
+        *((volatile unsigned long *)(WDT2_CONTROL_REG)) &= ~(WDT_RESET_SYSTEM | WDT_ENABLE);
+-
++#ifdef CONFIG_SPX_FEATURE_HW_FAILSAFE_BOOT
++       *((volatile unsigned long *)(FMC_WDT2_REG)) &= ~(0x1 >> 0);//disable FMC WDT
++#endif
+        /* Set the Timeout value to max possible 5 Minutes */
+        *((volatile unsigned long *)(WDT2_RELOAD_REG)) = WDT_TIMEOUT;
+ 
+@@ -64,13 +66,14 @@
+        }
+ #endif
+ 
+-#if 0
+ #ifdef CONFIG_SPX_FEATURE_HW_FAILSAFE_BOOT
+-       /* Enabling the Second Boot code upon reset */
+-       *((volatile unsigned long *)(WDT2_CONTROL_REG)) |= (WDT2_SECOND_BOOT_CODE);
++       /*clear boot src to primary upon reset */
++       *((volatile unsigned long *)(FMC_WDT2_REG)) &= ~(0x1 >> 4);//clear boot src
++       *((volatile unsigned long *)(0x1E620000 + 0x68)) = 0x597d0;//10 min bmc boot time
++       *((volatile unsigned long *)(0x1E620000 + 0x6c)) = 0x4755;//reload timer value
++       *((volatile unsigned long *)(FMC_WDT2_REG)) |= (0x1);//enable FMC WDT
+ #else
+-       *((volatile unsigned long *)(WDT2_CONTROL_REG)) &= ~(WDT2_SECOND_BOOT_CODE);
+-#endif
++       *((volatile unsigned long *)(FMC_WDT2_REG)) = 0xEA;//disable FMC WDT
+ #endif
+ 
+        /* Enable back the Watchdog timer to start the Watchdog */
+@@ -81,7 +84,7 @@
+ 	if (broken_spi_banks == 1) 
+            return 1;// if bank#0 is broken then dont clear address mapping and bootimage 1 
+        else 
+-           return (((*wdt_timeout_status) & (WDT_CUR_BOOTSRC_MASK)) >> 1 ) + 1 ;
++           return (((*wdt_timeout_status) >> 4) & 1 ) + 1 ;
+ #else
+        	return 0;
+ #endif
+@@ -102,8 +105,14 @@
+        *((volatile unsigned long *)(WDT2_CONTROL_REG)) &= ~(WDT_RESET_SYSTEM | WDT_ENABLE);
+     }
+ #ifdef CONFIG_SPX_FEATURE_HW_FAILSAFE_BOOT
+-	if ((broken_spi_banks == 2) && (*((volatile unsigned long *)(FMC_WDT2_REG)) & WDT_CUR_BOOTSRC_MASK))
++	if ((broken_spi_banks == 2) && ((*((volatile unsigned long *)(FMC_WDT2_REG)) >> 4) & 1))
+ 		broken_spi_banks = 1;
++
++	if(*((volatile unsigned long *)(FMC_WDT2_REG)) & (0x1))
++    	{
++       		printf("Disabling FMC Watchdog 2 Timer\n");
++       		*((volatile unsigned long *)(FMC_WDT2_REG)) &= ~(0x1);
++    	}
+ #endif
+     return 0;
+ }
+diff -Naur uboot_old/oem/ami/fmh/cmd_fmh.c uboot_new/oem/ami/fmh/cmd_fmh.c
+--- uboot_old/oem/ami/fmh/cmd_fmh.c	2021-01-11 21:21:24.964621750 +0530
++++ uboot_new/oem/ami/fmh/cmd_fmh.c	2021-01-11 21:23:09.521395493 +0530
+@@ -55,7 +55,7 @@
+ }VersionInfo;
+ 
+ #ifdef CONFIG_SPX_FEATURE_DEDICATED_SPI_FLASH_BANK
+-        #define CE1_ADDRESS_SEGMENT 0x28000000
++        #define CE1_ADDRESS_SEGMENT 0x24000000
+         struct spi_flash *flashspi[CONFIG_SPX_FEATURE_GLOBAL_FLASH_BANKS]={NULL};
+ #endif
+ #ifdef CONFIG_SPX_FEATURE_HW_FAILSAFE_BOOT
+@@ -83,6 +83,7 @@
+ #define WDT_CLR_EVT_COUNTER             0x76        // Clear the Timeout Counter & Boot Source code
+ #define WDT2_SECOND_BOOT_CODE           0x80        // Enable Second Boot Code upon reset
+ #define WDT_CUR_BOOTSRC_MASK            0x00000002
++#define FMC_WDT2_REG            AST_FMC_BASE+0x64
+ #endif
+ 
+ #if defined(CONFIG_SPX_FEATURE_FAIL_SAFE_BOOTING) || defined(CONFIG_SPX_FEATURE_BMC_FIRMWARE_AUTO_RECOVERY)
+@@ -1096,14 +1097,14 @@
+        {
+            *((volatile unsigned long *)(WDT2_CLR_TIMEOUT_STAT_REG)) = 0x00000001;
+        }
+-#if 0
+ #ifdef CONFIG_SPX_FEATURE_HW_FAILSAFE_BOOT
+-       /* Enabling the Second Boot code upon reset */
+-       *((volatile unsigned long *)(WDT2_CONTROL_REG)) |= (WDT2_SECOND_BOOT_CODE);
++       /* Enabling FMC WDT upon reset */
++       *((volatile unsigned long *)(0x1E620000 + 0x68)) = 0xe0;//22 sec WDT time out
++       *((volatile unsigned long *)(0x1E620000 + 0x6c)) = 0x4755;//reload timer value
++       *((volatile unsigned long *)(FMC_WDT2_REG)) |= (0x1);//enable FMC WDT
+ #else
+-       *((volatile unsigned long *)(WDT2_CONTROL_REG)) &= ~(WDT2_SECOND_BOOT_CODE);
+-#endif
+-#endif
++       *((volatile unsigned long *)(FMC_WDT2_REG)) = 0xEA;//disable FMC WDT
++#endif       
+        /* Enable back the Watchdog timer to start the Watchdog */
+        /* Also set the Flag to reset the CPU on Timeout */
+        *((volatile unsigned long *)(WDT2_CONTROL_REG)) |= (WDT_RESET_SYSTEM | WDT_ENABLE);
+@@ -1228,10 +1229,8 @@
+         BMCAutoRecovery();
+ #endif
+ 
+-
+ 	printf("Image to be booted is %d\n",imagetoboot);
+ 
+-
+     if(imagetoboot == IMAGE_1)
+     {
+ #ifdef CONFIG_SPX_FEATURE_DEDICATED_SPI_FLASH_BANK
+@@ -1249,12 +1248,15 @@
+     else//for image2
+     {
+ #if defined CONFIG_SPX_FEATURE_DEDICATED_SPI_FLASH_BANK
+-        flash = flashspi[1];
+-        StartingSector = CONFIG_SPX_FEATURE_GLOBAL_USED_FLASH_SIZE;
+-        SectorCount=StartingSector+CONFIG_SPX_FEATURE_GLOBAL_USED_FLASH_SIZE;
+-        startaddress=CE1_ADDRESS_SEGMENT;
+-        StartingSector/=SectorSize;
+-        SectorCount/=SectorSize;
++        flash = flashspi[0];
++	SectorCount = (CONFIG_SPX_FEATURE_GLOBAL_USED_FLASH_SIZE/SectorSize);
++	StartingSector = 0;
++	startaddress=0;
++//        StartingSector = CONFIG_SPX_FEATURE_GLOBAL_USED_FLASH_SIZE;
++//        SectorCount=StartingSector+CONFIG_SPX_FEATURE_GLOBAL_USED_FLASH_SIZE;
++//        startaddress=CE1_ADDRESS_SEGMENT;
++//        StartingSector/=SectorSize;
++//        SectorCount/=SectorSize;
+ #else
+ 
+         StartingSector = (CONFIG_SPX_FEATURE_GLOBAL_USED_FLASH_SIZE/SectorSize);

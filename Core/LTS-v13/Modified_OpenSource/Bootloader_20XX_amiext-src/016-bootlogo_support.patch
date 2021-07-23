@@ -1,0 +1,262 @@
+diff -Naur uboot/oem/ami/bootlogo/bootlogo.h uboot-new/oem/ami/bootlogo/bootlogo.h
+--- uboot/oem/ami/bootlogo/bootlogo.h	1970-01-01 05:30:00.000000000 +0530
++++ uboot-new/oem/ami/bootlogo/bootlogo.h	2021-01-06 14:12:44.965056694 +0530
+@@ -0,0 +1,53 @@
++#ifndef __BOOTLOGO_H__
++#define __BOOTLOGO_H__
++
++#define BOOT_LOGO_TAG		0x494458
++#define BOOT_LOGO_MAGIC		0x4F474F4C
++
++#define MAX_LOGO_WIDTH		800
++#define MAX_LOGO_HEIGHT		600
++#define MAX_LOGO_COLORS		256
++
++#define LOGO_TYPE_CLUT		1
++
++struct boot_logos_t {
++    unsigned int magic; 
++    unsigned int count; //num of logos
++} __attribute__((packed));
++
++struct info_data_t {
++    unsigned int size;
++    unsigned int offset;
++} __attribute__((packed));
++
++struct info_clut_t {
++    unsigned int size;
++    unsigned int offset;
++} __attribute__((packed));
++
++struct checksum_t {
++    unsigned int info;
++    unsigned int data;
++    unsigned int clut;
++} __attribute__((packed));
++
++struct logo_info_t {
++    unsigned int tag;
++    unsigned int index;
++    unsigned int type;
++    unsigned int width;
++    unsigned int height;
++    unsigned int max_color;
++    struct info_data_t data;
++    struct info_clut_t clut;
++    struct checksum_t chksum;
++} __attribute__((packed));
++
++struct color_t {
++    unsigned char red;
++    unsigned char green;
++    unsigned char blue;
++    unsigned char alpha;
++} __attribute__((packed));
++
++#endif
+diff -Naur uboot/oem/ami/bootlogo/cmd_bootlogo.c uboot-new/oem/ami/bootlogo/cmd_bootlogo.c
+--- uboot/oem/ami/bootlogo/cmd_bootlogo.c	1970-01-01 05:30:00.000000000 +0530
++++ uboot-new/oem/ami/bootlogo/cmd_bootlogo.c	2021-01-06 14:12:44.965056694 +0530
+@@ -0,0 +1,87 @@
++# include <common.h>
++# include <config.h>
++# include <command.h>
++# include <flash.h>
++# include <malloc.h>
++# include <linux/string.h>
++# include "bootlogo.h"
++
++#define ACTION_ADDR	"addr"
++extern unsigned int enable_framebuffer(void);
++int ShowBootLogoByAddress(unsigned int logo_bin_addr, int idx)
++{
++	unsigned int ptr_addr ;
++	struct boot_logos_t *boot_logos = NULL;
++	struct logo_info_t *logo_info = NULL;
++	struct color_t *clut_ptr = NULL;
++	unsigned char *logo_data_ptr = NULL;
++	unsigned int fb_addr = 0;
++	int i;
++	struct color_t clut;
++
++	// Logo binary start address
++	ptr_addr = logo_bin_addr;
++
++	// Get Boot logos header
++	boot_logos = ((struct boot_logos_t *) logo_bin_addr);
++
++	// Get Logo info header
++	ptr_addr += sizeof(struct boot_logos_t);
++
++	// Check idx is valid
++	if ((idx >= boot_logos->count) | (idx < 0))
++	{
++		printf("boot logo idx is not valid:%d \n", idx);
++		return -1;
++	}
++
++	for(i=0;i<boot_logos->count;i++){
++		logo_info = ((struct logo_info_t *)ptr_addr);
++		printf("(%d)idx %d, type %x, w*h (%d x %d), clut[%d: %d], data[%d: %d]\n", boot_logos->count, 
++		logo_info->index, logo_info->type, logo_info->width, logo_info->height, logo_info->clut.offset, logo_info->clut.size, logo_info->data.offset, logo_info->data.size);
++
++		// Get Logo palette
++		ptr_addr += sizeof(struct logo_info_t);
++
++		// Get Logo Data
++		ptr_addr += logo_info->clut.size * sizeof(struct color_t);
++		ptr_addr += logo_info->data.size;
++
++		if(i == idx)
++			break;
++	}
++	printf("\n enabling Frame buffer\n");
++	// Enable Framebuffer device
++	fb_addr = enable_framebuffer();
++	clut_ptr = (struct color_t *)(logo_bin_addr + logo_info->clut.offset);
++	logo_data_ptr = (unsigned char*)(logo_bin_addr + logo_info->data.offset);
++	printf("\n fb_addr = %x\n",fb_addr);
++	// show Logo 
++	for(i=0;i<logo_info->data.size;i++){
++		clut = clut_ptr[logo_data_ptr[i]];
++		*( (unsigned int *) (fb_addr + (i << 2)) ) = (clut.alpha << 24) | (clut.red << 16) | (clut.green << 8) | (clut.blue << 0);
++	}
++
++	return 0;
++}
++
++/* U-boot's cmd function to show boot logo */
++int do_bootlogo (cmd_tbl_t *cmdtp, int flag , int argc, char * const argv[])
++{
++	int ret = -1;
++
++	if(!strcasecmp(argv[1], ACTION_ADDR)) {
++		ret = ShowBootLogoByAddress(simple_strtoul(argv[2], NULL, 16), simple_strtoul(argv[3], NULL, 10));
++	}
++
++	return ret;
++}
++
++static char help_text[] = 
++	"addr [Address of bootlogo binary] [image idx of bootlogo] - show logo from address.\n";
++
++U_BOOT_CMD(
++	bootlogo,	4,	0,	do_bootlogo,
++	"Show boot logo from address", help_text
++);
++
+diff -Naur uboot/oem/ami/bootlogo/Makefile uboot-new/oem/ami/bootlogo/Makefile
+--- uboot/oem/ami/bootlogo/Makefile	1970-01-01 05:30:00.000000000 +0530
++++ uboot-new/oem/ami/bootlogo/Makefile	2021-01-06 14:12:44.965056694 +0530
+@@ -0,0 +1,21 @@
++#
++# (C) Copyright 2013 
++# American Megatrends Inc
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation; either version 2 of
++# the License, or (at your option) any later version.
++#
++# This program is distributed in the hope that it will be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write to the Free Software
++# Foundation, Inc., 59 Temple Place, Suite 330, Boston,
++# MA 02111-1307 USA
++#
++obj-y			+= cmd_bootlogo.o #bootlogocore.o 
++
+diff -Naur uboot/oem/ami/fmh/ast_fb.c uboot-new/oem/ami/fmh/ast_fb.c
+--- uboot/oem/ami/fmh/ast_fb.c	1970-01-01 05:30:00.000000000 +0530
++++ uboot-new/oem/ami/fmh/ast_fb.c	2021-01-06 14:14:11.193639708 +0530
+@@ -0,0 +1,44 @@
++#include <common.h>
++
++#ifdef CONFIG_BOOTLOGO_SUPPORT
++#include <malloc.h>
++#include <miiphy.h>
++#include <net.h>
++#include <linux/io.h>
++
++#include "soc_hw.h"
++
++#ifdef CONFIG_ASPEED_AST2600
++unsigned int enable_framebuffer(void)
++{
++	printf("Inside enable_framebuffer function .... \n");
++		*(volatile u32 *)(0x1E6E2000) = 0x1688A8A8;
++		*(volatile u32 *)(0x1E6E2000 + 0x44) = 0x4002000; 
++		udelay(10000);
++		*(volatile u32 *)(0x1E6E2000 + 0x84) = 0x0000400; 
++		udelay(10000);
++		*(volatile u32 *)(0x1E6E2000 + 0x300) = 0x0b9a8a00; 
++		udelay(10000);
++		*(volatile u32 *)(0x1E6E2000 + 0xc0) = 0x00011000; 
++		udelay(10000);
++
++        /* Graphics Display Controller - (800x600, 32bpp, 60Hz) */
++         *(volatile u32 *)(0x1E6E6000 + 0x70) = 0x031F041f;     // CRT Horizontal Total & Display Enable End
++        *(volatile u32 *)(0x1E6E6000 + 0x74) = 0x03C80347;     // CRT Horizontal Retrace Start & End 
++        *(volatile u32 *)(0x1E6E6000 + 0x78) = 0x02570273;     // CRT Vertical Total & Display Enable End
++        *(volatile u32 *)(0x1E6E6000 + 0x7C) = 0x025D0259;     // CRT Vertical Retrace Start & End
++		*(volatile u32 *)(0x1E6E6000 + 0x7C) = 0x025c0258;     // CRT Vertical Retrace Start & End
++		*(volatile u32 *)(0x1E6E6000 + 0x80) = 0x03000000; // CRT Display Starting Address
++        *(volatile u32 *)(0x1E6E6000 + 0x84) = 0x00000C80;//0x00000C80;     // CRT Display Offset & Terminal Count
++        *(volatile u32 *)(0x1E6E6000 + 0x88) = 0x00007040;     // CRT Threshold
++		*(volatile u32 *)(0x1E6E6000 + 0x60) = 0x00000101;     // CRT Control-1
++        *(volatile u32 *)(0x1E6E6000 + 0x64) = 0x00000001;     // CRT Control-2
++        
++        udelay(10000);
++       printf("End of enable_framebuffer function ....... \n");
++	return CONFIG_DISPLAY_ADDRESS;
++}
++#endif
++
++
++#endif /* CONFIG_BOOTLOGO_SUPPORT */
+diff -Naur uboot/oem/ami/fmh/cmd_fmh.c uboot-new/oem/ami/fmh/cmd_fmh.c
+--- uboot/oem/ami/fmh/cmd_fmh.c	2021-01-06 14:10:28.728136808 +0530
++++ uboot-new/oem/ami/fmh/cmd_fmh.c	2021-01-06 14:20:14.960105668 +0530
+@@ -1306,13 +1306,11 @@
+ 		{
+ 			//showLogo
+ 			if ((fmh->FMH_Ver_Major == 1) && (fmh->FMH_Ver_Minor >= 8)){
+-				flash_read( /*addr,cnt,dest */
+-						(ulong)(startaddress + le32_to_host(mod->Module_Location)),
++				spi_flash_read(flash,(startaddress + le32_to_host(mod->Module_Location)),
+ 						le32_to_host(mod->Module_Size),
+ 						(char *)le32_to_host(mod->Module_Load_Address));
+ 			} else {
+-				flash_read( /*addr,cnt,dest */
+-						(ulong)((CONFIG_SYS_FLASH_BASE+(i*SectorSize)) + le32_to_host(mod->Module_Location)),
++				spi_flash_read(flash,((i*SectorSize) + le32_to_host(mod->Module_Location)),
+ 						le32_to_host(mod->Module_Size),
+ 						(char *)le32_to_host(mod->Module_Load_Address));
+ 			}
+diff -Naur uboot/oem/ami/fmh/Makefile uboot-new/oem/ami/fmh/Makefile
+--- uboot/oem/ami/fmh/Makefile	2021-01-06 14:10:28.728136808 +0530
++++ uboot-new/oem/ami/fmh/Makefile	2021-01-06 14:15:57.610360043 +0530
+@@ -23,4 +23,8 @@
+ ifdef CONFIG_SPX_FEATURE_SECURE_BOOT_SUPPORT
+ obj-y                           += hrotcore.o
+ endif
++ifdef CONFIG_SPX_FEATURE_GLOBAL_FRAME_BUFFER_SUPPORT
++obj-y                           += ast_fb.o
++endif
++
+ #
+diff -Naur uboot/oem/Makefile uboot-new/oem/Makefile
+--- uboot/oem/Makefile	2021-01-06 14:10:28.728136808 +0530
++++ uboot-new/oem/Makefile	2021-01-06 14:16:44.162675437 +0530
+@@ -7,3 +7,6 @@
+    obj-y += ami/ipmi/
+    obj-y += ami/fwupdate/
+  #endif
++ifeq ($(CONFIG_SPX_FEATURE_GLOBAL_FRAME_BUFFER_SUPPORT),"YES")
++obj-y += ami/bootlogo/
++endif

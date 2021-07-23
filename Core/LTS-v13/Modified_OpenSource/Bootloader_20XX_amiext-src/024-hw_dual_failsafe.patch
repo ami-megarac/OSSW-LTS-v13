@@ -1,0 +1,314 @@
+diff -Naur uboot.old/common/bootm.c uboot/common/bootm.c
+--- uboot.old/common/bootm.c	2021-02-22 19:01:09.237498762 -0500
++++ uboot/common/bootm.c	2021-02-27 17:40:42.347985661 -0500
+@@ -285,6 +285,56 @@
+ 	return 0;
+ }
+ 
++int bootm_find_images1(int flag, int argc, char * const argv[], bootm_headers_t *images1)
++{
++	int ret;
++
++	/* find ramdisk */
++	ret = boot_get_ramdisk(argc, argv, &images, IH_INITRD_ARCH,
++			       &images.rd_start, &images.rd_end);
++	if (ret) {
++		puts("Ramdisk image is corrupt or invalid\n");
++		return 1;
++	}
++
++#if IMAGE_ENABLE_OF_LIBFDT
++	/* find flattened device tree */
++	ret = boot_get_fdt(flag, argc, argv, IH_ARCH_DEFAULT, &images,
++			   &images.ft_addr, &images.ft_len);
++	if (ret) {
++		puts("Could not find a valid device tree\n");
++		return 1;
++	}
++	if (CONFIG_IS_ENABLED(CMD_FDT))
++		set_working_fdt_addr(map_to_sysmem(images.ft_addr));
++#endif
++
++#if IMAGE_ENABLE_FIT
++#if defined(CONFIG_FPGA)
++	/* find bitstreams */
++	ret = boot_get_fpga(argc, argv, &images, IH_ARCH_DEFAULT,
++			    NULL, NULL);
++	if (ret) {
++		printf("FPGA image is corrupted or invalid\n");
++		return 1;
++	}
++#endif
++
++	/* find all of the loadables */
++	ret = boot_get_loadable(argc, argv, &images, IH_ARCH_DEFAULT,
++			       NULL, NULL);
++	if (ret) {
++		printf("Loadable(s) is corrupt or invalid\n");
++		return 1;
++	}
++#endif
++
++	//Do memcpy to restore the offset address
++	memcpy (images1, &images, sizeof(struct bootm_headers));
++	return 0;
++}
++
++#if 0
+ static int bootm_find_other(cmd_tbl_t *cmdtp, int flag, int argc,
+ 			    char * const argv[])
+ {
+@@ -297,6 +347,24 @@
+ 
+ 	return 0;
+ }
++#endif
++
++//While booting through second SPI in HW dual failsafe starting offset address is corrupted. So pass one new argument(images1) to store the offset address and restore the same in the previous function 
++//This is a temporary work around. Need to revisit.
++static int bootm_find_other1(cmd_tbl_t *cmdtp, int flag, int argc,
++			    char * const argv[], bootm_headers_t *images1)
++{
++	images1 = images1;
++	if (((images.os.type == IH_TYPE_KERNEL) ||
++	     (images.os.type == IH_TYPE_KERNEL_NOLOAD) ||
++	     (images.os.type == IH_TYPE_MULTI)) &&
++	    (images.os.os == IH_OS_LINUX ||
++		 images.os.os == IH_OS_VXWORKS))
++		return bootm_find_images1(flag, argc, argv, images1);
++
++	return 0;
++}
++
+ #endif /* USE_HOSTC */
+ 
+ /**
+@@ -631,6 +699,8 @@
+ 	ulong iflag = 0;
+ 	int ret = 0, need_boot_fn;
+ 
++	bootm_headers_t images1;
++	
+ 	images->state |= states;
+ 
+ 	/*
+@@ -643,8 +713,12 @@
+ 	if (!ret && (states & BOOTM_STATE_FINDOS))
+ 		ret = bootm_find_os(cmdtp, flag, argc, argv);
+ 
+-	if (!ret && (states & BOOTM_STATE_FINDOTHER))
+-		ret = bootm_find_other(cmdtp, flag, argc, argv);
++	if (!ret && (states & BOOTM_STATE_FINDOTHER)) {
++		ret = bootm_find_other1(cmdtp, flag, argc, argv, &images1);
++		//Restore back the address
++		images = &images1;
++	}	
++		//ret = bootm_find_other(cmdtp, flag, argc, argv);
+ 
+ 	/* Load the OS */
+ 	if (!ret && (states & BOOTM_STATE_LOADOS)) {
+diff -Naur uboot.old/oem/ami/fmh/ast_wdt.c uboot/oem/ami/fmh/ast_wdt.c
+--- uboot.old/oem/ami/fmh/ast_wdt.c	2021-02-22 19:01:09.573501966 -0500
++++ uboot/oem/ami/fmh/ast_wdt.c	2021-02-27 17:44:19.237842829 -0500
+@@ -24,9 +24,9 @@
+ #define WDT_CLOCK               0x10                    // 1MHz Clock for WDT
+ #define WDT_RESET_SYSTEM        0x02                    // Enable System-Reset-On-Timeout
+ #define WDT_CLR_EVT_COUNTER     0x76                    // Clear the Timeout Counter & Boot Source code
+-#define WDT2_SECOND_BOOT_CODE   0x01                    // Enable Second Boot Code upon reset
+-#define WDT_CUR_BOOTSRC_MASK    0x08
+-#define FMC_WDT2_REG		0x1e620000+0x64
++#define WDT2_SECOND_BOOT_CODE   0xEA0000                    // Enable Second Boot Code upon reset
++#define WDT_CUR_BOOTSRC_MASK    0x10
++#define FMC_WDT2_REG		 0x1e620000+0x64
+ 
+ #ifdef CONFIG_SPX_FEATURE_HW_FAILSAFE_BOOT 
+ extern unsigned char broken_spi_banks;// specify the number of broken SPI flash bank
+@@ -36,9 +36,9 @@
+ {
+        /* Setting the Watchdog Timer to prevent dead locks during booting */
+        /* Disable the Watchdog Timer */
+-       *((volatile unsigned long *)(WDT2_CONTROL_REG)) &= ~(WDT_RESET_SYSTEM | WDT_ENABLE);
++       //*((volatile unsigned long *)(WDT2_CONTROL_REG)) &= ~(WDT_RESET_SYSTEM | WDT_ENABLE);
+ #ifdef CONFIG_SPX_FEATURE_HW_FAILSAFE_BOOT
+-       *((volatile unsigned long *)(FMC_WDT2_REG)) &= ~(0x1 >> 0);//disable FMC WDT
++		*((volatile unsigned long *)(FMC_WDT2_REG)) &= (0xFFFE);//disable FMC WDT
+ #endif
+        /* Set the Timeout value to max possible 5 Minutes */
+        *((volatile unsigned long *)(WDT2_RELOAD_REG)) = WDT_TIMEOUT;
+@@ -47,7 +47,7 @@
+        *((volatile unsigned long *)(WDT2_CNT_RESTART_REG)) = WDT_TRIGGER;
+ 
+        /* Set the Watchdog clock to 1MHz clock */
+-       *((volatile unsigned long *)(WDT2_CONTROL_REG)) |= (WDT_CLOCK);
++       //*((volatile unsigned long *)(WDT2_CONTROL_REG)) |= (WDT_CLOCK);
+ #ifdef CONFIG_SPX_FEATURE_HW_FAILSAFE_BOOT
+        /* Reading the Watchdog Timeout event counter*/
+        *wdt_timeout_status = *((volatile unsigned long *)(FMC_WDT2_REG));
+@@ -62,32 +62,20 @@
+ 		else if (broken_spi_banks == 0)
+ #endif
+        {
+-           *((volatile unsigned long *)(WDT2_CLR_TIMEOUT_STAT_REG)) = 0x00000077 ;
++	       *((volatile unsigned long *)(FMC_WDT2_REG)) |= WDT2_SECOND_BOOT_CODE;//clear boot src
+        }
+ #endif
+-
+-#ifdef CONFIG_SPX_FEATURE_HW_FAILSAFE_BOOT
+-       /*clear boot src to primary upon reset */
+-       *((volatile unsigned long *)(FMC_WDT2_REG)) &= ~(0x1 >> 4);//clear boot src
+-       *((volatile unsigned long *)(0x1E620000 + 0x68)) = 0x597d0;//10 min bmc boot time
+-       *((volatile unsigned long *)(0x1E620000 + 0x6c)) = 0x4755;//reload timer value
+-       *((volatile unsigned long *)(FMC_WDT2_REG)) |= (0x1);//enable FMC WDT
+-#else
+-       *((volatile unsigned long *)(FMC_WDT2_REG)) = 0xEA;//disable FMC WDT
+-#endif
+-
+        /* Enable back the Watchdog timer to start the Watchdog */
+        /* Also set the Flag to reset the CPU on Timeout */
+        *((volatile unsigned long *)(WDT2_CONTROL_REG)) |= (WDT_RESET_SYSTEM | WDT_ENABLE);
+ 
++       *((volatile unsigned long *)(FMC_WDT2_REG)) |= (0x1);//enable FMC WDT
+ #ifdef CONFIG_SPX_FEATURE_HW_FAILSAFE_BOOT 
+ 	if (broken_spi_banks == 1) 
+            return 1;// if bank#0 is broken then dont clear address mapping and bootimage 1 
+        else 
+-           return (((*wdt_timeout_status) >> 4) & 1 ) + 1 ;
+-#else
+-       	return 0;
+ #endif
++           return (((*wdt_timeout_status) & (WDT_CUR_BOOTSRC_MASK)) >> 4 ) + 1 ;
+ }
+ 
+ /**
+@@ -105,14 +93,13 @@
+        *((volatile unsigned long *)(WDT2_CONTROL_REG)) &= ~(WDT_RESET_SYSTEM | WDT_ENABLE);
+     }
+ #ifdef CONFIG_SPX_FEATURE_HW_FAILSAFE_BOOT
+-	if ((broken_spi_banks == 2) && ((*((volatile unsigned long *)(FMC_WDT2_REG)) >> 4) & 1))
+-		broken_spi_banks = 1;
+-
+ 	if(*((volatile unsigned long *)(FMC_WDT2_REG)) & (0x1))
+-    	{
+-       		printf("Disabling FMC Watchdog 2 Timer\n");
+-       		*((volatile unsigned long *)(FMC_WDT2_REG)) &= ~(0x1);
+-    	}
++	{
++		printf("Disabling FMC Watchdog 2 Timer\n");
++		*((volatile unsigned long *)(FMC_WDT2_REG)) &= ~(0x1);
++	}
++	if ((broken_spi_banks == 2) && (*((volatile unsigned long *)(FMC_WDT2_REG)) & WDT_CUR_BOOTSRC_MASK))
++		broken_spi_banks = 1;
+ #endif
+     return 0;
+ }
+diff -Naur uboot.old/oem/ami/fmh/cmd_fmh.c uboot/oem/ami/fmh/cmd_fmh.c
+--- uboot.old/oem/ami/fmh/cmd_fmh.c	2021-02-22 19:01:09.589502118 -0500
++++ uboot/oem/ami/fmh/cmd_fmh.c	2021-02-27 17:46:27.568729988 -0500
+@@ -62,7 +62,7 @@
+ }VersionInfo;
+ 
+ #ifdef CONFIG_SPX_FEATURE_DEDICATED_SPI_FLASH_BANK
+-        #define CE1_ADDRESS_SEGMENT 0x24000000
++        #define CE1_ADDRESS_SEGMENT 0x28000000
+         struct spi_flash *flashspi[CONFIG_SPX_FEATURE_GLOBAL_FLASH_BANKS]={NULL};
+ #endif
+ #ifdef CONFIG_SPX_FEATURE_HW_FAILSAFE_BOOT
+@@ -88,9 +88,9 @@
+ #define WDT_CLOCK                       0x10        // 1MHz Clock for WDT
+ #define WDT_RESET_SYSTEM                0x02        // Enable System-Reset-On-Timeout
+ #define WDT_CLR_EVT_COUNTER             0x76        // Clear the Timeout Counter & Boot Source code
+-#define WDT2_SECOND_BOOT_CODE           0x80        // Enable Second Boot Code upon reset
+-#define WDT_CUR_BOOTSRC_MASK            0x00000002
+-#define FMC_WDT2_REG            AST_FMC_BASE+0x64
++#define WDT2_SECOND_BOOT_CODE           0xEA0000    // Enable Second Boot Code upon reset
++#define WDT_CUR_BOOTSRC_MASK            0x10
++#define FMC_WDT2_REG            	 AST_FMC_BASE+0x64
+ #endif
+ 
+ #if defined(CONFIG_SPX_FEATURE_FAIL_SAFE_BOOTING) || defined(CONFIG_SPX_FEATURE_BMC_FIRMWARE_AUTO_RECOVERY)
+@@ -1079,6 +1079,7 @@
+ }
+ #endif
+ 
++#if 0
+ #ifdef  CONFIG_SPX_FEATURE_GLOBAL_DUAL_IMAGE_SUPPORT
+ static int TriggerWDT2(void)
+ {
+@@ -1118,7 +1119,8 @@
+        return 0;
+ }
+ #endif
+-	
++#endif
++
+ int
+ BootFMH(unsigned short PathID)
+ {
+@@ -1277,16 +1279,13 @@
+     }
+     else//for image2
+     {
+-#if defined CONFIG_SPX_FEATURE_DEDICATED_SPI_FLASH_BANK
+-        flash = flashspi[0];
+-	SectorCount = (CONFIG_SPX_FEATURE_GLOBAL_USED_FLASH_SIZE/SectorSize);
+-	StartingSector = 0;
+-	startaddress=0;
+-//        StartingSector = CONFIG_SPX_FEATURE_GLOBAL_USED_FLASH_SIZE;
+-//        SectorCount=StartingSector+CONFIG_SPX_FEATURE_GLOBAL_USED_FLASH_SIZE;
+-//        startaddress=CE1_ADDRESS_SEGMENT;
+-//        StartingSector/=SectorSize;
+-//        SectorCount/=SectorSize;
++#ifdef CONFIG_SPX_FEATURE_DEDICATED_SPI_FLASH_BANK
++	flash = flashspi[1];
++	StartingSector = CONFIG_SPX_FEATURE_GLOBAL_USED_FLASH_SIZE;
++	SectorCount=StartingSector+CONFIG_SPX_FEATURE_GLOBAL_USED_FLASH_SIZE;
++	startaddress=CE1_ADDRESS_SEGMENT;
++	StartingSector/=SectorSize;
++	SectorCount/=SectorSize;
+ #else
+ 
+         StartingSector = (CONFIG_SPX_FEATURE_GLOBAL_USED_FLASH_SIZE/SectorSize);
+@@ -1823,9 +1822,11 @@
+ 		console_assign(stdout,"serial");
+ #else
+         printf("Error locating Kernel. Reset the board\n");
++#if 0
+ #ifdef  CONFIG_SPX_FEATURE_GLOBAL_DUAL_IMAGE_SUPPORT
+         TriggerWDT2();
+ #endif	
++#endif
+ #endif                
+ 		printf("Unable to locate %s\n",KERNEL_FILE);
+ 	}
+@@ -1847,6 +1848,7 @@
+ 	str_pos = strspn(bootpart,"mmcblk");
+ 	devicenumber = simple_strtoul( (bootpart + str_pos), NULL, 10);
+ 	str_pos += 2;
++
+ #if CONFIG_SD_BOOT_SELECTOR 
+ 	bootselect = env_get("sdbootselector");
+ 	str_pos = simple_strtoul(bootselect,NULL,10);	
+@@ -1903,10 +1905,12 @@
+ 	UpdateFirmware();
+ #else
+    printf("Error locating Kernel. Reset the board\n");
++#if 0
+ #ifdef CONFIG_SPX_FEATURE_GLOBAL_DUAL_IMAGE_SUPPORT
+ 	TriggerWDT2();
+ #endif
+ #endif
++#endif
+ 
+ 	UpdateFirmware();
+ 	/* Module Type JFFS and JFFS2 are File System  - Not executable */
+diff -Naur uboot.old/oem/ami/fmh/fmhcore.c uboot/oem/ami/fmh/fmhcore.c
+--- uboot.old/oem/ami/fmh/fmhcore.c	2021-02-22 19:01:09.585502081 -0500
++++ uboot/oem/ami/fmh/fmhcore.c	2021-02-22 19:10:47.130015122 -0500
+@@ -225,7 +225,6 @@
+     	{
+ 		puts("Error in reading SPI\n");
+     	}	
+-	else
+ #elif defined CONFIG_SPX_FEATURE_CONTIGIOUS_SPI_MEMORY
+ 	mod = &(fmh->Module_Info);
+         if ((StartAddr - le32_to_host(mod->Module_Location)) >= CONFIG_SPX_FEATURE_GLOBAL_USED_FLASH_SIZE)

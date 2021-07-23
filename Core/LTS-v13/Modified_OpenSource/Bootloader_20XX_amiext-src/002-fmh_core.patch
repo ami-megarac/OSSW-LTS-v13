@@ -1,0 +1,2121 @@
+--- u-boot-2019.04/include/oem/ami/fmh/fmh.h	2019-12-10 23:04:50.020353495 -0500
++++ uboot/include/oem/ami/fmh/fmh.h	2019-12-10 21:22:44.088100272 -0500
+@@ -0,0 +1,152 @@
++#ifndef __AMI_FMH_H__
++#define __AMI_FMH_H__
++#include <flash.h>
++#include <mtd/cfi_flash.h>
++#include <spi_flash.h>
++
++
++
++typedef unsigned long UINT32;
++typedef long INT32;
++
++#define FMH_SIGNATURE			"$MODULE$"
++#define FMH_END_SIGNATURE 		0x55AA
++#define FMH_SIZE				64
++#define FMH_MAJOR				1
++#define FMH_MINOR		 		8
++
++/*
++typedef struct
++{
++	unsigned short BootPathID:3;
++	unsigned short CopyToRAM:1;
++	unsigned short Execute:1;	
++	unsigned short Compress:3;
++	unsigned short ValidChecksum:1;
++	unsigned short Reserved:7;
++} __attribute__ ((packed)) MODULE_FLAGS;
++*/
++
++/* Module Information Structure */
++typedef struct
++{
++	unsigned char 	Module_Name[8];
++	unsigned char  	Module_Ver_Major;
++	unsigned char  	Module_Ver_Minor;
++	unsigned short	Module_Type;			/* Refer Module Type Values Below */
++	UINT32			Module_Location;		/* Offset to Module from start */
++	UINT32			Module_Size;
++	unsigned short	Module_Flags;			/* Refer Module Flags Values Below */
++	UINT32			Module_Load_Address;
++	UINT32	 		Module_Checksum;		/* CRC 32 */
++	unsigned char  	Module_Ver_Aux[6];
++	unsigned char	Module_Reserved[2];
++} __attribute__ ((packed)) MODULE_INFO;
++
++/* Flash Module Header */
++typedef struct
++{
++	unsigned char 	FMH_Signature[8];		/* "$MODULE$" */
++	unsigned char 	FMH_Ver_Major;			/* 1 */	
++	unsigned char 	FMH_Ver_Minor;			/* 8 */
++	unsigned short	FMH_Size;				/* 64 */
++	UINT32	 		FMH_AllocatedSize;
++	UINT32			FMH_Location;
++	unsigned char	FMH_Reserved[3];
++	unsigned char	FMH_Header_Checksum;		/* Modulo 100 */
++	MODULE_INFO	Module_Info;
++	unsigned short 	FMH_End_Signature;		/* 0x55AA */	
++} __attribute__ ((packed)) FMH;
++
++/* Alternate FMH Location - At the end of first erase block */
++typedef struct
++{
++	unsigned short 	FMH_End_Signature;		/* 0x55AA */
++	unsigned char  	FMH_Header_Checksum;	/* Modulo 100 */
++	unsigned char  	FMH_Reserved;
++	UINT32			FMH_Link_Address;		/* Actual FMH offset from erase blk start*/
++	unsigned char  	FMH_Signature[8];		/* "$MODULE$" */
++} __attribute__ ((packed)) ALT_FMH;
++
++
++/*Values for FMH_Link_Address*/
++#define INVALID_FMH_OFFSET 0xFFFFFFFF
++
++
++/* Values for LSB of Module Type */
++#define MODULE_UNKNOWN			0x00	/* Unknown Module Type  */	/* All */
++#define MODULE_BOOTLOADER		0x01	/* Boot Loader 		*/	/* All */	
++#define MODULE_FMH_FIRMWARE		0x02  	/* Info about  firmware */	/* All */	
++#define MODULE_KERNEL			0x03	/* OS Kernel 		*/	/* All */	
++#define MODULE_FPGA				0x04	/* FPGA Microcode 	*/	/* All */		
++#define MODULE_ELF				0x05	/* ELF Executable Image */	/* All */
++#define MODULE_PIMAGE			0x06	/* U-Boot Linux Image 	*/	/* < 1.4  */
++#define MODULE_INITRD_CRAMFS    0x07  	/* Initrd image of cramfs*/	/* < 1.4  */
++#define MODULE_LINUX_KERNEL		0x08	/* Linux Kernel Image 	 */     /* >= 1.4 */
++#define MODULE_LINUX_ROOTFS		0x09	/* Linux Root FileSystem */  	/* >= 1.4 */
++#define MODULE_JFFS				0x10	/* JFFS File System 	 */	/* < 1.3  */
++#define MODULE_JFFS2			0x11	/* JFFS2 File System 	 */	/* < 1.3  */
++#define MODULE_CRAMFS			0x12	/* CRAMFS */
++#define MODULE_JFFS_CONFIG		0x20					/* 1.3 Only */
++#define MODULE_JFFS2_CONFIG		0x21					/* 1.3 Only */
++#define MODULE_CONFIG			0x30	/* Configuration */ 		/* >= 1.4 */
++#define MODULE_WEB				0x40	/* Web pages 	 */		/* >= 1.4 */
++#define MODULE_BOOTLOGO		0x4A
++#define MODULE_PDK				0x50	/* PDK 	 */			/* >= 1.4 */
++#define MODULE_SQUASHFS			0x60
++#define MODULE_INITRD_SQUASHFS    0x61  	/* Initrd image of Squasfs */
++
++/* Values for MSBof Module Type = Module Format */
++#define MODULE_FORMAT_BACKWARD		0x00	/* Set for Backward comaptible till 1.3 */
++#define MODULE_FORMAT_BINARY		0x01
++#define MODULE_FORMAT_FIRMWARE_INFO	0x02
++#define MODULE_FORMAT_UBOOT_WRAP	0x03
++#define MODULE_FORMAT_ELF			0x04
++#define MODULE_FORMAT_CRAMFS		0x10
++#define MODULE_FORMAT_JFFS			0x11
++#define MODULE_FORMAT_JFFS2			0x12
++#define MODULE_FORMAT_INITRD		0x80
++#define MODULE_FORMAT_SQUASHFS		0x60
++#define MODULE_FORMAT_INITRD_SQUASHFS 0x61  	/* Initrd image of Squasfs */
++
++#define MODULE_FIRMWARE_1_4	((MODULE_FORMAT_FIRMWARE_INFO << 8) | (MODULE_FMH_FIRMWARE))
++
++/* Values for Module Flags */
++#define MODULE_FLAG_BOOTPATH_OS			0x0001
++#define MODULE_FLAG_BOOTPATH_DIAG		0x0002
++#define MODULE_FLAG_BOOTPATH_RECOVERY	0x0004
++#define MODULE_FLAG_COPY_TO_RAM			0x0008
++#define MODULE_FLAG_EXECUTE				0x0010
++#define MODULE_FLAG_COMPRESSION_MASK	0x00E0  /* Refer Compression Type values */
++#define MODULE_FLAG_COMPRESSION_LSHIFT	5
++#define MODULE_FLAG_VALID_CHECKSUM		0x0100	/* Validate Checksum if this is set */
++
++/* Values for Compression */
++#define MODULE_COMPRESSION_NONE			0x00
++#define MODULE_COMPRESSION_MINILZO_1X	0x01
++#define MODULE_COMPRESSION_GZIP			0x02
++
++#include <asm/byteorder.h>
++#define host_to_le16(x)	__cpu_to_le16((x))
++#define host_to_le32(x)	__cpu_to_le32((x))
++#define le16_to_host(x)	__le16_to_cpu((x))
++#define le32_to_host(x)	__le32_to_cpu((x))
++
++#ifdef CONFIG_YAFU_RECOVER_MULTIPLE_SPI_SUPPORT
++extern int recover_both_spi;
++#endif
++
++/* Function Prototypes */
++FMH* 	ScanforFMH(struct spi_flash *flash,u32 SectorAddr, UINT32 SectorSize);
++void	CreateFMH(FMH *fmh,UINT32 AllocatedSize, MODULE_INFO *mod);
++void 	CreateAlternateFMH(ALT_FMH *altfmh,UINT32 FMH_Offset); 
++#ifdef CONFIG_SPX_FEATURE_BMC_FIRMWARE_AUTO_RECOVERY
++FMH* 	ScanforFMH_RAM(unsigned char *SectorAddr, unsigned long SectorSize);
++#endif
++
++/* CRC32 Related */
++UINT32 CalculateCRC32(unsigned char *Buffer, UINT32 Size);
++void BeginCRC32(UINT32 *crc32);
++void DoCRC32(UINT32 *crc32, unsigned char Data);
++void EndCRC32(UINT32 *crc32);
++#endif	
+--- u-boot-2019.04/oem/ami/fmh/cmd_fmh.c	2019-12-10 23:05:49.836584249 -0500
++++ uboot/oem/ami/fmh/cmd_fmh.c	2019-12-10 22:25:48.251299098 -0500
+@@ -0,0 +1,1593 @@
++# include <common.h>
++# include <config.h>
++# include <command.h>
++# include <flash.h>
++# include <i2c.h>
++# include "cmd_fmh.h"
++# include <oem/ami/fmh/fmh.h>
++# include "cmd.h"
++#include <flash.h>
++#include <mtd/cfi_flash.h>
++#include <spi_flash.h>
++#include <environment.h>
++#include <console.h>
++
++
++#ifdef CONFIG_SPX_FEATURE_SECURE_BOOT_SUPPORT 
++# include "hrot_ifc.h"
++#endif
++
++#ifdef CONFIG_SPX_FEATURE_BMC_FIRMWARE_AUTO_RECOVERY
++# include <mmc.h>
++# include <fat.h>
++# include <net.h>
++extern int Firmware_AutoRecovery(u8 force_recovery, u8 imgheadererr);
++#endif
++
++#ifdef CONFIG_YAFU_RECOVER_MULTIPLE_SPI_SUPPORT
++int recover_both_spi=0;
++#endif
++
++# define  KERNEL_LOADADDR	0xC00000
++# define  KERNEL_FILE		"/boot/uImage"
++
++
++# define AUTO_HIGH_VER_FW          	0x0
++# define IMAGE_1                   	0x1
++# define IMAGE_2                   	0x2
++# define AUTO_LOW_VER_FW           	0x3
++# define MOST_RECENTLY_PROG_FW     	0x4
++# define LEAST_RECENTLY_PROG_FW    	0x5
++
++#define IMG1_index_val  0
++#define IMG2_index_val  1
++
++typedef struct
++{
++    u8 major_ver;
++    u8 minor_ver;
++#if (FMH_MAJOR==1 && FMH_MINOR==6)
++    u8 aux_ver[2];
++#elif (FMH_MAJOR==1 && FMH_MINOR>=7)
++    u8 aux_ver[6];
++#endif
++}VersionInfo;
++
++#ifdef CONFIG_BOOTLOGO_SUPPORT
++extern int ShowBootLogoByAddress(unsigned int logo_bin_addr, int idx);
++#endif
++
++extern int do_protect (cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[]);
++extern int Get_bootargs(char *bootargs,int rootisinitrd,int RootMtdNo, int mmc);
++
++/* Note: Currently FMH support is done only for the first bank */
++//extern flash_info_t flash_info[CONFIG_SYS_MAX_FLASH_BANKS];
++
++int check_firmware_recovery(void);
++
++
++#if defined(CONFIG_SPX_FEATURE_FAIL_SAFE_BOOTING) || defined(CONFIG_SPX_FEATURE_BMC_FIRMWARE_AUTO_RECOVERY)
++extern int Enable_watchdog(unsigned long *wdt_timeout_status);
++extern int Disable_watchdog(void);
++#endif
++
++#ifdef CONFIG_YAFU_SUPPORT
++extern int fwupdate(void);
++#endif
++
++#ifdef CONFIG_R2C_SUPPORT
++extern int rconsole(void);
++#else
++int  
++UpdateFirmware(void)
++{
++#ifdef CONFIG_YAFU_SUPPORT
++	env_set("mode", "1"); 
++	fwupdate();
++#endif
++return 0;
++}
++int
++do_fwupdate(cmd_tbl_t *cmdtp, int flag , int argc, char * const argv[])
++{
++	return UpdateFirmware();
++}
++
++U_BOOT_CMD(
++	fwupdate,	1,	1,	do_fwupdate,
++	"Start Firmware Recovery Update",
++	""
++);
++
++#endif
++
++unsigned long g_wdt_reset_status = 0 ;
++
++
++int __ReadJumperConfig(void)
++{
++	return -1;
++}
++int ReadJumperConfig(void) 
++	__attribute__((weak, alias("__ReadJumperConfig")));
++
++/* U-boot's cmd function to list FMH */
++int
++do_fmh (cmd_tbl_t *cmdtp, int flag , int argc, char * const argv[])
++{
++	return ListFMH();
++}
++
++U_BOOT_CMD(
++	fmh,	1,	1,	do_fmh,
++	"List the Flash Module Headers",
++	""
++);
++
++/* U-boot's cmd function to boot using FMH  Has one argument with
++ * the values from 0 to 2.  It is  either  0 (OS), 1 (DIAG), 2 (RECOVERY)
++ */
++int
++do_bootfmh(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
++{
++	short PathID;
++
++	if (argc == 1)
++	{
++		/* Get the BootPath ID from the Hardware configuration Jumper */
++		PathID = ReadJumperConfig();
++
++		/* If Read Jumper Config not supported, boot to OS */
++		if (PathID == -1)
++			PathID = 0;
++	}
++	else
++	{
++		/* Get the BootPath ID from the Argument */
++		PathID = (unsigned short)simple_strtoul(argv[1],NULL,0);
++	}
++
++	if (PathID > 4)
++	{
++		printf("Usage : bootfmh <Arg> . Arg = 0 to 4\n");
++		return 1;
++	}
++
++	return BootFMH((unsigned short)1 << PathID);
++}
++
++U_BOOT_CMD(bootfmh,	2,	0,	do_bootfmh,
++	"Boot using FMH Modules",
++	"<Arg>  (Arg = 0 to 2)"
++);
++
++int EnableSocflash (unsigned short InterfaceID)
++{
++	int reg = 0;
++	
++	*(volatile u32 *)(0x1e6e2000) = 0x1688A8A8;
++	if (InterfaceID == 0)
++		*(volatile u32 *)(0x1e6e2000 + 0x180) |= 0x2;
++	else if (InterfaceID == 1)
++	{
++		*(volatile u32 *)(0x1e789000 + 0x80) |= 0x100;
++		*(volatile u32 *)(0x1e789000 + 0x100) &= ~(0x40);
++		*(volatile u32 *)(0x1e6e2000 + 0x7C) = (0x100000);
++	}
++	*(volatile u32 *)(0x1e6e2000) = 0;
++	
++	reg = *(volatile u32 *)(0x1E6E2000 + 0x180);
++	if (reg & 0x2)
++		printf("soc flash mode via pcie is enable\n");
++	reg = *(volatile u32 *)(0x1E6E2000 + 0x70);
++	if (!(reg & 0x100000))
++		printf("soc flash mode via lpc is enable\n");
++	return 0;
++}
++
++int 
++do_bootmenu (cmd_tbl_t *cmdtp, int flag , int argc, char * const argv[]) 
++{ 
++	unsigned short PathID = 2;
++	unsigned short InterfaceID = 0; 
++	 
++	while (PathID >= 2) 
++	{ 
++		printf("------ Boot Options-------\n"); 
++		printf("\t0. Normal Boot\n");
++		printf("\t1. socflash Recovery\n");
++		printf("Select Boot Option:\n"); 
++		PathID = getc() - '0'; 
++		if (PathID == 1)
++		{
++			printf("\t0. socflash via pcie\n"); 
++			printf("\t1. socflash via lpc\n"); 
++			printf("Select Interface Option:\n"); 
++			InterfaceID = getc() - '0'; 
++		}
++	} 
++	if (PathID == 1)
++		return EnableSocflash(InterfaceID);
++	else
++		return BootFMH((unsigned short)1 << PathID); 
++} 
++
++U_BOOT_CMD(bootmenu,	1,	1,	do_bootmenu, 
++	"Show Boot Path menu", 
++	"" 
++); 
++ 
++ 
++/* Actual function implementing FMH Listing*/
++/* Returns 0 on success, else 1 on failure */
++int
++ListFMH(void)
++{
++    //unsigned char buf[64*1024] = {0};
++    struct spi_flash *flash;
++    unsigned long flashsize=0,SectorCount=0;
++    unsigned long SectorSize=0;
++    int i=0;
++    FMH	*fmh;
++    unsigned char Name[9] = {0};
++    MODULE_INFO *mod;
++    long SkipSize;
++
++    flash = spi_flash_probe(CONFIG_ENV_SPI_BUS, CONFIG_ENV_SPI_CS,
++                        CONFIG_ENV_SPI_MAX_HZ, CONFIG_ENV_SPI_MODE);
++    if (flash == NULL) 
++    {
++        puts("\nspi_flash_probe failed");
++        hang();
++    }
++
++    //flashsize = flash->mtd.size;
++    flashsize = CONFIG_SPX_FEATURE_GLOBAL_USED_FLASH_SIZE;
++    SectorSize = 0x10000; //flash->erase_size;//0x10000;//flash->sector_size;
++    SectorCount = flashsize/SectorSize;
++   printf("Flash size 0x%lx Sector size 0x%lx SectorCount 0x%lx\n",flashsize,SectorSize,SectorCount);
++
++    for(i=0;i<SectorCount;)
++    {
++                   #if 0
++        fmh = ScanforFMH((unsigned char *)(CONFIG_SYS_FLASH_BASE+(i*SectorSize)),SectorSize);
++        if (fmh == NULL)
++        {
++            i++;
++            continue;
++        }
++        #endif
++
++        fmh = ScanforFMH(flash,((i*SectorSize)),SectorSize);
++        if (fmh == NULL)
++        {
++            i++;
++            continue;
++        }
++
++
++        /* Print Information about the FMH and its module */
++        printf("\nFMH Located at 0x%08lx of Size 0x%08x\n",
++                (unsigned long)((i*SectorSize)),le32_to_host(fmh->FMH_AllocatedSize));
++
++        mod = &(fmh->Module_Info);
++        strncpy((char *)Name,(char *)mod->Module_Name,8);
++        Name[8]=0;
++        printf("Name    : %s\n",Name);
++        
++        if( FMH_MAJOR==1 && FMH_MINOR>=7 )
++            printf("Ver     : %d.%02d.%.6s\n",mod->Module_Ver_Major,mod->Module_Ver_Minor,mod->Module_Ver_Aux);
++        else if( FMH_MAJOR==1 && FMH_MINOR==6 )
++            printf("Ver     : %d.%02d.%.2s\n",mod->Module_Ver_Major,mod->Module_Ver_Minor,mod->Module_Ver_Aux);
++        else
++            printf("Ver     : %d.%02d\n",mod->Module_Ver_Major,mod->Module_Ver_Minor);
++
++        printf("Type    : 0x%04x\n",le16_to_host(mod->Module_Type));
++        printf("Flags   : 0x%04x\n",le16_to_host(mod->Module_Flags));
++        printf("Size    : 0x%08x\n",le32_to_host(mod->Module_Size));
++
++        if ((fmh->FMH_Ver_Major == 1) && (fmh->FMH_Ver_Minor >= 8))
++            printf("Location: 0x%08x\n", le32_to_host(mod->Module_Location));
++        else
++            printf("Location: 0x%08lx\n",((i*SectorSize)) + le32_to_host(mod->Module_Location));
++
++        printf("LoadAddr: 0x%08x\n",le32_to_host(mod->Module_Load_Address));
++        printf("--------------------------------------------------\n");
++
++
++        if (i*SectorSize > le32_to_host(mod->Module_Location)) /* Special case of AltFMH (FMH location > Module_Location */
++            SkipSize=SectorSize;
++        else
++            /* Skip the Sectors occupied by the Module */
++            SkipSize = le32_to_host(fmh->FMH_AllocatedSize);
++
++        while ((SkipSize > 0) && (i < SectorCount))
++        {
++            SkipSize-=SectorSize;
++            i++;
++        }
++    
++    } /* sector */
++
++
++#if 0
++    if(0)
++    {
++        flash_read(0,64*1024,buf);
++        printf("Buffer %x %x %x %x \n",buf[0],buf[1],buf[2],buf[3]);
++    }
++#endif
++#if 0
++	flash_info_t *flinfo;
++	unsigned long SectorSize=CONFIG_SPX_FEATURE_GLOBAL_ERASE_BLOCK_SIZE;
++	unsigned long SectorCount=0,flashsize=0;
++	long SkipSize;
++	int i,bank;
++	FMH	*fmh;
++	MODULE_INFO *mod;
++	unsigned char Name[9];
++
++	printf("Listing FMH Modules\n");
++
++	for (bank=0;bank<CONFIG_SYS_MAX_FLASH_BANKS;bank++)
++	{
++		flinfo = &flash_info[bank];
++		flashsize += flinfo->size;		
++		if (flinfo->size == 0)
++			break;
++	}
++	SectorCount = flashsize/SectorSize;
++	for (i=0;i<SectorCount;)
++	{	
++#if 0
++            #ifdef CONFIG_SPX_FEATURE_GLOBAL_DUAL_IMAGE_SUPPORT
++            if( (i*SectorSize) >= (2 * CONFIG_SPX_FEATURE_GLOBAL_USED_FLASH_SIZE) ) { break; }
++            #else
++            if( (i*SectorSize) >= CONFIG_SPX_FEATURE_GLOBAL_USED_FLASH_SIZE ) { break; }
++            #endif
++#endif
++			fmh = ScanforFMH((unsigned char *)(CONFIG_SYS_FLASH_BASE+(i*SectorSize)),SectorSize);
++			if (fmh == NULL)
++			{
++				i++;
++				continue;
++			}
++
++			/* Print Information about the FMH and its module */
++			printf("\nFMH Located at 0x%08lx of Size 0x%08x\n",
++					(unsigned long)(CONFIG_SYS_FLASH_BASE+(i*SectorSize)),le32_to_host(fmh->FMH_AllocatedSize));
++
++			mod = &(fmh->Module_Info);
++			strncpy((char *)Name,(char *)mod->Module_Name,8);
++			Name[8]=0;
++			printf("Name    : %s\n",Name);
++			
++			if( FMH_MAJOR==1 && FMH_MINOR>=7 )
++				printf("Ver     : %d.%02d.%.6s\n",mod->Module_Ver_Major,mod->Module_Ver_Minor,mod->Module_Ver_Aux);
++			else if( FMH_MAJOR==1 && FMH_MINOR==6 )
++				printf("Ver     : %d.%02d.%.2s\n",mod->Module_Ver_Major,mod->Module_Ver_Minor,mod->Module_Ver_Aux);
++			else
++				printf("Ver     : %d.%02d\n",mod->Module_Ver_Major,mod->Module_Ver_Minor);
++
++			printf("Type 	: 0x%04x\n",le16_to_host(mod->Module_Type));
++			printf("Flags	: 0x%04x\n",le16_to_host(mod->Module_Flags));
++			printf("Size 	: 0x%08x\n",le32_to_host(mod->Module_Size));
++
++			if ((fmh->FMH_Ver_Major == 1) && (fmh->FMH_Ver_Minor >= 8))
++				printf("Location: 0x%08x\n", CONFIG_SYS_FLASH_BASE + le32_to_host(mod->Module_Location));
++			else
++				printf("Location: 0x%08lx\n",(CONFIG_SYS_FLASH_BASE+(i*SectorSize)) + le32_to_host(mod->Module_Location));
++
++			printf("LoadAddr: 0x%08x\n",le32_to_host(mod->Module_Load_Address));
++
++			/* Validate CheckSum */
++			if (le16_to_host(mod->Module_Flags) & MODULE_FLAG_VALID_CHECKSUM)
++			{
++				UINT32 ChkSum;
++				if ((fmh->FMH_Ver_Major == 1) && (fmh->FMH_Ver_Minor >= 8))
++					ChkSum=  CalculateCRC32((unsigned char *)CONFIG_SYS_FLASH_BASE+
++								le32_to_host(mod->Module_Location),
++								le32_to_host(mod->Module_Size));
++				else
++					ChkSum  = CalculateCRC32((unsigned char *)(CONFIG_SYS_FLASH_BASE+(i*SectorSize))+
++								le32_to_host(mod->Module_Location),
++								le32_to_host(mod->Module_Size));
++				if (ChkSum == le32_to_host(mod->Module_Checksum))
++					printf("CheckSum: Valid\n");
++				else
++					printf("CheckSum: Invalid\n");
++			}
++			else
++					printf("CheckSum: Not Computed\n");
++
++
++
++			printf("--------------------------------------------------\n");
++
++
++			if (i*SectorSize > le32_to_host(mod->Module_Location)) /* Special case of AltFMH (FMH location > Module_Location */
++				SkipSize=SectorSize;
++			else
++				/* Skip the Sectors occupied by the Module */
++				SkipSize = le32_to_host(fmh->FMH_AllocatedSize);
++
++			while ((SkipSize > 0) && (i < SectorCount))
++			{
++				SkipSize-=SectorSize;
++				i++;
++			}
++			
++		} /* sector */
++#endif
++	return 0;
++}
++
++int
++GetFMHSectorLocationSize(char * Name, unsigned long * Location, unsigned long * Size)
++{
++#if 0
++        flash_info_t *flinfo;
++        unsigned long SectorSize=CONFIG_SPX_FEATURE_GLOBAL_ERASE_BLOCK_SIZE;
++        unsigned long SectorCount=0,flashsize=0;
++        long SkipSize;
++        int i,bank;
++        FMH     *fmh;
++        MODULE_INFO *mod;
++
++	if ((NULL == Name) || (NULL == Location) || (NULL == Size))
++	{
++		printf ("Invalid pointers to get FMH information\n");
++		return -1;
++	}
++
++
++        for (bank=0;bank<CONFIG_SYS_MAX_FLASH_BANKS;bank++)
++        {
++                flinfo = &flash_info[bank];
++                flashsize += flinfo->size;
++                if (flinfo->size == 0)
++                        break;
++        }
++
++        SectorCount = flashsize/SectorSize;
++        for (i=0;i<SectorCount;)
++        {
++                #ifdef CONFIG_SPX_FEATURE_GLOBAL_DUAL_IMAGE_SUPPORT
++                if( (i*SectorSize) >= (2 * CONFIG_SPX_FEATURE_GLOBAL_USED_FLASH_SIZE) ) { break; }
++                #else
++                if( (i*SectorSize) >= CONFIG_SPX_FEATURE_GLOBAL_USED_FLASH_SIZE ) { break; }
++                #endif
++
++                fmh = ScanforFMH((unsigned char *)(CONFIG_SYS_FLASH_BASE+(i*SectorSize)),SectorSize);
++                if (fmh == NULL)
++                {
++                        i++;
++                        continue;
++                }
++
++                mod = &(fmh->Module_Info);
++                if (0 == strncmp((char *)Name,(char *)mod->Module_Name,8))
++                {
++                        *Size = le32_to_host(mod->Module_Size);
++						if ((fmh->FMH_Ver_Major == 1) && (fmh->FMH_Ver_Minor >= 8))
++                        	*Location = CONFIG_SYS_FLASH_BASE  + le32_to_host(mod->Module_Location);
++						else
++                        	*Location = CONFIG_SYS_FLASH_BASE + (i*SectorSize) + le32_to_host(mod->Module_Location);
++			break;
++                }
++
++				if (i*SectorSize > le32_to_host(mod->Module_Location)) /* Special case of AltFMH (FMH location > Module_Location */
++					SkipSize=SectorSize;
++				else
++					/* Skip the Sectors occupied by the Module */
++					SkipSize = le32_to_host(fmh->FMH_AllocatedSize);
++                while ((SkipSize > 0) && (i < SectorCount))
++                {
++                        SkipSize-=SectorSize;
++                        i++;
++                }
++
++        } /* sector */
++
++        return (i >= SectorCount) ? -1 : 0;
++#endif
++return 0;
++}
++
++/****************************************************************************/
++//extern int gDefaultEnvironment;
++
++
++/**
++*@fn ValidateBootImage
++*@brief checks the boot image according to boot option.
++*@param imagetoboot[in]  -  boot option, firmware image versions.
++*@param imagetoboot[out] -  boot image.
++**/
++u8 ValidateBootImage(u8 bootopt,  VersionInfo fwimgver[])
++{
++    u8 bootimg = 0;
++    VersionInfo *fwinfo1 = NULL;
++    VersionInfo *fwinfo2 = NULL;
++	
++    if(bootopt == AUTO_HIGH_VER_FW)
++    {
++	    fwinfo1 = &fwimgver[IMG1_index_val];
++	    fwinfo2 = &fwimgver[IMG2_index_val];
++    }
++    if(bootopt == AUTO_LOW_VER_FW)
++    {
++	    fwinfo1 = &fwimgver[IMG2_index_val];
++	    fwinfo2 = &fwimgver[IMG1_index_val];
++    }
++
++    if ( fwinfo1->major_ver > fwinfo2->major_ver )
++        bootimg = IMAGE_1;
++    else if ( fwinfo1->major_ver < fwinfo2->major_ver )
++        bootimg = IMAGE_2;
++    else if ( fwinfo1->minor_ver > fwinfo2->minor_ver )
++        bootimg = IMAGE_1;
++    else if ( fwinfo1->minor_ver < fwinfo2->minor_ver )
++        bootimg = IMAGE_2;
++    else
++    {
++	if( FMH_MAJOR==1 && FMH_MINOR>=6 ) // AUX available with FMH version 1.6 and above
++	{
++	    if(strncmp((char *)fwinfo1->aux_ver,(char *)fwinfo2->aux_ver,sizeof(fwinfo1->aux_ver)) > 0)
++	        bootimg = IMAGE_1;
++	    else if(strncmp((char *)fwinfo1->aux_ver,(char *)fwinfo2->aux_ver,sizeof(fwinfo1->aux_ver)) < 0)
++	        bootimg = IMAGE_2;
++	    else
++            	bootimg = 0;
++	}
++    }
++
++return bootimg;
++}
++
++
++/**
++*@fn ReadEnvVarAndGetBootOption
++*@brief Reads the Env variable bootselector, based on the value set it env variable, the image to be booted is assigned
++*@param imagetoboot[in] - the image to be booted (image1 or image2).
++*@param failsafeboot[in] - is it fail safe boot.
++*@param firmware_ver[in] - firmware info versions.
++*@param [out]  0 - on success
++*             -1 - on error
++**/
++int  ReadEnvVarAndGetBootOption(u8 *imagetoboot,u8 failsafeboot,  VersionInfo  firmware_ver[], VersionInfo  platform_ver[])
++{
++      char *selector = NULL;
++      char *update   = NULL;
++      u8 boot_opt, recent_img, boot_img;
++
++      selector = env_get("bootselector");
++      if (selector == NULL) {
++           printf("uboot env variable bootselector not present \n");
++           return -1;
++      }
++      boot_opt = *selector - 48;
++
++      update = env_get("recentlyprogfw");
++      if (update == NULL) {
++          printf(" uboot env variable recentlyprogfw not present");
++          return -1;
++      }
++      recent_img = *update - 48;
++
++
++      switch(boot_opt)
++      {
++	case IMAGE_1:
++		*imagetoboot = IMAGE_1;
++	        break;
++	case IMAGE_2:
++		*imagetoboot = IMAGE_2;
++		break;
++	case AUTO_HIGH_VER_FW:
++                if( (boot_img = ValidateBootImage(AUTO_HIGH_VER_FW, firmware_ver) ))
++                {
++                    *imagetoboot = boot_img;
++                }// ValidateBootImage will return zero if both firmware image versions matches, then need to check platform versions
++                else if( (boot_img = ValidateBootImage(AUTO_HIGH_VER_FW, platform_ver) ) )
++                {
++                    *imagetoboot = boot_img;
++                }// ValidateBootImage will return zero if both platform versions matches, then booting image1 as defautly.
++                else
++                {
++                    *imagetoboot = IMAGE_1;
++                }
++                break;
++	case AUTO_LOW_VER_FW:
++                if( (boot_img = ValidateBootImage(AUTO_LOW_VER_FW, firmware_ver) ))
++                {
++                    *imagetoboot = boot_img;
++                }// ValidateBootImage will return zero if both firmware image versions  matches, then need to check platform versions
++                else if( (boot_img = ValidateBootImage(AUTO_LOW_VER_FW, platform_ver) ))
++                {
++                    *imagetoboot = boot_img;
++                }// ValidateBootImage will return zero if both platform versions matches, then booting image1 as defautly.
++                else
++                {
++                    *imagetoboot = IMAGE_1;
++                }
++                break;
++	case MOST_RECENTLY_PROG_FW:
++		if ( recent_img == IMAGE_1 )
++			*imagetoboot = IMAGE_1;
++		else
++			*imagetoboot = IMAGE_2;
++
++		break;
++	case  LEAST_RECENTLY_PROG_FW:
++                recent_img = *update - 48;
++		if ( recent_img == IMAGE_1 )
++			*imagetoboot = IMAGE_2;
++		else
++			*imagetoboot = IMAGE_1;
++		break;
++	default:
++	      printf("Invalid boot option \n");
++              return -1;
++	      break;
++      }
++
++      if(failsafeboot)
++      {
++	 if(*imagetoboot == IMAGE_1)
++	 {
++		env_set("fwimage1corrupted","yes");
++		env_set("bootselector","2");
++		env_save();
++		*imagetoboot = IMAGE_2;
++	 }
++	 else if(*imagetoboot == IMAGE_2)
++	 {
++		env_set("fwimage2corrupted","yes");
++		env_set("bootselector","1");
++		env_save();
++		*imagetoboot = IMAGE_1;
++	 }
++         else
++       	 {
++             printf("Invalid Boot option...\n");
++             return -1;
++         }
++      }
++
++return 0;
++}
++
++
++/*
++ *@fn    : check_firmware_recovery
++ *@breif : moves firmware to recovery mode if both images are corrupted
++ */
++int check_firmware_recovery()
++{
++	if( env_get("fwimage1corrupted") && env_get("fwimage2corrupted") )
++	{
++		printf("Both Images corrupted so moving Remote Recovery Mode...\n");
++		#ifdef CONFIG_YAFU_RECOVER_MULTIPLE_SPI_SUPPORT
++			if(CONFIG_YAFU_RECOVER_MULTIPLE_SPI_SUPPORT==1)
++			{
++        	        	printf("recovering both spi\n");
++	                	recover_both_spi=1;
++			}
++	        #endif
++		/*Need to disable watchdog reset before firmware Recovery */
++		#ifdef CONFIG_SPX_FEATURE_FAIL_SAFE_BOOTING
++			Disable_watchdog();
++		#endif
++        #ifdef CONFIG_R2C_SUPPORT
++	        return rconsole();      /* Remote Recovery Mode */
++	    #else
++	        UpdateFirmware();
++		    return -1;
++	    #endif
++	}
++	return 0;
++}
++
++
++/**
++*@fn GetBootImage
++*@brief provides image to boot. 
++*@param imagetoboot[in] - the image to be booted (image1 or image2).
++*@param [out]  0 - on success
++*             -1 - on error
++**/
++
++
++int GetBootImage(u8 *imagetoboot)
++{
++#if 0
++	flash_info_t *flinfo;
++	unsigned long i=0,SectorSize=CONFIG_SPX_FEATURE_GLOBAL_ERASE_BLOCK_SIZE;
++	unsigned long SectorCount=0,flashsize=0;
++	unsigned long watchdog_reset_status = 0;
++	u8 imgIndex=0,bank=0,img1_presence=0,img2_presence=0;
++	FMH	*fmh = NULL;
++	MODULE_INFO *mod = NULL;
++	VersionInfo firmware_ver[2], platform_ver[2];
++
++
++#ifdef CONFIG_SPX_FEATURE_FAIL_SAFE_BOOTING
++#ifdef CONFIG_SPX_FEATURE_SW_FAILSAFE_BOOT
++    Enable_watchdog(&watchdog_reset_status);
++#else
++    *imagetoboot=Enable_watchdog(&watchdog_reset_status);
++    return 0;
++#endif
++#endif
++
++
++	for (bank=0;bank<CONFIG_SYS_MAX_FLASH_BANKS;bank++)
++	{
++		flinfo = &flash_info[bank];
++		flashsize += flinfo->size;
++		if (flinfo->size == 0)
++			break;
++	}
++
++	SectorCount=flashsize/SectorSize;
++
++        memset(&firmware_ver,0,sizeof(firmware_ver));
++        memset(&platform_ver,0,sizeof(platform_ver));
++ 
++		/* Scan through the flash for FMH */
++		for (i=0;i<SectorCount;)
++		{
++	            #ifdef CONFIG_SPX_FEATURE_GLOBAL_DUAL_IMAGE_SUPPORT
++				#ifndef CONFIG_SPX_FEATURE_DEDICATED_SPI_FLASH_BANK
++        	        if( (i*SectorSize) >= (2 * CONFIG_SPX_FEATURE_GLOBAL_USED_FLASH_SIZE) ) { break; }
++                #endif
++	            #else
++        	        if( (i*SectorSize) >= CONFIG_SPX_FEATURE_GLOBAL_USED_FLASH_SIZE ) { break; }
++	            #endif
++			/* Check if FMH found at this sector */
++			fmh = ScanforFMH((unsigned char *)(CONFIG_SYS_FLASH_BASE+(i*SectorSize)),SectorSize);
++			if (fmh == NULL)
++			{
++				i++;
++				continue;
++			}
++
++			/* Extract Module information and module name */
++			mod = &(fmh->Module_Info);
++						
++			/* if firmware contains platform module need to consider*/
++			if( (mod->Module_Type) == MODULE_JFFS2)
++			{
++				if( strncmp((char *)mod->Module_Name,"platform",8)==0 )
++				{
++					platform_ver[imgIndex].major_ver = mod->Module_Ver_Major;
++					platform_ver[imgIndex].minor_ver = mod->Module_Ver_Minor;
++					if( FMH_MAJOR == 1 && FMH_MINOR == 6 )
++		        		{			
++						strncpy((char *)platform_ver[imgIndex].aux_ver,(char *)mod->Module_Ver_Aux, 2);
++					}					
++					else if(FMH_MAJOR == 1 && FMH_MINOR >= 7)
++					{
++						strncpy((char *)platform_ver[imgIndex].aux_ver,(char *)mod->Module_Ver_Aux,sizeof(mod->Module_Ver_Aux));
++					}
++				}
++			}
++
++	
++			if( (mod->Module_Type) == MODULE_FMH_FIRMWARE)
++			{
++				firmware_ver[imgIndex].major_ver = mod->Module_Ver_Major;
++				firmware_ver[imgIndex].minor_ver = mod->Module_Ver_Minor;
++				if( FMH_MAJOR == 1 && FMH_MINOR == 6 )
++		                {
++					strncpy((char *)firmware_ver[imgIndex].aux_ver,(char *)mod->Module_Ver_Aux, 2);
++				}
++				else if(FMH_MAJOR == 1 && FMH_MINOR >= 7)
++				{
++					strncpy((char *)firmware_ver[imgIndex].aux_ver,(char *)mod->Module_Ver_Aux,sizeof(mod->Module_Ver_Aux));
++				}                   
++				if( imgIndex == IMG1_index_val)
++					img1_presence = 1;
++				if( imgIndex == IMG2_index_val)
++					img2_presence = 1;
++		        }
++			i++;
++			
++			if ((i*SectorSize) >= CONFIG_SPX_FEATURE_GLOBAL_USED_FLASH_SIZE)//Image Size
++			{
++				if(mod->Module_Type == FIRMWARE_INFO_TYPE)
++				{
++					imgIndex++;
++				}
++			}
++		}
++		
++        
++        /* check whether reboot caused by watchdog modules reset */
++		if(watchdog_reset_status)
++		{
++			// Check uboot env variable bootselector and get boot option for failsafeboot 
++			if( ReadEnvVarAndGetBootOption(imagetoboot,1,firmware_ver, platform_ver) != 0)
++				return -1;
++        
++		     if(check_firmware_recovery() !=0 )
++			 {
++					 return -1;
++			 }
++		}
++		else
++		{
++			 if(check_firmware_recovery() !=0 )
++			 {
++					 return -1;
++			 }
++			 if( !img1_presence && img2_presence)
++			 {
++       			     // if any of the firmware image corrupted or not flashed, going to boot valid firmware image 
++	        	     *imagetoboot = IMAGE_2;
++			 }
++			 else if( !img2_presence && img1_presence)
++			 {
++	        	     // if any of the firmware image corrupted or not flashed, going to boot valid firmware image
++        		     *imagetoboot = IMAGE_1;
++			 }
++			 else if( img2_presence && img1_presence)
++			 {
++	        	     // Check uboot env variable bootselector and get boot option
++			     if( ReadEnvVarAndGetBootOption(imagetoboot,0,firmware_ver, platform_ver) != 0)
++	                     return -1; 
++			 }
++			 else
++			 {
++				printf("Both Images corrupted/Not Flashed so moving to Remote Recovery Mode...\n");
++                                #ifdef CONFIG_SPX_FEATURE_FAIL_SAFE_BOOTING
++                                    Disable_watchdog();
++                                #endif
++		                /*Need to disable watchdog reset before firmware Recovery */
++				#ifdef CONFIG_R2C_SUPPORT
++					return rconsole();      /* Remote Recovery Mode */
++				#else
++					UpdateFirmware();
++					return -1;
++				#endif
++		 	 }
++		}
++#endif
++return 0;
++}
++
++#ifdef CONFIG_SPX_FEATURE_BMC_FIRMWARE_AUTO_RECOVERY
++void BMCAutoRecovery (void)
++{
++    char *pStr;
++    char value[2] = {0};
++    u8 force_recovery = 0, imgheadererr = 0, bootretry = CONFIG_SPX_FEATURE_BMC_FIRMWARE_REBOOT_RETRY_COUNT, currentbootretry = 0;
++
++    /*Check whether force recovery image boot is triggered.*/
++    pStr= env_get("forcerecovery");
++    if ((pStr!= NULL ) && (strcmp(pStr,"yes") == 0))
++    {
++        force_recovery = 1;
++    }
++
++    pStr = NULL;
++    pStr = env_get("imgheadererr");
++    if ((pStr != NULL ) && (strcmp(pStr,"yes") == 0))
++    {
++        imgheadererr = 1;
++    }
++
++    pStr = NULL;
++    pStr = env_get("bootretry");
++    if (pStr != NULL )
++    {
++        bootretry = (int)simple_strtoul(pStr,NULL,0);
++    }
++
++    pStr = NULL;
++    pStr = env_get("currentbootretry");
++    if (pStr != NULL )
++    {
++        currentbootretry = (int)simple_strtoul(pStr,NULL,0);
++    }
++
++    currentbootretry++;
++    sprintf(value,"%d",currentbootretry);
++    env_set("currentbootretry",(char *)value);
++    env_save();
++
++    if(force_recovery || imgheadererr || (currentbootretry > bootretry) )
++    {
++        if ( Firmware_AutoRecovery(force_recovery, imgheadererr) != 0 )
++        {
++            if(force_recovery == 1)
++            {
++                env_set("forcerecovery",NULL);
++                env_save();
++            }
++
++            /*Disable the watchdog as both method was failed*/
++            Disable_watchdog();
++
++            /*Reset the lastrecoveryboot*/
++            env_set("lastrecoveryboot",NULL);
++            env_set("recoveryinprog",NULL);
++            env_save();
++            /*Wait On KCS for Fimware update when Auto-Recovery failed */ 
++            UpdateFirmware();
++            return;
++        }
++    }
++    else
++    {
++        Enable_watchdog(&g_wdt_reset_status);
++        if (g_wdt_reset_status & 0x00000002)
++        {
++            env_set("goldenside", "1");
++        }
++        else
++        {
++            env_set("goldenside", "0");
++        }
++
++        env_save();
++
++    }
++
++}
++#endif
++
++	
++int
++BootFMH(unsigned short PathID)
++{
++#if 1
++	char Command[128] = "FMHEXECUTE";
++	char AddrStr[128] = "0xFFFFFFFF";
++	char bootargs[256] = {0};
++	char imagebooted[16] = {0};
++    char goldenside[16];
++	char INITRDAddrStr[128] = "0xFFFFFFFF";
++	char dtsaddrstr[128] = "0xFFFFFFFF";
++	char baudrate_str[16] = {0};
++	unsigned char mod_Name[9]={0};
++	char FSName[16] = {0};  /* Hope no filesystem name is bigger then 15 char long */
++	u8 imagetoboot = IMAGE_1; /* By default will boot image-1 */
++	char *argv[6];
++	char *s = NULL;
++	//flash_info_t *flinfo = NULL;
++	FMH	*fmh = NULL;
++	MODULE_INFO *mod = NULL;
++	unsigned long i=0,SectorSize=CONFIG_SPX_FEATURE_GLOBAL_ERASE_BLOCK_SIZE;//,flashsize=0;
++	unsigned long SectorCount,StartingSector =0, startaddress;	
++	unsigned long initrd_address = 0xFFFFFFFF;
++	long SkipSize;
++	unsigned long ExecuteAddr = 0xFFFFFFFF;
++	unsigned long dtsaddr = 0xFFFFFFFF;
++	unsigned short ExecuteType = MODULE_BOOTLOADER;
++	unsigned short Compression;
++	int retval = -1;
++	int  silent = 0;
++	int MtdPartition = 1;		/* mtdblock0 is used for full flash */
++	int RootMtdNo = 0;
++	int rootisinitrd = 0; /*indicates root is actually an initrd*/
++	char *side = NULL;
++	u8 golden_side;
++	struct spi_flash *flash;
++	int ret = 0;
++#ifdef CONFIG_YAFU_SUPPORT
++	int  boot_fwupd = 0;
++#endif
++#ifdef CONFIG_BOOTLOGO_SUPPORT
++	char bootlogo_addr[20] = {0};
++#endif
++
++#if defined (CONFIG_CMD_EXT4) && defined (CONFIG_CMD_MMC) && defined (CONFIG_SPX_FEATURE_MMC_BOOT)
++	char bootpart[256] = {0};
++	int str_pos =0;
++	int devicenumber =0;
++	char partition[128] = {0};
++	char *bootselect = NULL;
++#endif
++
++	sprintf(baudrate_str,"%d",CONFIG_BAUDRATE);
++
++#ifdef CONFIG_YAFU_SUPPORT
++	s = env_get("boot_fwupd");
++	if (s != NULL)
++	{
++		boot_fwupd = (int)simple_strtoul(s,NULL,0);
++		printf("boot_fwupd is %d\n",boot_fwupd);
++	}
++
++	/* Check the variable to find out if we need to go into fwupdate mode or not */
++	if(boot_fwupd)
++	{
++		/* If variable is set, then clear it and call fwupdate() */
++		env_set("mode", "1");   
++		env_save();
++		fwupdate();
++	}
++#endif
++#if 0
++	if (gDefaultEnvironment == 1)
++	{
++		gDefaultEnvironment = 0;
++		env_save ();
++	}
++#endif
++	/* silentboot = 0 (Verbose) 2 (Progress bar) 1 (Quiet) */
++	s = env_get("silent");
++	if (s != NULL)
++		silent = (int)simple_strtoul(s,NULL,0);
++
++	if (PathID == 0x04)
++	{
++		#ifdef CONFIG_R2C_SUPPORT
++			return rconsole();      /* Remote Recovery Mode */
++		#else
++			return UpdateFirmware();
++		#endif
++	}
++	if (PathID == 0x08)
++	{
++		return 0;			/* Management Console (Restricted Version of Uboot) */
++	}
++	if (PathID == 0x10)
++	{
++		return 0;			/* Full Access to Uboot Console */
++	}
++
++#ifdef CONFIG_SPX_FEATURE_GLOBAL_DUAL_IMAGE_SUPPORT
++    if( GetBootImage(&imagetoboot) != 0 )
++	 return -1;
++#endif
++
++#ifdef CONFIG_SPX_FEATURE_BMC_FIRMWARE_AUTO_RECOVERY
++        BMCAutoRecovery();
++#endif
++
++
++	printf("Image to be booted is %d\n",imagetoboot);
++
++
++    flash = spi_flash_probe(CONFIG_ENV_SPI_BUS, CONFIG_ENV_SPI_CS,
++                        CONFIG_ENV_SPI_MAX_HZ, CONFIG_ENV_SPI_MODE);
++    if (flash == NULL) 
++    {
++        puts("\nspi_flash_probe failed");
++        hang();
++    }
++
++    if(imagetoboot == IMAGE_1)
++    {
++        SectorCount = (CONFIG_SPX_FEATURE_GLOBAL_USED_FLASH_SIZE/SectorSize);
++        StartingSector = 0;
++        //startaddress=CONFIG_SYS_FLASH_BASE;
++        startaddress=0;
++    }
++    else//for image2
++    {
++#if defined CONFIG_SPX_FEATURE_DEDICATED_SPI_FLASH_BANK
++        StartingSector=0;
++        for(i=0;i< CONFIG_SPX_FEATURE_SECONDARY_IMAGE_SPI; i++){
++            StartingSector+=flash_info[i].size;
++        }
++        SectorCount=StartingSector+CONFIG_SPX_FEATURE_GLOBAL_USED_FLASH_SIZE;
++        startaddress=CONFIG_SYS_FLASH_BASE+StartingSector;
++        StartingSector/=SectorSize;
++        SectorCount/=SectorSize;
++#else
++
++        StartingSector = (CONFIG_SPX_FEATURE_GLOBAL_USED_FLASH_SIZE/SectorSize);
++        SectorCount = ( (2*CONFIG_SPX_FEATURE_GLOBAL_USED_FLASH_SIZE)/SectorSize );
++        //startaddress=CONFIG_SYS_FLASH_BASE+CONFIG_SPX_FEATURE_GLOBAL_USED_FLASH_SIZE;
++        startaddress=CONFIG_SPX_FEATURE_GLOBAL_USED_FLASH_SIZE;
++#endif
++    }
++
++        #ifdef CONFIG_SPX_FEATURE_SECURE_BOOT_SUPPORT
++                hrot_start();
++        #endif
++
++	/* Scan through the flash for FMH */
++	for (i=StartingSector;i<SectorCount;)
++	{
++		/* Check if FMH found at this sector */
++		fmh = ScanforFMH(flash,((i*SectorSize)),SectorSize);
++		//fmh = ScanforFMH((unsigned char *)(CONFIG_SYS_FLASH_BASE+(i*SectorSize)),SectorSize);
++		if (fmh == NULL)
++		{
++			i++;
++			continue;
++		}
++
++		/* Extract Module information and module name */
++		mod = &(fmh->Module_Info);
++	
++	#ifdef CONFIG_SPX_FEATURE_SECURE_BOOT_SUPPORT
++                retval = hrot_update(mod->Module_Type, mod->Module_Name, le32_to_host(mod->Module_Location), le32_to_host(fmh->FMH_AllocatedSize), le32_to_host(fmh->FMH_Location), startaddress);
++                if(retval){
++		#ifdef CONFIG_SPX_FEATURE_FAIL_SAFE_BOOTING
++			while(true)
++                        {
++			    udelay(10000);
++                        }
++		#else
++                        return retval;
++		#endif
++                }
++        #endif
++	
++		/*To avoid junk prints if module name length is equals to size */
++		strncpy((char *)mod_Name,(char *)mod->Module_Name,sizeof(mod->Module_Name));
++		mod_Name[sizeof(mod->Module_Name)]=0;
++
++#ifdef CONFIG_BOOTLOGO_SUPPORT
++		if ((le16_to_host(mod->Module_Type) == MODULE_BOOTLOGO))
++		{
++			//showLogo
++			if ((fmh->FMH_Ver_Major == 1) && (fmh->FMH_Ver_Minor >= 8)){
++				flash_read( /*addr,cnt,dest */
++						(ulong)(startaddress + le32_to_host(mod->Module_Location)),
++						le32_to_host(mod->Module_Size),
++						(char *)le32_to_host(mod->Module_Load_Address));
++			} else {
++				flash_read( /*addr,cnt,dest */
++						(ulong)((CONFIG_SYS_FLASH_BASE+(i*SectorSize)) + le32_to_host(mod->Module_Location)),
++						le32_to_host(mod->Module_Size),
++						(char *)le32_to_host(mod->Module_Load_Address));
++			}
++			#if 0 // disable show logo when booting.
++			ShowBootLogoByAddress( le32_to_host(mod->Module_Load_Address), 0);
++			#endif 
++			sprintf(bootlogo_addr," bootlogo=%x", le32_to_host(mod->Module_Location));
++		}
++#endif
++
++		/* Check if Path ID Matches */
++		if (!(le16_to_host(mod->Module_Flags) & PathID))
++		{
++			goto Skip;
++			continue;
++		}
++
++		if ((le16_to_host(mod->Module_Type) == MODULE_JFFS2) ||
++			(le16_to_host(mod->Module_Type) == MODULE_JFFS) ||
++			(le16_to_host(mod->Module_Type) == MODULE_CRAMFS) ||
++			(le16_to_host(mod->Module_Type) == MODULE_SQUASHFS) ||
++			(le16_to_host(mod->Module_Type) == MODULE_INITRD_CRAMFS) ||
++			(le16_to_host(mod->Module_Type) == MODULE_INITRD_SQUASHFS))
++		{
++			if (strncasecmp((char *)mod->Module_Name,"ROOT",8) == 0)
++			{
++				if(le16_to_host(mod->Module_Type) == MODULE_INITRD_CRAMFS)
++				{
++					rootisinitrd = 1; //found root and it is initrd
++				}
++				if(le16_to_host(mod->Module_Type) == MODULE_INITRD_SQUASHFS)
++				{
++					rootisinitrd = 1; //found root and it is initrd
++				}
++				RootMtdNo = MtdPartition;
++				if(rootisinitrd == 0)
++				{
++					printf("Found Root File System @ /dev/mtdblock%d\n",RootMtdNo);
++				}
++				else
++				{
++					if ((fmh->FMH_Ver_Major == 1) && (fmh->FMH_Ver_Minor >= 8))
++						initrd_address = startaddress + le32_to_host(mod->Module_Location);
++					printf("Found INITRD Image for Root File System @ /dev/mtdblock%d flash address %lx\n",RootMtdNo,initrd_address);
++				}
++
++ 				switch (le16_to_host(mod->Module_Type))
++        		{
++         			case MODULE_JFFS:
++               			printf("Root File System is JFFS\n");
++                		strncpy(FSName,"jffs",15);
++                		break;
++            		case MODULE_JFFS2:
++               			printf("Root File System is JFFS2\n");
++           			    strncpy(FSName,"jffs2",15);
++              			break;
++           			case MODULE_CRAMFS:
++         			case MODULE_INITRD_CRAMFS:
++               			printf("Root File System is CRAMFS\n");
++                		strncpy(FSName,"cramfs",15);
++                		break;
++            		case MODULE_SQUASHFS:
++         			case MODULE_INITRD_SQUASHFS:
++                		printf("Root File System is SQUASHFS\n");
++                		strncpy(FSName,"squashfs",15);
++                		break;
++            		default:
++                		strncpy(FSName,"",15);
++       	 		}
++			}
++
++			if ((fmh->FMH_Ver_Major == 1) && (fmh->FMH_Ver_Minor >= 8))
++				printf("%s @ /dev/mtdblock%d Address %lx\n",mod_Name, MtdPartition, startaddress + le32_to_host(mod->Module_Location));
++
++			MtdPartition++;
++		}
++
++		if (le16_to_host(mod->Module_Type) == MODULE_FPGA)
++		{
++			dtsaddr = le32_to_host(mod->Module_Location);
++		}
++
++
++
++		/* Calculate the compresion Type */
++		Compression = le16_to_host(mod->Module_Flags);
++	    	Compression &= MODULE_FLAG_COMPRESSION_MASK;
++		Compression >>= MODULE_FLAG_COMPRESSION_LSHIFT;
++
++
++		/* If module to be loaded to memory */
++		if (le16_to_host(mod->Module_Flags) & MODULE_FLAG_COPY_TO_RAM)
++		{
++			/* TODO: If compression is enabled, decompress to ram */
++			if (Compression == MODULE_COMPRESSION_NONE)
++			{
++				if ((fmh->FMH_Ver_Major == 1) && (fmh->FMH_Ver_Minor >= 8))
++				{
++					printf("Copying Module of size 0x%x From 0x%lx to 0x%x\n",
++								le32_to_host(mod->Module_Size),
++								startaddress+le32_to_host(mod->Module_Location),
++								le32_to_host(mod->Module_Load_Address));
++					ret = spi_flash_read(flash, le32_to_host(mod->Module_Location), le32_to_host(mod->Module_Size), (void *)le32_to_host(mod->Module_Load_Address));
++					if(ret)
++					{
++						puts("Error in reading SPI\n");
++					}
++				}
++
++				if (strncasecmp((char *)mod->Module_Name,"ROOT",8) == 0)
++				{
++					if(rootisinitrd == 1)
++					{
++						initrd_address =  le32_to_host(mod->Module_Load_Address);
++						printf("INITRD Image moved to 0x%lx\n",initrd_address);
++					}
++				}
++			}
++			else
++			{
++				/* TODO: If compression is enabled, decompress to ram */
++				printf("ERROR: Compression support not present in U-Boot\n");
++			}
++		}
++
++		/* If no other previous module to be executed and this module to
++		 * be executed. Save the ExecuteAddr for later execution */
++		if ((le16_to_host(mod->Module_Flags) & MODULE_FLAG_EXECUTE)
++						&& 	(ExecuteAddr == 0xFFFFFFFF))
++		{
++			ExecuteType =le16_to_host(mod->Module_Type);
++			if (le16_to_host(mod->Module_Flags) & MODULE_FLAG_COPY_TO_RAM)
++				ExecuteAddr =le32_to_host(mod->Module_Load_Address);
++			else
++			{
++				if (Compression == MODULE_COMPRESSION_NONE)
++				{
++					if ((fmh->FMH_Ver_Major == 1) && (fmh->FMH_Ver_Minor >= 8))
++						ExecuteAddr = startaddress + le32_to_host(mod->Module_Location);
++				}
++				else
++					printf("ERROR: Compressed Module cannot be XIP\n");
++			}
++		}
++
++		/* Skip the Sectors occupied by the Module */
++Skip:
++		if (i*SectorSize > le32_to_host(mod->Module_Location)) /* Special case of AltFMH (FMH location > Module_Location */
++				SkipSize=SectorSize;
++		else
++			/* Skip the Sectors occupied by the Module */
++			SkipSize = le32_to_host(fmh->FMH_AllocatedSize);
++		while ((SkipSize > 0) && (i < SectorCount))
++		{
++			/*if (i == (SectorCount-1))
++				SectorSize= flinfo->size - flinfo->start[i];
++			else
++				SectorSize = flinfo->start[i+1]-flinfo->start[i];
++			*/
++			SkipSize-=SectorSize;
++			i++;
++		}
++	}	/* For Scan */
++
++        #ifdef CONFIG_SPX_FEATURE_SECURE_BOOT_SUPPORT
++                retval = hrot_finish(startaddress);
++                if(retval){
++                        printf("Signature verification failed, halting boot!\n\n");
++		#ifdef CONFIG_SPX_FEATURE_FAIL_SAFE_BOOTING
++			while(true)
++                        {
++			    udelay(10000);
++                        }
++		#else
++                        return retval;
++		#endif
++                }
++                else{
++                        printf("Signature verification passed\n");
++                }
++
++        #endif
++
++	/* Create the bootarguments */
++#ifdef  CONFIG_SPX_FEATURE_MMC_BOOT 
++	if (1)
++#else
++	if (RootMtdNo > 0) 
++#endif
++	{
++		// Some flash does auto protect on powerup. Linux MTD as of now will return 
++        // error on writes to protected blocks. This will create problems in JFFS2 
++		// writes. So unprotect all blocks before booting to linux
++		argv[0] = &Command[0];
++		argv[1] = "off";
++		argv[2] = "all";
++		argv[3] = NULL;
++		//do_protect (NULL,0,3,argv); //TBD
++#ifdef  CONFIG_SPX_FEATURE_MMC_BOOT 
++		Get_bootargs(bootargs,rootisinitrd,RootMtdNo,1);
++#else
++		Get_bootargs(bootargs,rootisinitrd,RootMtdNo,0);
++#endif
++/*
++		//we found root mtd.now we see if it is initrd
++		if(rootisinitrd == 1)
++		{
++			sprintf(bootargs,"root=/dev/ramdisk ro ip=none ramdisk_blocksize=4096 ");
++		}
++		else
++		{
++			sprintf(bootargs,"root=/dev/mtdblock%d ro ip=none ",RootMtdNo);
++		}
++*/
++		if (silent > 1)
++		{
++			strcat(bootargs,"console=");
++#ifdef CONFIG_SPX_FEATURE_GLOBAL_CONSOLE_TTY
++			strcat(bootargs,CONFIG_SPX_FEATURE_GLOBAL_CONSOLE_TTY);
++#else
++			strcat(bootargs,"ttyS0");
++#endif
++			strcat(bootargs,",");
++			strcat(bootargs,baudrate_str);
++			strcat(bootargs," bootprogress");
++		}
++		else
++		{
++			if (silent == 1)
++				strcat(bootargs,"console=null");
++			else
++			{
++				strcat(bootargs,"console=");
++#ifdef CONFIG_SPX_FEATURE_GLOBAL_CONSOLE_TTY
++				strcat(bootargs,CONFIG_SPX_FEATURE_GLOBAL_CONSOLE_TTY);
++#else
++				strcat(bootargs,"ttyS0");
++#endif
++				strcat(bootargs,",");
++				strcat(bootargs,baudrate_str);
++			}
++		}
++	
++		if (FSName[0] != 0)
++		{
++			strcat(bootargs," rootfstype=");
++			strcat(bootargs,FSName);
++		}
++
++#ifdef CONFIG_BIGPHYSAREA
++		strcat(bootargs," bigphysarea=");
++		strcat(bootargs,CONFIG_BIGPHYSAREA);
++#endif		
++#ifdef CONFIG_EXTRA_BOOTARGS 
++		strcat(bootargs," " CONFIG_EXTRA_BOOTARGS);
++#endif
++#ifdef CONFIG_BOOTLOGO_SUPPORT
++		strcat(bootargs,bootlogo_addr);
++#endif
++		sprintf(imagebooted," imagebooted=%d",imagetoboot);
++		strcat(bootargs,imagebooted);		
++
++        side = env_get("goldenside");
++        if (side == NULL) 
++        {
++            printf("Booting from Primary side\n");
++            golden_side = 0;
++        }
++        else
++        {
++            golden_side = *side - 48;
++        }
++
++        if (golden_side)
++        {
++            sprintf(goldenside, " goldenside=1");
++            strcat(bootargs,goldenside); 
++        }
++	}
++
++	/* Check if anything to be executed */
++	if (ExecuteAddr != 0xFFFFFFFF)
++	{
++		/* Form Arguments */
++		if(rootisinitrd != 1)
++		{
++			sprintf(AddrStr,"0x%lx",ExecuteAddr);
++			sprintf(dtsaddrstr,"0x%lx",dtsaddr);
++			argv[0] = &Command[0];
++			argv[1] = &AddrStr[0];
++			argv[2] = "-";
++			argv[3] = &dtsaddrstr[0];
++			argv[4] = NULL;
++		}
++		else
++		{
++			sprintf(AddrStr,"0x%lx",ExecuteAddr);
++			sprintf(INITRDAddrStr,"0x%lx",initrd_address);
++			sprintf(dtsaddrstr,"0x%lx",dtsaddr);
++			argv[0] = &Command[0];
++			argv[1] = &AddrStr[0];
++			argv[2] = &INITRDAddrStr[0];
++			argv[3] = &dtsaddrstr[0];
++			argv[4] = NULL;
++		}
++
++		/* If module is a ELF Executable */
++		if (ExecuteType == MODULE_ELF)
++		{
++			if (silent == 1)
++				console_assign(stdout,"nulldev");
++			retval = do_bootelf(NULL,0,2,argv);
++			console_assign(stdout,"serial");
++			return retval;
++		}
++
++		/* If module is a U-Boot Format Linux Image */
++		if (ExecuteType == MODULE_PIMAGE)
++		{
++			printf("Booting from MODULE_PIMAGE ...\n");
++			printf("Bootargs = [%s]\n",bootargs);
++			env_set("bootargs",bootargs);
++			if (silent == 1)
++				console_assign(stdout,"nulldev");
++			if(rootisinitrd != 1)
++			{
++				retval =  do_bootm(NULL,0,4,argv);
++			}
++			else
++			{
++				//env_set("initrd_high","off");
++				retval = do_bootm(NULL,0,4,argv);
++			}
++			console_assign(stdout,"serial");
++			printf("Failed\n");
++			return retval;
++		}
++
++		/* Other Executable modules, jump directly */
++		if ((ExecuteType == MODULE_KERNEL) || (ExecuteType == MODULE_UNKNOWN))
++		{
++			if (silent == 1)
++				console_assign(stdout,"nulldev");
++			//retval =  do_go(NULL,0,2,argv); TBD
++	
++			console_assign(stdout,"serial");
++			return retval;
++		}
++	}
++
++	/* If PathID is 1 (OS) and nothing was executed, try booting
++	 * kernel from JFFS2 File system if any available
++	 */
++	if ((PathID == 1) && (RootMtdNo > 0))
++	{
++#if (CONFIG_CMD_JFFS2)
++		printf("Booting from image in %s ...\n",KERNEL_FILE);
++		printf("Bootargs = [%s]\n",bootargs);
++		env_set("bootargs",bootargs);
++		if (silent == 1)
++			console_assign(stdout,"nulldev");
++		/* Change active JFFS2 partition to wherever  (Root FS ) */
++		sprintf(AddrStr,"%d",RootMtdNo-1);	/* -1 because Zero Based */
++		argv[0] = &Command[0];
++		argv[1] = &AddrStr[0];
++		argv[2] = NULL;
++		do_jffs2_chpart(NULL,0,2,argv);
++
++		/* Load linux kernel into memory */
++		sprintf(AddrStr,"0x%x",KERNEL_LOADADDR);
++		argv[0] = &Command[0];
++		argv[1] = &AddrStr[0];
++		argv[2] = KERNEL_FILE;
++		argv[3] = NULL;
++		if (do_jffs2_fsload(NULL,0,3,argv) == 0 )
++		{
++			argv[2] = NULL;
++			/* Boot the kernel from memory */
++			retval = do_bootm(NULL,0,2,argv);
++			console_assign(stdout,"serial");
++			printf("Failed\n");
++			return retval;
++		}
++		console_assign(stdout,"serial");
++#else
++        printf("Error locating Kernel. Reset the board\n");
++#endif                
++		printf("Unable to locate %s\n",KERNEL_FILE);
++	}
++
++#if defined (CONFIG_CMD_EXT4) && defined (CONFIG_CMD_MMC) && defined (CONFIG_SPX_FEATURE_MMC_BOOT)
++	printf("Booting from emmc/sd using image %s ...\n",KERNEL_FILE);
++	printf("Bootargs = [%s]\n",bootargs);
++	env_set("bootargs",bootargs);
++	if (silent == 1)
++		console_assign(stdout,"nulldev");
++
++	retval = snprintf(AddrStr,128,"0x%x",CONFIG_SYS_LOAD_ADDR);
++	if(retval < 0 || retval >= 128)
++	{
++		return retval;
++	}
++
++	strncpy(bootpart,&bootargs[10],9);//Copy boot partition from bootargs to bootpart 
++	str_pos = strspn(bootpart,"mmcblk");
++	devicenumber = simple_strtoul( (bootpart + str_pos), NULL, 10);
++	str_pos += 2;
++
++#if CONFIG_SD_BOOT_SELECTOR 
++	bootselect = env_get("sdbootselector");
++	str_pos = simple_strtoul(bootselect,NULL,10);	
++#else
++	strncpy(partition,&bootpart[str_pos],strlen(&bootpart[str_pos]));
++	str_pos = simple_strtoul(partition,NULL,10);
++	memset(partition,0,sizeof(partition));
++#endif
++	retval = snprintf(partition,128,"%d:%d", devicenumber, str_pos);
++	if(retval < 0 || retval >= 128)
++	{
++		return retval;
++	}
++
++	argv[0] = "ext4load";
++	argv[1] = "mmc";
++	argv[2] = &partition[0]; /* It is assumed that boot partition will be in slot 0 */
++	argv[3] = &AddrStr[0];
++	argv[4] = KERNEL_FILE;
++	argv[5] = NULL;
++
++	if(do_ext4_load(NULL,0,5,argv) == 0)
++	{
++		argv[0] = &Command[0];
++		argv[1] = &AddrStr[0];
++		argv[2] = NULL;
++		retval = do_bootm(NULL,0,2,argv);
++		console_assign(stdout,"serial");
++		printf("Failed\n");
++		return retval;
++	}
++	console_assign(stdout,"nulldev");
++	printf("Unable to locate %s\n",KERNEL_FILE);
++	UpdateFirmware();
++#else
++   printf("Error locating Kernel. Reset the board\n");
++#endif
++
++	UpdateFirmware();
++	/* Module Type JFFS and JFFS2 are File System  - Not executable */
++	/* Module Type FIRMWARE is a information module- Not Executable */
++	/* Module Type FPGA has FPGA microcodes - Not Executable by CPU */
++	/* Module Type BOOT LOADER is loaded automatically */
++#endif
++	return 0;
++}
++
+--- u-boot-2019.04/oem/ami/fmh/cmd_fmh.h	2019-12-10 23:05:58.800617378 -0500
++++ uboot/oem/ami/fmh/cmd_fmh.h	2019-12-10 21:22:44.088100272 -0500
+@@ -0,0 +1,22 @@
++#ifndef __AMI_CMD_FMH_H__
++#define __AMI_CMD_FMH_H__
++
++/* For deciding on mac address */
++#define MAC_ADDR_LEN  18 		 /* no : in between */
++#define BLINK_DELAY_COUNT 200000 /* 200 msec */
++#define FIRMWARE_INFO_TYPE    MODULE_FORMAT_FIRMWARE_INFO
++
++/* U-boot's cmd function to list and bootFMH */
++extern int  do_fmh(cmd_tbl_t *, int, int, char * const []);
++extern int  do_bootfmh(cmd_tbl_t *, int, int, char * const []);
++
++/* Actual function implementing listing of FMH*/
++extern int  ListFMH(void);	
++extern int  GetFMHSectorLocationSize(char * Name, unsigned long * Location, unsigned long * Size);
++extern int  BootFMH(unsigned short PathID);
++extern int processMac( char *mac);
++extern int getMacKb(unsigned char *mac );
++extern int gets(char * buff,unsigned int size );
++extern int validateMac( unsigned char *s);
++
++#endif	
+--- u-boot-2019.04/oem/ami/fmh/cmd.h	2019-12-10 23:11:51.725943471 -0500
++++ uboot/oem/ami/fmh/cmd.h	2019-12-10 21:22:44.088100272 -0500
+@@ -0,0 +1,17 @@
++
++/*
++ * Copyright 2005 Sun Microsystems, Inc.  All rights reserved.
++ * Use is subject to license terms.
++ */
++
++#ifndef __CMD_H__
++#define __CMD_H__
++
++extern int do_bootm (cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[]);
++extern int do_bootelf (cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[]);
++extern int do_go (cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[]);
++extern int do_jffs2_chpart (cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[]);
++extern int do_jffs2_fsload (cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[]);
++extern int do_ext4_load(cmd_tbl_t *cmdtp, int flag, int argc,char *const argv[]);
++
++#endif
+--- u-boot-2019.04/oem/ami/fmh/fmhcore.c	2019-12-10 23:06:16.352682342 -0500
++++ uboot/oem/ami/fmh/fmhcore.c	2019-12-10 21:22:44.088100272 -0500
+@@ -0,0 +1,289 @@
++#ifdef __KERNEL__
++	#ifdef __UBOOT__
++		#include <common.h>
++	#else
++		#include <linux/kernel.h>
++		#include <linux/string.h>
++	#endif
++#else
++	#include <stdio.h>
++	#include <string.h>
++#endif
++#include <oem/ami/fmh/fmh.h>
++//#include "crc32.h"
++#include <flash.h>
++#include <mtd/cfi_flash.h>
++#include <spi_flash.h>
++
++
++
++
++
++FMH fmh_buffer;
++ALT_FMH altfmh_buffer;
++
++static unsigned char  CalculateModule100(unsigned char *Buffer, unsigned long Size);
++static FMH * CheckForNormalFMH(FMH *fmh);
++static unsigned long  CheckForAlternateFMH(ALT_FMH *altfmh);
++//extern flash_info_t flash_info[CONFIG_SYS_MAX_FLASH_BANKS];
++
++static
++unsigned char 
++CalculateModule100(unsigned char *Buffer, unsigned long Size)
++{
++	unsigned char Sum=0;
++
++	while (Size--)
++	{
++		Sum+=(*Buffer);
++		Buffer++;
++	}	
++
++	return (~Sum)+1;
++}
++
++static
++unsigned char 
++ValidateModule100(unsigned char *Buffer, unsigned long Size)
++{
++	unsigned char Sum=0;
++
++	while (Size--)
++	{
++		Sum+=(*Buffer);
++		Buffer++;
++	}
++
++	return Sum;
++}
++
++static
++FMH *
++CheckForNormalFMH(FMH *fmh)
++{
++	if (strncmp((char *)fmh->FMH_Signature,FMH_SIGNATURE,sizeof(FMH_SIGNATURE)-1) != 0)
++			return NULL;
++
++	if (le16_to_host(fmh->FMH_End_Signature) != FMH_END_SIGNATURE)
++			return NULL;
++
++	if (ValidateModule100((unsigned char *)fmh,sizeof(FMH)) != 0)
++			return NULL;
++	
++	return fmh;
++			
++}
++
++static
++unsigned long 
++CheckForAlternateFMH(ALT_FMH *altfmh)
++{
++
++	if (strncmp((char *)altfmh->FMH_Signature,FMH_SIGNATURE,sizeof(FMH_SIGNATURE)-1) != 0)
++			return INVALID_FMH_OFFSET;
++
++	if (le16_to_host(altfmh->FMH_End_Signature) != FMH_END_SIGNATURE)
++			return INVALID_FMH_OFFSET;
++
++	if (ValidateModule100((unsigned char *)altfmh,sizeof(ALT_FMH)) != 0)
++			return INVALID_FMH_OFFSET;
++	
++	return le32_to_host(altfmh->FMH_Link_Address);
++
++}
++
++
++#ifdef CONFIG_SPX_FEATURE_BMC_FIRMWARE_AUTO_RECOVERY
++/*
++ * Check For Alternate FMH in RAM
++ */
++static
++unsigned long
++CheckForAlternateFMH_RAM(ALT_FMH *altfmh)
++{
++
++	if (strncmp((char *)altfmh->FMH_Signature,FMH_SIGNATURE,sizeof(FMH_SIGNATURE)-1) != 0)
++		return INVALID_FMH_OFFSET;
++
++	if (le16_to_host(altfmh->FMH_End_Signature) != FMH_END_SIGNATURE)
++		return INVALID_FMH_OFFSET;
++
++	if (ValidateModule100((unsigned char *)altfmh,sizeof(ALT_FMH)) != 0)
++		return INVALID_FMH_OFFSET;
++
++	return le32_to_host(altfmh->FMH_Link_Address);
++
++}
++
++
++/*
++ * Check For Normal FMH in RAM
++ */
++static
++FMH *
++CheckForNormalFMH_RAM(FMH *fmh)
++{
++
++
++	if (strncmp((char *)fmh->FMH_Signature,FMH_SIGNATURE,sizeof(FMH_SIGNATURE)-1) != 0)
++		return NULL;
++
++
++	if (le16_to_host(fmh->FMH_End_Signature) != FMH_END_SIGNATURE)
++		return NULL;
++
++
++	if (ValidateModule100((unsigned char *)fmh,sizeof(FMH)) != 0)
++		return NULL;
++
++
++	return fmh;
++
++}
++
++/*
++ * Scan for FMH in the RAM
++ */
++FMH*
++ScanforFMH_RAM(unsigned char *SectorAddr, unsigned long SectorSize)
++{
++	FMH *fmh;
++	ALT_FMH *altfmh;
++	unsigned long FMH_Offset;
++
++
++	/* Check if Normal FMH is found */
++	fmh = (FMH *)SectorAddr;
++	fmh = CheckForNormalFMH_RAM(fmh);
++	if (fmh != NULL)
++	{
++		return fmh;
++	}
++
++	/* If Normal FMH is not found, check for alternate FMH */
++	altfmh = (ALT_FMH *)(SectorAddr+SectorSize - sizeof(ALT_FMH));
++	FMH_Offset = CheckForAlternateFMH_RAM(altfmh);
++	if (FMH_Offset == INVALID_FMH_OFFSET)
++	{
++		return NULL;
++	}
++	fmh = (FMH *)(SectorAddr +FMH_Offset);
++
++	/* If alternate FMH is found, validate it */
++	fmh = CheckForNormalFMH_RAM(fmh);
++	return fmh;
++}
++#endif
++
++FMH *
++ScanforFMH(struct spi_flash *flash,u32 SectorAddr, unsigned long SectorSize)
++{
++	FMH *fmh;
++	ALT_FMH *altfmh;
++	unsigned long FMH_Offset;
++#if defined CONFIG_SPX_FEATURE_DEDICATED_SPI_FLASH_BANK
++	unsigned long StartAddr = (unsigned long)SectorAddr;
++	unsigned long SecStartAddr = 0;
++	unsigned long i = 0;
++#elif defined CONFIG_SPX_FEATURE_CONTIGIOUS_SPI_MEMORY
++	unsigned long StartAddr = (unsigned long)SectorAddr;
++#endif
++    int ret=0;
++
++
++    //printf("Sector Address %x\n",SectorAddr);
++    ret = spi_flash_read(flash, SectorAddr, sizeof(FMH), (void *)&fmh_buffer);
++    if(ret)
++    {
++        puts("Error in reading SPI\n");
++    }
++
++
++	/* Check if Normal FMH is found */
++	//flash_read(flash,(ulong)SectorAddr,sizeof(FMH),(char*)&fmh_buffer);
++	fmh = (FMH *)(&fmh_buffer);
++	fmh = CheckForNormalFMH(fmh);
++	if (fmh != NULL)
++		return fmh;
++
++	/* If Normal FMH is not found, check for alternate FMH */
++	//flash_read((ulong)SectorAddr+SectorSize - sizeof(ALT_FMH),sizeof(ALT_FMH),(char *)&altfmh_buffer);
++    ret = spi_flash_read(flash, SectorAddr+SectorSize - sizeof(ALT_FMH), sizeof(ALT_FMH), (void *)&altfmh_buffer);
++    if(ret)
++    {
++        puts("Error in reading SPI\n");
++    }
++	altfmh = (ALT_FMH*)&altfmh_buffer;
++	FMH_Offset = CheckForAlternateFMH(altfmh);
++	if (FMH_Offset == INVALID_FMH_OFFSET)
++		return NULL;
++	
++#if defined CONFIG_SPX_FEATURE_DEDICATED_SPI_FLASH_BANK
++	for(i = 0; i < CONFIG_SPX_FEATURE_SECONDARY_IMAGE_SPI; i++)
++		SecStartAddr += flash_info[i].size;
++
++	if ((StartAddr - CONFIG_SYS_FLASH_BASE) >= SecStartAddr)
++		flash_read((ulong)CONFIG_SYS_FLASH_BASE+SecStartAddr+FMH_Offset, sizeof(FMH),(char *)&fmh_buffer);
++	else
++#elif defined CONFIG_SPX_FEATURE_CONTIGIOUS_SPI_MEMORY
++	if ((StartAddr - CONFIG_SYS_FLASH_BASE) >= CONFIG_SPX_FEATURE_GLOBAL_USED_FLASH_SIZE)
++		flash_read((ulong)CONFIG_SYS_FLASH_BASE+CONFIG_SPX_FEATURE_GLOBAL_USED_FLASH_SIZE+FMH_Offset, sizeof(FMH), (char *)&fmh_buffer);
++	else
++#endif
++
++    //flash_read((ulong)CONFIG_SYS_FLASH_BASE+FMH_Offset,sizeof(FMH),(char *)&fmh_buffer);
++    ret = spi_flash_read(flash, FMH_Offset, sizeof(FMH), (void *)&fmh_buffer);
++    if(ret)
++    {
++        puts("Error in reading SPI\n");
++    }
++
++	fmh = (FMH*)&fmh_buffer;
++	
++	/* If alternate FMH is found, validate it */
++	fmh = CheckForNormalFMH(fmh);
++	return fmh;
++}
++
++void
++CreateFMH(FMH *fmh,unsigned long AllocatedSize, MODULE_INFO *mod)
++{
++	/* Clear the Structure */	
++	memset((void *)fmh,0,sizeof(FMH));
++
++	/* Copy the module information */
++	memcpy((void *)&(fmh->Module_Info),(void *)mod,sizeof(MODULE_INFO));
++					
++	/* Fill the FMH Fields */		
++	strncpy((char *)fmh->FMH_Signature,FMH_SIGNATURE,sizeof(FMH_SIGNATURE)-1);
++	fmh->FMH_Ver_Major 		= FMH_MAJOR;
++	fmh->FMH_Ver_Minor 		= FMH_MINOR;
++	fmh->FMH_Size	   		= FMH_SIZE;
++	fmh->FMH_End_Signature	= host_to_le16(FMH_END_SIGNATURE);
++	
++	fmh->FMH_AllocatedSize	= host_to_le32(AllocatedSize);
++
++	/*Calculate Header Checksum*/
++	fmh->FMH_Header_Checksum = CalculateModule100((unsigned char *)fmh,sizeof(FMH));
++		
++	return;
++}
++
++void
++CreateAlternateFMH(ALT_FMH *altfmh,unsigned long FMH_Offset) 
++{
++	/* Clear the Structure */	
++	memset((void *)altfmh,0,sizeof(ALT_FMH));
++					
++	/* Fill the FMH Fields */		
++	strncpy((char *)altfmh->FMH_Signature,FMH_SIGNATURE,sizeof(FMH_SIGNATURE)-1);
++	altfmh->FMH_End_Signature	= host_to_le16(FMH_END_SIGNATURE);
++	
++	altfmh->FMH_Link_Address	= host_to_le32(FMH_Offset);
++
++	/*Calculate Header Checksum*/
++	altfmh->FMH_Header_Checksum = CalculateModule100((unsigned char *)altfmh,
++										sizeof(ALT_FMH));
++	return;
++}
++
+--- u-boot-2019.04/oem/ami/fmh/Makefile	2019-12-10 23:06:25.552716444 -0500
++++ uboot/oem/ami/fmh/Makefile	2019-12-10 21:22:44.088100272 -0500
+@@ -0,0 +1,26 @@
++#
++## (C) Copyright 2013
++# American Megatrends Inc
++# #
++# # This program is free software; you can redistribute it and/or
++# # modify it under the terms of the GNU General Public License as
++# # published by the Free Software Foundation; either version 2 of
++# # the License, or (at your option) any later version.
++# #
++# # This program is distributed in the hope that it will be useful,
++# # but WITHOUT ANY WARRANTY; without even the implied warranty of
++# # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# # GNU General Public License for more details.
++# #
++# # You should have received a copy of the GNU General Public License
++# # along with this program; if not, write to the Free Software
++# # Foundation, Inc., 59 Temple Place, Suite 330, Boston,
++# # MA 02111-1307 USA
++# #
++
++obj-y                           += cmd_fmh.o fmhcore.o bootargs.o
++
++ifdef CONFIG_SPX_FEATURE_SECURE_BOOT_SUPPORT
++obj-y                           += hrotcore.o
++endif
++#
+--- u-boot-2019.04/oem/Makefile	2019-12-10 23:06:36.668757695 -0500
++++ uboot/oem/Makefile	2019-12-10 21:22:44.088100272 -0500
+@@ -0,0 +1 @@
++obj-y += ami/fmh/

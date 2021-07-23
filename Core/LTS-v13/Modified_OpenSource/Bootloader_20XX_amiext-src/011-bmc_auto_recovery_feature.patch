@@ -1,0 +1,4762 @@
+diff -uNar uboot/include/configs/evb_ast2600_spl.h uboot.new/include/configs/evb_ast2600_spl.h
+--- uboot/include/configs/evb_ast2600_spl.h	2020-11-20 04:00:27.000000000 -0500
++++ uboot.new/include/configs/evb_ast2600_spl.h	2020-12-16 13:59:45.000000000 -0500
+@@ -17,6 +17,9 @@
+ /* Memory Info */
+ #define CONFIG_SYS_LOAD_ADDR       0x83000000
+
++#define YAFU_IMAGE_UPLOAD_LOCATION    (CONFIG_SYS_SDRAM_BASE + 0x03000000)
++#define YAFU_TEMP_SECTOR_BUFFER         (CONFIG_SYS_SDRAM_BASE + 0x07000000)
++
+ #ifdef CONFIG_SPL_TINY
+ #ifdef CONFIG_SPL_BUILD
+ #define CONFIG_SYS_NS16550_REG_SIZE 2
+diff -uNar uboot/include/net.h uboot.new/include/net.h
+--- uboot/include/net.h	2020-11-20 04:00:27.000000000 -0500
++++ uboot.new/include/net.h	2020-12-16 14:35:18.023077113 -0500
+@@ -529,7 +529,7 @@
+ 
+ enum proto_t {
+ 	BOOTP, RARP, ARP, TFTPGET, DHCP, PING, DNS, NFS, CDP, NETCONS, SNTP,
+-	TFTPSRV, TFTPPUT, LINKLOCAL, FASTBOOT, WOL, NCSI
++	TFTPSRV, TFTPPUT, LINKLOCAL, FASTBOOT, WOL, NCSI, RECOVERY
+ };
+ 
+ extern char	net_boot_file_name[1024];/* Boot File name */
+diff -uNar uboot/include/oem/ami/fwupdate/kcs.h uboot.new/include/oem/ami/fwupdate/kcs.h
+--- uboot/include/oem/ami/fwupdate/kcs.h	1969-12-31 19:00:00.000000000 -0500
++++ uboot.new/include/oem/ami/fwupdate/kcs.h	2020-12-16 14:09:43.052530392 -0500
+@@ -0,0 +1,75 @@
++/*****************************************************************
++ *****************************************************************
++ ***                                                            **
++ ***    (C)Copyright 2002-2003, American Megatrends Inc.        **
++ ***                                                            **
++ ***            All Rights Reserved.                            **
++ ***                                                            **
++ ***        6145-F, Northbelt Parkway, Norcross,                **
++ ***                                                            **
++ ***        Georgia - 30071, USA. Phone-(770)-246-8600.         **
++ ***                                                            **
++ *****************************************************************
++ *****************************************************************
++ *****************************************************************
++ * $Header: $
++ *
++ * $Revision: $
++ *
++ * $Date: $
++ *
++ ******************************************************************
++ ******************************************************************
++ * 
++ * KCS.h
++ * KCS Functions and Macros Definitions.
++ *
++ *  Author: Rama Rao Bisa <ramab@ami.com>
++ *			Modified by Anurag Bhatia for SP porting		
++ ******************************************************************/
++#ifndef KCS_H
++#define KCS_H
++
++
++#define PACKED __attribute__ ((packed))
++
++/** 
++ * @def MAX_KCS_PKT_LEN
++ * @brief Max KCS Packet Length
++**/
++#define MAX_KCS_PKT_LEN			 (64*1024)
++
++/** 
++ * @def MAX_KCS_DATA_LEN
++ * @brief Max KCS Data Length
++**/
++#define MAX_KCS_DATA_LEN		(MAX_KCS_PKT_LEN - 2)
++
++/**
++ * @brief Initialize KCS interface.
++ * @return 0 if success, -1 if error.
++**/
++extern int InitKCS (void);
++
++/**
++ * @brief Receive KCS Request
++ * @return 0 if success if full KCS packet is received and -1 otherwise
++**/
++extern int RecvKCSRequest (unsigned char ChannelNum,unsigned char *pKCSPkt);
++
++/**
++ * @brief Send KCS Response
++**/
++extern void SendKCSResponse (unsigned char ChannelNum,unsigned char *Pkt, int Size);
++
++#pragma pack(1)
++/* KCSCmd_T */
++typedef struct
++{
++	unsigned char NetFnLUN;
++	unsigned char Cmd;
++	unsigned char Data [MAX_KCS_DATA_LEN];
++
++} PACKED KCSCmd_T;
++#pragma pack()
++#endif	/* KCS_H */
+diff -uNar uboot/include/oem/ami/fwupdate/kcsifc.h uboot.new/include/oem/ami/fwupdate/kcsifc.h
+--- uboot/include/oem/ami/fwupdate/kcsifc.h	1969-12-31 19:00:00.000000000 -0500
++++ uboot.new/include/oem/ami/fwupdate/kcsifc.h	2020-12-16 14:13:35.503684127 -0500
+@@ -0,0 +1,164 @@
++/*****************************************************************
++ *****************************************************************
++ ***                                                            **
++ ***    (C)Copyright 2002-2003, American Megatrends Inc.        **
++ ***                                                            **
++ ***            All Rights Reserved.                            **
++ ***                                                            **
++ ***        6145-F, Northbelt Parkway, Norcross,                **
++ ***                                                            **
++ ***        Georgia - 30071, USA. Phone-(770)-246-8600.         **
++ ***                                                            **
++ *****************************************************************
++ *****************************************************************
++ *****************************************************************/
++#ifndef KCSIFC_H
++#define KCSIFC_H
++
++#define	KCS_1_CHANNEL			0
++#define	KCS_2_CHANNEL			1
++
++extern volatile unsigned char *lpc_base[MAX_KCS_CHANNEL];
++
++#define WRITE_U8(reg,data)			*((LPC_REG_DT *)(reg)) = (data)
++#define READ_U8(reg)				*((LPC_REG_DT *)(reg))
++
++/*** Local Macro Definitions ***/
++/**
++ * @def WRITE_KCS_STATUS_REG
++ * @brief Writes a byte into KCS port status register.
++ * @param CHANNEL The KCS channel number.
++ * @param STATUS a byte data.
++ **/
++#define WRITE_KCS_STATUS_REG(CHANNEL, STATUS)			                 						 \
++do {                                     			                 			 			     \
++    switch (CHANNEL){                      				         						         \
++    case KCS_1_CHANNEL: WRITE_U8 (lpc_base[CHANNEL] + KCS_STATUS_1,STATUS|LPC_WRITE_STATUS_BIT); break;         \
++    case KCS_2_CHANNEL: WRITE_U8 (lpc_base[CHANNEL] + KCS_STATUS_2,STATUS|LPC_WRITE_STATUS_BIT); break;         \
++    }                                                  				    						 \
++} while (0)
++
++
++/**
++ * @def READ_KCS_STATUS_REG
++ * @brief Reads a byte from KCS port status register.
++ * @param CHANNEL The KCS channel number.
++ * @param STATUS a byte data.
++ **/
++#define READ_KCS_STATUS_REG(CHANNEL, STATUS)             								     \
++do {                                                     								     \
++    switch (CHANNEL) {                                   								     \
++    case KCS_1_CHANNEL: STATUS = READ_U8(lpc_base[CHANNEL] + KCS_STATUS_1); break;   	 \
++    case KCS_2_CHANNEL: STATUS = READ_U8(lpc_base[CHANNEL] + KCS_STATUS_2); break;   	 \
++    }                                                      									 \
++} while (0)
++
++/**
++ * @def KCS_DATA_OUT_REG
++ * @brief Writes a byte into KCS port data register.
++ * @param CHANNEL The KCS channel number.
++ * @param DATA a byte data.
++ **/
++#define KCS_DATA_OUT_REG(CHANNEL, DATA)        				            					 \
++do {                                           				             					 \
++    switch (CHANNEL) {                        				             					 \
++    case KCS_1_CHANNEL: WRITE_U8 (lpc_base[CHANNEL] + KCS_ODR1,DATA); break;           \
++    case KCS_2_CHANNEL: WRITE_U8 (lpc_base[CHANNEL] + KCS_ODR2,DATA); break;           \
++    }                                               				      					 \
++} while (0)
++
++
++/**
++ * @def KCS_DATA_IN_REG
++ * @brief Reads a byte from KCS port data register.
++ * @param CHANNEL The KCS channel number.
++ * @param DATA a byte data.
++ **/
++#define KCS_DATA_IN_REG(CHANNEL, DATA)        				   		    				 \
++do {                                        				  	 				         \
++    switch (CHANNEL) {                                     								 \
++    case KCS_1_CHANNEL: DATA = READ_U8(lpc_base[CHANNEL] + KCS_IDR1); break;   		 \
++    case KCS_2_CHANNEL: DATA = READ_U8(lpc_base[CHANNEL] + KCS_IDR2); break;   		 \
++    }                                                      				  				 \
++} while (0)
++
++
++/**
++ * @def KCS_CMD_REG
++ * @brief Reads a byte from KCS port command register.
++ * @param CHANNEL The KCS channel number.
++ * @param CMD a byte data.
++ **/
++#define KCS_CMD_REG(CHANNEL, CMD)         								                 \
++do {                                            				                         \
++    switch (CHANNEL) {                       				                             \
++    case KCS_1_CHANNEL: CMD = READ_U8(lpc_base[CHANNEL] + KCS_IDR1); break;   		 \
++    case KCS_2_CHANNEL: CMD = READ_U8(lpc_base[CHANNEL] + KCS_IDR2); break;   		 \
++    }                                            				         				 \
++} while (0)
++
++
++/** 
++ * @def CLEAR_IBF_STATUS
++**/
++#define CLEAR_IBF_STATUS(CHANNEL)
++
++/** 
++ * @def SET_OBF_STATUS
++**/
++#define SET_OBF_STATUS(CHANNEL)
++
++/**
++ * @def INIT_KCS
++ * @brief Enables KCS channel 1
++ **/
++#define INIT_KCS_HARDWARE() 			                    					\
++do {                                                        					\
++	CLEAR_IBF_STATUS(0);															\
++	CLEAR_IBF_STATUS(1);															\
++} while (0) 
++
++
++/** 
++ * @def SMS_KCS_BASE_ADDR
++ * @brief SMS KCS Base address
++**/
++//#define SMS_KCS_BASE_ADDR		0xCA2
++
++/** 
++ * @def OBF_BIT_SET
++ * @brief Macro to check if output buffer is full
++**/
++#define OBF_BIT_SET(STATUS_REG) (0 != ((STATUS_REG) & 0x01))
++
++/** 
++ * @def IBF_BIT_SET
++ * @brief Macro to check if input buffer is full
++**/
++#define IBF_BIT_SET(STATUS_REG) (0 != ((STATUS_REG) & 0x02))
++
++/** 
++ * @def SET_KCS_STATE
++ * @brief Macro to set the current state of the KCS Interface.
++**/
++#define SET_KCS_STATE(CHANNEL, STATE) 									\
++do {																	\
++	u8 Status = 0;														\
++	READ_KCS_STATUS_REG ((CHANNEL), Status);							\
++	Status = (((Status & LPC_READ_STATUS_BIT) & (~0xC0)) | (STATE));							\
++	WRITE_KCS_STATUS_REG ((CHANNEL),Status);							\
++} while (0)
++
++/** 
++ * @def IS_WRITE_TO_CMD_REG
++ * @brief Macro that returns true if last write was to command register.
++**/
++#define IS_WRITE_TO_CMD_REG(STATUS_REG) (0 != ((STATUS_REG) & 0x08))
++
++/** 
++ * @def IS_WRITE_TO_DATA_REG
++ * @brief Macro that returns true if last write was to data register.
++**/
++#define IS_WRITE_TO_DATA_REG(STATUS_REG) (0 == ((STATUS_REG) & 0x08))
++
++#endif  /* KCS_REGS_H */
+diff -uNar uboot/include/oem/ami/ipmi/cmdhandler.h uboot.new/include/oem/ami/ipmi/cmdhandler.h
+--- uboot/include/oem/ami/ipmi/cmdhandler.h	1969-12-31 19:00:00.000000000 -0500
++++ uboot.new/include/oem/ami/ipmi/cmdhandler.h	2020-12-16 14:18:47.299010325 -0500
+@@ -0,0 +1,924 @@
++/*****************************************************************
++ *****************************************************************
++ ***                                                            **
++ ***    (C)Copyright 2002-2003, American Megatrends Inc.        **
++ ***                                                            **
++ ***            All Rights Reserved.                            **
++ ***                                                            **
++ ***        6145-F, Northbelt Parkway, Norcross,                **
++ ***                                                            **
++ ***        Georgia - 30071, USA. Phone-(770)-246-8600.         **
++ ***                                                            **
++ *****************************************************************
++ *****************************************************************
++ *****************************************************************
++ * $Header: $
++ *
++ * $Revision: $
++ *
++ * $Date: $
++ *
++ ******************************************************************
++ ******************************************************************
++ * 
++ * cmdhandler.h
++ * command handler data structures & macros
++ *
++ *  Author: Rama Rao Bisa <ramab@ami.com>
++ *			Modified by Anurag Bhatia for SP porting
++ ******************************************************************/
++
++#ifndef _CMD_HANDLER_H_
++#define _CMD_HANDLER_H_
++
++#define PACKED __attribute__ ((packed))
++/*** Macro Definitions ***/
++
++#define IP_ADDR_LEN			4
++#define MAX_FILE_NAME_LEN		100
++/**
++ * @def MAX_IPMI_MSG_LEN
++ * @brief Maximum IPMI Message Length
++ **/
++#define MAX_IPMI_MSG_LEN	(64 * 1024)
++
++#define DATA_PACKET_SIZE        (32*1024)       
++
++#define TOTAL_PACKETS_XMIT_IN_A_BLOCK   (CONFIG_SPX_FEATURE_GLOBAL_ERASE_BLOCK_SIZE/DATA_PACKET_SIZE)
++
++#define MAX_FIRMWARE_SECTORS		40
++
++/*----------------------------------------------
++ * Processor specfic type definetion
++ *----------------------------------------------*/
++
++ typedef char  INT8S;
++ typedef short INT16S;
++ typedef long  INT32S;
++ typedef unsigned char  INT8U;
++ typedef unsigned short INT16U;
++ typedef unsigned long INT32U;
++ typedef unsigned long DWORD;
++/*  Command Codes */
++/**
++ * @def CMD_GET_DEV_ID
++ * @brief Command code for Get Device ID Command
++ **/
++#define CMD_GET_DEV_ID					0x01
++#define CMD_GET_CH_AUTH_CAPS			0x38
++#define CMD_GET_SESSION_CHALLENGE		0x39
++#define CMD_ACTIVATE_SESSION			0x3A
++#define CMD_SET_SESSION_PRIV_LEVEL		0x3B
++#define CMD_CLOSE_SESSION				0x3C
++
++
++#define CMD_AMI_YAFU_COMMON_NAK 		(0X00FF)
++
++#define CMD_AMI_YAFU_GET_FLASH_INFO  	(0x0001)
++#define CMD_AMI_YAFU_GET_FMH_INFO 		(0x0003)
++#define CMD_AMI_YAFU_GET_STATUS 		(0x0004)
++#define CMD_AMI_YAFU_ACTIVATE_FLASH 	(0x0010)
++#define CMD_AMI_YAFU_PROTECT_FLASH 		(0x0025)
++#define CMD_AMI_YAFU_ERASE_COPY_FLASH 	(0x0026)
++#define CMD_AMI_YAFU_WRITE_MEMORY 		(0x0031)
++#define CMD_AMI_YAFU_GET_BOOT_CONFIG 	(0x0040)
++#define CMD_AMI_YAFU_SET_BOOT_CONFIG 	(0x0041)
++#define CMD_AMI_YAFU_GET_BOOT_VARS 		(0x0042)
++#define CMD_AMI_YAFU_DEACTIVATE_FLASH_MODE (0x0050)
++#define CMD_AMI_YAFU_RESET_DEVICE 		(0x0051)
++#define CMD_AMI_YAFU_DUAL_IMAGE_SUP 	(0x0054)
++#define CMD_AMI_DUAL_IMG_SUPPORT    (	0x008F)
++#define CMD_AMI_YAFU_GET_RECOVERY_SPI_DETAILS (0x006e)
++
++
++
++
++/* Command Handlers */
++/**
++ * @def CMD_GET_DEV_ID
++ * @brief Get Device ID Command Handler
++ **/
++#define GET_DEV_ID						GetDevID
++#define GET_CH_AUTH_CAPS				GetChAuthCaps
++#define GET_SESSION_CHALLENGE       	GetSessionChallenge
++#define ACTIVATE_SESSION				ActivateSession
++#define SET_SESSION_PRIV_LEVEL			SetSessionPrivLevel
++#define CLOSE_SESSION					CloseSession
++
++#define AMI_YAFU_GET_FLASH_INFO                 AMIYAFUGetFlashInfo
++#define AMI_YAFU_GET_FMH_INFO            		AMIYAFUGetFMHInfo
++#define AMI_YAFU_GET_STATUS                		AMIYAFUGetStatus
++#define AMI_YAFU_ACTIVATE_FLASH         		AMIYAFUActivateFlashMode
++#define AMI_YAFU_PROTECT_FLASH           		AMIYAFUProtectFlash
++#define AMI_YAFU_ERASE_COPY_FLASH     			AMIYAFUEraseCopyFlash
++#define AMI_YAFU_WRITE_MEMORY            		AMIYAFUWriteMemory
++#define AMI_YAFU_GET_BOOT_CONFIG      			AMIYAFUGetBootConfig        
++#define AMI_YAFU_SET_BOOT_CONFIG      			AMIYAFUSetBootConfig        
++#define AMI_YAFU_GET_BOOT_VARS          		AMIYAFUGetBootVars          
++#define AMI_YAFU_DEACTIVATE_FLASH_MODE   		AMIYAFUDeactivateFlash
++#define AMI_YAFU_RESET_DEVICE   				AMIYAFUResetDevice
++#define AMI_DUAL_IMG_SUPPORT 					AMIDualImageSupport
++#define AMI_YAFU_DUAL_IMG_SUP                   AMIYAFUDualImgSup
++#define AMI_YAFU_GET_RECOVERY_SPI_DETAILS       AMIYAFUGetRecoverySPIDetails
++
++#define FMH_MODULE_CHECKSUM_START_OFFSET		(0x32 + CONFIG_SPX_FEATURE_GLOBAL_USED_FLASH_SIZE - CONFIG_SPX_FEATURE_GLOBAL_ERASE_BLOCK_SIZE)
++#define FMH_MODULE_CHCKSUM_END_OFFSET			(0x35 + CONFIG_SPX_FEATURE_GLOBAL_USED_FLASH_SIZE - CONFIG_SPX_FEATURE_GLOBAL_ERASE_BLOCK_SIZE)
++#define FMH_FMH_HEADER_CHECKSUM_OFFSET			(0x17 + CONFIG_SPX_FEATURE_GLOBAL_USED_FLASH_SIZE - CONFIG_SPX_FEATURE_GLOBAL_ERASE_BLOCK_SIZE)
++#define CONFIG_SECTION_NAME				"conf"
++
++
++#pragma pack(1)
++
++typedef struct
++{
++	unsigned char NetFnLUN;
++	unsigned char Cmd;
++	unsigned long ReqLen;
++	unsigned long ResLen;
++	unsigned char ReqData [MAX_IPMI_MSG_LEN];
++	unsigned char ResData [MAX_IPMI_MSG_LEN];
++
++} PACKED IPMICmdData_T;
++
++
++typedef struct 
++{
++    unsigned char   CompletionCode;
++    unsigned char   DeviceID;
++    unsigned char   DevRevision;
++    unsigned char   FirmwareRevision1;
++    unsigned char   FirmwareRevision2;
++    unsigned char   IPMIVersion;
++    unsigned char   DevSupport;
++    unsigned char   MfgID[3];
++    unsigned short  ProdID;
++    unsigned long  AuxFirmwareRevision;
++} PACKED GetDevIDRes_T;
++
++/* GetChAuthCapReq_T */
++typedef struct 
++{
++    unsigned char   ChannelNum;
++    unsigned char   PrivLevel;
++
++} PACKED GetChAuthCapReq_T;
++
++/* GetChAuthCapRes_T */
++typedef struct 
++{
++    uchar   CompletionCode;
++    uchar   ChannelNum;
++    uchar   AuthType;
++    uchar   PerMsgUserAuthLoginStatus;
++    uchar   Reserved;
++    uchar   OEMID[3];
++    uchar   OEMAuxData;
++
++} PACKED GetChAuthCapRes_T;
++
++
++/* GetSesChallengeReq_T */
++typedef struct 
++{
++    uchar   AuthType;
++    uchar   UserName[16];
++
++} PACKED GetSesChallengeReq_T;
++
++/* GetSesChallengeRes_T */
++typedef struct 
++{
++    uchar   CompletionCode;
++    unsigned int  TempSessionID;
++    uchar   ChallengeString[16];
++
++} PACKED GetSesChallengeRes_T;
++
++/* ActivateSesReq_T */
++typedef struct 
++{
++    uchar   AuthType;
++    uchar   Privilege;
++    uchar   ChallengeString[16];
++    unsigned int  OutboundSeq;
++
++} PACKED ActivateSesReq_T;
++
++/* ActivateSesRes_T */
++typedef struct 
++{
++    uchar   CompletionCode;
++    uchar   AuthType;
++    unsigned int  SessionID;
++    unsigned int  InboundSeq;
++    uchar   Privilege;
++
++} PACKED ActivateSesRes_T;
++
++/* SetSesPrivLevelRes_T */
++typedef struct 
++{
++    uchar   CompletionCode;
++    uchar   Privilege;
++
++} PACKED SetSesPrivLevelRes_T;
++
++/* GetSesInfoReq_T */
++typedef struct 
++{
++    uchar   SessionIndex;
++    uchar   SessionHandleOrID [4];
++
++} GetSesInfoReq_T;
++
++/* LANSesInfoRes_T */
++typedef struct 
++{
++    uchar    IPAddress[4];
++    uchar    MACAddress[6];
++    ushort   PortNumber;
++
++} PACKED LANSesInfoRes_T;
++
++/* SerialSesInfoRes_T */
++typedef struct 
++{
++    uchar    SessionActivityType;
++    uchar    DestinationSelector;
++    uchar    IPAddress[4];
++    ushort   PortNumber;
++
++} PACKED SerialSesInfoRes_T;
++
++/* Union SessionInfoRes_T */
++typedef union 
++{
++    LANSesInfoRes_T     LANSesInfo;
++    SerialSesInfoRes_T  SerialSesInfo;
++
++} PACKED SessionInfoRes_T;
++
++/* ActiveSesInfo_T */
++typedef struct 
++{
++    uchar       UserID;
++    uchar       Privilege;
++    uchar       ChannelNum;
++
++} PACKED ActiveSesInfo_T;
++
++/* GetSesInfoRes_T */
++typedef struct 
++{
++    uchar               CompletionCode;
++    uchar               SessionHandle;
++    uchar               NumPossibleActiveSession;
++    uchar               NumActiveSession;
++    ActiveSesInfo_T     ActiveSesinfo;
++    SessionInfoRes_T    SesInfo;
++
++} PACKED GetSesInfoRes_T;
++
++/* CloseSesReq_T */
++typedef struct 
++{
++    unsigned int  SessionID;
++
++} PACKED CloseSesReq_T;
++
++
++/**
++ * @struct YafuHeader
++ * @brief Flash info structure
++ */
++ typedef struct
++{
++    INT32U  Seqnum;
++    INT16U  YafuCmd;
++    INT16U  Datalen;
++    INT32U  CRC32chksum;
++} PACKED YafuHeader;
++
++/**
++ * @struct AMIYAFUNotAck
++ * @brief Flash info structure
++ */
++typedef struct
++{
++   YafuHeader NotAck;
++   INT16U       ErrorCode;
++}PACKED AMIYAFUNotAck;
++
++/**
++ * @struct ALT_FMH
++ * @brief Flash info structure
++ */
++
++typedef struct
++{
++    INT16U EndSignature;
++    INT8U   HeaderChkSum;
++    INT8U   Reserved;
++    INT32U LinkAddress;
++    INT8U   Signature[8]; 	
++} PACKED ALT_FMHead;
++
++
++
++/**
++ * @struct FMH
++ * @brief Flash info structure
++ */
++
++	typedef struct
++	{
++		INT8U		FmhSignature[8];
++		union
++		{
++			INT16U	FwVersion;
++			INT8U	FwMinorVer;
++			INT8U	FwMajorVer;
++		} PACKED Fmh_Version;
++		INT16U		FmhSize;
++		INT32U		AllocatedSize;
++		INT32U		FmhLocation;
++		INT8U		FmhReserved[3];
++		INT8U		HeaderChecksum;
++		INT8U		ModuleName[8];
++		union
++		{
++			INT16U	ModVersion;
++			INT8U	ModMinorVer;
++			INT8U	ModMajorVer;
++		}PACKED Module_Version;
++		INT16U		ModuleType;
++		INT32U		ModuleLocation;
++		INT32U		ModuleSize;
++		INT16U		ModuleFlags;
++		INT32U		ModuleLoadAddress;
++		INT32U		ModuleChecksum;
++		INT8U		ModuleReserved[8];
++		INT16U		EndSignature;
++	}PACKED  FlashMH;
++
++/**
++ * @struct AMIYAFUGetFlashInfoReq_T
++ * @brief Flash info structure
++ */
++ 
++typedef struct
++{
++    YafuHeader FlashInfoReq;
++
++} PACKED AMIYAFUGetFlashInfoReq_T;
++
++
++typedef struct
++{
++
++   INT32U   FlashSize;
++    INT32U  FlashAddress;
++    INT32U  FlashEraseBlkSize;
++    INT16U  FlashProductID;
++    INT8U    FlashWidth;	
++    INT8U    FMHCompliance;
++    INT16U  Reserved;
++    INT16U  NoEraseBlks;	 
++	
++}PACKED FlashDetails;
++
++
++/**
++ * @struct AMIYAFUGetFlashInfoRes_T
++ * @brief Flash info structure
++ */
++typedef struct
++{
++    INT8U           CompletionCode;
++    YafuHeader   FlashInfoRes;
++    FlashDetails  FlashInfo;
++
++} PACKED AMIYAFUGetFlashInfoRes_T;	
++
++
++
++
++/**
++ * @struct AMIYAFUGetFMHInfoRes_T
++ * @brief Flash info structure
++ */
++typedef struct
++{
++     YafuHeader FMHReq;
++
++} PACKED AMIYAFUGetFMHInfoReq_T;
++
++/**
++ * @struct AMIYAFUGetFMHInfoRes_T
++ * @brief Flash info structure
++ */
++typedef struct
++{
++    INT8U         CompletionCode;
++    YafuHeader FMHRes;
++    INT16U       Reserved;
++    INT16U       NumFMH;
++   
++} PACKED AMIYAFUGetFMHInfoRes_T;
++
++/**
++ * @struct AMIYAFUGetStatusReq_T
++ * @brief Flash info structure
++ */
++typedef struct
++{
++     YafuHeader GetStatusReq;
++
++} PACKED AMIYAFUGetStatusReq_T;
++
++
++/**
++ * @struct AMIYAFUGetStatusRes_T
++ * @brief Flash info structure
++ */
++typedef struct
++{
++    INT8U         CompletionCode;
++    YafuHeader GetStatusRes;
++    INT16U       LastStatusCode;
++    INT16U       YAFUState;
++    INT16U         Mode;
++    INT16U       Reserved;
++    INT8U         Message[65];
++
++} PACKED AMIYAFUGetStatusRes_T;
++
++/**
++ * @struct AMIYAFUActivateFlashModeReq_T
++ * @brief Flash info structure
++ */
++typedef struct
++{
++    YafuHeader ActivateflashReq;
++    INT16U       Mode;
++
++} PACKED AMIYAFUActivateFlashModeReq_T;
++
++/**
++ * @struct AMIYAFUGetStatusRes_T
++ * @brief Flash info structure
++ */
++typedef struct
++{
++    INT8U         CompletionCode;
++    YafuHeader ActivateflashRes;
++    INT8U         Delay;
++
++}PACKED AMIYAFUActivateFlashModeRes_T;
++
++/**
++ * @struct AMIYAFUProtectFlashReq_T
++ * @brief Flash info structure
++ */
++typedef struct
++{
++    YafuHeader ProtectFlashReq;
++    INT32U Blknum;
++    INT8U   Protect;
++
++} PACKED AMIYAFUProtectFlashReq_T;
++
++/**
++ * @struct AMIYAFUProtectFlashRes_T
++ * @brief Flash info structure
++ */
++typedef struct
++{
++    INT8U   CompletionCode;
++    YafuHeader ProtectFlashRes;
++    INT8U   Status;
++
++}PACKED AMIYAFUProtectFlashRes_T;
++
++/**
++ * @struct AMIYAFUEraseCopyFlashReq_T
++ * @brief Flash info structure
++ */
++typedef struct
++{
++    YafuHeader EraseCpyFlashReq;
++    INT32U Memoffset;
++    INT32U Flashoffset;
++    INT32U Sizetocopy;
++
++} PACKED AMIYAFUEraseCopyFlashReq_T;
++
++/**
++ * @struct AMIYAFUEraseCopyFlashRes_T
++ * @brief Flash info structure
++ */
++typedef struct
++{
++    INT8U   CompletionCode;
++    YafuHeader EraseCpyFlashRes;
++    INT32U Sizecopied;
++
++}PACKED AMIYAFUEraseCopyFlashRes_T;
++
++
++/**
++ * @struct AMIYAFUWriteMemoryReq_T
++ * @brief Flash info structure
++ */
++typedef struct
++{
++    YafuHeader WriteMemReq;
++    INT32U Memoffset;
++    INT8U   WriteWidth;
++    //INT8U   Buffer[0x4000];
++
++} PACKED AMIYAFUWriteMemoryReq_T;
++
++/**
++ * @struct AMIYAFUWriteMemoryRes_T
++ * @brief Flash info structure
++ */
++typedef struct
++{
++    INT8U   CompletionCode;
++    YafuHeader WriteMemRes;
++    INT16U SizeWritten;
++
++}PACKED AMIYAFUWriteMemoryRes_T;
++
++/**
++ * @struct AMIYAFUGetBootConfigReq_T
++ * @brief Flash info structure
++ */
++typedef struct
++{
++    YafuHeader GetBootReq;
++    INT8U         VarName[65];  	
++             	
++} PACKED AMIYAFUGetBootConfigReq_T;
++
++/**
++ * @struct AMIYAFUGetBootConfigRes_T
++ * @brief Flash info structure
++ */
++typedef struct
++{
++    INT8U         CompletionCode; 
++    YafuHeader GetBootRes;
++    INT8U         Status;	
++   	
++}PACKED AMIYAFUGetBootConfigRes_T;
++
++/**
++ * @struct AMIYAFUSetBootConfigReq_T
++ * @brief Flash info structure
++ */
++typedef struct
++{
++    YafuHeader SetBootReq;
++    INT8U         VarName[65];	
++                 	  
++} PACKED AMIYAFUSetBootConfigReq_T;
++
++/**
++ * @struct AMIYAFUSetBootConfigRes_T
++ * @brief Flash info structure
++ */
++typedef struct
++{
++    INT8U         CompletionCode; 
++    YafuHeader SetBootRes;
++    INT8U         Status;	
++    	
++}PACKED AMIYAFUSetBootConfigRes_T;
++
++/**
++ * @struct AMIYAFUGetBootVarsReq_T
++ * @brief Flash info structure
++ */
++typedef struct
++{
++    YafuHeader GetBootReq;
++                  	  
++} PACKED AMIYAFUGetBootVarsReq_T;
++
++/**
++ * @struct AMIYAFUGetBootVarsRes_T
++ * @brief Flash info structure
++ */
++typedef struct
++{
++    INT8U         CompletionCode; 
++    YafuHeader GetBootRes;
++    INT8U         VarCount;
++        	
++}PACKED AMIYAFUGetBootVarsRes_T;
++
++
++/**
++ * @struct AMIYAFUDeactivateFlashReq_T
++ * @brief Flash info structure
++ */
++typedef struct
++{
++    YafuHeader DeactivateFlashReq;
++
++} PACKED AMIYAFUDeactivateFlashReq_T;
++
++/**
++ * @struct AMIYAFUDeactivateFlashRes_T
++ * @brief Flash info structure
++ */
++typedef struct
++{
++    INT8U         CompletionCode;
++    YafuHeader DeactivateFlashRes;
++    INT8U         Status;
++	
++}PACKED AMIYAFUDeactivateFlashRes_T;
++
++/**
++ * @struct AMIYAFUResetDeviceReq_T
++ * @brief Flash info structure
++ */
++typedef struct
++{
++    YafuHeader ResetReq;
++    INT16U       WaitSec;
++
++} PACKED AMIYAFUResetDeviceReq_T;
++
++/**
++ * @struct AMIYAFUResetDeviceRes_T
++ * @brief Flash info structure
++ */
++typedef struct
++{
++    INT8U         CompletionCode;
++    YafuHeader ResetRes;
++    INT8U         Status;
++
++
++}PACKED AMIYAFUResetDeviceRes_T;
++
++
++typedef struct {
++	char FWVersion[64];
++	char FWDate[64];
++	char FWBuildTime[64];
++	char FWDesc[512];
++} FWINFO_STRUCT;
++
++typedef struct {
++	char runningImg;
++	char InactiveImg;
++} DUALIMGINFO_STRUCT;
++
++/*
++AMIDualImageSup Releated Structure definitions
++*/
++typedef struct
++{
++    INT8U Parameter;
++    INT8U BootSelector;
++}PACKED AMIDualImageSupReq_T;
++
++typedef struct
++{
++    INT8U MajVer;
++    INT8U MinVer;
++}PACKED FwVersion;
++
++
++typedef union
++{
++    INT8U SetBootSelector;
++    INT8U GetBootSelector;
++    INT8U SetUploadSelector;
++    INT8U GetUploadSelector;
++    INT8U SetRebootStatus;
++    INT8U GetRebootStatus;
++    INT8U GetCurActiveImg;
++    FwVersion GetFwVersion;
++
++}DualImageOpt_T;
++
++typedef struct
++{
++    INT8U    CompletionCode;
++    DualImageOpt_T BootSelOpt;
++}PACKED AMIDualImageSupRes_T;
++
++
++/**
++*@struct AMIYAFUDualImgSupReq_T
++*@brief Dual Image Support Structure
++**/
++typedef struct
++{
++	YafuHeader DualImgSupReq;
++	INT8U		  PreserveConf;
++	INT8U		  Reserved1;
++	INT8U		  Reserved2;
++	INT8U		  Reserved3;
++}PACKED AMIYAFUDualImgSupReq_T;
++
++/**
++*@struct AMIYAFUDualImgSupRes_T
++*@brief Dual Image Support Structure
++**/
++typedef struct
++{
++	INT8U CompletionCode;
++	YafuHeader DualImgSupRes;
++}PACKED AMIYAFUDualImgSupRes_T;
++
++
++/**
++ * @struct AMIYAFUGetRecoverySPIDetailsReq_T
++ * @brief Flash info structure
++ */
++typedef struct
++{
++     YafuHeader GetRecoverySPIDetailsReq;
++
++} PACKED AMIYAFUGetRecoverySPIDetailsReq_T;
++
++
++/**
++ * @struct AMIYAFUGetStatusRes_T
++ * @brief Flash info structure
++ */
++typedef struct
++{
++    INT8U         CompletionCode;
++    YafuHeader GetRecoverySPIDetailsRes;
++    INT16U       LastStatusCode;
++    INT16U         Mode;
++
++} PACKED AMIYAFUGetRecoverySPIDetailsRes_T;
++
++
++#pragma pack()
++
++#define NO_ADDRESS						0xFFFFFFFF
++
++#define YAFU_CC_NORMAL						0x00
++#define YAFU_CC_INVALID_DATLEN			0xcc
++#define YAFU_CC_ALLOC_ERR				       0x02
++#define YAFU_CC_DEV_OPEN_ERR				0x03
++#define YAFU_CC_SEEK_ERR				       0x04
++#define YAFU_CC_READ_ERR				       0x05
++#define YAFU_CC_WRITE_ERR			              0x06
++#define YAFU_CC_MEM_ERASE_ERR				0x07
++#define YAFU_CC_IN_DEACTIVATE                       0x08
++#define YAFU_OFFSET_NOT_IN_ERASE_BOUNDARY     0x09
++#define YAFU_SIZE_NOT_IN_ERASE_BOUNDARY  0x10
++#define YAFU_FLASH_ERASE_FAILURE                 0x11
++#define YAFU_INVALID_CHKSUM                           0x12
++#define YAFU_PROTECT_ERR                                 0x14
++#define YAFU_CC_INVALID_DATA       0x19
++#define CC_INV_CMD										0xC1
++
++/**
++ * @def DEVICE_ID
++ * @brief Device ID
++ **/
++#define DEVICE_ID                       0x20
++/**
++ * @def SDR_SUPPORT
++ * @brief SDR support bit flag 
++ **/
++#define SDR_SUPPORT                     0x80    
++/**
++ * @def DEV_REVISION                    
++ * @brief Device Revision 
++ **/
++#define DEV_REVISION                    0x01    
++#define IPMI_DEV_REVISION               DEV_REVISION
++/**
++ * @def DEV_AVAILABLE                   
++ * @brief Device availability bit flag
++ **/
++#define DEV_AVAILABLE                   0x80
++/**
++ * @def IPMI_VERSION
++ * @brief IPMI version
++ **/
++#define IPMI_VERSION                    0x02
++/**
++ * @def CHASSIS_DEVICE_SUPPORT          
++ * @brief Chassis Device support bit flag
++ **/
++#define CHASSIS_DEVICE_SUPPORT          0x80    
++/**
++ * @def BRIDGE_COMMAND_SUPPORT          
++ * @brief Bridge Device support bit flag
++ **/
++#define BRIDGE_COMMAND_SUPPORT          0x40    
++/**
++ * @def IPMB_EVENT_GENERATOR_SUPPORT    
++ * @brief IPMB Event generator support bit flag 
++ **/
++#define IPMB_EVENT_GENERATOR_SUPPORT    0x20    
++/**
++ * @def IPMB_EVENT_RECEIVER_SUPPORT     
++ * @brief IPMB Event receiver support bit flag 
++ **/
++#define IPMB_EVENT_RECEIVER_SUPPORT     0x10    
++/**
++ * @def FRU_INVENTORY_DEVICE_SUPPORT    
++ * @brief FRU Device support bit flag 
++ **/
++#define FRU_INVENTORY_DEVICE_SUPPORT    0x08    
++/**
++ * @def SEL_DEVICE_SUPPORT              
++ * @brief SEL Device support bit flag 
++ **/
++#define SEL_DEVICE_SUPPORT              0x04    
++/**
++ * @def SDR_REPOSITORY_DEVICE_SUPPORT   
++ * @brief SDR Device support bit flag
++ **/
++#define SDR_REPOSITORY_DEVICE_SUPPORT   0x02    
++/**
++ * @def SENSOR_DEVICE_SUPPORT           
++ * @brief Sensor Device support bit flag 
++ **/
++#define SENSOR_DEVICE_SUPPORT           0x01    
++
++#define DEV_SUPPORT                     CHASSIS_DEVICE_SUPPORT |          \
++                                        IPMB_EVENT_GENERATOR_SUPPORT | IPMB_EVENT_RECEIVER_SUPPORT |\
++                                        FRU_INVENTORY_DEVICE_SUPPORT | SEL_DEVICE_SUPPORT |         \
++                                        SDR_REPOSITORY_DEVICE_SUPPORT | SENSOR_DEVICE_SUPPORT 
++/**
++ * @def MFG_ID_AMI                      
++ * @brief IANA number for AMI 
++ **/
++#define MFG_ID_AMI                      {0x00,0x00,0x00}    
++/**
++ * @def PROD_ID_AMI_PM                  
++ * @brief AMI Product ID {'E','M'} 
++ **/
++#define PROD_ID_AMI_PM                  0x0000
++
++#define 	CPLD_BASE_ADDR				0x90200000
++#define     CPLD_FW_UPDATE_REG_ADDR		0xB000007E
++#define 	CPLD_CONFIG_REG_INIT_VALUE	0x10000000
++#define 	CPLD_TIMING_REG_INIT_VALUE  0xFF1700DF
++
++#define SETFWBOOTSELECTOR           0x1
++#define GETFWBOOTSELECTOR           0x2
++#define SETFWUPLOADSELECTOR         0x3
++#define GETFWUPLOADSELECTOR         0x4
++#define GETCURACTIVEIMG             0x7
++
++
++//List of bootselector options
++#define AUTO_HIGH_VER_FW        0x0
++#define LOWER_IMAGE_FW          0x1
++#define HIGHER_IMAGE_FW         0x2
++#define AUTO_LOW_VER_FW         0x3
++#define MOST_RECENTLY_PROG_FW   0x4
++#define LEAST_RECENTLY_PROG_FW  0x5
++
++//List of firmware upload selector options for web and yafu
++#define AUTO_INACTIVE_IMAGE     0x0
++#define IMAGE_1                 0x1
++#define IMAGE_2                 0x2
++#define IMAGE_BOTH              0x3
++//Use for indicating current active image is under bank is broken circumstance 
++//Bit[1:0] Number of Active Flash 
++//Bit[3:2] Number of Broken Flash 
++#define IMAGE_1_2BROKEN			0x9 
++#define IMAGE_2_1BROKEN			0x6 
++
++
++
++#define ReqLength		  (4)			
++#define ReqLength_0	  (ReqLength + 0) 
++#define ReqLength_1	  (ReqLength + 1) 
++#define ReqLength_2	  (ReqLength + 2) 
++#define ReqLength_3	  (ReqLength + 3) 
++#define ReqDataByte	  (-1)  
++#define ReqDataByte_1    (ReqDataByte + 1)
++#define ReqDataByte_2    (ReqDataByte + 2)
++#define ReqDataByte_3    (ReqDataByte + 3)  
++#define ReqDataByte_4    (ReqDataByte + 4)  
++
++#define ResDataByte    (-1)  
++#define ResDataByte_1    (ResDataByte + 1)  
++#define ResDataByte_2    (ResDataByte + 2)  
++#define ResDataByte_3    (ResDataByte + 3)  
++#define ResDataByte_4    (ResDataByte + 4)  
++#define ResDataByte_5    (ResDataByte + 5)  
++#define ResDataByte_6    (ResDataByte + 6)  
++
++unsigned long  ProcessIPMICmd (IPMICmdData_T* pIPMICmd);
++
++#endif /* _CMD_HANDLER_H_ */
+diff -uNar uboot/include/oem/ami/ipmi/IPMIDefs.h uboot.new/include/oem/ami/ipmi/IPMIDefs.h
+--- uboot/include/oem/ami/ipmi/IPMIDefs.h	1969-12-31 19:00:00.000000000 -0500
++++ uboot.new/include/oem/ami/ipmi/IPMIDefs.h	2020-12-16 14:19:17.690963861 -0500
+@@ -0,0 +1,159 @@
++/****************************************************************
++ ****************************************************************
++ **                                                            **
++ **    (C)Copyright 2005-2006, American Megatrends Inc.        **
++ **                                                            **
++ **            All Rights Reserved.                            **
++ **                                                            **
++ **        6145-F, Northbelt Parkway, Norcross,                **
++ **                                                            **
++ **        Georgia - 30071, USA. Phone-(770)-246-8600.         **
++ **                                                            **
++ ****************************************************************
++ ****************************************************************
++ ****************************************************************
++ ******************************************************************
++ *
++ * ipmi_defs.h
++ * IPMI Definitions
++ *
++ *  Author: Govind Kothandapani <govindk@ami.com>
++ *
++ ******************************************************************/
++#ifndef IPMI_DEFS_H
++#define IPMI_DEFS_H
++
++/*------- Net Functions  -------------------*/
++#define NETFN_CHASSIS					0x00
++#define NETFN_BRIDGE					0x02
++#define NETFN_SENSOR					0x04
++#define NETFN_APP						0x06
++#define NETFN_FIRMWARE					0x08
++#define NETFN_STORAGE					0x0A
++#define NETFN_TRANSPORT					0x0C
++#define NETFN_GROUP_EXT					0x2C
++#define NETFN_OEM_AMI					0x32
++
++/**** Command Completion Codes ****/
++#define	CC_NORMAL										0x00
++#define	CC_SUCCESS										0x00
++#define CC_NODE_BUSY									0xC0
++#define CC_INV_CMD										0xC1
++#define CC_INV_CMD_FOR_LUN								0xC2
++#define CC_TIMEOUT										0xC3
++#define CC_OUT_OF_SPACE									0xC4
++#define CC_INV_RESERVATION_ID							0xC5
++#define CC_REQ_TRUNCATED								0xC6
++#define CC_REQ_INV_LEN									0xC7
++#define CC_REQ_FIELD_LEN_EXCEEDED						0xC8
++#define CC_PARAM_OUT_OF_RANGE							0xC9
++#define CC_CANNOT_RETURN_REQ_BYTES						0xCA
++#define CC_SEL_REC_NOT_PRESENT							0xCB
++#define CC_SDR_REC_NOT_PRESENT							0xCB
++#define CC_FRU_REC_NOT_PRESENT							0xCB
++#define CC_INV_DATA_FIELD								0xCC
++#define CC_ILLEGAL_CMD_FOR_SENSOR_REC					0xCD
++#define CC_COULD_NOT_PROVIDE_RESP						0xCE
++#define CC_CANNOT_EXEC_DUPL_REQ							0xCF
++#define CC_SDR_REP_IN_UPDATE_MODE						0xD0
++#define CC_DEV_IN_FIRMWARE_UPDATE_MODE					0xD1
++#define CC_INIT_AGENT_IN_PROGRESS						0xD2
++#define CC_DEST_UNAVAILABLE								0xD3
++#define CC_INSUFFIENT_PRIVILEGE							0xD4
++#define CC_PARAM_NOT_SUP_IN_CUR_STATE					0xD5
++#define CC_UNSPECIFIED_ERR								0xFF
++#define CC_GET_MSG_QUEUE_EMPTY							0x80
++#define	CC_EVT_MSG_QUEUE_EMPTY							0x80
++#define CC_GET_SESSION_INVALID_USER						0x81
++#define CC_GET_SESSION_NULL_USER_DISABLED				0x82
++#define CC_ACTIVATE_SESS_NO_SESSION_SLOT_AVAILABLE		0x81
++#define CC_ACTIVATE_SESS_NO_SLOT_AVAILABLE_USER			0x82
++#define CC_ACTIVATE_SESS_REQ_LEVEL_EXCEEDS_LIMIT		0x83
++#define CC_ACTIVATE_SESS_INVALID_SESSION_ID				0x85
++#define CC_ACTIVATE_SESS_MAX_PRIVILEGE_EXCEEDS_LIMIT	0x86
++#define	CC_PASSWORD_TEST_FAILED							0x80
++#define	CC_SETPASSWORD_INVALID_USERID					0x81
++#define	CC_SETPASSWORD_CANNOT_DISABLE_USER				0x82
++#define	CC_NO_ACK_FROM_SLAVE							0x83
++#define	CC_GET_CH_COMMAND_NOT_SUPPORTED					0x82
++#define	CC_SET_CH_COMMAND_NOT_SUPPORTED					0x82
++#define	CC_SET_CH_ACCES_MODE_NOT_SUPPORTED				0x83
++#define	CC_SET_SESS_PREV_REQ_LEVEL_NOT_AVAILABLE		0x80
++#define	CC_SET_SESS_PREV_REQ_PRIVILEGE_EXCEEDS_LIMIT	0x81
++#define	CC_SET_SESS_PREV_INVALID_SESSION_ID				0x82
++#define CC_ACTIVATE_SESS_NO_SLOT_AVAILABLE_USER			0x82
++#define	CC_CLOSE_INVALID_SESSION_ID						0x87
++#define	CC_PEF_PARAM_NOT_SUPPORTED						0x80
++#define	CC_PEF_SET_IN_PROGRESS							0x81
++#define CC_PEF_ATTEMPT_TO_SET_READ_ONLY_PARAM			0x82
++#define	CC_SET_IN_PROGRESS								0x81
++#define CC_ATTEMPT_TO_SET_RO_PARAM						0x82
++#define	CC_PARAM_NOT_SUPPORTED							0x80
++#define CC_BIOS_NOT_READY								0x82
++#define CC_IFC_NOT_SUPPORTED							0x81
++#define CC_DISABLE_SM									0x81
++#define CC_BIOS_IS_BUSY									0x81
++
++#define CC_CALLBACK_REJ_SESSION_ACTIVE					0x82
++#define CC_WRITE_ONLY_PARAM								0x83
++
++#define CC_INST_ALREADY_ACTIVE							0x80
++#define CC_CANNOT_ACTIVATE_WITH_ENCR					0x83
++#define CC_PAYLOAD_NOT_ENABLED							0x81
++#define CC_INST_EXCEEDED								0x82
++#define CC_INST_ALREADY_INACTIVE						0x80
++#define CC_ENCRYPT_NOT_AVAILABLE						0x82
++#define CC_INST_NOT_ACTIVE								0x83
++#define	CC_KEYS_LOCKED									0x80
++#define	CC_INSUF_KEY_BYTES								0x81
++#define	CC_TOO_MANY_KEY_BYTES							0x82
++#define	CC_KEY_MISMATCH									0x83
++
++#define CC_OP_NOT_SUPPORTED								0x80
++#define CC_OP_NOT_ALLOWED								0x81
++
++#define CC_ATTEMPT_TO_RESET_UNIN_WATCHDOG 				0x80
++
++#define	CC_ILLEGAL_CONNECTOR_ID							0x81
++
++#define IPMI_EVM_REVISION								0x04
++#define IPMI_SENSOR_TEMP_TYPE							0x01
++#define IPMI_SENSOR_VOLT_TYPE							0x02
++#define IPMI_SENSOR_FAN_TYPE							0x04
++#define IPMI_SENSOR_PHYSICAL_SECURITY_TYPE				0x05
++#define IPMI_SENSOR_POWER_SUPPLY_TYPE					0x08
++#define IPMI_SENSOR_MEMORY_TYPE							0x0C
++#define IPMI_SENSOR_DRIVE_TYPE							0x0D
++#define IPMI_SENSOR_BUTTON_TYPE							0x14
++#define IPMI_SENSOR_ENTITY_PRESENCE_TYPE				0x25
++#define IPMI_SENSOR_OEM_TYPE							0xC0
++
++/******************OEM Completion codes*********************/
++#define OEMCC_INVALID_USERNAME							0x01
++#define OEMCC_PASSWD_MISMATCH							0x02
++#define OEMCC_INVALID_PASSWD							0x03
++#define OEMCC_DUPLICATE_USERNAME						0x04
++#define OEMCC_USER_EXISTS_AT_SLOT						0x05
++#define OEMCC_NOMEM										0x06
++#define OEMCC_FILE_ERR									0x07
++#define OEMCC_SSHKEY_UPDATE_FAILURE						0x08
++#define OEMCC_SENSOR_DISABLED							0x09
++#define OEMCC_INVALID_SDR_ENTRY							0x0a
++#define OEMCC_CORRUPT_FLASH_DATA						0x0b
++#define OEMCC_CORRUPT_DATA_CHKSUM						0x0c
++#define OEMCC_FLASH_UPGRADE_FAILURE						0x0d
++#define OEMCC_VERSION_MISMATCH							0x0e
++
++/*--------------------------------------------
++ * Macro to extract the net function.
++ *--------------------------------------------*/
++#define NET_FN(NetFnLUN)	((INT8U)((NetFnLUN & 0xFC) >> 2))
++
++#define htoipmi_u16(val)	(val)
++#define htoipmi_u32(val)	(val)
++
++#define ipmitoh_u16(val)	(val)
++#define ipmitoh_u32(val)	(val)
++
++
++#endif	/* IPMI_DEFS_H */
+diff -uNar uboot/include/soc_kcs.h uboot.new/include/soc_kcs.h
+--- uboot/include/soc_kcs.h	1969-12-31 19:00:00.000000000 -0500
++++ uboot.new/include/soc_kcs.h	2020-12-16 14:20:32.422860555 -0500
+@@ -0,0 +1,37 @@
++/*****************************************************************
++ *****************************************************************
++ ***                                                            **
++ ***    (C)Copyright 2002-2003, American Megatrends Inc.        **
++ ***                                                            **
++ ***            All Rights Reserved.                            **
++ ***                                                            **
++ ***        6145-F, Northbelt Parkway, Norcross,                **
++ ***                                                            **
++ ***        Georgia - 30071, USA. Phone-(770)-246-8600.         **
++ ***                                                            **
++ ******************************************************************/
++/* AST KCS Registers offsets used for KCS - YAFU Upgrade */
++
++#ifndef SOC_KCS_H
++#define SOC_KCS_H
++
++#define MAX_KCS_CHANNEL     2
++
++typedef volatile unsigned long LPC_REG_DT;
++
++#define LPC_WRITE_STATUS_BIT            0x00
++#define LPC_READ_STATUS_BIT             0xFF
++
++#define KCS_IDR3			0x24
++#define KCS_ODR3			0x30	
++#define KCS_STATUS_3		0x3C	
++
++#define KCS_IDR2			0x28
++#define KCS_ODR2			0x34
++#define KCS_STATUS_2		0x40
++
++#define KCS_IDR1			0x2C
++#define KCS_ODR1			0x38
++#define KCS_STATUS_1		0x44
++
++#endif
+diff -uNar uboot/net/net.c uboot.new/net/net.c
+--- uboot/net/net.c	2020-11-20 04:00:27.000000000 -0500
++++ uboot.new/net/net.c	2020-12-16 14:32:29.000000000 -0500
+@@ -189,7 +189,7 @@
+ /* Receive packets */
+ uchar *net_rx_packets[PKTBUFSRX];
+ /* Current UDP RX packet handler */
+-static rxhand_f *udp_packet_handler;
++static rxhand_f *udp_packet_handler=NULL;
+ /* Current ARP RX packet handler */
+ static rxhand_f *arp_packet_handler;
+ #ifdef CONFIG_CMD_TFTPPUT
+@@ -401,6 +401,10 @@
+ int net_loop(enum proto_t protocol)
+ {
+ 	int ret = -EINVAL;
++        #ifdef CONFIG_SPX_FEATURE_BMC_FIRMWARE_AUTO_RECOVERY
++           char *value;
++        #endif
++
+ 	enum net_loop_state prev_net_state = net_state;
+ 
+ 	net_restarted = 0;
+@@ -446,6 +450,25 @@
+ 	debug_cond(DEBUG_INT_STATE, "--- net_loop Init\n");
+ 	net_init_loop();
+ 
++       #ifdef CONFIG_SPX_FEATURE_BMC_FIRMWARE_AUTO_RECOVERY
++       if(protocol == RECOVERY)
++       {
++               net_server_ip = env_get_ip ("recoveryserverip");
++               load_addr = YAFU_IMAGE_UPLOAD_LOCATION;
++               value = env_get("recoverybootfile");
++               if(value == NULL)
++               {
++               /*default boot file is rom.ima*/
++            copy_filename(net_boot_file_name,"rom.ima",sizeof(net_boot_file_name));
++        }
++        else
++       {
++               copy_filename(net_boot_file_name,value,sizeof(net_boot_file_name));
++        }
++       }
++      #endif
++
++
+ 	switch (net_check_prereq(protocol)) {
+ 	case 1:
+ 		/* network not configured */
+@@ -539,6 +562,11 @@
+ 			wol_start();
+ 			break;
+ #endif
++#ifdef CONFIG_SPX_FEATURE_BMC_FIRMWARE_AUTO_RECOVERY
++                case RECOVERY:
++                    tftp_start(TFTPGET);
++                       break;
++#endif
+ #if defined(CONFIG_CMD_NCSI)
+ 		case NCSI:
+ 			ncsi_probe_packages();
+@@ -1344,6 +1372,10 @@
+ 		ncsi_receive(et, ip, len);
+ 		break;
+ #endif
++       default:
++               if(udp_packet_handler)
++                   (*udp_packet_handler)((uchar *)net_rx_packet,0,src_ip,0,net_rx_packet_len);
++
+ 	}
+ }
+ 
+@@ -1392,7 +1424,7 @@
+ common:
+ #endif
+ 		/* Fall through */
+-
++        case RECOVERY:
+ 	case NETCONS:
+ 	case FASTBOOT:
+ 	case TFTPSRV:
+@@ -1400,6 +1432,10 @@
+ 			puts("*** ERROR: `ipaddr' not set\n");
+ 			return 1;
+ 		}
++		if (net_server_ip.s_addr == 0 && !is_serverip_in_cmd()) {
++			puts("*** ERROR: `serverip' not set\n");
++			return 1;
++		}
+ 		/* Fall through */
+ 
+ #ifdef CONFIG_CMD_RARP
+diff -uNar uboot/net/tftp.c uboot.new/net/tftp.c
+--- uboot/net/tftp.c	2020-11-20 04:00:27.000000000 -0500
++++ uboot.new/net/tftp.c	2020-12-16 14:40:36.000000000 -0500
+@@ -298,8 +298,9 @@
+ 	time_start = get_timer(time_start);
+ 	if (time_start > 0) {
+ 		puts("\n\t ");	/* Line up with "Loading: " */
+-		print_size(net_boot_file_size /
+-			time_start * 1000, "/s");
++		//print_size(net_boot_file_size /
++		//	time_start * 1000, "/s");
++                print_size(net_boot_file_size, "");
+ 	}
+ 	puts("\ndone\n");
+ 	net_set_state(NETLOOP_SUCCESS);
+diff -uNar uboot/oem/ami/fmh/ast_hw.h uboot.new/oem/ami/fmh/ast_hw.h
+--- uboot/oem/ami/fmh/ast_hw.h	1969-12-31 19:00:00.000000000 -0500
++++ uboot.new/oem/ami/fmh/ast_hw.h	2020-12-16 14:42:15.432646339 -0500
+@@ -0,0 +1,13 @@
++#ifndef _AST_HW_H_
++#define _AST_HW_H_
++
++#include <config.h>
++
++/* U-Boot does not use MMU. So no mapping */
++#define IO_ADDRESS(x)	(x)
++#define MEM_ADDRESS(x)  (x)
++
++#include "hwmap.h"
++#include "hwreg.h"
++#include "hwdef.h"
++#endif
+diff -uNar uboot/oem/ami/fmh/ast_wdt.c uboot.new/oem/ami/fmh/ast_wdt.c
+--- uboot/oem/ami/fmh/ast_wdt.c	1969-12-31 19:00:00.000000000 -0500
++++ uboot.new/oem/ami/fmh/ast_wdt.c	2020-12-16 15:24:09.129762946 -0500
+@@ -0,0 +1,102 @@
++
++/*****************************************************************
++ *****************************************************************
++ ***                                                            **
++ ***    (C)Copyright 2002-2003, American Megatrends Inc.        **
++ ***                                                            **
++ ***            All Rights Reserved.                            **
++ ***                                                            **
++ ***        6145-F, Northbelt Parkway, Norcross,                **
++ ***                                                            **
++ ***        Georgia - 30071, USA. Phone-(770)-246-8600.         **
++ ***                                                            **
++ *****************************************************************
++ *****************************************************************
++
++ *******************************************************************/
++#if defined(CONFIG_SPX_FEATURE_FAIL_SAFE_BOOTING) || defined(CONFIG_SPX_FEATURE_BMC_FIRMWARE_AUTO_RECOVERY)
++#include "soc_hw.h"
++#include <common.h>
++
++#define WDT_ENABLE              0x01
++#define WDT_TIMEOUT             0x11E1A300              // 5 Minutes (300 secs * 1MHz)
++#define WDT_TRIGGER             0x00004755              // Trigger Passcode
++#define WDT_CLOCK               0x10                    // 1MHz Clock for WDT
++#define WDT_RESET_SYSTEM        0x02                    // Enable System-Reset-On-Timeout
++#define WDT_CLR_EVT_COUNTER     0x76                    // Clear the Timeout Counter & Boot Source code
++#define WDT2_SECOND_BOOT_CODE   0x80                    // Enable Second Boot Code upon reset
++#define WDT_CUR_BOOTSRC_MASK    0x00000002
++
++#ifdef CONFIG_SPX_FEATURE_HW_FAILSAFE_BOOT 
++extern unsigned char broken_spi_banks;// specify the number of broken SPI flash bank
++#endif
++
++int Enable_watchdog(unsigned long *wdt_timeout_status)
++{
++       /* Setting the Watchdog Timer to prevent dead locks during booting */
++       /* Disable the Watchdog Timer */
++       *((volatile unsigned long *)(WDT2_CONTROL_REG)) &= ~(WDT_RESET_SYSTEM | WDT_ENABLE);
++
++       /* Set the Timeout value to max possible 5 Minutes */
++       *((volatile unsigned long *)(WDT2_RELOAD_REG)) = WDT_TIMEOUT;
++
++       /* Set the Trigger value to restart Timer freshly */
++       *((volatile unsigned long *)(WDT2_CNT_RESTART_REG)) = WDT_TRIGGER;
++
++       /* Set the Watchdog clock to 1MHz clock */
++       *((volatile unsigned long *)(WDT2_CONTROL_REG)) |= (WDT_CLOCK);
++
++       /* Reading the Watchdog Timeout event counter*/
++       *wdt_timeout_status = *((volatile unsigned long *)(WDT2_TIMEOUT_STAT_REG));
++#ifdef CONFIG_SPX_FEATURE_GLOBAL_DUAL_IMAGE_SUPPORT
++       /*clear boot source to restore address mapping... */
++#ifdef CONFIG_SPX_FEATURE_HW_FAILSAFE_BOOT
++		if ((broken_spi_banks == 2) && (*wdt_timeout_status & WDT_CUR_BOOTSRC_MASK))
++			broken_spi_banks = 1;
++		else if (broken_spi_banks == 0)
++#endif
++       {
++           *((volatile unsigned long *)(WDT2_CLR_TIMEOUT_STAT_REG)) = 0x00000077 ;
++       }
++#endif
++
++#ifdef CONFIG_SPX_FEATURE_HW_FAILSAFE_BOOT
++       /* Enabling the Second Boot code upon reset */
++       *((volatile unsigned long *)(WDT2_CONTROL_REG)) |= (WDT2_SECOND_BOOT_CODE);
++#else
++       *((volatile unsigned long *)(WDT2_CONTROL_REG)) &= ~(WDT2_SECOND_BOOT_CODE);
++#endif
++       /* Enable back the Watchdog timer to start the Watchdog */
++       /* Also set the Flag to reset the CPU on Timeout */
++       *((volatile unsigned long *)(WDT2_CONTROL_REG)) |= (WDT_RESET_SYSTEM | WDT_ENABLE);
++
++#ifdef CONFIG_SPX_FEATURE_HW_FAILSAFE_BOOT 
++	if (broken_spi_banks == 1) 
++           return 1;// if bank#0 is broken then dont clear address mapping and bootimage 1 
++       else 
++#endif
++           return (((*wdt_timeout_status) & (WDT_CUR_BOOTSRC_MASK)) >> 1 ) + 1 ;
++}
++
++/**
++* @fn Disable_watchdog
++* @brief Disables watchdog reset.
++* @param[in] void.
++* @retval  0 - on success.
++*/
++int Disable_watchdog(void)
++{
++
++    if(*((volatile unsigned long *)(WDT2_CONTROL_REG)) & (WDT_ENABLE | WDT_RESET_SYSTEM))
++    {
++       printf("Disabling Watchdog 2 Timer\n");
++       *((volatile unsigned long *)(WDT2_CONTROL_REG)) &= ~(WDT_RESET_SYSTEM | WDT_ENABLE);
++    }
++#ifdef CONFIG_SPX_FEATURE_HW_FAILSAFE_BOOT
++	if ((broken_spi_banks == 2) && (*((volatile unsigned long *)(WDT2_TIMEOUT_STAT_REG)) & WDT_CUR_BOOTSRC_MASK))
++		broken_spi_banks = 1;
++#endif
++    return 0;
++}
++
++#endif
+diff -uNar uboot/oem/ami/fmh/hwdef.h uboot.new/oem/ami/fmh/hwdef.h
+--- uboot/oem/ami/fmh/hwdef.h	1969-12-31 19:00:00.000000000 -0500
++++ uboot.new/oem/ami/fmh/hwdef.h	2020-12-16 15:24:38.867184089 -0500
+@@ -0,0 +1,122 @@
++/*
++ *  This file contains the AST SOC Register definitions
++ *
++ *  Copyright (C) 2005 American Megatrends Inc
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, write to the Free Software
++ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
++ */
++
++#ifndef     _HWDEF_AST_H_
++#define     _HWDEF_AST_H_
++
++
++/* -----------------------------------------------------------------
++ *      	         SRAM Registers
++ * -----------------------------------------------------------------
++ */
++
++
++/*
++ * -------------------------------------------------------------
++ *  					SDRAM Registers
++ * -------------------------------------------------------------
++ */
++
++/*--------------------------------------------------------
++ *  Timer definitions
++ * ------------------------------------------------------
++ */
++/* Timer conrol reg */
++#define TIMER3_INTR_ENABLE 		0x400
++#define TIMER3_CLOCK_SELECT		0x200
++#define TIMER3_ENABLE		    0x100
++#define TIMER2_INTR_ENABLE 		0x040
++#define TIMER2_CLOCK_SELECT		0x020
++#define TIMER2_ENABLE		    0x010
++#define TIMER1_INTR_ENABLE 		0x004
++#define TIMER1_CLOCK_SELECT		0x002
++#define TIMER1_ENABLE		    0x001
++
++/* --------------------------------------------------------
++ *  Interrupt Controllers
++ * --------------------------------------------------------
++ */
++/* Source control reg */
++#define INTR_LOW_LEVEL	0x00
++#define INTR_HIGH_LEVEL	0x40
++#define INTR_NEG_EDGE	0x80
++#define INRR_POS_EDGE	0xC0
++
++
++/*  --------------------------------------------------------------
++ *   I2S Controllers
++ *  --------------------------------------------------------------
++ */
++
++
++/*  --------------------------------------------------------------
++ *   SSP Controllers
++ *  --------------------------------------------------------------
++ */
++
++
++/*  --------------------------------------------------------------
++ *   I2C Controllers
++ *  --------------------------------------------------------------
++ */
++
++
++/*----------------------------------------------------------------
++ *   DMA Controllers
++ *----------------------------------------------------------------
++ */
++
++
++/*----------------------------------------------------------------
++ *   Serial  Controllers
++ *----------------------------------------------------------------
++ */
++#if 0
++#define AST_UART_CLOCK      UART_CLOCK/13	/* defined in board config */
++#define AST_BAUD_115200	    (AST_UART_CLOCK /1843200)
++#define AST_BAUD_57600	    (AST_UART_CLOCK /921600)
++#define AST_BAUD_38400	    (AST_UART_CLOCK /614400)
++#define AST_BAUD_19200	    (AST_UART_CLOCK /307200)
++#define AST_BAUD_14400	    (AST_UART_CLOCK /230400)
++#define AST_BAUD_9600	    (AST_UART_CLOCK /153600)
++#endif
++
++/*----------------------------------------------------------------
++ *   RTC
++ *----------------------------------------------------------------
++ */
++
++
++/*----------------------------------------------------------------
++ *   WDT
++ *----------------------------------------------------------------
++ */
++#define WDT_TIMER_EN		0x01
++#define WDT_RESET_EN		0x02
++
++/*----------------------------------------------------------------
++ *   USB Reference Clock
++ *----------------------------------------------------------------
++ */
++#define AST_PLL_25MHZ                   25000000
++#define AST_PLL_24MHZ                   24000000
++#define AST_PLL_12MHZ                   12000000
++
++#endif
+diff -uNar uboot/oem/ami/fmh/hwmap.h uboot.new/oem/ami/fmh/hwmap.h
+--- uboot/oem/ami/fmh/hwmap.h	1969-12-31 19:00:00.000000000 -0500
++++ uboot.new/oem/ami/fmh/hwmap.h	2020-12-16 15:25:12.704757858 -0500
+@@ -0,0 +1,122 @@
++/*
++ *  This file contains the AST SOC Register Base, IRQ and DMA  mappings
++ *
++ *  Copyright (C) 2005 American Megatrends Inc
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, write to the Free Software
++ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
++ */
++
++#ifndef     _HWREG_AST_H_
++#define     _HWMAP_AST_H_
++
++
++/********************************************************************
++   Internal Register Mapping Actual = 0x16000000 to 0x1E78CFFF
++   After Align the base and size    = 0x16000000 to 0x1EFFFFFF
++*********************************************************************/
++
++#define AST_REGISTER_BASE				0x16000000
++#define AST_REGISTER_SIZE				0x09000000
++
++/*--------------------------- Individual Devices ------------------------- */
++#define AST_SMC_BASE                    0x16000000
++
++#define AST_AHBC_BASE                   0x1E600000
++#define AST_FMC_BASE                    0x1E620000   
++#define AST_SPI_BASE                    0x1E630000   
++#define AST_MIC_BASE                    0x1E640000
++#define AST_MAC1_BASE                   0x1E660000
++#define AST_MAC2_BASE                   0x1E680000
++#define AST_USB20_HUB_BASE              0x1E6A0000
++#define AST_USB20_HOST_BASE             0x1E6A1000
++#define AST_USB11_HOST_BASE             0x1E6B0000
++#define AST_IC_BASE                     0x1E6C0000
++#define AST_SDRAMC_BASE                 0x1E6E0000
++#define AST_USB11_BASE                  0x1E6E1000
++#define AST_SCU_BASE                    0x1E6E2000
++#define AST_ADC_BASE                    0x1E6E9000
++#define AST_LPC_PLUS_BASE               0x1E6EC000
++#define AST_CRT_BASE                    0x1E6E6000
++#define AST_RFX_BASE                    0x1E6EB000
++#define AST_PCIE_BASE                   0x1E6ED000
++#define AST_P2X_BASE                    0x1E6F0000
++#define AST_GPIO_BASE                   0x1E780000
++#define AST_RTC_BASE                    0x1E781000
++#define AST_TIMER_BASE                  0x1E782000
++#define AST_UART1_BASE                  0x1E783000
++#define AST_UART2_BASE                  0x1E784000
++#define AST_WDT_BASE                    0x1E785000
++#define AST_WDT2_BASE                   0x1E785040
++#define AST_PWM_FAN_BASE                0x1E786000
++#define AST_VUART_BASE                  0x1E787000
++#define AST_PUART_BASE                  0x1E788000
++#define AST_LPC_BASE                    0x1E789000
++#define AST_I2C_BASE                    0x1E78A000
++
++#define AST_PCIE_WIN_BASE               0x70000000
++#define AST_PCIE_WIN_SIZE               0x10000000
++
++/*--------------- Virtual address of the IO Registers Region  ------------*/
++#define AST_REGISTER_VA_BASE            IO_ADDRESS(AST_REGISTER_BASE)
++
++#define AST_SMC_VA_BASE                 IO_ADDRESS(AST_SMC_BASE)
++#define AST_AHBC_VA_BASE                IO_ADDRESS(AST_AHBC_BASE)
++#define AST_FMC_VA_BASE                 IO_ADDRESS(AST_FMC_BASE)  
++#define AST_SPI_VA_BASE                 IO_ADDRESS(AST_SPI_BASE)   
++#define AST_MIC_VA_BASE                 IO_ADDRESS(AST_MIC_BASE)
++#define AST_MAC1_VA_BASE                IO_ADDRESS(AST_MAC1_BASE)
++#define AST_MAC2_VA_BASE                IO_ADDRESS(AST_MAC2_BASE)
++#define AST_USB20_HUB_VA_BASE           IO_ADDRESS(AST_USB20_HUB_BASE)
++#define AST_USB20_HOST_VA_BASE          IO_ADDRESS(AST_USB20_HOST_BASE)
++#define AST_USB11_HOST_VA_BASE          IO_ADDRESS(AST_USB11_HOST_BASE)
++#define AST_IC_VA_BASE                  IO_ADDRESS(AST_IC_BASE)
++#define AST_SDRAMC_VA_BASE              IO_ADDRESS(AST_SDRAMC_BASE)
++#define AST_USB11_VA_BASE               IO_ADDRESS(AST_USB11_BASE)
++#define AST_SCU_VA_BASE                 IO_ADDRESS(AST_SCU_BASE)
++#define AST_ADC_VA_BASE                 IO_ADDRESS(AST_ADC_BASE)
++#define AST_LPC_PLUS_VA_BASE            IO_ADDRESS(AST_LPC_PLUS_BASE)
++#define AST_CRT_VA_BASE                 IO_ADDRESS(AST_CRT_BASE)
++#define AST_RFX_VA_BASE                 IO_ADDRESS(AST_RFX_BASE)
++#define AST_PCIE_VA_BASE                IO_ADDRESS(AST_PCIE_BASE)
++#define AST_P2X_VA_BASE                 IO_ADDRESS(AST_P2X_BASE)
++#define AST_GPIO_VA_BASE                IO_ADDRESS(AST_GPIO_BASE)
++#define AST_RTC_VA_BASE                 IO_ADDRESS(AST_RTC_BASE)
++#define AST_TIMER_VA_BASE               IO_ADDRESS(AST_TIMER_BASE)
++#define AST_UART1_VA_BASE               IO_ADDRESS(AST_UART1_BASE)
++#define AST_UART2_VA_BASE               IO_ADDRESS(AST_UART2_BASE)
++#define AST_WDT_VA_BASE                 IO_ADDRESS(AST_WDT_BASE)
++#define AST_WDT2_VA_BASE                IO_ADDRESS(AST_WDT2_BASE)
++#define AST_PWM_FAN_VA_BASE             IO_ADDRESS(AST_PWM_FAN_BASE)
++#define AST_VUART_VA_BASE               IO_ADDRESS(AST_VUART_BASE)
++#define AST_PUART_VA_BASE               IO_ADDRESS(AST_PUART_BASE)
++#define AST_LPC_VA_BASE                 IO_ADDRESS(AST_LPC_BASE)
++#define AST_I2C_VA_BASE                 IO_ADDRESS(AST_I2C_BASE)
++
++
++/*****************************************************************
++						    Flash
++*****************************************************************/
++#define CPE_FLASH_BASE                  0x10000000
++#define CPE_FLASH_SZ                    0x00800000		/* Max 16 MB */
++#define CPE_FLASH_VA_BASE               MEM_ADDRESS(CPE_FLASH_BASE)
++
++
++/*****************************************************************
++					  IRQ Assignment
++*****************************************************************/
++#define NR_IRQS							32
++#define MAXIRQNUM                       31
++
++#endif
+diff -uNar uboot/oem/ami/fmh/hwreg.h uboot.new/oem/ami/fmh/hwreg.h
+--- uboot/oem/ami/fmh/hwreg.h	1969-12-31 19:00:00.000000000 -0500
++++ uboot.new/oem/ami/fmh/hwreg.h	2020-12-16 15:25:28.407150520 -0500
+@@ -0,0 +1,218 @@
++/*
++ *  This file contains the AST SOC Register locations
++ *
++ *  Copyright (C) 2005 American Megatrends Inc
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, write to the Free Software
++ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
++ */
++
++#ifndef     _HWREG_AST_H_
++#define     _HWREG_AST_H_
++
++
++/* -----------------------------------------------------------------
++ *                  SMC Registers
++ * -----------------------------------------------------------------
++*/
++#define SMC_CE0_SEGMENT_AC_TIMING_REG   (AST_SMC_VA_BASE + 0x00)
++#define SMC_CE0_CTRL_REG                (AST_SMC_VA_BASE + 0x04)
++#define SMC_CE1_CTRL_REG                (AST_SMC_VA_BASE + 0x08)
++#define SMC_CE2_CTRL_REG                (AST_SMC_VA_BASE + 0x0C)
++
++/* -----------------------------------------------------------------
++ *                  AHB Registers
++ * -----------------------------------------------------------------
++*/
++#define AHB_PROTECTION_KEY_REG          (AST_AHBC_VA_BASE + 0x00)
++#define AHB_PRIORITY_CTRL_REG           (AST_AHBC_VA_BASE + 0x80)
++#define AHB_INTERRUPT_CTRL_REG          (AST_AHBC_VA_BASE + 0x88)
++#define AHB_ADDR_REMAP_REG              (AST_AHBC_VA_BASE + 0x8C)
++
++/* -----------------------------------------------------------------
++ *                 SRAM Registers
++ * -----------------------------------------------------------------
++ */
++
++ /* -------------------------------------------------------------
++ *                  SDRAM Registers
++ * -------------------------------------------------------------
++ */
++#define SDRAM_PROTECTION_KEY_REG            (AST_SDRAMC_VA_BASE + 0x00)
++#define SDRAM_CONFIG_REG                    (AST_SDRAMC_VA_BASE + 0x04)
++#define SDRAM_GRAP_MEM_PROTECTION_REG       (AST_SDRAMC_VA_BASE + 0x08)
++#define SDRAM_REFRESH_TIMING_REG            (AST_SDRAMC_VA_BASE + 0x0C)
++#define SDRAM_NSPEED_REG1                   (AST_SDRAMC_VA_BASE + 0x10)
++#define SDRAM_LSPEED_REG1                   (AST_SDRAMC_VA_BASE + 0x14)
++#define SDRAM_NSPEED_REG2                   (AST_SDRAMC_VA_BASE + 0x18)
++#define SDRAM_LSPEED_REG2                   (AST_SDRAMC_VA_BASE + 0x1C)
++#define SDRAM_NSPEED_DELAY_CTRL_REG         (AST_SDRAMC_VA_BASE + 0x20)
++#define SDRAM_LSPEED_DELAY_CTRL_REG         (AST_SDRAMC_VA_BASE + 0x24)
++#define SDRAM_MODE_SET_CTRL_REG             (AST_SDRAMC_VA_BASE + 0x28)
++#define SDRAM_MRS_EMRS2_MODE_SET_REG        (AST_SDRAMC_VA_BASE + 0x2C)
++#define SDRAM_MRS_EMRS3_MODE_SET_REG        (AST_SDRAMC_VA_BASE + 0x30)
++#define SDRAM_PWR_CTRL_REG                  (AST_SDRAMC_VA_BASE + 0x34)
++#define SDRAM_PAGE_MISS_LATENCY_MASK_REG    (AST_SDRAMC_VA_BASE + 0x38)
++#define SDRAM_PRIORITY_GROUP_SET_REG        (AST_SDRAMC_VA_BASE + 0x3C)
++#define SDRAM_MAX_GRANT_LENGTH_REG1         (AST_SDRAMC_VA_BASE + 0x40)
++#define SDRAM_MAX_GRANT_LENGTH_REG2         (AST_SDRAMC_VA_BASE + 0x44)
++#define SDRAM_MAX_GRANT_LENGTH_REG3         (AST_SDRAMC_VA_BASE + 0x48)
++#define SDRAM_ECC_CTRL_STATUS_REG           (AST_SDRAMC_VA_BASE + 0x50)
++#define SDRAM_ECC_SEGMENT_EN_REG            (AST_SDRAMC_VA_BASE + 0x54)
++#define SDRAM_ECC_SCRUB_REQ_MASK_CTRL_REG   (AST_SDRAMC_VA_BASE + 0x58)
++#define SDRAM_ECC_ADDR_FIRST_ERR_REG        (AST_SDRAMC_VA_BASE + 0x5C)
++#define SDRAM_IO_BUFF_MODE_REG              (AST_SDRAMC_VA_BASE + 0x60)
++#define SDRAM_DLL_CTRL_REG1                 (AST_SDRAMC_VA_BASE + 0x64)
++#define SDRAM_DLL_CTRL_REG2                 (AST_SDRAMC_VA_BASE + 0x68)
++#define SDRAM_DLL_CTRL_REG3                 (AST_SDRAMC_VA_BASE + 0x6C)
++#define SDRAM_TEST_CTRL_STATUS_REG          (AST_SDRAMC_VA_BASE + 0x70)
++#define SDRAM_TEST_START_ADDR_LENGTH_REG    (AST_SDRAMC_VA_BASE + 0x74)
++#define SDRAM_TEST_FAIL_DQ_BIT_REG          (AST_SDRAMC_VA_BASE + 0x78)
++#define SDRAM_TEST_INIT_VALUE_REG           (AST_SDRAMC_VA_BASE + 0x7C)
++#define AST2100_COMPATIBLE_SCU_PASSWORD     (AST_SDRAMC_VA_BASE + 0x100)
++#define AST2100_COMPATIBLE_SCU_MPLL_PARA    (AST_SDRAMC_VA_BASE + 0x120)
++
++/*-------------------------------------------------------------------
++ *                 SCU Registers
++ *--------------------------------------------------------------------
++ */
++#define SCU_KEY_CONTROL_REG                (AST_SCU_VA_BASE +  0x00)
++#define SCU_SYS_RESET_REG               (AST_SCU_VA_BASE +  0x04)
++#define SCU_CLK_SELECT_REG              (AST_SCU_VA_BASE +  0x08)
++#define SCU_CLK_STOP_REG                (AST_SCU_VA_BASE +  0x0C)
++#define SCU_OSC_COUNT_CTRL_REG         (AST_SCU_VA_BASE +  0x10)
++#define SCU_OSC_COUNT_VALUE_REG         (AST_SCU_VA_BASE +  0x14)
++#define SCU_INTR_CRTL_VALUE_REG         (AST_SCU_VA_BASE +  0x18)
++#define SCU_D2PLL_PARAM_REG             (AST_SCU_VA_BASE +  0x1C)//AST2500A1
++#define SCU_32CLK_ERR_CORRECT_REG       (AST_SCU_VA_BASE +  0x1C)
++#define SCU_M_PLL_PARAM_REG             (AST_SCU_VA_BASE +  0x20)
++#define SCU_H_PLL_PARAM_REG             (AST_SCU_VA_BASE +  0x24)
++#define SCU_MISC_CONTROL_REG            (AST_SCU_VA_BASE +  0x2C)
++#define SCU_MISC_MULTI_PIN3_REG  	(AST_SCU_VA_BASE +  0x88)
++#define SCU_MISC_MULTI_PIN5_REG		    (AST_SCU_VA_BASE +  0x90)
++
++#define SCU_SOC_SCRATCH1_REG            (AST_SCU_VA_BASE +  0x40)
++#define SCU_SOC_SCRATCH2_REG            (AST_SCU_VA_BASE +  0x44)
++#define SCU_MAC_CLOCK_DELAY             (AST_SCU_VA_BASE +  0x48)
++#define SCU_HW_STRAPPING_REG            (AST_SCU_VA_BASE +  0x70)
++#define SCU_PIN_MUX                     (AST_SCU_VA_BASE +  0x74)
++#define SCU_REVISION_ID                 (AST_SCU_VA_BASE +  0x7C)
++#define SCU_F0_REG                      (AST_SCU_VA_BASE +  0xf0)
++#define SCU_MAC_CLK_DELAY_100M          (AST_SCU_VA_BASE +  0xB8)
++#define SCU_MAC_CLK_DELAY_10M           (AST_SCU_VA_BASE +  0xBC)
++#define SCU_SYS_RESET_CTL_REG2          (AST_SCU_VA_BASE +  0xD4)
++#define SCU_D2PLL_EXTENDED_REG          (AST_SCU_VA_BASE +  0x13C)
++
++/* -------------------------------------------------------------------
++ *                     Timer Registers
++ * -------------------------------------------------------------------
++ */
++#define TIMER1_COUNT_REG                (AST_TIMER_VA_BASE + 0x00)
++#define TIMER1_RELOAD_REG               (AST_TIMER_VA_BASE + 0x04)
++#define TIMER1_FIRST_MATCH_REG          (AST_TIMER_VA_BASE + 0x08)
++#define TIMER1_SEC_MATCH_REG            (AST_TIMER_VA_BASE + 0x0C)
++
++#define TIMER2_COUNT_REG                (AST_TIMER_VA_BASE + 0x10)
++#define TIMER2_RELOAD_REG               (AST_TIMER_VA_BASE + 0x14)
++#define TIMER2_FIRST_MATCH_REG          (AST_TIMER_VA_BASE + 0x18)
++#define TIMER2_SEC_MATCH_REG            (AST_TIMER_VA_BASE + 0x1C)
++
++#define TIMER3_COUNT_REG                (AST_TIMER_VA_BASE + 0x20)
++#define TIMER3_RELOAD_REG               (AST_TIMER_VA_BASE + 0x24)
++#define TIMER3_FIRST_MATCH_REG          (AST_TIMER_VA_BASE + 0x28)
++#define TIMER3_SEC_MATCH_REG            (AST_TIMER_VA_BASE + 0x2C)
++
++#define TIMER_CONTROL_REG               (AST_TIMER_VA_BASE + 0x30)
++
++/* --------------------------------------------------------------------
++ *                         GPIO Registers
++ * --------------------------------------------------------------------
++ */
++#define SIMPLE_GPIO0_DATA_VAL_REG       (AST_GPIO_VA_BASE + 0x70)
++#define EXT_GPIO_CMD_SRC_0_REG		(AST_GPIO_VA_BASE + 0x68)
++#define EXT_GPIO_CMD_SRC_1_REG		(AST_GPIO_VA_BASE + 0x6c)
++#define EXT_GPIO_DATA_REG		(AST_GPIO_VA_BASE + 0x20)
++#define EXT_GPIO_DIR_REG		(AST_GPIO_VA_BASE + 0x24)
++#define GPIO_DATA_REG			(AST_GPIO_VA_BASE + 0x0)
++#define GPIO_DIR_REG			(AST_GPIO_VA_BASE + 0x4)
++
++
++/* -----------------------------------------------------------------
++ *                  Interrupt Controller Register
++ * -----------------------------------------------------------------
++ */
++#define IRQ_STATUS_REG                 (AST_IC_VA_BASE + 0x00)
++#define FIQ_STATUS_REG                 (AST_IC_VA_BASE + 0x04)
++#define RAW_INT_STATUS_REG             (AST_IC_VA_BASE + 0x08)
++#define IRQ_SELECT_REG                 (AST_IC_VA_BASE + 0x0C)
++#define IRQ_ENABLE_REG                 (AST_IC_VA_BASE + 0x10)
++#define IRQ_CLEAR_REG                  (AST_IC_VA_BASE + 0x14)
++#define SOFT_INT_REG                   (AST_IC_VA_BASE + 0x18)
++#define SOFT_INT_CLEAR_REG             (AST_IC_VA_BASE + 0x1C)
++#define PROTECT_ENABLE_REG             (AST_IC_VA_BASE + 0x20)
++
++/*-------------------------------------------------------------
++ *               SSP Controllers Registers
++ *  -----------------------------------------------------------
++ */
++
++
++/*---------------------------------------------------------------
++ *   I2C Controllers Register
++ *  ------------------------------------------------------------
++ */
++
++/*------------------------------------------------------------------
++ *   DMA Controllers Registers
++ *  ----------------------------------------------------------------
++ */
++
++/*------------------------------------------------------------------
++ *              RTC Register Locations
++ *------------------------------------------------------------------*/
++
++
++/*------------------------------------------------------------------
++ *              WDT Register Locations
++ *------------------------------------------------------------------*/
++#define WDT_CNT_STATUS_REG  (AST_WDT_VA_BASE + 0x00)
++#define WDT_RELOAD_REG     (AST_WDT_VA_BASE + 0x04)
++#define WDT_CNT_RESTART_REG (AST_WDT_VA_BASE + 0x08)
++#define WDT_CONTROL_REG        (AST_WDT_VA_BASE + 0x0C)
++#define WDT_TIMEOUT_STAT_REG (AST_WDT_VA_BASE + 0x10)
++#define WDT_CLR_TIMEOUT_STAT_REG (AST_WDT_VA_BASE + 0x14)
++#define WDT2_CNT_STATUS_REG  (AST_WDT2_VA_BASE + 0x00)
++#define WDT2_RELOAD_REG          (AST_WDT2_VA_BASE + 0x04)
++#define WDT2_CNT_RESTART_REG (AST_WDT2_VA_BASE + 0x08)
++#define WDT2_CONTROL_REG         (AST_WDT2_VA_BASE + 0x0C)
++
++#define WDT2_TIMEOUT_STAT_REG      (AST_WDT2_VA_BASE + 0x10)
++#define WDT2_CLR_TIMEOUT_STAT_REG  (AST_WDT2_VA_BASE + 0x14)
++
++/*------------------------------------------------------------------
++ *              LPC PLUS Controllers Register Locations
++ *------------------------------------------------------------------*/
++#define LPC_PLUS_CALIBRATION_DATA   (AST_LPC_PLUS_VA_BASE + 0x04)
++
++
++/*------------------------------------------------------------------
++ *              LPC Controllers Register Locations
++ *------------------------------------------------------------------*/
++#define LPC_HOST_CNT_REG0	        (AST_LPC_VA_BASE + 0xa0)
++#define LPC_SNP_WADR			(AST_LPC_VA_BASE + 0x90)
++#define LPC_SNP_WDR			(AST_LPC_VA_BASE + 0x94)
++#define LPC_HICR5			(AST_LPC_VA_BASE + 0x80)
++
++
++#endif
+diff -uNar uboot/oem/ami/fmh/Makefile uboot.new/oem/ami/fmh/Makefile
+--- uboot/oem/ami/fmh/Makefile	2020-12-16 12:55:32.532921826 -0500
++++ uboot.new/oem/ami/fmh/Makefile	2020-12-16 15:29:13.000000000 -0500
+@@ -18,7 +18,7 @@
+ # # MA 02111-1307 USA
+ # #
+ 
+-obj-y                           += cmd_fmh.o fmhcore.o bootargs.o
++obj-y                           += ast_wdt.o cmd_fmh.o fmhcore.o bootargs.o
+ 
+ ifdef CONFIG_SPX_FEATURE_SECURE_BOOT_SUPPORT
+ obj-y                           += hrotcore.o
+diff -uNar uboot/oem/ami/fmh/soc_hw.h uboot.new/oem/ami/fmh/soc_hw.h
+--- uboot/oem/ami/fmh/soc_hw.h	1969-12-31 19:00:00.000000000 -0500
++++ uboot.new/oem/ami/fmh/soc_hw.h	2020-12-16 15:30:41.458208092 -0500
+@@ -0,0 +1 @@
++#include "ast_hw.h"
+diff -uNar uboot/oem/ami/fwupdate/fwupdate.c uboot.new/oem/ami/fwupdate/fwupdate.c
+--- uboot/oem/ami/fwupdate/fwupdate.c	1969-12-31 19:00:00.000000000 -0500
++++ uboot.new/oem/ami/fwupdate/fwupdate.c	2020-12-16 15:32:58.634218034 -0500
+@@ -0,0 +1,714 @@
++/*****************************************************************
++ *****************************************************************
++ ***                                                            **
++ ***    (C)Copyright 2002-2007, American Megatrends Inc.        **
++ ***                                                            **
++ ***            All Rights Reserved.                            **
++ ***                                                            **
++ ***        6145-F, Northbelt Parkway, Norcross,                **
++ ***                                                            **
++ ***        Georgia - 30071, USA. Phone-(770)-246-8600.         **
++ ***                                                            **
++ *****************************************************************
++ *****************************************************************
++ *****************************************************************
++ * $Header: $
++ *
++ * $Revision: $
++ *
++ * $Date: $
++ *
++ ******************************************************************
++ ******************************************************************
++ * 
++ * fwupdate.c
++ * fwupdate functionality
++ *
++ *  Author: Rama Rao Bisa <ramab@ami.com>
++ *			Modified by Anurag Bhatia for SP porting		
++ ******************************************************************/
++# include <common.h>
++# include <config.h>
++# include <command.h>
++# include <net.h>
++# include "soc_kcs.h"
++# include <oem/ami/fwupdate/kcs.h>
++# include <oem/ami/ipmi/cmdhandler.h>
++#include <mmc.h>
++#include <part.h>
++#ifdef CONFIG_SPX_FEATURE_BMC_FIRMWARE_AUTO_RECOVERY
++# include <oem/ami/fmh/fmh.h>
++# include "fat.h"
++#include <mmc.h>
++#endif
++#include <environment.h>
++#include <configs/evb_ast2600.h>
++#include <spi_flash.h>
++
++//#define YAFU_IMAGE_UPLOAD_LOCATION    (CONFIG_SYS_SDRAM_BASE + 0x03000000)
++//#define YAFU_TEMP_SECTOR_BUFFER         (CONFIG_SYS_SDRAM_BASE + 0x07000000)
++//#define 	DEBUG 						1
++#define 	UBOOT_TIMEOUT_VALUE			0xE00000
++
++#ifdef CONFIG_SPX_FEATURE_BMC_FIRMWARE_AUTO_RECOVERY
++extern int Enable_watchdog(unsigned long *wdt_timeout_status);
++extern int Disable_watchdog(void);
++#endif
++
++//extern int do_protect (cmd_tbl_t *cmdtp, int flag, int argc, char *argv[]);
++//extern int flash_erase (flash_info_t *info, int s_first, int s_last);
++//extern flash_info_t flash_info[];
++
++/* From cmdhandler.c */
++extern int 				gReset;
++extern int 				gStartFirmwareUpdation;
++extern INT32U			gEraseBlock;
++extern unsigned char	gFWUploadSelector;
++
++volatile static unsigned long 	gUbootTimeout;
++
++static unsigned char 	m_KCSCmd [MAX_KCS_PKT_LEN];
++static unsigned char 	m_KCSRes [MAX_KCS_PKT_LEN];
++
++static IPMICmdData_T    m_IPMICmd;
++
++static KCSCmd_T*		pKCSRes; 
++static KCSCmd_T*		pKCSCmd;
++static IPMICmdData_T*   pIPMICmd;
++
++#ifdef CONFIG_SPX_FEATURE_BMC_FIRMWARE_AUTO_RECOVERY
++static struct mmc *init_mmc_device(int dev, bool force_init)
++{
++	struct mmc *mmc;
++	mmc = find_mmc_device(dev);
++	if (!mmc) {
++		printf("no mmc device at slot %x\n", dev);
++		return NULL;
++	}
++
++	if (!mmc_getcd(mmc))
++		force_init = true;
++
++	if (force_init)
++		mmc->has_init = 0;
++	if (mmc_init(mmc))
++		return NULL;
++	return mmc;
++}
++
++#endif
++
++#ifdef CONFIG_SPX_FEATURE_BMC_FIRMWARE_AUTO_RECOVERY
++static int mmc_get_dev(int dev, struct blk_desc **descp)
++{
++	struct mmc *mmc = init_mmc_device(dev,false);
++	
++	if (!mmc)
++		return -ENODEV;
++	
++	*descp = mmc_get_blk_desc(mmc);
++
++	return 0;
++}
++#endif
++
++/*
++ * ProcessKCSRequests
++ */
++static void
++ProcessKCSRequests (void)
++{
++
++	int retlen;
++	unsigned char ChannelNum=0;
++	unsigned long Responselen;
++
++	/* Read KCS Request */
++	for (ChannelNum=0;ChannelNum<MAX_KCS_CHANNEL;ChannelNum++)
++	{
++	retlen = RecvKCSRequest (ChannelNum,&m_KCSCmd[0]);
++		if (0 != retlen)
++		{
++#ifdef DEBUG
++		int i;
++		printf ("KCS Packet Received\n");
++		for (i = 0; i < retlen; i++)
++				printf ("C%d  0x%x\n", ChannelNum, m_KCSCmd [i]);
++#endif					
++		pIPMICmd->NetFnLUN = pKCSCmd->NetFnLUN;
++		pIPMICmd->Cmd	   = pKCSCmd->Cmd;
++		pIPMICmd->ReqLen   = (retlen - 2);
++		if (0 != pIPMICmd->ReqLen) 
++		{
++			memcpy ((unsigned char*)pIPMICmd->ReqData, (unsigned char*)pKCSCmd->Data, pIPMICmd->ReqLen);
++		}
++
++		Responselen = ProcessIPMICmd (pIPMICmd);
++
++		gUbootTimeout = UBOOT_TIMEOUT_VALUE;
++		pKCSRes->NetFnLUN = pKCSCmd->NetFnLUN + 4;
++		pKCSRes->Cmd      = pKCSCmd->Cmd;
++		if (Responselen)
++		{
++			memcpy (pKCSRes->Data, pIPMICmd->ResData, Responselen);
++		}
++#ifdef DEBUG
++		printf ("pIPMPCmd->ResLen = 0x%lx\n", pIPMICmd->ResLen);
++#endif
++		SendKCSResponse (ChannelNum, m_KCSRes, (sizeof (pKCSCmd->NetFnLUN) + sizeof (pKCSCmd->Cmd) + Responselen));
++		
++		}
++	}
++	return;
++}
++
++/*
++ * Perform Firmware Reset
++ */
++static int
++PerformFirmwareReset (void)
++{
++	int Counter;
++	char *argv[2];
++
++	argv[0] = "reset";
++	argv[1] = NULL;
++	
++	for (Counter = 0; Counter < 10000; Counter++)
++	{
++		ProcessKCSRequests ();
++	}
++
++	if (0 != do_reset(NULL, 0, 1, argv))
++	{
++		printf ("Error: reset firmware failed\n");
++		return -1;
++	}
++
++	return 0;
++}
++
++#ifdef CONFIG_SPX_FEATURE_BMC_FIRMWARE_AUTO_RECOVERY
++int CopyRecoveryImage(void)
++{
++    struct blk_desc* desc = NULL;
++	int ret=-1;
++    long size;
++    unsigned long cnt = 0;
++    int dev = 0, part = 1;
++    char fname[20] = {0};
++
++    /*TODO: dev,part and cnt values can be get from U-Boot env also.*/
++
++    /*Get the MMC device descriptor*/
++    ret= mmc_get_dev(dev,&desc);
++    if(ret != 0){
++        return -1;
++    }
++
++    /*Register the MMC device partition with FAT file system*/
++    if(fat_register_device(desc,part) != 0){
++        return -1;
++    }
++
++    strcpy(fname,"rom.ima");
++
++    /*Read the recovery image from file system*/
++    size = file_fat_read(fname,(unsigned char *)YAFU_IMAGE_UPLOAD_LOCATION,cnt);
++    if(size == -1){
++        return -1;
++    }
++    return -1;
++}
++
++int VerifyRAMImage(unsigned long *ConfStart, unsigned long *ConfSize)
++{
++    unsigned long   offset = 0;
++    FMH     *pFMH = NULL;
++    MODULE_INFO *pmod = NULL;
++    char        sectionname[10] = {0}, conffound = 0;
++    unsigned char   *TempBuf = (unsigned char *)YAFU_TEMP_SECTOR_BUFFER;
++    int i,ret = -1;
++
++    for(i = 0; i < (CONFIG_SPX_FEATURE_GLOBAL_USED_FLASH_SIZE/CONFIG_SPX_FEATURE_GLOBAL_ERASE_BLOCK_SIZE); i++)
++    {
++        memcpy(TempBuf, (unsigned char *)(YAFU_IMAGE_UPLOAD_LOCATION + (i * CONFIG_SPX_FEATURE_GLOBAL_ERASE_BLOCK_SIZE)),CONFIG_SPX_FEATURE_GLOBAL_ERASE_BLOCK_SIZE);
++
++        /*Locate the FMH Section*/
++        pFMH = ScanforFMH_RAM(TempBuf,CONFIG_SPX_FEATURE_GLOBAL_ERASE_BLOCK_SIZE);
++        if(pFMH != NULL)
++        {
++            /*Get the Module Information*/
++            pmod = &pFMH->Module_Info;
++            memcpy(sectionname,pmod->Module_Name,8);
++            printf("Found Module : %s\n",sectionname);
++            /*Firmware Module found*/
++            if(pmod->Module_Type == 0x02)
++            {
++                /*return success if the firmware module found, else failure*/
++                ret = 0;
++            }
++
++            if((strncmp(sectionname,"conf",8) == 0) && (conffound == 0))
++            {
++                conffound = 1;
++                *ConfStart = offset;
++                *ConfSize = pFMH->FMH_AllocatedSize;
++            }
++        }
++        offset += CONFIG_SPX_FEATURE_GLOBAL_ERASE_BLOCK_SIZE;
++        
++    }
++
++    return ret;
++}
++
++int VerifyandFlash (void)
++{
++	struct spi_flash *flash;
++    int retries = 0,sector=0;//bank = 0,
++	int TotalSectorCnt = 0;
++
++    unsigned char   *TempBuf = (unsigned char*)YAFU_TEMP_SECTOR_BUFFER;
++ 
++    unsigned char   *pRamAddr;
++    unsigned long   cnt,confstartaddr = 0,confsize = 0, offset=0;   
++
++    /*Validate the Recovery Image which is in RAM Memory*/
++    if(VerifyRAMImage(&confstartaddr,&confsize) != 0)
++    {
++        printf("Image in the RAM address is invalid !!!");
++        return -1;
++    }
++
++	flash = spi_flash_probe(CONFIG_ENV_SPI_BUS, CONFIG_ENV_SPI_CS,
++                        CONFIG_ENV_SPI_MAX_HZ, CONFIG_ENV_SPI_MODE);
++    if (flash == NULL) 
++    {
++        puts("\nspi_flash_probe failed");
++        hang();
++    }
++	TotalSectorCnt = (CONFIG_SPX_FEATURE_GLOBAL_USED_FLASH_SIZE/CONFIG_SPX_FEATURE_GLOBAL_ERASE_BLOCK_SIZE);
++
++    for(sector = 0; sector < TotalSectorCnt; sector++)
++    {
++
++        pRamAddr = (unsigned char *) (YAFU_IMAGE_UPLOAD_LOCATION + (sector * CONFIG_SPX_FEATURE_GLOBAL_ERASE_BLOCK_SIZE));
++		offset = sector * CONFIG_SPX_FEATURE_GLOBAL_ERASE_BLOCK_SIZE;
++
++ /*Skip the U-Boot Env Sector*/
++        if((offset >= ((CONFIG_SPX_FEATURE_GLOBAL_UBOOT_ENV_START - CONFIG_SPX_FEATURE_GLOBAL_FLASH_START))) &&
++            (offset < ((CONFIG_SPX_FEATURE_GLOBAL_UBOOT_ENV_START - CONFIG_SPX_FEATURE_GLOBAL_FLASH_START + CONFIG_SPX_FEATURE_GLOBAL_UBOOT_ENV_SIZE))))
++        {
++           // printf("Skipping U-Boot Environment sector: %d\n",sector);
++			printf("evn sector =%lx\n",offset);
++			
++            continue;
++        }
++	
++        retries = 3;
++        while(retries)
++        {
++            
++			if(0 != spi_flash_read(flash, offset, CONFIG_SPX_FEATURE_GLOBAL_ERASE_BLOCK_SIZE,(char*)TempBuf))
++			{
++                retries--;
++                continue;
++            }
++            break;
++        }
++
++        if(retries == 0)
++            return -1;
++
++        /*Skip the sector if there is no change*/
++        if(0 == memcmp((unsigned char*)TempBuf,(unsigned char*)pRamAddr,CONFIG_SPX_FEATURE_GLOBAL_ERASE_BLOCK_SIZE))
++        {
++            printf("sector %d did not change offset=%lx\n",sector,offset);
++            continue;
++        }
++		
++        retries = 3;
++        while(retries)
++        {
++            /*Erase the sector*/
++            if(0 != spi_flash_erase(flash, offset, CONFIG_SPX_FEATURE_GLOBAL_ERASE_BLOCK_SIZE))
++            {
++                retries--;
++                continue;
++            }
++            break;
++        }
++
++        if(retries == 0)
++            return -1;
++
++        cnt = CONFIG_SPX_FEATURE_GLOBAL_ERASE_BLOCK_SIZE;
++        retries = 3;
++        while(retries)
++        {
++            /*Write the modified sector to SPI*/
++
++            if(0 != spi_flash_write(flash,offset,cnt,(unsigned char*)pRamAddr))
++            {
++				printf("failed to flash hence erasing sector =%lx\n",offset);
++                retries--;
++                spi_flash_erase(flash, offset, CONFIG_SPX_FEATURE_GLOBAL_ERASE_BLOCK_SIZE);
++                continue;
++            }
++            break;
++        }
++        if(retries == 0)
++            return -1;
++       
++    }
++    
++    return 0;
++}
++
++int TFTPRecoveryBoot(void)
++{
++    char    *s, tmp[22] = {0};
++
++    /*Set the netrety to "no", so that NetLoop will comeout after TFTP retry exceeds.*/
++    s = env_get("netretry");
++    env_set("netretry","no");
++    env_save();
++
++    /*Run the DHCP command to get the IP Address, SubNetmask and Gateway*/
++    net_loop(DHCP);
++	
++	if(!(net_gateway.s_addr))
++	{
++		env_set("ethact","ethernet@1e680000");
++		 net_loop(DHCP);
++	}
++
++    /*Update the Gateway U-Boot Env*/
++    if(net_gateway.s_addr)
++    {
++        ip_to_string(net_gateway, tmp);
++        env_set("gatewayip", tmp);
++    }
++
++    /*Update the netmask U-Boot Env*/
++    if(net_netmask.s_addr)
++    {
++        ip_to_string(net_netmask, tmp);
++        env_set("netmask", tmp);
++    }
++
++    /*Update the IPAddress U-Boot Env*/
++    if(net_ip.s_addr)
++    {
++        ip_to_string(net_ip, tmp);
++        env_set("ipaddr", tmp);
++    }
++
++    /*Save the IP Address details*/
++    env_save();
++
++    /*Call the Network loop to load the file from remote machine*/
++    net_loop(RECOVERY);
++
++    /*Restore the net retry value*/
++    env_set("netretry",s);
++    env_save();
++
++    /*Verify the recovery Image and flash it to SPI*/
++    if(0 != VerifyandFlash())
++    {
++        return -1;
++    }
++
++    return 0;
++}
++
++int Firmware_AutoRecovery(u8 force_recovery, u8 imgheadererr)
++{
++    unsigned long wdt_reset_status = 0 ;
++    char    *value = NULL;
++    int retries = 3;
++    u8  recoveryprogress = 0;
++
++    value = env_get("recoveryretry");
++    if(value != NULL)
++    {
++        retries = (int)simple_strtoul(value,NULL,0);
++    }
++
++    value = NULL;
++    value = env_get("recoveryinprog");
++    if(strcmp(value,"yes") == 0)
++    {
++        recoveryprogress = 1;
++    }
++
++    /*Enable watchdog timer only when the force recovery option is disabled*/
++    if((force_recovery == 0) && (imgheadererr == 0))
++    {
++        Enable_watchdog(&wdt_reset_status);
++    }
++
++    if(recoveryprogress == 0)
++    {
++        env_set("recoveryinprog","yes");     
++        env_save();
++    }
++
++    if((recoveryprogress == 0) && (wdt_reset_status) && (force_recovery == 0)) 
++    {
++        /*watchdog is triggered for other purpose, so exit*/
++        return 0;
++    }
++
++    if((recoveryprogress) && (wdt_reset_status) && (force_recovery == 0) && (imgheadererr == 0))
++    {
++        Disable_watchdog();
++    }
++    if(wdt_reset_status || force_recovery || imgheadererr)
++    {
++        /*The image in the SPI is corrupted or force recovery is called, so
++         flash the recovery image from the MMC card to the SPI*/
++
++        if(imgheadererr)
++        {
++            env_set("imgheadererr",NULL);
++            env_save();
++        }
++
++        /*Check the last recovery boot only when the force recovery is not set. Because in case of
++         force recovery we will restart the recovery image booting from MMC to TFTP.*/
++        if(force_recovery == 0)
++        {
++            /*Check the lastrecovery boot and cancel the recovery boot process*/
++            value = NULL;
++            value = env_get("lastrecoveryboot");
++            if(strcmp(value,"tftp") == 0)
++            {
++                printf("Both MMC and TFTP Recovery boot is failed !!!\n");
++                return -1;
++            }
++        }
++
++        printf("Firmware Recovery is started...\n");
++
++        /*Check the last recovery boot*/
++        value = NULL;
++        value = env_get("lastrecoveryboot");
++        if(strcmp(value,"mmc") == 0)
++        {
++            goto TFTP;
++        }
++
++        /*copy the recovery Image to RAM memory*/
++        while (retries)
++        {
++            if(0 != CopyRecoveryImage())
++            {
++                printf("Retring to copy the image from eMMC..\n");
++                retries--;
++                continue;
++            }
++            printf("Image Copied successfully.\n");
++            break;
++        }
++
++        if(retries == 0)
++        {
++            goto TFTP;
++        }
++
++        /*Verify the recovery Image and flash it to SPI*/
++        if(0 != VerifyandFlash())
++        {
++            printf("Error while flashing the recovery image. Try Recovery via TFTP...\n");
++            goto TFTP;
++        }
++
++        /*Set the Last recovery boot Env as MMC. If the image which is stored in the MMC is corrupted
++         and next recovery boot should not flash the image from MMC.*/
++        env_set("lastrecoveryboot","mmc");
++        env_save();
++    }
++
++    goto SUCCESS;
++
++TFTP:
++    printf("TFTP Recovery Image Booting started...\n");
++
++    /*Start the TFTP recovery falshing*/
++    if (0 != TFTPRecoveryBoot())
++    {
++        printf("Recovery Image Flashing via TFTP Failed !!\n");
++        return -1;
++    }
++
++    /*Set the last recoveryboot as TFTP*/
++    env_set("lastrecoveryboot","tftp");
++    env_save();
++
++SUCCESS:
++	/*After successfully flashing the image, start the watchdog timer to detect the kernel boot success.*/
++
++	if(wdt_reset_status || force_recovery || imgheadererr)
++	{
++		if(force_recovery == 1)
++		{
++			env_set("forcerecovery",NULL);
++			env_set("recoverysuccess", "3"); //force recovery 
++		}
++		else
++		{
++			env_set("recoverysuccess", "1");  
++		}
++		/*recoverysucess env bit 0 used for Recovery and bit 1 to diffrentiat a
++		force recovery*/
++		env_set("currentbootretry",NULL);
++		env_save();
++		Enable_watchdog(&wdt_reset_status);
++		printf("Recovery Image Flashing is success!! Booting Recovery Image...\n");
++	}
++
++    return 0;
++}
++#endif
++
++/*
++ * fwupdate
++ */
++int  
++fwupdate(void)
++{
++	
++	int 			retries=0;
++	volatile int 	SectorToUpdate;
++	unsigned long 	addr;
++	unsigned long 	cnt,BlkToUpgrade;
++	unsigned char	*TempBuf = (unsigned char*)YAFU_TEMP_SECTOR_BUFFER;
++	unsigned char	*src,*pRamAddress=0;
++	flash_info_t 	*pFlashInfo;
++	int bank = 0, prev_sector = 0 ,sector_number = 0;
++	unsigned long 	BaseFlashAddrs = 0;
++	struct spi_flash *flash;	
++
++ 	pFlashInfo = &flash_info[bank];
++	pKCSRes  = (KCSCmd_T*)(&m_KCSRes[0]);
++	pKCSCmd  = (KCSCmd_T*)(&m_KCSCmd[0]);
++	pIPMICmd = (IPMICmdData_T *)(&m_IPMICmd);
++	
++	printf ("Initing KCS...");
++	InitKCS ();
++	printf ("done\n");
++	gUbootTimeout = UBOOT_TIMEOUT_VALUE;
++	flash = spi_flash_probe(CONFIG_ENV_SPI_BUS, CONFIG_ENV_SPI_CS,
++                        CONFIG_ENV_SPI_MAX_HZ, CONFIG_ENV_SPI_MODE);
++    if (flash == NULL) 
++    {
++        puts("\nspi_flash_probe failed");
++        hang();
++    }
++	printf("Uboot waiting for firmware update to start...\n");
++	while (1)
++	{
++		if (0 == gUbootTimeout)
++		{
++			printf ("Uboot waiting for fwupdate to start timed out\n");
++			return 0;
++		}
++#ifndef CONFIG_SPX_FEATURE_SW_FAILSAFE_BOOT
++		gUbootTimeout--;
++#endif
++		ProcessKCSRequests ();
++
++		if (gReset)
++		{
++			gReset = 0;
++            env_set("boot_fwupd", "0");
++            env_save();
++			PerformFirmwareReset ();
++			continue;			
++		}
++
++		if(gStartFirmwareUpdation == 1) 
++		{
++
++		if (gFWUploadSelector == IMAGE_2)
++			BaseFlashAddrs =  CONFIG_SPX_FEATURE_GLOBAL_USED_FLASH_SIZE;
++		BlkToUpgrade = gEraseBlock;
++
++		pRamAddress =(unsigned char *)YAFU_IMAGE_UPLOAD_LOCATION;
++									   
++		if((BlkToUpgrade /CONFIG_SPX_FEATURE_GLOBAL_ERASE_BLOCK_SIZE) < (CONFIG_SPX_FEATURE_GLOBAL_FLASH_SIZE/CONFIG_SPX_FEATURE_GLOBAL_ERASE_BLOCK_SIZE) )
++		{
++			sector_number = ( (BaseFlashAddrs + BlkToUpgrade) /CONFIG_SPX_FEATURE_GLOBAL_ERASE_BLOCK_SIZE);	
++			
++			/* SectorToUpdate value starts from 0 to all available sector in current bank.Once bank changes,SectorToUpdate will start again from 0.*/
++			SectorToUpdate = sector_number - prev_sector;
++			/*When current bank's last sector reached,then bank number is changed to next bank.*/
++			/*bank = bank + (SectorToUpdate  /  (pFlashInfo->size  / CONFIG_SPX_FEATURE_GLOBAL_ERASE_BLOCK_SIZE));
++			if ((SectorToUpdate  /  (pFlashInfo->size  / CONFIG_SPX_FEATURE_GLOBAL_ERASE_BLOCK_SIZE)) == 1)
++			{
++				prev_sector = sector_number;//This assignment will only take place,when there is bank change.
++			}*/
++
++			SectorToUpdate = SectorToUpdate % (pFlashInfo->size  / CONFIG_SPX_FEATURE_GLOBAL_ERASE_BLOCK_SIZE);
++			if(0 != spi_flash_read(flash,(SectorToUpdate * CONFIG_SPX_FEATURE_GLOBAL_ERASE_BLOCK_SIZE ), CONFIG_SPX_FEATURE_GLOBAL_ERASE_BLOCK_SIZE, (char *)TempBuf))
++			{
++                retries--;
++                continue;
++            }
++		
++			if (0 == memcmp ((unsigned char*)TempBuf, pRamAddress, CONFIG_SPX_FEATURE_GLOBAL_ERASE_BLOCK_SIZE))	
++			{
++			 	printf ("sector %d did not change\n", (SectorToUpdate * CONFIG_SPX_FEATURE_GLOBAL_ERASE_BLOCK_SIZE ));
++				gStartFirmwareUpdation = 0;	 
++				continue;
++			}	
++			retries = 3;
++			while (retries)
++			{
++				if (0 != spi_flash_erase (flash, (SectorToUpdate * CONFIG_SPX_FEATURE_GLOBAL_ERASE_BLOCK_SIZE ), CONFIG_SPX_FEATURE_GLOBAL_ERASE_BLOCK_SIZE))
++				{
++					printf ("Flash Erase Failed at sector %d and retrying...\n", SectorToUpdate);
++					retries--;
++					continue;
++				}
++				break;
++			}
++			if (0 == retries)
++			{
++				PerformFirmwareReset ();
++			}
++							
++			src   = pRamAddress;
++			addr = (SectorToUpdate * CONFIG_SPX_FEATURE_GLOBAL_ERASE_BLOCK_SIZE );
++			cnt  = CONFIG_SPX_FEATURE_GLOBAL_ERASE_BLOCK_SIZE;
++			retries = 3;
++
++			while (retries)
++			{
++				if (0 != spi_flash_write(flash,addr, cnt,src))
++				{
++					printf ("\nFlash write failed at address =0x%lx of size= 0x%lx\n", addr, cnt);
++					retries--;
++					spi_flash_erase (flash,addr, CONFIG_SPX_FEATURE_GLOBAL_ERASE_BLOCK_SIZE);
++					continue;
++				}	
++				break;
++			}
++		}
++		if (0 == retries)
++		{
++			PerformFirmwareReset ();
++		}
++				
++		gStartFirmwareUpdation = 0;
++				
++	}
++
++
++	}
++
++	return 0;
++}	
+diff -uNar uboot/oem/ami/fwupdate/kcsifc.c uboot.new/oem/ami/fwupdate/kcsifc.c
+--- uboot/oem/ami/fwupdate/kcsifc.c	1969-12-31 19:00:00.000000000 -0500
++++ uboot.new/oem/ami/fwupdate/kcsifc.c	2020-12-16 15:33:23.795499745 -0500
+@@ -0,0 +1,371 @@
++/*****************************************************************
++ *****************************************************************
++ ***                                                            **
++ ***    (C)Copyright 2002-2003, American Megatrends Inc.        **
++ ***                                                            **
++ ***            All Rights Reserved.                            **
++ ***                                                            **
++ ***        6145-F, Northbelt Parkway, Norcross,                **
++ ***                                                            **
++ ***        Georgia - 30071, USA. Phone-(770)-246-8600.         **
++ ***                                                            **
++ *****************************************************************
++ *****************************************************************
++
++ ******************************************************************
++ * 
++ * KCS.c
++ * KCS Functions.
++ *
++ *  Author: Rama Rao Bisa <ramab@ami.com>
++ *			Modified by Anurag Bhatia for Pilot-II porting		
++ ******************************************************************/
++#include <common.h>
++#include <config.h>
++
++#include "soc_kcs.h"
++#include <oem/ami/fwupdate/kcs.h>
++#include <oem/ami/fwupdate/kcsifc.h>
++
++extern void InitializeKCSHardware(void);		/* SOC Specific Initialization */
++
++#define PACKED __attribute__ ((packed))
++
++/*** Local definitions ***/
++
++/* Different Phases of the KCS Module */
++#define KCS_PHASE_IDLE			    0x00
++#define KCS_PHASE_WRITE			    0x01
++#define KCS_PHASE_WRITE_END		    0x02
++#define KCS_PHASE_READ			    0x03
++#define KCS_PHASE_ABORT			    0x04
++#define KCS_PHASE_ERROR			    0x05
++#define ABORT_PHASE_ERROR1		    0x02
++#define ABORT_PHASE_ERROR2		    0x03
++
++/* Different KCS States */
++#define KCS_IDLE_STATE	            0x00
++#define KCS_READ_STATE	            0x40
++#define KCS_WRITE_STATE             0x80
++#define KCS_ERROR_STATE	            0xC0
++
++/* KCS Command Control Codes */
++#define KCS_GET_STATUS				0x60
++#define KCS_ABORT					0x60
++#define KCS_WRITE_START				0x61
++#define KCS_WRITE_END				0x62
++#define KCS_READ					0x68
++
++/* KCS Error Codes */
++#define KCS_NO_ERROR				0x00
++#define KCS_ABORTED_BY_COMMAND		0x01
++#define KCS_ILLEGAL_CONTROL_CODE	0x02
++#define KCS_LENGTH_ERROR			0x06
++#define KCS_UNSPECIFIED_ERROR		0xff
++
++#define INIT_KCS_BUFFER(KCSBuffer,Ch)              \
++do {                                               \
++     KCSBuf_T *(KCSBuffer##Ch) = &m_KCSBuf[Ch-1];    \
++     (KCSBuffer##Ch)->KCSRcvPktIx = 0;             \
++     (KCSBuffer##Ch)->KCSSendPktIx = 0;            \
++     (KCSBuffer##Ch)->KCSSendPktLen = 0;           \
++     (KCSBuffer##Ch)->KCSPhase = KCS_PHASE_IDLE;   \
++     (KCSBuffer##Ch)->AbortPhase = 0;              \
++     (KCSBuffer##Ch)->KCSError = 0;                \
++     (KCSBuffer##Ch)->KCSRcvPktReady = 0;          \
++} while(0);                           
++
++
++/*** Local typedefs ***/
++/**
++ * @struct KCSBuf_T	
++ * @brief KCS Buffer.
++**/
++#pragma pack(1)
++typedef struct
++{
++	int			    KCSRcvPktIx;
++	unsigned long   KCSSendPktIx;
++	unsigned long   KCSSendPktLen;
++	unsigned char	KCSRcvPkt [MAX_KCS_PKT_LEN];
++	unsigned char	KCSSendPkt [MAX_KCS_PKT_LEN];
++	unsigned char   KCSPhase;	
++	unsigned char   AbortPhase;
++	unsigned char   KCSError;
++	unsigned char   KCSRcvPktReady;
++
++} PACKED KCSBuf_T;
++#pragma pack ()
++
++/*** Module variables ***/
++static KCSBuf_T		m_KCSBuf [MAX_KCS_CHANNEL];
++
++unsigned char KCSMaxCh = 0;
++
++/*** Prototype Declaration ***/
++static void OnKCSRcvByte 	(unsigned char ChannelNum);
++
++/*------------------------------------
++ * InitKCS
++ *------------------------------------*/
++int
++InitKCS (void)
++{
++  unsigned char	Status = 0;
++
++  INIT_KCS_BUFFER(pKCSBuf,1);
++
++#if(MAX_KCS_CHANNEL > 1)
++  INIT_KCS_BUFFER(pKCSBuf,2);
++#endif
++
++	InitializeKCSHardware();
++
++	INIT_KCS_HARDWARE ();
++
++	READ_KCS_STATUS_REG (KCS_1_CHANNEL,Status);
++  Status = Status | KCS_ERROR_STATE;
++  WRITE_KCS_STATUS_REG (KCS_1_CHANNEL,Status);
++
++#if(MAX_KCS_CHANNEL > 1)
++  READ_KCS_STATUS_REG (KCS_2_CHANNEL,Status);
++  Status = Status | KCS_ERROR_STATE;
++  WRITE_KCS_STATUS_REG (KCS_2_CHANNEL,Status);
++#endif
++
++	return 0;
++}
++
++/**
++ * @brief RecvKCSRequest
++**/
++int
++RecvKCSRequest (unsigned char ChannelNum,unsigned char *pKCSPkt)
++{
++	KCSBuf_T *pKCSBuf;
++
++
++	OnKCSRcvByte (ChannelNum);
++	pKCSBuf=  &m_KCSBuf[ChannelNum];
++	
++	if (pKCSBuf->KCSRcvPktReady)	{
++		pKCSBuf->KCSRcvPktReady = 0;
++		memcpy (pKCSPkt, pKCSBuf->KCSRcvPkt, pKCSBuf->KCSRcvPktIx);
++		return (pKCSBuf->KCSRcvPktIx);
++	}
++	return 0;
++}
++
++
++/**
++ * @brief KCS Byte-receive handler.
++**/
++static void
++OnKCSRcvByte (unsigned char ChannelNum)
++{
++	unsigned char   Status;
++	unsigned char   DummyByte;
++	KCSBuf_T*		pKCSBuf;
++
++	pKCSBuf = &m_KCSBuf[ChannelNum];
++
++	/* Read the Present Status of KCS Port */
++	Status = 0;	
++
++	READ_KCS_STATUS_REG (ChannelNum,Status);
++
++	if(!(IBF_BIT_SET(Status)))
++	{
++		return;
++	}
++//    printf("something in RcvByte\n");
++	/* If write to command register */
++	if (IS_WRITE_TO_CMD_REG (Status))
++	{
++		unsigned char	Cmd;
++		
++		Cmd = 0;
++		
++		/* Set the status to WRITE_STATE */
++		SET_KCS_STATE (ChannelNum,KCS_WRITE_STATE);
++		/* Read the command */
++		KCS_CMD_REG (ChannelNum,Cmd);
++		switch (Cmd)
++		{
++		case KCS_WRITE_START :
++			/* Set the Index to 0 */
++			pKCSBuf->KCSRcvPktIx = 0;
++			/* Set the phase to WRITE */
++			pKCSBuf->KCSPhase = KCS_PHASE_WRITE;
++			break;
++
++		case KCS_WRITE_END 	 :
++            /* Set the phase to write end */
++			pKCSBuf->KCSPhase = KCS_PHASE_WRITE_END;
++			break;
++
++		case KCS_ABORT       : 
++            /* Set the error code */
++			if (KCS_NO_ERROR == pKCSBuf->KCSError)
++			{
++				pKCSBuf->KCSError = KCS_ABORTED_BY_COMMAND; 
++			}
++			/* Set the phase to write end */
++			pKCSBuf->KCSPhase = KCS_PHASE_ABORT;
++			/* Set the abort phase to be error1 */
++			pKCSBuf->AbortPhase = ABORT_PHASE_ERROR1;
++			/* Send the dummy byte	*/
++			KCS_DATA_OUT_REG (ChannelNum,0);
++			SET_OBF_STATUS(ChannelNum);
++			break;
++
++		default :
++
++            /* Set the error code */
++			pKCSBuf->KCSError = KCS_ILLEGAL_CONTROL_CODE;
++			/* Invalid command code - Set an error state */
++			SET_KCS_STATE (ChannelNum,KCS_ERROR_STATE);
++			/* Set the phase to error phase */
++			pKCSBuf->KCSPhase = KCS_PHASE_ERROR;
++			break;
++		}
++	}
++
++	/* Else last write was to data register */
++	else
++	{
++		switch (pKCSBuf->KCSPhase)
++		{
++		case KCS_PHASE_WRITE :
++
++            /* Set the state to write state */
++			SET_KCS_STATE (ChannelNum,KCS_WRITE_STATE);
++			/* Read the BYTE from the data register */
++			KCS_DATA_IN_REG (ChannelNum,pKCSBuf->KCSRcvPkt [pKCSBuf->KCSRcvPktIx]);
++			if (pKCSBuf->KCSRcvPktIx < MAX_KCS_PKT_LEN)
++			{
++				pKCSBuf->KCSRcvPktIx++;
++			}
++			break;
++
++		case KCS_PHASE_WRITE_END :
++
++            /* Set the state to READ_STATE */
++			SET_KCS_STATE (ChannelNum,KCS_READ_STATE);
++			/* Read the BYTE from the data register */
++			KCS_DATA_IN_REG (ChannelNum,pKCSBuf->KCSRcvPkt [pKCSBuf->KCSRcvPktIx]);
++			pKCSBuf->KCSRcvPktIx++;
++			/* Move to READ Phase */
++			pKCSBuf->KCSPhase = KCS_PHASE_READ;
++
++			/* Signal receive data ready */
++			pKCSBuf->KCSRcvPktReady = 1;
++
++			break;
++
++		case KCS_PHASE_READ		 :
++            /* If we have reached the end of the packet move to idle state */
++			if (pKCSBuf->KCSSendPktIx == pKCSBuf->KCSSendPktLen)
++			{
++				SET_KCS_STATE (ChannelNum,KCS_IDLE_STATE);
++			}
++			/* Read the byte returned by the SMS */
++			{ 
++				unsigned char b = 0;
++				KCS_DATA_IN_REG (ChannelNum,b); 
++				if (b != KCS_READ)
++				{
++					SET_KCS_STATE (ChannelNum,KCS_ERROR_STATE);
++					KCS_DATA_OUT_REG (ChannelNum,0);
++					SET_OBF_STATUS(ChannelNum);
++					break;
++				}
++			}
++			/* If we are finished transmitting, send the dummy byte */
++			if (pKCSBuf->KCSSendPktIx == pKCSBuf->KCSSendPktLen) 
++			{
++				pKCSBuf->KCSPhase = KCS_PHASE_IDLE;
++				KCS_DATA_OUT_REG (ChannelNum,0);
++				SET_OBF_STATUS(ChannelNum);
++#if 0 // ANURAGB
++				/* Set Transmission Complete */
++                pKCSBuf->TxReady                = 1;
++#endif
++				break;
++			}
++			/* Transmit the next byte from the send buffer */
++			KCS_DATA_OUT_REG (ChannelNum,pKCSBuf->KCSSendPkt [pKCSBuf->KCSSendPktIx]);
++			SET_OBF_STATUS(ChannelNum);
++			pKCSBuf->KCSSendPktIx++;
++			break;
++			
++		case KCS_PHASE_ABORT 	 :
++            switch (pKCSBuf->AbortPhase) 
++			{
++			case ABORT_PHASE_ERROR1 :
++				/* Set the KCS State to READ_STATE */
++				SET_KCS_STATE (ChannelNum,KCS_READ_STATE);
++				/* Read the Dummy byte	*/
++				KCS_DATA_IN_REG (ChannelNum,DummyByte); 
++
++				/* Write the error code to Data out register */
++				KCS_DATA_OUT_REG (ChannelNum,pKCSBuf->KCSError);
++
++				SET_OBF_STATUS(ChannelNum);
++
++				/* Set the abort phase to be error2 */
++				pKCSBuf->AbortPhase = ABORT_PHASE_ERROR2;
++				break;
++				
++			case ABORT_PHASE_ERROR2 :
++
++                /**
++				 * The system software has read the error code. Go to idle
++				 * state.
++				**/
++				SET_KCS_STATE (ChannelNum,KCS_IDLE_STATE);
++
++				/* Read the Dummy byte	*/
++				KCS_DATA_IN_REG (ChannelNum,DummyByte); 
++
++				pKCSBuf->KCSPhase = KCS_PHASE_IDLE;
++				pKCSBuf->AbortPhase = 0;
++
++				/* Send the dummy byte	*/
++				KCS_DATA_OUT_REG (ChannelNum,0);
++				SET_OBF_STATUS(ChannelNum);
++			}
++			break;
++
++			default:
++				/* Read the Dummy byte	*/
++				KCS_DATA_IN_REG (ChannelNum,DummyByte); 
++		}
++	}
++	if (0) printf("%d",DummyByte);  // To prevent unused variable error
++}
++
++
++/**
++ * @brief Send KCS Response
++**/
++void
++SendKCSResponse (unsigned char ChannelNum,unsigned char *Pkt, int Size)
++{
++
++	KCSBuf_T*	pKCSBuf = &m_KCSBuf[ChannelNum];
++#ifdef DEBUG
++	printf ("Channel number:%d\n",ChannelNum);
++	printf ("Send KCS Resposne of 0x%x bytes with completion code 0x%x\n", Size, Pkt [2]);
++#endif
++	pKCSBuf->KCSSendPktIx   = 0;
++	pKCSBuf->KCSSendPktLen = Size;
++	memcpy (pKCSBuf->KCSSendPkt, Pkt, Size);
++	/* Send the first byte */
++	pKCSBuf->KCSSendPktIx++;
++	KCS_DATA_OUT_REG (ChannelNum,pKCSBuf->KCSSendPkt [0]);
++	SET_OBF_STATUS(ChannelNum);
++	return;
++}
++
++
+diff -uNar uboot/oem/ami/fwupdate/Makefile uboot.new/oem/ami/fwupdate/Makefile
+--- uboot/oem/ami/fwupdate/Makefile	1969-12-31 19:00:00.000000000 -0500
++++ uboot.new/oem/ami/fwupdate/Makefile	2020-12-16 15:33:44.012496714 -0500
+@@ -0,0 +1,25 @@
++# (C) Copyright 2013 
++# American Megatrends Inc
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation; either version 2 of
++# the License, or (at your option) any later version.
++#
++# This program is distributed in the hope that it will be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write to the Free Software
++# Foundation, Inc., 59 Temple Place, Suite 330, Boston,
++# MA 02111-1307 USA
++#
++
++
++ifeq ($(CPU),armv7)
++CCFLAGS-y += -mno-unaligned-access
++endif
++
++obj-y += fwupdate.o kcsifc.o
+diff -uNar uboot/oem/ami/ipmi/cmdhandler.c uboot.new/oem/ami/ipmi/cmdhandler.c
+--- uboot/oem/ami/ipmi/cmdhandler.c	1969-12-31 19:00:00.000000000 -0500
++++ uboot.new/oem/ami/ipmi/cmdhandler.c	2020-12-16 15:34:45.751383283 -0500
+@@ -0,0 +1,1472 @@
++/*****************************************************************
++ *****************************************************************
++ ***                                                            **
++ ***    (C)Copyright 2002-2003, American Megatrends Inc.        **
++ ***                                                            **
++ ***            All Rights Reserved.                            **
++ ***                                                            **
++ ***        6145-F, Northbelt Parkway, Norcross,                **
++ ***                                                            **
++ ***        Georgia - 30071, USA. Phone-(770)-246-8600.         **
++ ***                                                            **
++ *****************************************************************
++ *****************************************************************
++ *****************************************************************
++ * $Header: $
++ *
++ * $Revision: $
++ *
++ * $Date: $
++ *
++ ******************************************************************
++ ******************************************************************
++ * 
++ * cmdhandler.c
++ * IPMI Command Handler Functions
++ *
++ *  Author: Rama Rao Bisa <ramab@ami.com>
++ *			Modified by Anurag Bhatia for SP porting		
++ ******************************************************************/
++
++#include <common.h>
++#include <config.h>
++#include <environment.h>
++#include <net.h>
++#include <command.h>
++#include <malloc.h>
++#include <flash.h>
++
++#include <oem/ami/ipmi/IPMIDefs.h>
++#include <oem/ami/ipmi/cmdhandler.h>
++#include <oem/ami/fmh/fmh.h>
++#include <environment.h>
++
++// #define YAFU_IMAGE_UPLOAD_LOCATION    (CONFIG_SYS_SDRAM_BASE + 0x03000000)
++ //#define YAFU_TEMP_SECTOR_BUFFER         (CONFIG_SYS_SDRAM_BASE + 0x07000000)
++
++extern int do_protect (cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[]);
++extern flash_info_t flash_info[];
++#ifdef CONFIG_SPX_FEATURE_HW_FAILSAFE_BOOT 
++extern unsigned char broken_spi_banks;// specify the number of broken SPI flash bank 
++#endif 
++
++/* Global Variables */
++static const unsigned char      m_DualResBits [] = {2,1,2,1,2,1,1,2};
++
++
++
++static INT32U			gSizeToErase = 0;
++static unsigned int 	gSessionSeqNum = 0;
++static unsigned int 	gSessionID     = 0;
++static int  			FMHComp;
++static int 				ActivateFlashStatus =0X00 ;
++static int 				LastStatCode = 0x00;
++static unsigned char 	*pNewFirmwareAddr; 
++
++
++/* The following are used by fwupdate.c */
++int 					gReset	= 0;
++int 					gStartFirmwareUpdation = 0;
++INT32U					gEraseBlock = 0;
++unsigned char			gFWUploadSelector = IMAGE_1;
++
++
++/************************************************************************
++*Gets all the environment variable names
++*/
++static
++int Getenvvar(unsigned char *count,unsigned char *VarName,int *BootVarlen)
++{
++     int i=0,Counter=0;
++     unsigned char *Nextenv;
++     uchar *env,*nxt = NULL;
++
++     uchar *env_data = (uchar *)env_get_char(0);
++     Nextenv = VarName;
++     for (env=env_data; *env; env=nxt+1)
++     {
++        i=0;
++        for (nxt=env; *nxt; ++nxt)
++        {
++            if(*nxt != '\0')
++            {
++                  if(i==0)
++                  {
++                      *count += 1;
++                   while((*Nextenv++ = *nxt++) != '=' )
++                   {
++                        Counter ++;
++                   };
++                   Nextenv --;
++                   *Nextenv++ = '\0';
++                       i =1;
++                  }
++            }
++              }
++      }
++     *BootVarlen = Counter + *count;
++     return 0;
++}
++
++
++/*---------------------------------------
++ * GetChAuthCaps
++ *---------------------------------------*/
++int
++GetChAuthCaps (unsigned char *pReq, unsigned char ReqLen, unsigned char *pRes)
++{
++
++    GetChAuthCapReq_T* pGetChAuthCapReq = (GetChAuthCapReq_T*)pReq;
++    GetChAuthCapRes_T* pGetChAuthCapRes = (GetChAuthCapRes_T*)pRes;
++    unsigned char              PrivLevel, ChannelNum;
++
++    PrivLevel   = pGetChAuthCapReq->PrivLevel & 0x0F;
++    ChannelNum  = pGetChAuthCapReq->ChannelNum & 0x0F;
++	if (ChannelNum == 0x0e) ChannelNum = 1;
++
++    pGetChAuthCapRes->CompletionCode    = CC_NORMAL; /* completion code */
++    pGetChAuthCapRes->ChannelNum        = ChannelNum; /* channel No */
++
++    if ((0 == PrivLevel) || (PrivLevel > 5))
++    {
++        pGetChAuthCapRes->CompletionCode = CC_INV_DATA_FIELD;/* Privilege is Reserved */
++        return sizeof (*pRes);
++    }
++    /* Authentication Type Supported for given Privilege */
++    pGetChAuthCapRes->AuthType = 0x01;
++
++
++    pGetChAuthCapRes->PerMsgUserAuthLoginStatus = 0;
++
++	/* Null User Null Password Enabled  */
++	pGetChAuthCapRes->PerMsgUserAuthLoginStatus |= 0x01;
++	/* Null User with Password Disabled */
++	pGetChAuthCapRes->PerMsgUserAuthLoginStatus &= ~0x02;
++
++    /* User level Authentication */
++    pGetChAuthCapRes->PerMsgUserAuthLoginStatus |= 0x08;
++
++    /* PerMessage Authentication */
++    pGetChAuthCapRes->PerMsgUserAuthLoginStatus |= 0x10;
++    return sizeof (GetChAuthCapRes_T);
++
++}
++
++
++
++/*---------------------------------------
++ * GetSessionChallenge
++ *---------------------------------------*/
++int
++GetSessionChallenge (unsigned char* pReq, unsigned char ReqLen, unsigned char* pRes)
++{
++
++    GetSesChallengeRes_T* pGetSesChalRes = (GetSesChallengeRes_T*)pRes;
++	unsigned char         ChallengeString[16] = { 1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6 };
++    unsigned int          TempSessId = 0x12345678;
++
++	printf ("Get Session Challenge\n");
++   	pGetSesChalRes->CompletionCode = CC_NORMAL;
++    pGetSesChalRes->TempSessionID  = TempSessId;
++    memcpy(pGetSesChalRes->ChallengeString, ChallengeString, 16);
++
++    return sizeof (GetSesChallengeRes_T);
++}
++
++
++/*---------------------------------------
++ * ActivateSession
++ *---------------------------------------*/
++int
++ActivateSession (unsigned char* pReq, unsigned char ReqLen, unsigned char* pRes)
++{
++     ActivateSesReq_T*   pAcvtSesReq = (ActivateSesReq_T*)pReq;
++     ActivateSesRes_T*   pAcvtSesRes = (ActivateSesRes_T*)pRes;
++     unsigned char       /*AuthType, */Privilege;
++
++    Privilege = pAcvtSesReq->Privilege & 0x0F;
++
++    if ((0 == Privilege) || (Privilege > 5))
++    {
++        pAcvtSesRes->CompletionCode = CC_INV_DATA_FIELD;
++        return sizeof (*pRes);
++    }
++
++    pAcvtSesRes->CompletionCode = CC_NORMAL;
++    pAcvtSesRes->AuthType       = 0x00;
++    pAcvtSesRes->SessionID      = 0x12345678;
++	pAcvtSesRes->InboundSeq		= 0x00;
++    pAcvtSesRes->Privilege      = 0x04;
++
++	gSessionID					= pAcvtSesRes->SessionID;
++	gSessionSeqNum				= pAcvtSesRes->InboundSeq;
++
++    return sizeof (ActivateSesRes_T);
++}
++
++
++/*---------------------------------------
++ * SetSessionPrivLevel
++ *---------------------------------------*/
++int
++SetSessionPrivLevel (unsigned char* pReq, unsigned char ReqLen, unsigned char* pRes)
++{
++    SetSesPrivLevelRes_T*   pSetSesPrivLevelRes = (SetSesPrivLevelRes_T*)pRes;
++
++    pSetSesPrivLevelRes->CompletionCode = CC_NORMAL;
++    pSetSesPrivLevelRes->Privilege      = *pReq & 0x0F;;
++
++    return sizeof (SetSesPrivLevelRes_T);
++}
++
++/*---------------------------------------
++ * CloseSession
++ *---------------------------------------*/
++int
++CloseSession (unsigned char* pReq, unsigned char ReqLen, unsigned char* pRes)
++{
++
++	CloseSesReq_T*	pCloseSesReq = (CloseSesReq_T*) pReq;
++
++	printf ("Close Session ID Receive is %x\n", pCloseSesReq->SessionID);
++    /* The SessionInfo is deleted form session table  from interface */
++    *pRes = CC_NORMAL;
++	if (gSessionID == pCloseSesReq->SessionID)
++	{
++		gSessionSeqNum = 0;
++		gSessionID	 = 0;
++	}
++	else
++	{
++		*pRes = CC_CLOSE_INVALID_SESSION_ID;
++	}	
++
++    return sizeof (*pRes);
++}
++/*---------------------------------------
++ * GetDevID
++ *---------------------------------------*/
++int
++GetDevID (unsigned char *pReq, unsigned char ReqLen, unsigned char *pRes)
++{
++	//flash_info_t *pFlashInfo;
++ 	//pFlashInfo = &flash_info[0];
++	FMH *FMHPtr = NULL;
++	MODULE_INFO *ModulePtr = NULL;
++    GetDevIDRes_T*  pGetDevIDRes = (GetDevIDRes_T*) pRes;
++    unsigned int Major,Minor;
++	unsigned char MfgID [3] = MFG_ID_AMI;
++	struct spi_flash *flash;
++	
++	flash = spi_flash_probe(CONFIG_ENV_SPI_BUS, CONFIG_ENV_SPI_CS,
++                        CONFIG_ENV_SPI_MAX_HZ, CONFIG_ENV_SPI_MODE);
++    if (flash == NULL) 
++    {
++        puts("\nspi_flash_probe failed");
++        hang();
++    }
++	FMHPtr = ScanforFMH(flash,(CONFIG_SPX_FEATURE_GLOBAL_USED_FLASH_SIZE-CONFIG_SPX_FEATURE_GLOBAL_ERASE_BLOCK_SIZE), 
++			(unsigned long)CONFIG_SPX_FEATURE_GLOBAL_ERASE_BLOCK_SIZE);
++	if (FMHPtr == NULL)
++	{
++		printf ("FMH not found\n");
++	}
++	ModulePtr = &(FMHPtr->Module_Info);
++	Major = ModulePtr->Module_Ver_Major;
++	Minor = ModulePtr->Module_Ver_Minor;
++
++    pGetDevIDRes->CompletionCode      = CC_NORMAL;
++    pGetDevIDRes->DeviceID            = DEVICE_ID;
++    pGetDevIDRes->DevRevision         = IPMI_DEV_REVISION;
++    pGetDevIDRes->FirmwareRevision1   = Major;
++    pGetDevIDRes->FirmwareRevision2   = Minor;
++    pGetDevIDRes->IPMIVersion         = IPMI_VERSION;
++    pGetDevIDRes->DevSupport          = DEV_SUPPORT;
++    pGetDevIDRes->ProdID              = htoipmi_u16 (0xaabb);
++    pGetDevIDRes->AuxFirmwareRevision = 0x00;
++    memcpy (pGetDevIDRes->MfgID, MfgID, sizeof (MfgID));
++
++    return (sizeof (GetDevIDRes_T));
++}
++
++/*---------------------------------------
++ * CalculateChksum
++ *---------------------------------------*/
++static
++unsigned long
++CalculateChksum (char *data, unsigned long size)
++{
++    unsigned long crc32val = 0;
++    unsigned int i = 0;
++
++    BeginCRC32 (&crc32val);
++
++    /*  Begin calculating CRC32 */
++	for(i = 0;i < size;i++)
++    {
++		DoCRC32 (&crc32val, data[i]);
++    }
++
++    EndCRC32 (&crc32val);
++
++	return crc32val;
++}
++
++/*---------------------------------------
++ * AMIYAFUGetFlashInfo
++ *---------------------------------------*/
++int AMIYAFUGetFlashInfo ( unsigned char *pReq, unsigned char ReqLen, unsigned char *pRes )  
++{
++
++
++	AMIYAFUGetFlashInfoReq_T *pAMIYAFUFlashInfoReq = (AMIYAFUGetFlashInfoReq_T *)pReq;
++    AMIYAFUGetFlashInfoRes_T* pAMIYAFUGetFlashInfo = (AMIYAFUGetFlashInfoRes_T*)pRes;  
++
++     	
++	pAMIYAFUGetFlashInfo->CompletionCode = YAFU_CC_NORMAL;
++    pAMIYAFUGetFlashInfo->FlashInfoRes.Seqnum = pAMIYAFUFlashInfoReq->FlashInfoReq.Seqnum;
++	pAMIYAFUGetFlashInfo->FlashInfoRes.YafuCmd= pAMIYAFUFlashInfoReq->FlashInfoReq.YafuCmd;
++	
++	pAMIYAFUGetFlashInfo->FlashInfo.FlashSize = CONFIG_SPX_FEATURE_GLOBAL_USED_FLASH_SIZE;
++	pAMIYAFUGetFlashInfo->FlashInfo.FlashAddress = CONFIG_SPX_FEATURE_GLOBAL_USED_FLASH_START;
++	pAMIYAFUGetFlashInfo->FlashInfo.FlashEraseBlkSize = CONFIG_SPX_FEATURE_GLOBAL_ERASE_BLOCK_SIZE;
++	pAMIYAFUGetFlashInfo->FlashInfo.FlashProductID = 0; 
++	pAMIYAFUGetFlashInfo->FlashInfo.FlashWidth = 8;  
++	pAMIYAFUGetFlashInfo->FlashInfo.FMHCompliance = 0x01;
++
++    if(pAMIYAFUGetFlashInfo->FlashInfo.FMHCompliance == 0x01)
++		FMHComp = 1;
++	
++    pAMIYAFUGetFlashInfo->FlashInfo.Reserved = 0;
++	pAMIYAFUGetFlashInfo->FlashInfo.NoEraseBlks = CONFIG_SPX_FEATURE_GLOBAL_USED_FLASH_SIZE/CONFIG_SPX_FEATURE_GLOBAL_ERASE_BLOCK_SIZE; 
++
++    if((pAMIYAFUGetFlashInfo->FlashInfo.NoEraseBlks * pAMIYAFUGetFlashInfo->FlashInfo.FlashEraseBlkSize) == pAMIYAFUGetFlashInfo->FlashInfo.FlashSize)
++	{
++    	pAMIYAFUGetFlashInfo->FlashInfoRes.Datalen= 0x20; 
++	}
++    else
++	{		
++     	pAMIYAFUGetFlashInfo->FlashInfoRes.Datalen = 0x20 + pAMIYAFUGetFlashInfo->FlashInfo.NoEraseBlks;
++	}
++
++	pAMIYAFUGetFlashInfo->FlashInfoRes.CRC32chksum = CalculateChksum((char *)&pAMIYAFUGetFlashInfo->FlashInfo,sizeof(pAMIYAFUGetFlashInfo->FlashInfo));				 	   
++	
++    return( sizeof( AMIYAFUGetFlashInfoRes_T ) );
++}
++
++
++/*---------------------------------------
++ * AMIYAFUGetFMHInfo
++ *---------------------------------------*/
++ int AMIYAFUGetFMHInfo ( unsigned char* pReq, unsigned char ReqLen, unsigned char *pRes ) 
++{
++      DWORD i=0,m=0;
++      INT8U *Buf;
++      FlashMH      FlashModHeader;
++      ALT_FMHead    AltFmh;  
++      char *FMHDetails;	  
++      DWORD StartFlashAddr = 0;
++	  struct spi_flash *flash;
++    
++
++      AMIYAFUGetFMHInfoReq_T *pAMIYAFUGetFMHInfoReq = (AMIYAFUGetFMHInfoReq_T *)pReq;
++      AMIYAFUGetFMHInfoRes_T* pAMIYAFUGetFMHInfo = (AMIYAFUGetFMHInfoRes_T*)pRes;
++
++	  pAMIYAFUGetFMHInfo->NumFMH = 0x00;
++
++      FMHDetails = malloc(1200);
++      if(FMHDetails == NULL)
++      {
++             printf("Error in malloc of FMHDetails");
++	      return -1;		 
++      }
++
++      if(gFWUploadSelector == IMAGE_2)	
++	  	StartFlashAddr =  CONFIG_SPX_FEATURE_GLOBAL_USED_FLASH_SIZE;
++	
++	flash = spi_flash_probe(CONFIG_ENV_SPI_BUS, CONFIG_ENV_SPI_CS,
++                        CONFIG_ENV_SPI_MAX_HZ, CONFIG_ENV_SPI_MODE);
++    if (flash == NULL) 
++    {
++        puts("\nspi_flash_probe failed");
++        hang();
++    }
++
++	for(i=0;i<(CONFIG_SPX_FEATURE_GLOBAL_USED_FLASH_SIZE/CONFIG_SPX_FEATURE_GLOBAL_ERASE_BLOCK_SIZE);i++) 			
++   {
++	Buf= (INT8U *)malloc(64);
++
++	if(Buf == NULL)
++	{
++	      printf("Error in alloc\n");
++	      AMIYAFUNotAck* pAMIYAFUNotAcknowledge =(AMIYAFUNotAck*)pRes;
++	      pAMIYAFUNotAcknowledge->NotAck.Seqnum = pAMIYAFUGetFMHInfoReq->FMHReq.Seqnum;
++	      pAMIYAFUNotAcknowledge->NotAck.YafuCmd = CMD_AMI_YAFU_COMMON_NAK;
++	      pAMIYAFUNotAcknowledge->NotAck.Datalen = 0x02;
++	      pAMIYAFUNotAcknowledge->NotAck.CRC32chksum = 0x00; 
++	      pAMIYAFUNotAcknowledge->ErrorCode = YAFU_CC_ALLOC_ERR;
++	      LastStatCode = YAFU_CC_ALLOC_ERR;
++
++             return (sizeof(AMIYAFUNotAck));
++   	}
++
++
++       if(spi_flash_read(flash, StartFlashAddr + (i*CONFIG_SPX_FEATURE_GLOBAL_ERASE_BLOCK_SIZE),64,(char *)Buf) != 0)
++	{
++
++		AMIYAFUNotAck* pAMIYAFUNotAcknowledge =(AMIYAFUNotAck*)pRes;
++		pAMIYAFUNotAcknowledge->NotAck.Seqnum = pAMIYAFUGetFMHInfoReq->FMHReq.Seqnum;
++		pAMIYAFUNotAcknowledge->NotAck.YafuCmd = CMD_AMI_YAFU_COMMON_NAK;
++		pAMIYAFUNotAcknowledge->NotAck.Datalen = 0x02;
++		pAMIYAFUNotAcknowledge->NotAck.CRC32chksum = 0x00;
++		pAMIYAFUNotAcknowledge->ErrorCode = YAFU_CC_READ_ERR;
++			 
++		return (sizeof(AMIYAFUNotAck));
++	}
++    
++       
++      memcpy((char*)&FlashModHeader,Buf,64);
++
++      if(strncmp((char*)FlashModHeader.FmhSignature,"$MODULE$",(sizeof(FlashModHeader.FmhSignature) -1)) == 0 )	//Check FMH Signature
++      {
++
++            if(FlashModHeader.EndSignature != 21930)
++	      	  	continue;
++
++	     memcpy((FMHDetails + m),(char *)&FlashModHeader,64);
++           
++       
++              printf("Module Name = %s\n",FlashModHeader.ModuleName);
++
++	     m +=64;
++	     pAMIYAFUGetFMHInfo->NumFMH += 0x1;
++
++	     free(Buf);
++
++	}
++      else
++      {
++
++         if(spi_flash_read(flash, StartFlashAddr + ((i*CONFIG_SPX_FEATURE_GLOBAL_ERASE_BLOCK_SIZE) +(CONFIG_SPX_FEATURE_GLOBAL_ERASE_BLOCK_SIZE -sizeof(AltFmh))),sizeof(AltFmh),(char*)Buf) != 0)
++		{
++
++			AMIYAFUNotAck* pAMIYAFUNotAcknowledge =(AMIYAFUNotAck*)pRes;
++			pAMIYAFUNotAcknowledge->NotAck.Seqnum = pAMIYAFUGetFMHInfoReq->FMHReq.Seqnum;
++			pAMIYAFUNotAcknowledge->NotAck.YafuCmd = CMD_AMI_YAFU_COMMON_NAK;
++			pAMIYAFUNotAcknowledge->NotAck.Datalen = 0x02;
++			pAMIYAFUNotAcknowledge->NotAck.CRC32chksum = 0x00;
++			pAMIYAFUNotAcknowledge->ErrorCode = YAFU_CC_READ_ERR;
++			 
++			return (sizeof(AMIYAFUNotAck));
++        }	
++
++	  
++	      memcpy((char *)&AltFmh,Buf,sizeof(AltFmh));
++             if(strncmp((char *)AltFmh.Signature,"$MODULE$",(sizeof(AltFmh.Signature) -1)) == 0 )	//Check FMH Signature
++             	{
++			 
++	         	if(spi_flash_read(flash, StartFlashAddr + (i*CONFIG_SPX_FEATURE_GLOBAL_ERASE_BLOCK_SIZE) +AltFmh.LinkAddress,64,(char *)Buf) != 0)
++				{
++
++					AMIYAFUNotAck* pAMIYAFUNotAcknowledge =(AMIYAFUNotAck*)pRes;
++					pAMIYAFUNotAcknowledge->NotAck.Seqnum = pAMIYAFUGetFMHInfoReq->FMHReq.Seqnum;
++					pAMIYAFUNotAcknowledge->NotAck.YafuCmd = CMD_AMI_YAFU_COMMON_NAK;
++					pAMIYAFUNotAcknowledge->NotAck.Datalen = 0x02;
++					pAMIYAFUNotAcknowledge->NotAck.CRC32chksum = 0x00;
++					pAMIYAFUNotAcknowledge->ErrorCode = YAFU_CC_READ_ERR;
++						 
++					return (sizeof(AMIYAFUNotAck));
++         		 }
++
++					  
++	      		memcpy((char*)&FlashModHeader,Buf,64);	
++
++	      		if(strncmp((char *)FlashModHeader.FmhSignature,"$MODULE$",(sizeof(FlashModHeader.FmhSignature) -1)) == 0 )	//Check FMH Signature
++            		{
++
++	      			if(FlashModHeader.EndSignature != 21930)
++	      	  			continue;
++
++                            memcpy((FMHDetails +m),(char *)&FlashModHeader,64);
++           
++              		printf("Module Name = %s\n",FlashModHeader.ModuleName);
++	
++	     			m +=64;
++	     			pAMIYAFUGetFMHInfo->NumFMH += 0x1;
++
++	     			
++
++	   		}	
++          		
++             	}	
++	  free(Buf);
++      	}
++    }
++
++
++      if(pAMIYAFUGetFMHInfoReq->FMHReq.Datalen == 0x00)
++		pAMIYAFUGetFMHInfo->FMHRes.Datalen= 0x04 + (pAMIYAFUGetFMHInfo->NumFMH * 64);
++	else
++	{
++		pAMIYAFUGetFMHInfo->CompletionCode = CC_INV_DATA_FIELD;
++		return sizeof (*pRes);
++	}
++
++      memcpy (( INT8U*) (pAMIYAFUGetFMHInfo + 1),
++                   ( INT8U*)FMHDetails,(pAMIYAFUGetFMHInfo->NumFMH * 64) );	
++
++      pAMIYAFUGetFMHInfo->CompletionCode = YAFU_CC_NORMAL;
++      pAMIYAFUGetFMHInfo->FMHRes.Seqnum = pAMIYAFUGetFMHInfoReq->FMHReq.Seqnum;
++      pAMIYAFUGetFMHInfo->FMHRes.YafuCmd= pAMIYAFUGetFMHInfoReq->FMHReq.YafuCmd;
++      pAMIYAFUGetFMHInfo->Reserved = 0x00; 	  
++      pAMIYAFUGetFMHInfo->FMHRes.CRC32chksum = CalculateChksum((char *)&pAMIYAFUGetFMHInfo->Reserved,pAMIYAFUGetFMHInfo->FMHRes.Datalen);
++     
++      return( sizeof( AMIYAFUGetFMHInfoRes_T ) + pAMIYAFUGetFMHInfo->NumFMH * 64 );
++}
++ 
++/*---------------------------------------
++ * AMIYAFUGetStatus
++ *---------------------------------------*/
++
++int AMIYAFUGetStatus  (unsigned char *pReq, unsigned char ReqLen, unsigned char *pRes )  
++{
++    char *s;
++    int Mode = 0;
++
++    AMIYAFUGetStatusReq_T *pAMIYAFUGetStatusReq =(AMIYAFUGetStatusReq_T *)pReq;
++    AMIYAFUGetStatusRes_T* pAMIYAFUGetStatus = (AMIYAFUGetStatusRes_T*)pRes;
++
++    pAMIYAFUGetStatus->CompletionCode = YAFU_CC_NORMAL;
++    pAMIYAFUGetStatus->GetStatusRes.Seqnum = pAMIYAFUGetStatusReq->GetStatusReq.Seqnum;
++    pAMIYAFUGetStatus->GetStatusRes.YafuCmd= pAMIYAFUGetStatusReq->GetStatusReq.YafuCmd;
++    pAMIYAFUGetStatus->LastStatusCode =(INT16U) LastStatCode;
++    pAMIYAFUGetStatus->YAFUState = 0x00;
++
++
++    s = env_get("mode");
++    if (s != NULL)
++    {
++		Mode = (int)simple_strtoul(s,NULL,0);
++		printf("Mode is %d\n",Mode);
++    }
++
++
++    pAMIYAFUGetStatus->Mode = Mode;
++    pAMIYAFUGetStatus->Reserved = 0x00;
++    pAMIYAFUGetStatus->GetStatusRes.Datalen= 8;
++    pAMIYAFUGetStatus->Message[0] = 0;
++    pAMIYAFUGetStatus->GetStatusRes.CRC32chksum = CalculateChksum((char *)&pAMIYAFUGetStatus->LastStatusCode,(INT32U)pAMIYAFUGetStatus->GetStatusRes.Datalen);
++
++     return ( sizeof( AMIYAFUGetStatusRes_T ) );
++}
++
++/*---------------------------------------
++ * AMIYAFUActivateFlashMode
++ *---------------------------------------*/
++int AMIYAFUActivateFlashMode ( unsigned char *pReq, unsigned char ReqLen,unsigned char *pRes )  
++{
++    AMIYAFUActivateFlashModeReq_T *pAMIYAFUActivateFlashReq = (AMIYAFUActivateFlashModeReq_T *)pReq;
++    AMIYAFUActivateFlashModeRes_T* pAMIYAFUActivateFlash = (AMIYAFUActivateFlashModeRes_T*)pRes;
++
++   if(CalculateChksum((char *)&pAMIYAFUActivateFlashReq->Mode,sizeof(INT16U)) != pAMIYAFUActivateFlashReq->ActivateflashReq.CRC32chksum)
++  {
++         AMIYAFUNotAck* pAMIYAFUNotAcknowledge =(AMIYAFUNotAck*)pRes;
++         pAMIYAFUNotAcknowledge->NotAck.Seqnum = pAMIYAFUActivateFlashReq->ActivateflashReq.Seqnum;
++	  pAMIYAFUNotAcknowledge->NotAck.YafuCmd = CMD_AMI_YAFU_COMMON_NAK;
++	  pAMIYAFUNotAcknowledge->NotAck.Datalen = 0x02;
++	  pAMIYAFUNotAcknowledge->NotAck.CRC32chksum = 0x00;
++         pAMIYAFUNotAcknowledge->ErrorCode = YAFU_INVALID_CHKSUM;
++         LastStatCode=pAMIYAFUNotAcknowledge->ErrorCode;
++
++         return (sizeof(AMIYAFUNotAck));
++
++  }
++
++	if(pAMIYAFUActivateFlashReq->ActivateflashReq.Datalen == 0x02)
++		pAMIYAFUActivateFlash->ActivateflashRes.Datalen= 0x02;
++	else
++	{
++	     AMIYAFUNotAck* pAMIYAFUNotAcknowledge =(AMIYAFUNotAck*)pRes;
++            pAMIYAFUNotAcknowledge->NotAck.Seqnum = pAMIYAFUActivateFlashReq->ActivateflashReq.Seqnum;
++	     pAMIYAFUNotAcknowledge->NotAck.YafuCmd = CMD_AMI_YAFU_COMMON_NAK;
++	     pAMIYAFUNotAcknowledge->NotAck.Datalen = 0x02;
++	     pAMIYAFUNotAcknowledge->NotAck.CRC32chksum = 0x00;
++            pAMIYAFUNotAcknowledge->ErrorCode = YAFU_CC_INVALID_DATLEN;
++            LastStatCode=pAMIYAFUNotAcknowledge->ErrorCode;
++
++            return (sizeof(AMIYAFUNotAck));
++	}
++
++    ActivateFlashStatus = 0x01;
++    pNewFirmwareAddr = (unsigned char*)YAFU_IMAGE_UPLOAD_LOCATION;
++
++    pAMIYAFUActivateFlash->CompletionCode = YAFU_CC_NORMAL;
++    pAMIYAFUActivateFlash->ActivateflashRes.Seqnum = pAMIYAFUActivateFlashReq->ActivateflashReq.Seqnum;
++    pAMIYAFUActivateFlash->ActivateflashRes.YafuCmd= pAMIYAFUActivateFlashReq->ActivateflashReq.YafuCmd;
++
++    pAMIYAFUActivateFlash->ActivateflashRes.CRC32chksum = 0x00;
++    pAMIYAFUActivateFlash->Delay = 0x00;
++
++    return ( sizeof( AMIYAFUActivateFlashModeRes_T ) );
++}
++
++/*---------------------------------------
++ * AMIYAFUProtectFlash
++ *---------------------------------------*/
++int AMIYAFUProtectFlash ( unsigned char *pReq, unsigned char ReqLen, unsigned char *pRes ) 
++{
++
++	char *argv [4];
++    AMIYAFUProtectFlashReq_T *pAMIYAFUProtectFlashReq = (AMIYAFUProtectFlashReq_T *)pReq;
++
++if(ActivateFlashStatus == 0x01)
++{
++   AMIYAFUProtectFlashRes_T* pAMIYAFUProtectFlash = (AMIYAFUProtectFlashRes_T*)pRes;
++
++   if(CalculateChksum((char *)&pAMIYAFUProtectFlashReq->Blknum,pAMIYAFUProtectFlashReq->ProtectFlashReq.Datalen) != pAMIYAFUProtectFlashReq->ProtectFlashReq.CRC32chksum)
++   {
++         AMIYAFUNotAck* pAMIYAFUNotAcknowledge =(AMIYAFUNotAck*)pRes;
++         pAMIYAFUNotAcknowledge->NotAck.Seqnum = pAMIYAFUProtectFlashReq->ProtectFlashReq.Seqnum;
++	  pAMIYAFUNotAcknowledge->NotAck.YafuCmd = CMD_AMI_YAFU_COMMON_NAK;
++	  pAMIYAFUNotAcknowledge->NotAck.Datalen = 0x02;
++	  pAMIYAFUNotAcknowledge->NotAck.CRC32chksum = 0x00;
++         pAMIYAFUNotAcknowledge->ErrorCode = YAFU_INVALID_CHKSUM;
++         LastStatCode=pAMIYAFUNotAcknowledge->ErrorCode;
++
++         return (sizeof(AMIYAFUNotAck));
++
++   }
++
++    if(pAMIYAFUProtectFlashReq->ProtectFlashReq.Datalen== 0x05)
++          pAMIYAFUProtectFlash->ProtectFlashRes.Datalen= 0x01;
++    else
++    {
++	   AMIYAFUNotAck* pAMIYAFUNotAcknowledge =(AMIYAFUNotAck*)pRes;
++	   pAMIYAFUNotAcknowledge->NotAck.Seqnum = pAMIYAFUProtectFlashReq->ProtectFlashReq.Seqnum;
++	   pAMIYAFUNotAcknowledge->NotAck.YafuCmd = CMD_AMI_YAFU_COMMON_NAK;
++	   pAMIYAFUNotAcknowledge->NotAck.Datalen = 0x02;
++	   pAMIYAFUNotAcknowledge->NotAck.CRC32chksum = 0x00;
++	   pAMIYAFUNotAcknowledge->ErrorCode = YAFU_CC_INVALID_DATLEN;
++	   LastStatCode = pAMIYAFUNotAcknowledge->ErrorCode;
++
++	   return (sizeof(AMIYAFUNotAck));
++   }
++
++    argv[0] = "protect";
++    argv[1] = "off";
++     argv[2] = "all";
++     argv[3] = NULL;
++
++     if (0 != do_protect (NULL,0,3,argv))
++     {
++	   AMIYAFUNotAck* pAMIYAFUNotAcknowledge =(AMIYAFUNotAck*)pRes;
++	   pAMIYAFUNotAcknowledge->NotAck.Seqnum = pAMIYAFUProtectFlashReq->ProtectFlashReq.Seqnum;
++	   pAMIYAFUNotAcknowledge->NotAck.YafuCmd = CMD_AMI_YAFU_COMMON_NAK;
++	   pAMIYAFUNotAcknowledge->NotAck.Datalen = 0x02;
++	   pAMIYAFUNotAcknowledge->NotAck.CRC32chksum = 0x00;
++	   pAMIYAFUNotAcknowledge->ErrorCode = YAFU_PROTECT_ERR;
++	   LastStatCode = pAMIYAFUNotAcknowledge->ErrorCode;
++
++	   return (sizeof(AMIYAFUNotAck));
++
++     }
++
++    pNewFirmwareAddr = (unsigned char*)YAFU_IMAGE_UPLOAD_LOCATION;
++
++    pAMIYAFUProtectFlash->CompletionCode = YAFU_CC_NORMAL;
++    LastStatCode = pAMIYAFUProtectFlash->CompletionCode;
++    pAMIYAFUProtectFlash->ProtectFlashRes.Seqnum = pAMIYAFUProtectFlashReq->ProtectFlashReq.Seqnum;
++    pAMIYAFUProtectFlash->ProtectFlashRes.YafuCmd= pAMIYAFUProtectFlashReq->ProtectFlashReq.YafuCmd;
++    pAMIYAFUProtectFlash->ProtectFlashRes.CRC32chksum =  CalculateChksum((char *)&(pAMIYAFUProtectFlash->Status),sizeof(INT8U));
++
++
++   return (sizeof(AMIYAFUProtectFlashRes_T));
++}
++else
++{
++     AMIYAFUNotAck* pAMIYAFUNotAcknowledge =(AMIYAFUNotAck*)pRes;
++     pAMIYAFUNotAcknowledge->NotAck.Seqnum = pAMIYAFUProtectFlashReq->ProtectFlashReq.Seqnum;
++     pAMIYAFUNotAcknowledge->NotAck.YafuCmd = CMD_AMI_YAFU_COMMON_NAK;
++     pAMIYAFUNotAcknowledge->NotAck.Datalen = 0x02;
++     pAMIYAFUNotAcknowledge->NotAck.CRC32chksum = 0x00;
++     pAMIYAFUNotAcknowledge->ErrorCode = YAFU_CC_IN_DEACTIVATE;
++     LastStatCode = pAMIYAFUNotAcknowledge->ErrorCode;
++
++     return (sizeof(AMIYAFUNotAck));
++}
++
++}
++
++/*---------------------------------------
++ * AMIYAFUEraseCopyFlash
++ *---------------------------------------*/
++int AMIYAFUEraseCopyFlash ( unsigned char *pReq, unsigned char ReqLen,unsigned char *pRes )  
++{
++
++    AMIYAFUEraseCopyFlashReq_T *pAMIYAFUEraseCopyFlashReq = (AMIYAFUEraseCopyFlashReq_T *)pReq;
++
++if(ActivateFlashStatus == 0x01)
++{
++
++    AMIYAFUEraseCopyFlashRes_T* pAMIYAFUEraseCopyFlash = (AMIYAFUEraseCopyFlashRes_T*)pRes;
++
++    if(CalculateChksum((char *)&pAMIYAFUEraseCopyFlashReq->Memoffset,pAMIYAFUEraseCopyFlashReq->EraseCpyFlashReq.Datalen) != pAMIYAFUEraseCopyFlashReq->EraseCpyFlashReq.CRC32chksum)
++    {
++         AMIYAFUNotAck* pAMIYAFUNotAcknowledge =(AMIYAFUNotAck*)pRes;
++         pAMIYAFUNotAcknowledge->NotAck.Seqnum = pAMIYAFUEraseCopyFlashReq->EraseCpyFlashReq.Seqnum;
++	  pAMIYAFUNotAcknowledge->NotAck.YafuCmd = CMD_AMI_YAFU_COMMON_NAK;
++	  pAMIYAFUNotAcknowledge->NotAck.Datalen = 0x02;
++	  pAMIYAFUNotAcknowledge->NotAck.CRC32chksum = 0x00; 
++         pAMIYAFUNotAcknowledge->ErrorCode = YAFU_INVALID_CHKSUM;
++         LastStatCode=pAMIYAFUNotAcknowledge->ErrorCode;
++
++         return (sizeof(AMIYAFUNotAck));
++
++    }
++
++    if(pAMIYAFUEraseCopyFlashReq->EraseCpyFlashReq.Datalen == 0x0c)
++          pAMIYAFUEraseCopyFlash->EraseCpyFlashRes.Datalen = 0x04;
++    else
++    {
++
++	   AMIYAFUNotAck* pAMIYAFUNotAcknowledge =(AMIYAFUNotAck*)pRes;
++          pAMIYAFUNotAcknowledge->NotAck.Seqnum = pAMIYAFUEraseCopyFlashReq->EraseCpyFlashReq.Seqnum;
++	   pAMIYAFUNotAcknowledge->NotAck.YafuCmd = CMD_AMI_YAFU_COMMON_NAK;
++	   pAMIYAFUNotAcknowledge->NotAck.Datalen = 0x02;
++	   pAMIYAFUNotAcknowledge->NotAck.CRC32chksum = 0x00;
++	   pAMIYAFUNotAcknowledge->ErrorCode = YAFU_CC_INVALID_DATLEN;
++	   LastStatCode = YAFU_CC_INVALID_DATLEN;
++
++	   return (sizeof(AMIYAFUNotAck));
++    }
++  
++    gEraseBlock = pAMIYAFUEraseCopyFlashReq->Flashoffset;
++    gSizeToErase = 	pAMIYAFUEraseCopyFlashReq->Sizetocopy;
++    pNewFirmwareAddr = (unsigned char *)YAFU_IMAGE_UPLOAD_LOCATION;
++
++
++   gStartFirmwareUpdation = 0x01;
++
++    pAMIYAFUEraseCopyFlash->Sizecopied =  pAMIYAFUEraseCopyFlashReq->Sizetocopy;
++    pAMIYAFUEraseCopyFlash->CompletionCode = YAFU_CC_NORMAL;
++    LastStatCode =  (INT16U)pAMIYAFUEraseCopyFlash->CompletionCode;
++    pAMIYAFUEraseCopyFlash->EraseCpyFlashRes.Seqnum = pAMIYAFUEraseCopyFlashReq->EraseCpyFlashReq.Seqnum;
++    pAMIYAFUEraseCopyFlash->EraseCpyFlashRes.YafuCmd= pAMIYAFUEraseCopyFlashReq->EraseCpyFlashReq.YafuCmd;
++    pAMIYAFUEraseCopyFlash->EraseCpyFlashRes.CRC32chksum = CalculateChksum((char *)&(pAMIYAFUEraseCopyFlash->Sizecopied),sizeof(INT32U));
++
++    return (sizeof(AMIYAFUEraseCopyFlashRes_T));
++}
++else
++{
++    AMIYAFUNotAck* pAMIYAFUNotAcknowledge =(AMIYAFUNotAck*)pRes;
++    pAMIYAFUNotAcknowledge->NotAck.Seqnum = pAMIYAFUEraseCopyFlashReq->EraseCpyFlashReq.Seqnum;
++    pAMIYAFUNotAcknowledge->NotAck.YafuCmd = CMD_AMI_YAFU_COMMON_NAK;
++    pAMIYAFUNotAcknowledge->NotAck.Datalen = 0x02;
++    pAMIYAFUNotAcknowledge->NotAck.CRC32chksum = 0x00;
++    pAMIYAFUNotAcknowledge->ErrorCode = YAFU_CC_IN_DEACTIVATE;
++    LastStatCode = pAMIYAFUNotAcknowledge->ErrorCode;
++
++    return (sizeof(AMIYAFUNotAck));
++}
++
++}
++
++
++
++/*---------------------------------------
++ * AMIYAFUWriteMemory
++ *---------------------------------------*/
++int AMIYAFUWriteMemory ( unsigned char *pReq, unsigned char ReqLen, unsigned char *pRes )  
++{
++
++    AMIYAFUWriteMemoryReq_T *pAMIYAFUWriteMemoryReq = (AMIYAFUWriteMemoryReq_T *)pReq;
++
++if(ActivateFlashStatus == 0x01)
++{
++    INT8U *OffsetToWrite;
++
++    AMIYAFUWriteMemoryRes_T* pAMIYAFUWriteMemory = (AMIYAFUWriteMemoryRes_T*)pRes;
++
++    if(CalculateChksum((char *)&pAMIYAFUWriteMemoryReq->Memoffset,pAMIYAFUWriteMemoryReq->WriteMemReq.Datalen) != pAMIYAFUWriteMemoryReq->WriteMemReq.CRC32chksum)
++   {
++         AMIYAFUNotAck* pAMIYAFUNotAcknowledge =(AMIYAFUNotAck*)pRes;
++         pAMIYAFUNotAcknowledge->NotAck.Seqnum = pAMIYAFUWriteMemoryReq->WriteMemReq.Seqnum;
++	  pAMIYAFUNotAcknowledge->NotAck.YafuCmd = CMD_AMI_YAFU_COMMON_NAK;
++	  pAMIYAFUNotAcknowledge->NotAck.Datalen = 0x02;
++	  pAMIYAFUNotAcknowledge->NotAck.CRC32chksum = 0x00;
++         pAMIYAFUNotAcknowledge->ErrorCode = YAFU_INVALID_CHKSUM;
++         LastStatCode=pAMIYAFUNotAcknowledge->ErrorCode;
++         return (sizeof(AMIYAFUNotAck));
++
++   }
++
++
++   OffsetToWrite = pNewFirmwareAddr ;
++   
++    memcpy (( INT8U*) OffsetToWrite,
++	 	 (pReq + sizeof(AMIYAFUWriteMemoryReq_T)), 
++		 (pAMIYAFUWriteMemoryReq->WriteMemReq.Datalen - 5)); 
++
++   pNewFirmwareAddr += pAMIYAFUWriteMemoryReq->WriteMemReq.Datalen - 5;
++
++    pAMIYAFUWriteMemory->SizeWritten = (pAMIYAFUWriteMemoryReq->WriteMemReq.Datalen - 5);
++
++
++    pAMIYAFUWriteMemory->CompletionCode = YAFU_CC_NORMAL;
++    LastStatCode = (INT16U) pAMIYAFUWriteMemory->CompletionCode;
++    pAMIYAFUWriteMemory->WriteMemRes.Seqnum= pAMIYAFUWriteMemoryReq->WriteMemReq.Seqnum;
++    pAMIYAFUWriteMemory->WriteMemRes.YafuCmd= pAMIYAFUWriteMemoryReq->WriteMemReq.YafuCmd;
++    pAMIYAFUWriteMemory->WriteMemRes.Datalen=0x02;
++    pAMIYAFUWriteMemory->WriteMemRes.CRC32chksum =  CalculateChksum((char *)&pAMIYAFUWriteMemory->SizeWritten,sizeof(INT16U));
++
++    return (sizeof(AMIYAFUWriteMemoryRes_T));
++}
++else
++{
++   AMIYAFUNotAck* pAMIYAFUNotAcknowledge =(AMIYAFUNotAck*)pRes;
++   pAMIYAFUNotAcknowledge->NotAck.Seqnum = pAMIYAFUWriteMemoryReq->WriteMemReq.Seqnum;
++   pAMIYAFUNotAcknowledge->NotAck.YafuCmd = CMD_AMI_YAFU_COMMON_NAK;
++   pAMIYAFUNotAcknowledge->NotAck.Datalen = 0x02;
++   pAMIYAFUNotAcknowledge->NotAck.CRC32chksum = 0x00;
++   pAMIYAFUNotAcknowledge->ErrorCode = YAFU_CC_IN_DEACTIVATE;
++   LastStatCode = pAMIYAFUNotAcknowledge->ErrorCode;
++
++   return (sizeof(AMIYAFUNotAck));
++}
++
++
++}
++
++/*---------------------------------------
++ * AMIYAFUGetBootConfig
++ *---------------------------------------*/
++int AMIYAFUGetBootConfig ( unsigned char *pReq, unsigned char ReqLen, unsigned char *pRes )  
++{
++
++    AMIYAFUGetBootConfigReq_T *pAMIYAFUGetBootConfigReq = (AMIYAFUGetBootConfigReq_T *)pReq;
++  
++if( ActivateFlashStatus == 0x01)
++{
++     int len = 0;
++     char *Buffer;		 
++
++    AMIYAFUGetBootConfigRes_T* pAMIYAFUGetBootConfig = (AMIYAFUGetBootConfigRes_T*)pRes;
++
++    if(CalculateChksum((char *)&pAMIYAFUGetBootConfigReq->VarName[0],pAMIYAFUGetBootConfigReq->GetBootReq.Datalen) != pAMIYAFUGetBootConfigReq->GetBootReq.CRC32chksum)
++   {
++         AMIYAFUNotAck* pAMIYAFUNotAcknowledge =(AMIYAFUNotAck*)pRes;
++         pAMIYAFUNotAcknowledge->NotAck.Seqnum = pAMIYAFUGetBootConfigReq->GetBootReq.Seqnum;
++	  pAMIYAFUNotAcknowledge->NotAck.YafuCmd = CMD_AMI_YAFU_COMMON_NAK;
++	  pAMIYAFUNotAcknowledge->NotAck.Datalen = 0x02;
++	  pAMIYAFUNotAcknowledge->NotAck.CRC32chksum = 0x00;
++         pAMIYAFUNotAcknowledge->ErrorCode = YAFU_INVALID_CHKSUM;
++         LastStatCode=pAMIYAFUNotAcknowledge->ErrorCode;
++         return (sizeof(AMIYAFUNotAck));
++
++   }
++
++    if(pAMIYAFUGetBootConfigReq->GetBootReq.Datalen == 0x41)
++          pAMIYAFUGetBootConfig->GetBootRes.Datalen= 0x42;
++    else
++    {
++	   AMIYAFUNotAck* pAMIYAFUNotAcknowledge =(AMIYAFUNotAck*)pRes;
++          pAMIYAFUNotAcknowledge->NotAck.Seqnum = pAMIYAFUGetBootConfigReq->GetBootReq.Seqnum;
++	   pAMIYAFUNotAcknowledge->NotAck.YafuCmd = CMD_AMI_YAFU_COMMON_NAK;
++	   pAMIYAFUNotAcknowledge->NotAck.Datalen = 0x02;
++	   pAMIYAFUNotAcknowledge->NotAck.CRC32chksum = 0x00;
++	   pAMIYAFUNotAcknowledge->ErrorCode = YAFU_CC_INVALID_DATLEN;
++	   LastStatCode =  pAMIYAFUNotAcknowledge->ErrorCode;
++						
++	   return (sizeof(AMIYAFUNotAck)); 
++
++    }
++
++    Buffer = env_get((char *)&pAMIYAFUGetBootConfigReq->VarName);
++
++    len = strlen(Buffer);
++    len++; 	
++	
++
++    pAMIYAFUGetBootConfig->Status = 0x01;
++
++    pAMIYAFUGetBootConfig->CompletionCode = YAFU_CC_NORMAL;
++    LastStatCode = (INT16U)pAMIYAFUGetBootConfig->CompletionCode;	
++    pAMIYAFUGetBootConfig->GetBootRes.Seqnum = pAMIYAFUGetBootConfigReq->GetBootReq.Seqnum;
++    pAMIYAFUGetBootConfig->GetBootRes.YafuCmd=pAMIYAFUGetBootConfigReq->GetBootReq.YafuCmd;
++      
++    memcpy (( INT8U*) (pAMIYAFUGetBootConfig + 1),
++                   ( INT8U*)Buffer,len );
++    pAMIYAFUGetBootConfig->GetBootRes.Datalen = len + 1;  
++    pAMIYAFUGetBootConfig->GetBootRes.CRC32chksum= CalculateChksum((char *)&pAMIYAFUGetBootConfig->Status,pAMIYAFUGetBootConfig->GetBootRes.Datalen);
++
++    return (sizeof(AMIYAFUGetBootConfigRes_T) + len);
++}
++else
++{
++    AMIYAFUNotAck* pAMIYAFUNotAcknowledge =(AMIYAFUNotAck*)pRes;
++    pAMIYAFUNotAcknowledge->NotAck.Seqnum = pAMIYAFUGetBootConfigReq->GetBootReq.Seqnum;
++    pAMIYAFUNotAcknowledge->NotAck.YafuCmd = CMD_AMI_YAFU_COMMON_NAK;
++    pAMIYAFUNotAcknowledge->NotAck.Datalen = 0x02;
++    pAMIYAFUNotAcknowledge->NotAck.CRC32chksum = 0x00; 
++    pAMIYAFUNotAcknowledge->ErrorCode = YAFU_CC_IN_DEACTIVATE;
++    LastStatCode =   pAMIYAFUNotAcknowledge->ErrorCode;	
++						
++    return (sizeof(AMIYAFUNotAck));   
++}
++	
++}
++
++/*---------------------------------------
++ * AMIYAFUSetBootConfig
++ *---------------------------------------*/
++int AMIYAFUSetBootConfig ( unsigned char *pReq, unsigned char ReqLen,unsigned char *pRes )  
++{
++    AMIYAFUSetBootConfigReq_T *pAMIYAFUSetBootConfigReq = (AMIYAFUSetBootConfigReq_T *)pReq;
++
++if( ActivateFlashStatus == 0x01)
++{
++   
++    char *BootVal = (char *)YAFU_TEMP_SECTOR_BUFFER;	
++	
++    AMIYAFUSetBootConfigRes_T* pAMIYAFUSetBootConfig = (AMIYAFUSetBootConfigRes_T*)pRes;
++  
++    if(CalculateChksum((char *)&pAMIYAFUSetBootConfigReq->VarName[0],pAMIYAFUSetBootConfigReq->SetBootReq.Datalen) != pAMIYAFUSetBootConfigReq->SetBootReq.CRC32chksum)
++    {
++         AMIYAFUNotAck* pAMIYAFUNotAcknowledge =(AMIYAFUNotAck*)pRes;
++         pAMIYAFUNotAcknowledge->NotAck.Seqnum = pAMIYAFUSetBootConfigReq->SetBootReq.Seqnum;
++	  pAMIYAFUNotAcknowledge->NotAck.YafuCmd = CMD_AMI_YAFU_COMMON_NAK;
++	  pAMIYAFUNotAcknowledge->NotAck.Datalen = 0x02;
++	  pAMIYAFUNotAcknowledge->NotAck.CRC32chksum = 0x00;
++         pAMIYAFUNotAcknowledge->ErrorCode = YAFU_INVALID_CHKSUM;
++	  LastStatCode=pAMIYAFUNotAcknowledge->ErrorCode;
++
++         return (sizeof(AMIYAFUNotAck));
++
++    }
++
++   
++    pReq += sizeof(AMIYAFUSetBootConfigReq_T);
++    memcpy(BootVal,pReq,(pAMIYAFUSetBootConfigReq->SetBootReq.Datalen - 65));
++    memset(pReq,0,(pAMIYAFUSetBootConfigReq->SetBootReq.Datalen - 65)); 	
++    pReq -= sizeof(AMIYAFUSetBootConfigReq_T);	
++
++    if(strcmp((char *)pAMIYAFUSetBootConfigReq->VarName,"baudrate") != 0)
++    	    env_set((char *)pAMIYAFUSetBootConfigReq->VarName,BootVal);
++  
++    env_save();
++
++    pAMIYAFUSetBootConfig->Status = 0x01;
++
++    pAMIYAFUSetBootConfig->CompletionCode = YAFU_CC_NORMAL;
++    LastStatCode = (INT16U)pAMIYAFUSetBootConfig->CompletionCode;	
++    pAMIYAFUSetBootConfig->SetBootRes.Seqnum = pAMIYAFUSetBootConfigReq->SetBootReq.Seqnum;
++    pAMIYAFUSetBootConfig->SetBootRes.YafuCmd = pAMIYAFUSetBootConfigReq->SetBootReq.YafuCmd;
++    pAMIYAFUSetBootConfig->SetBootRes.Datalen = 0x01;	
++    pAMIYAFUSetBootConfig->SetBootRes.CRC32chksum= CalculateChksum((char *)&pAMIYAFUSetBootConfig->Status,pAMIYAFUSetBootConfig->SetBootRes.Datalen ); 	
++
++    return (sizeof(AMIYAFUSetBootConfigRes_T));
++}
++else
++{
++   AMIYAFUNotAck* pAMIYAFUNotAcknowledge =(AMIYAFUNotAck*)pRes;
++   pAMIYAFUNotAcknowledge->NotAck.Seqnum = pAMIYAFUSetBootConfigReq->SetBootReq.Seqnum;
++   pAMIYAFUNotAcknowledge->NotAck.YafuCmd = CMD_AMI_YAFU_COMMON_NAK;
++   pAMIYAFUNotAcknowledge->NotAck.Datalen = 0x02;
++   pAMIYAFUNotAcknowledge->NotAck.CRC32chksum = 0x00; 
++   pAMIYAFUNotAcknowledge->ErrorCode = YAFU_CC_IN_DEACTIVATE;
++   LastStatCode =  pAMIYAFUNotAcknowledge->ErrorCode;
++							   
++   return (sizeof(AMIYAFUNotAck)); 
++}
++   
++}
++
++/*---------------------------------------
++ * AMIYAFUGetBootVars
++ *---------------------------------------*/
++int AMIYAFUGetBootVars ( unsigned char *pReq, unsigned char ReqLen, unsigned char *pRes ) 
++{
++    AMIYAFUGetBootVarsReq_T *pAMIYAFUGetBootVarsReq = (AMIYAFUGetBootVarsReq_T *)pReq;
++
++if(ActivateFlashStatus == 0x01)
++{
++   // int RetVal;
++    int BootVarlen =0;	
++    char *Buffer = (char *)YAFU_TEMP_SECTOR_BUFFER;	
++
++    AMIYAFUGetBootVarsRes_T* pAMIYAFUGetBootVars = (AMIYAFUGetBootVarsRes_T*)pRes;	 
++    pAMIYAFUGetBootVars->VarCount = 0X00;
++
++
++    Getenvvar ((uchar *)&pAMIYAFUGetBootVars->VarCount,(uchar *)Buffer,&BootVarlen); 
++
++    memcpy (( INT8U*) (pAMIYAFUGetBootVars + 1),
++                   ( INT8U*)Buffer,BootVarlen );
++
++    pAMIYAFUGetBootVars->GetBootRes.Datalen = BootVarlen + 1; 
++
++    pAMIYAFUGetBootVars->CompletionCode = YAFU_CC_NORMAL;
++    LastStatCode = (INT16U)pAMIYAFUGetBootVars->CompletionCode;	
++    pAMIYAFUGetBootVars->GetBootRes.Seqnum = pAMIYAFUGetBootVarsReq->GetBootReq.Seqnum;
++    pAMIYAFUGetBootVars->GetBootRes.YafuCmd = pAMIYAFUGetBootVarsReq->GetBootReq.YafuCmd;
++    pAMIYAFUGetBootVars->GetBootRes.CRC32chksum= CalculateChksum((char *)&pAMIYAFUGetBootVars->VarCount,pAMIYAFUGetBootVars->GetBootRes.Datalen);
++     
++    return (sizeof(AMIYAFUGetBootVarsRes_T)+ BootVarlen);
++}
++else
++{
++   AMIYAFUNotAck* pAMIYAFUNotAcknowledge =(AMIYAFUNotAck*)pRes;
++   pAMIYAFUNotAcknowledge->NotAck.Seqnum = pAMIYAFUGetBootVarsReq->GetBootReq.Seqnum;
++   pAMIYAFUNotAcknowledge->NotAck.YafuCmd = CMD_AMI_YAFU_COMMON_NAK;
++   pAMIYAFUNotAcknowledge->NotAck.Datalen = 0x02;
++   pAMIYAFUNotAcknowledge->NotAck.CRC32chksum = 0x00; 
++   pAMIYAFUNotAcknowledge->ErrorCode = YAFU_CC_IN_DEACTIVATE;
++   LastStatCode = pAMIYAFUNotAcknowledge->ErrorCode;
++							   
++   return (sizeof(AMIYAFUNotAck)); 
++} 
++
++}
++
++
++
++
++/*---------------------------------------
++ * AMIYAFUDeactivateFlash
++ *---------------------------------------*/
++int AMIYAFUDeactivateFlash (unsigned char*pReq, unsigned char ReqLen,unsigned char *pRes )  
++{
++
++    AMIYAFUDeactivateFlashReq_T *pAMIYAFUDeactivateFlashReq = (AMIYAFUDeactivateFlashReq_T *)pReq;
++
++if(ActivateFlashStatus == 0x01)
++{
++    AMIYAFUDeactivateFlashRes_T* pAMIYAFUDeactivateFlash = (AMIYAFUDeactivateFlashRes_T*)pRes;
++
++
++    if(pAMIYAFUDeactivateFlashReq->DeactivateFlashReq.Datalen== 0x00)
++          pAMIYAFUDeactivateFlash->DeactivateFlashRes.Datalen= 0x01;
++    else
++    {
++
++	   AMIYAFUNotAck* pAMIYAFUNotAcknowledge =(AMIYAFUNotAck*)pRes;
++          pAMIYAFUNotAcknowledge->NotAck.Seqnum = pAMIYAFUDeactivateFlashReq->DeactivateFlashReq.Seqnum;
++	   pAMIYAFUNotAcknowledge->NotAck.YafuCmd = CMD_AMI_YAFU_COMMON_NAK;
++	   pAMIYAFUNotAcknowledge->NotAck.Datalen = 0x02;
++	   pAMIYAFUNotAcknowledge->NotAck.CRC32chksum = 0x00;
++	   pAMIYAFUNotAcknowledge->ErrorCode = YAFU_CC_INVALID_DATLEN;
++	   LastStatCode = pAMIYAFUNotAcknowledge->ErrorCode;
++
++	   return (sizeof(AMIYAFUNotAck));
++
++    }
++
++    ActivateFlashStatus = 0x00;
++    if (gFWUploadSelector == IMAGE_1)
++    {
++       env_set("recentlyprogfw","1");
++    }
++    else if(gFWUploadSelector == IMAGE_2)
++    {
++       env_set("recentlyprogfw","2");
++    }
++    //clearing error codes if any generated by failsafe boot
++    if( env_get("fwimage1corrupted") )
++    {
++       env_set("fwimage1corrupted",NULL);
++    }
++    if( env_get("fwimage2corrupted") )
++    {
++       env_set("fwimage2corrupted",NULL);
++    }
++
++	env_save();
++
++    pAMIYAFUDeactivateFlash->Status = 0x00;
++    pAMIYAFUDeactivateFlash->CompletionCode = YAFU_CC_NORMAL;
++    LastStatCode = (INT16U) pAMIYAFUDeactivateFlash->CompletionCode;
++    pAMIYAFUDeactivateFlash->DeactivateFlashRes.Seqnum = pAMIYAFUDeactivateFlashReq->DeactivateFlashReq.Seqnum;
++    pAMIYAFUDeactivateFlash->DeactivateFlashRes.YafuCmd = pAMIYAFUDeactivateFlashReq->DeactivateFlashReq.YafuCmd;
++    pAMIYAFUDeactivateFlash->DeactivateFlashRes.CRC32chksum= CalculateChksum((char *)&pAMIYAFUDeactivateFlash->Status,sizeof(INT8U));
++
++
++    return (sizeof(AMIYAFUDeactivateFlashRes_T));
++}
++else
++{
++    AMIYAFUNotAck* pAMIYAFUNotAcknowledge =(AMIYAFUNotAck*)pRes;
++    pAMIYAFUNotAcknowledge->NotAck.Seqnum = pAMIYAFUDeactivateFlashReq->DeactivateFlashReq.Seqnum;
++    pAMIYAFUNotAcknowledge->NotAck.YafuCmd = CMD_AMI_YAFU_COMMON_NAK;
++    pAMIYAFUNotAcknowledge->NotAck.Datalen = 0x02;
++    pAMIYAFUNotAcknowledge->NotAck.CRC32chksum = 0x00;
++    pAMIYAFUNotAcknowledge->ErrorCode = YAFU_CC_INVALID_DATLEN;
++    LastStatCode = pAMIYAFUNotAcknowledge->ErrorCode;
++
++    return (sizeof(AMIYAFUNotAck));
++}
++
++}
++
++
++/*---------------------------------------
++ * AMIYAFUResetDevice
++ *---------------------------------------*/
++int AMIYAFUResetDevice ( unsigned char *pReq, unsigned char ReqLen,unsigned char *pRes )  
++{
++
++    AMIYAFUResetDeviceReq_T *pAMIYAFUResetDeviceReq = (AMIYAFUResetDeviceReq_T *)pReq;
++    AMIYAFUResetDeviceRes_T* pAMIYAFUResetDevice = (AMIYAFUResetDeviceRes_T*)pRes;
++
++     if(CalculateChksum((char *)&pAMIYAFUResetDeviceReq->WaitSec,sizeof(INT16U)) != pAMIYAFUResetDeviceReq->ResetReq.CRC32chksum)
++   {
++         AMIYAFUNotAck* pAMIYAFUNotAcknowledge =(AMIYAFUNotAck*)pRes;
++         pAMIYAFUNotAcknowledge->NotAck.Seqnum = pAMIYAFUResetDeviceReq->ResetReq.Seqnum;
++	  pAMIYAFUNotAcknowledge->NotAck.YafuCmd = CMD_AMI_YAFU_COMMON_NAK;
++	  pAMIYAFUNotAcknowledge->NotAck.Datalen = 0x02;
++	  pAMIYAFUNotAcknowledge->NotAck.CRC32chksum = 0x00;
++         pAMIYAFUNotAcknowledge->ErrorCode = YAFU_INVALID_CHKSUM;
++         LastStatCode=pAMIYAFUNotAcknowledge->ErrorCode;
++
++         return (sizeof(AMIYAFUNotAck));
++
++   }
++
++    if(pAMIYAFUResetDeviceReq->ResetReq.Datalen== 0x02)
++          pAMIYAFUResetDevice->ResetRes.Datalen= 0x01;
++    else
++    {
++
++	   AMIYAFUNotAck* pAMIYAFUNotAcknowledge =(AMIYAFUNotAck*)pRes;
++          pAMIYAFUNotAcknowledge->NotAck.Seqnum = pAMIYAFUResetDeviceReq->ResetReq.Seqnum;
++	   pAMIYAFUNotAcknowledge->NotAck.YafuCmd = CMD_AMI_YAFU_COMMON_NAK;
++	   pAMIYAFUNotAcknowledge->NotAck.Datalen = 0x02;
++	   pAMIYAFUNotAcknowledge->NotAck.CRC32chksum = 0x00;
++	   pAMIYAFUNotAcknowledge->ErrorCode = YAFU_CC_INVALID_DATLEN;
++	   LastStatCode =   pAMIYAFUNotAcknowledge->ErrorCode;
++
++	   return (sizeof(AMIYAFUNotAck));
++
++    }
++
++    gReset = 1;
++
++    pAMIYAFUResetDevice->CompletionCode = YAFU_CC_NORMAL;
++    LastStatCode = (INT16U) pAMIYAFUResetDevice->CompletionCode;
++    pAMIYAFUResetDevice->ResetRes.Seqnum = pAMIYAFUResetDeviceReq->ResetReq.Seqnum;
++    pAMIYAFUResetDevice->ResetRes.YafuCmd = pAMIYAFUResetDeviceReq->ResetReq.YafuCmd;
++    pAMIYAFUResetDevice->ResetRes.CRC32chksum=CalculateChksum((char *)&pAMIYAFUResetDevice->Status,sizeof(INT8U));
++
++    return (sizeof(AMIYAFUResetDeviceRes_T));
++}
++
++/**
++ * @fn CheckForBootOption
++ * @brief Check for valid boot selector option.
++ * @param[in] bootoption - boot selector option.
++ * @retval      0 - for valid boot selector option.
++ *              -1 - invalid boot option.
++ */
++static
++int CheckForBootOption(char bootoption)
++{
++    //Checking for valid Boot selector option
++    if(  (bootoption != AUTO_HIGH_VER_FW) && 
++         (bootoption != LOWER_IMAGE_FW ) && 
++         (bootoption != HIGHER_IMAGE_FW ) && 
++         (bootoption != AUTO_LOW_VER_FW) &&
++         (bootoption != MOST_RECENTLY_PROG_FW) && 
++         (bootoption != LEAST_RECENTLY_PROG_FW) )
++    {
++        return -1;
++    }
++
++return 0;
++}
++
++/**
++ * @fn IsfwuploadSelectorValid
++ * @brief Check for valid firmware upload selector.
++ * @param[in] uploadselector - firmware upload selector option.
++ * @retval      1 - for valid firmware upload selector.
++ *              0 - invalid firmware upload selector.
++ */
++static
++int  IsfwuploadSelectorValid(char uploadselector)
++{
++   return( (uploadselector == AUTO_INACTIVE_IMAGE)
++           || (uploadselector == IMAGE_1 )
++           || (uploadselector == IMAGE_2 )
++           || (uploadselector == IMAGE_BOTH )
++         );
++}
++
++/*
++*@fn AMIDualImageSupport
++*@brief This command helps to set and get the dual image params
++*@param pReq - Request for the command   
++*@param ReqLen - Request length for the command
++*@param pRes - Respose for the command
++*@return Returns size of AMIDualImageSupRes_T
++*/
++
++int AMIDualImageSupport( unsigned char *pReq, unsigned char ReqLen, unsigned char *pRes)
++{
++    AMIDualImageSupReq_T *pAMIDualImageSupReq = (AMIDualImageSupReq_T *)pReq;
++    AMIDualImageSupRes_T *pAMIDualImageSupRes = (AMIDualImageSupRes_T *)pRes;
++    u8 BootSelector, FwUploadSelector;
++    char *env_name;
++    char env_value[5];
++
++    if(ReqLen != m_DualResBits[pAMIDualImageSupReq->Parameter - 1])
++    {
++        *pRes = CC_REQ_INV_LEN;
++        return sizeof(INT8U); 
++    }
++ 
++#ifndef CONFIG_SPX_FEATURE_GLOBAL_DUAL_IMAGE_SUPPORT
++      *pRes  = CC_INV_CMD;
++      return sizeof(INT8U);
++#endif
++
++    switch (pAMIDualImageSupReq->Parameter) //validating for command sub specifier
++    {
++        case SETFWBOOTSELECTOR: //0x01 - Set FW Boot Selector
++        
++		//Checking for valid Boot selector option
++		if( CheckForBootOption(pAMIDualImageSupReq->BootSelector) != 0 )
++		{
++			printf("Invalid Bootoption");
++			*pRes = CC_INV_DATA_FIELD;
++			return sizeof(INT8U); 
++		}
++				
++                memset(env_value,0,sizeof(env_value));
++                sprintf(env_value,"%d",pAMIDualImageSupReq->BootSelector);
++
++                env_set("bootselector", env_value);
++                env_save();
++
++                pAMIDualImageSupRes->BootSelOpt.SetBootSelector = pAMIDualImageSupReq->BootSelector;
++                pAMIDualImageSupRes->CompletionCode = CC_NORMAL;
++                return sizeof(INT8U) + sizeof(pAMIDualImageSupRes->BootSelOpt.SetBootSelector);
++                break;
++	
++        case GETFWBOOTSELECTOR: //0x02 - Get FW Boot Selector           	   
++
++                env_name = env_get("bootselector");
++                if (env_name == NULL)
++                {
++                    return CC_UNSPECIFIED_ERR;
++                }
++                BootSelector = (u8)simple_strtoul(env_name,NULL,0);
++			  
++                //Checking for valid Boot selector option
++                if( CheckForBootOption(BootSelector) !=0 ) 
++                {
++                    return CC_UNSPECIFIED_ERR;
++                }
++				pAMIDualImageSupRes->BootSelOpt.GetBootSelector= BootSelector;
++                pAMIDualImageSupRes->CompletionCode = CC_NORMAL;
++                return sizeof(INT8U) + sizeof(pAMIDualImageSupRes->BootSelOpt.GetBootSelector);
++                break;
++       
++        case SETFWUPLOADSELECTOR: //0x03 Set FW Upload  Selector			   
++
++                FwUploadSelector =  pAMIDualImageSupReq->BootSelector;
++                //Checking for valid FW upload selector option 
++                if( IsfwuploadSelectorValid(FwUploadSelector) == 0 )
++                {      
++			     *pRes  = YAFU_CC_INVALID_DATA;
++			      return sizeof(INT8U);
++                }
++
++                gFWUploadSelector = FwUploadSelector;
++				pAMIDualImageSupRes->BootSelOpt.SetUploadSelector = gFWUploadSelector;
++                pAMIDualImageSupRes->CompletionCode = CC_NORMAL;
++                return sizeof(INT8U) + sizeof(pAMIDualImageSupRes->BootSelOpt.SetUploadSelector);
++                break;
++
++        case GETFWUPLOADSELECTOR: //0x04 Get FW Upload Selector               
++
++                FwUploadSelector = gFWUploadSelector;
++
++                //Checking for valid FW upload selector option 
++                if( IsfwuploadSelectorValid(FwUploadSelector) == 0 )
++                {      
++			     *pRes  = YAFU_CC_INVALID_DATA;
++			      return sizeof(INT8U);
++                }
++
++				pAMIDualImageSupRes->BootSelOpt.GetUploadSelector = FwUploadSelector;
++                pAMIDualImageSupRes->CompletionCode = CC_NORMAL;
++                return sizeof(INT8U) + sizeof(pAMIDualImageSupRes->BootSelOpt.GetUploadSelector);
++                break;
++	case GETCURACTIVEIMG:
++#ifdef CONFIG_SPX_FEATURE_HW_FAILSAFE_BOOT 
++                if (broken_spi_banks == 1) 
++                    pAMIDualImageSupRes->BootSelOpt.GetCurActiveImg = IMAGE_2_1BROKEN; 
++                else if (broken_spi_banks == 2) 
++                    pAMIDualImageSupRes->BootSelOpt.GetCurActiveImg = IMAGE_1_2BROKEN; 
++                else 
++#endif 
++                { 
++                    pAMIDualImageSupRes->BootSelOpt.GetCurActiveImg = IMAGE_1; 
++                } 
++                pAMIDualImageSupRes->CompletionCode = CC_NORMAL;
++                return sizeof(INT8U) + sizeof(pAMIDualImageSupRes->BootSelOpt.GetCurActiveImg);
++                break;
++
++        default:
++                return CC_INV_CMD;
++    }
++
++return  CC_SUCCESS;
++}
++
++
++
++/*-------------------------------------------
++ * AMIYAFUDualImgSup
++ *------------------------------------------*/
++int AMIYAFUDualImgSup(unsigned char *pReq, unsigned char ReqLen, unsigned char *pRes)
++{
++    AMIYAFUDualImgSupReq_T *pAMIYAFUDualImgSupReq = (AMIYAFUDualImgSupReq_T *)pReq;
++    AMIYAFUDualImgSupRes_T *pAMIYAFUDualImgSupRes = (AMIYAFUDualImgSupRes_T *)pRes;
++
++    if(CalculateChksum((char *)&pAMIYAFUDualImgSupReq->PreserveConf,pAMIYAFUDualImgSupReq->DualImgSupReq.Datalen) != pAMIYAFUDualImgSupReq->DualImgSupReq.CRC32chksum)
++    {
++         return YAFU_INVALID_CHKSUM;
++    }
++    pAMIYAFUDualImgSupRes->CompletionCode = YAFU_CC_NORMAL;
++    
++    return sizeof(AMIYAFUDualImgSupRes_T);
++}
++
++
++
++/*---------------------------------------
++ * AMIYAFUGetRecoverySPIDetails
++ *---------------------------------------*/
++
++int AMIYAFUGetRecoverySPIDetails  (unsigned char *pReq, unsigned char ReqLen, unsigned char *pRes )
++{
++    int Mode = 0;
++
++    AMIYAFUGetRecoverySPIDetailsReq_T *pAMIYAFUGetRecoverySPIDetailsReq =(AMIYAFUGetRecoverySPIDetailsReq_T *)pReq;
++    AMIYAFUGetRecoverySPIDetailsRes_T *pAMIYAFUGetRecoverySPIDetails    = (AMIYAFUGetRecoverySPIDetailsRes_T*)pRes;
++
++    pAMIYAFUGetRecoverySPIDetails->CompletionCode = YAFU_CC_NORMAL;
++    pAMIYAFUGetRecoverySPIDetails->GetRecoverySPIDetailsRes.Seqnum = pAMIYAFUGetRecoverySPIDetailsReq->GetRecoverySPIDetailsReq.Seqnum;
++    pAMIYAFUGetRecoverySPIDetails->GetRecoverySPIDetailsRes.YafuCmd= pAMIYAFUGetRecoverySPIDetailsReq->GetRecoverySPIDetailsReq.YafuCmd;
++    pAMIYAFUGetRecoverySPIDetails->LastStatusCode =(INT16U) LastStatCode;                      
++
++#ifdef CONFIG_YAFU_RECOVER_MULTIPLE_SPI_SUPPORT
++    Mode=recover_both_spi;       
++#else
++    Mode=0;	
++#endif
++
++    pAMIYAFUGetRecoverySPIDetails->Mode = Mode;
++    pAMIYAFUGetRecoverySPIDetails->GetRecoverySPIDetailsRes.Datalen= 4;
++    pAMIYAFUGetRecoverySPIDetails->GetRecoverySPIDetailsRes.CRC32chksum = CalculateChksum((char *)&pAMIYAFUGetRecoverySPIDetails->LastStatusCode,(INT32U)pAMIYAFUGetRecoverySPIDetails->GetRecoverySPIDetailsRes.Datalen);
++
++
++     return ( sizeof( AMIYAFUGetRecoverySPIDetailsRes_T ) );
++}
++
++
++/*-----------------------
++ * Command Handler Type
++ *----------------------*/
++typedef int (*pCmdHndlr_T) (unsigned char *pReq, unsigned char ReqLen, unsigned char *pRes);
++
++/**** Command Handlers ****/
++typedef struct
++{
++	unsigned char	NetFnLUN;
++	unsigned char	Cmd;
++	pCmdHndlr_T		pHandler;
++	unsigned char	Len;
++
++} CmdInfo_T;
++
++/* Supported Commands */
++CmdInfo_T	m_CmdInfo [] = 
++{
++    { NETFN_APP,		CMD_GET_DEV_ID,		            	GET_DEV_ID, 	        		0x00    								},
++	{ NETFN_APP,		CMD_GET_CH_AUTH_CAPS,				GET_CH_AUTH_CAPS,				sizeof (GetChAuthCapReq_T) 				},	
++    { NETFN_APP,		CMD_GET_SESSION_CHALLENGE,      	GET_SESSION_CHALLENGE,  		sizeof (GetSesChallengeReq_T) 			},
++    { NETFN_APP,		CMD_ACTIVATE_SESSION, 		    	ACTIVATE_SESSION,       		sizeof (ActivateSesReq_T) 				},
++    { NETFN_APP,		CMD_SET_SESSION_PRIV_LEVEL,     	SET_SESSION_PRIV_LEVEL, 		sizeof (unsigned char) 					},
++    { NETFN_APP,		CMD_CLOSE_SESSION,              	CLOSE_SESSION,          		sizeof (CloseSesReq_T) 					},
++
++    { NETFN_OEM_AMI,   	CMD_AMI_YAFU_GET_FLASH_INFO,       	AMI_YAFU_GET_FLASH_INFO,        sizeof(AMIYAFUGetFlashInfoReq_T)		},
++    { NETFN_OEM_AMI,	CMD_AMI_YAFU_GET_FMH_INFO, 			AMI_YAFU_GET_FMH_INFO,			sizeof(AMIYAFUGetFMHInfoReq_T) 			},
++    { NETFN_OEM_AMI,	CMD_AMI_YAFU_GET_STATUS,		 	AMI_YAFU_GET_STATUS,			sizeof(AMIYAFUGetStatusReq_T) 			},
++    { NETFN_OEM_AMI,	CMD_AMI_YAFU_ACTIVATE_FLASH,		AMI_YAFU_ACTIVATE_FLASH,		sizeof(AMIYAFUActivateFlashModeReq_T)	},
++    { NETFN_OEM_AMI,	CMD_AMI_YAFU_PROTECT_FLASH,			AMI_YAFU_PROTECT_FLASH, 		sizeof(AMIYAFUProtectFlashReq_T) 		},
++    { NETFN_OEM_AMI,	CMD_AMI_YAFU_ERASE_COPY_FLASH, 		AMI_YAFU_ERASE_COPY_FLASH,		sizeof(AMIYAFUEraseCopyFlashReq_T) 		},
++    { NETFN_OEM_AMI,	CMD_AMI_YAFU_WRITE_MEMORY, 			AMI_YAFU_WRITE_MEMORY,			0xff 									},
++    { NETFN_OEM_AMI,   	CMD_AMI_YAFU_GET_BOOT_CONFIG,       AMI_YAFU_GET_BOOT_CONFIG,       sizeof(AMIYAFUGetBootConfigReq_T) 		},
++    { NETFN_OEM_AMI,   	CMD_AMI_YAFU_SET_BOOT_CONFIG,       AMI_YAFU_SET_BOOT_CONFIG,       0xff									},
++    { NETFN_OEM_AMI,   	CMD_AMI_YAFU_GET_BOOT_VARS,         AMI_YAFU_GET_BOOT_VARS,         0xff									}, 
++    { NETFN_OEM_AMI,	CMD_AMI_YAFU_DEACTIVATE_FLASH_MODE,	AMI_YAFU_DEACTIVATE_FLASH_MODE, sizeof(AMIYAFUDeactivateFlashReq_T) 	},
++    { NETFN_OEM_AMI,	CMD_AMI_YAFU_RESET_DEVICE, 			AMI_YAFU_RESET_DEVICE , 		sizeof(AMIYAFUResetDeviceReq_T) 		},
++    { NETFN_OEM_AMI,	CMD_AMI_YAFU_DUAL_IMAGE_SUP,        AMI_YAFU_DUAL_IMG_SUP,          sizeof(AMIYAFUDualImgSupReq_T)			},
++    { NETFN_OEM_AMI, 	CMD_AMI_DUAL_IMG_SUPPORT,           AMI_DUAL_IMG_SUPPORT,   	 	0xFF},
++    { NETFN_OEM_AMI, 	CMD_AMI_YAFU_GET_RECOVERY_SPI_DETAILS,           AMI_YAFU_GET_RECOVERY_SPI_DETAILS,   	 	sizeof(AMIYAFUGetRecoverySPIDetailsReq_T)}
++};
++
++/*
++ * Process IPMI Command
++ */
++unsigned long
++ProcessIPMICmd (IPMICmdData_T* pIPMICmd)
++{
++	int i;
++	unsigned char Err = CC_NORMAL;
++	unsigned long	Responselen;
++
++	/* Process this message through the SMM message handler */
++	for (i = 0; i < sizeof (m_CmdInfo) / sizeof (CmdInfo_T); i++)
++	{
++		if ((m_CmdInfo [i].NetFnLUN == (pIPMICmd->NetFnLUN >> 2)) &&
++			(m_CmdInfo [i].Cmd	    == pIPMICmd->Cmd))
++		{
++			break;
++		}
++	}
++
++	/* If we have found the handler - handle the command */
++	if (i != sizeof (m_CmdInfo) / sizeof (CmdInfo_T))
++	{
++		/* Check for the request length */
++		if (0xff != m_CmdInfo [i].Len)
++		{
++			if (pIPMICmd->ReqLen != m_CmdInfo [i].Len)
++			{
++				printf("INV LEN: Recv len = %ld,exp len = %d\n",pIPMICmd->ReqLen,m_CmdInfo [i].Len);
++				Err = CC_REQ_INV_LEN;
++			}
++			
++		}
++
++	}
++	else
++	{
++		Err = CC_INV_CMD;
++	}
++
++    if (Err == CC_NORMAL)
++	{
++		pIPMICmd->ResLen = m_CmdInfo [i].pHandler (pIPMICmd->ReqData, pIPMICmd->ReqLen, pIPMICmd->ResData); 
++		Responselen = pIPMICmd->ResLen;	 
++    }
++    else
++    {
++        pIPMICmd->ResData [0] = Err;
++		pIPMICmd->ResLen	  = 1;
++		Responselen = 1;
++    }
++	return Responselen;
++}
+diff -uNar uboot/oem/ami/ipmi/Makefile uboot.new/oem/ami/ipmi/Makefile
+--- uboot/oem/ami/ipmi/Makefile	1969-12-31 19:00:00.000000000 -0500
++++ uboot.new/oem/ami/ipmi/Makefile	2020-12-16 15:34:59.708006724 -0500
+@@ -0,0 +1,25 @@
++# (C) Copyright 2013 
++# American Megatrends Inc
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation; either version 2 of
++# the License, or (at your option) any later version.
++#
++# This program is distributed in the hope that it will be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write to the Free Software
++# Foundation, Inc., 59 Temple Place, Suite 330, Boston,
++# MA 02111-1307 USA
++#
++
++
++ifeq ($(CPU),armv7)
++CCFLAGS-y += -mno-unaligned-access
++endif
++
++obj-y	+= cmdhandler.o
+diff -uNar uboot/oem/Makefile uboot.new/oem/Makefile
+--- uboot/oem/Makefile	2020-12-16 12:55:32.532921826 -0500
++++ uboot.new/oem/Makefile	2020-12-16 15:36:28.000000000 -0500
+@@ -1 +1,6 @@
+ obj-y += ami/fmh/
++##define CONFIG_SPX_FEATURE_BMC_FIRMWARE_AUTO_RECOVERY YES
++#ifeq ($(CONFIG_SPX_FEATURE_BMC_FIRMWARE_AUTO_RECOVERY),"YES")
++   obj-y += ami/ipmi/
++   obj-y += ami/fwupdate/
++ #endif

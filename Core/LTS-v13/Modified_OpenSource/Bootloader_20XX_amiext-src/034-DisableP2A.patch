@@ -1,0 +1,15 @@
+diff -Naur uboot-old/arch/arm/mach-aspeed/ast2600/board_common.c uboot/arch/arm/mach-aspeed/ast2600/board_common.c
+--- uboot-old/arch/arm/mach-aspeed/ast2600/board_common.c	2021-06-04 18:06:02.378353349 +0800
++++ uboot/arch/arm/mach-aspeed/ast2600/board_common.c	2021-06-07 11:06:43.498609841 +0800
+@@ -102,6 +102,11 @@
+ 	*(volatile u32 *)(0x1e6e2000 + 0x510) |= 0x4;
+ 	//*(volatile u32 *)(0x1e6e2000) = 0;	
+ 	// End of setting decode to 0x4E
++	
++	// Disable multiple development/debug level bridges register
++	*((volatile u32 *)(0x1E6E2000 + 0xC8)) = 0x0FFF;
++	*((volatile u32 *)(0x1E6E2000 + 0xD8)) = 0x0FF;	
++	
+ 	return 0;
+ }
+ 

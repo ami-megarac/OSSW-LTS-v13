@@ -1,0 +1,429 @@
+--- uboot/arch/arm/mach-aspeed/ast2600/platform.S	2021-07-10 12:16:32.681938648 +0800
++++ uboot.new/arch/arm/mach-aspeed/ast2600/platform.S	2021-07-12 15:09:43.278820579 +0800
+@@ -45,6 +45,7 @@
+ #define AST_SCU_HPLL_PARAM_EXT		(AST_SCU_BASE + 0x204)
+ #define AST_SCU_HW_STRAP1		(AST_SCU_BASE + 0x500)
+ #define AST_SCU_HW_STRAP2		(AST_SCU_BASE + 0x510)
++#define AST_SCU_HW_STRAP3               (AST_SCU_BASE + 0x51C)
+ #define AST_SCU_CA7_PARITY_CHK		(AST_SCU_BASE + 0x820)
+ #define AST_SCU_CA7_PARITY_CLR		(AST_SCU_BASE + 0x824)
+ #define AST_SCU_MMIO_DEC_SET		(AST_SCU_BASE + 0xC24)
+@@ -61,7 +62,7 @@
+ /* Revision ID */
+ #define REV_ID_AST2600A0	0x05000303
+ #define REV_ID_AST2600A1	0x05010303
+-#define REV_ID_AST2620A1	0x05020203
++#define REV_ID_AST2620A1	0x05010203
+ 
+ .macro scu_unlock
+ 	movw	r0, #0xA8A8
+@@ -114,7 +115,7 @@
+ 	b	timer_init_out
+ 
+ timer_init_a0:
+-	movweq 	r0, #0x32c0
++	movweq	r0, #0x32c0
+ 	movteq	r0, #0x4013
+ 
+ timer_init_out:
+@@ -235,6 +236,14 @@
+ 	str	r1, [r0]
+ 
+ 2:
++	/* PCIeRC/E2M8 power-on reset comes from SCU040
++	But SCU04018 default value is 0x0.
++	It should be 0x1 to reset PCIeRC/E2M8.*/
++	ldr     r0, =AST_SCU_SYSRST_CTRL
++	movw    r1, #0x0000
++	movt    r1, #0x0004
++	str     r1, [r0]
++
+ 	/* MMIO decode setting */
+ 	ldr	r0, =AST_SCU_MMIO_DEC_SET
+ 	mov	r1, #0x2000
+@@ -277,19 +286,26 @@
+ 	ldr	r1, =AST_FMC_WDT1_CTRL_MODE
+ 	str	r0, [r1]
+ 
+-#if 0
+-	/* disable UART-based SoC Debug Interface UART5 and P2A bridge*/
+-	ldr     r0, =AST_SCU_DEBUG_CTRL
+-	ldr     r1, [r0]
+-	orr     r1, #0x03
+-	str     r1, [r0]
+-	
+-	/* disable UART-based SoC Debug Interface UART1 and LPC2AHB bridge */
+-	ldr     r0, =AST_SCU_DEBUG_CTRL2
+-	ldr     r1, [r0]
+-	orr     r1, #0x0A
+-	str     r1, [r0]
+-#endif
++        /* disable FMC WDT for SPI address mode detection */
++        mov     r0, #0
++        ldr     r1, =AST_FMC_WDT1_CTRL_MODE
++        str     r0, [r1]
++
++        /* disable backdoor for A1/A2 to align A3 design */
++        ldr     r0, =AST_SCU_HW_STRAP3
++        ldr     r0, [r0]
++        tst     r0, #0x1
++
++        ldr     r0, =AST_SCU_DEBUG_CTRL
++        movwne  r1, #0x0ffd
++        movweq  r1, #0x0fff
++        movt    r1, #0x0000
++        str     r1, [r0]
++
++        ldr     r0, =AST_SCU_DEBUG_CTRL2
++        movne   r1, #0xf7
++        moveq   r1, #0xff
++        str     r1, [r0]
+ 
+ 	/* relocate mailbox insn. for cpuN polling SMP go signal */
+ 	adrl	r0, mailbox_insn
+--- uboot/cmd/otp.c	2021-07-10 12:16:32.681938648 +0800
++++ uboot.new/cmd/otp.c	2021-07-12 16:40:25.095389570 +0800
+@@ -39,10 +39,11 @@
+ 
+ #define OTP_PROG_SKIP			1
+ 
+-#define OTP_KEY_TYPE_RSA		1
+-#define OTP_KEY_TYPE_AES		2
+-#define OTP_KEY_TYPE_VAULT		3
+-#define OTP_KEY_TYPE_HMAC		4
++#define OTP_KEY_TYPE_RSA_PUB		1
++#define OTP_KEY_TYPE_RSA_PRIV		2
++#define OTP_KEY_TYPE_AES		3
++#define OTP_KEY_TYPE_VAULT		4
++#define OTP_KEY_TYPE_HMAC		5
+ 
+ #define PBSTR "||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||"
+ #define PBWIDTH 60
+@@ -138,27 +139,41 @@
+ 	{0, OTP_KEY_TYPE_AES,   0, "AES-256 as OEM platform key for image encryption/decryption"},
+ 	{1, OTP_KEY_TYPE_VAULT, 0, "AES-256 as secret vault key"},
+ 	{4, OTP_KEY_TYPE_HMAC,  1, "HMAC as encrypted OEM HMAC keys in Mode 1"},
+-	{8, OTP_KEY_TYPE_RSA,   1, "RSA-public as OEM DSS public keys in Mode 2"},
+-	{9, OTP_KEY_TYPE_RSA,   0, "RSA-public as SOC public key"},
+-	{10, OTP_KEY_TYPE_RSA,  0, "RSA-public as AES key decryption key"},
+-	{13, OTP_KEY_TYPE_RSA,  0, "RSA-private as SOC private key"},
+-	{14, OTP_KEY_TYPE_RSA,  0, "RSA-private as AES key decryption key"},
++	{8, OTP_KEY_TYPE_RSA_PUB,   1, "RSA-public as OEM DSS public keys in Mode 2"},
++	{9, OTP_KEY_TYPE_RSA_PUB,   0, "RSA-public as SOC public key"},
++	{10, OTP_KEY_TYPE_RSA_PUB,  0, "RSA-public as AES key decryption key"},
++	{13, OTP_KEY_TYPE_RSA_PRIV,  0, "RSA-private as SOC private key"},
++	{14, OTP_KEY_TYPE_RSA_PRIV,  0, "RSA-private as AES key decryption key"},
+ };
+ 
+ static const struct otpkey_type a1_key_type[] = {
+ 	{1, OTP_KEY_TYPE_VAULT, 0, "AES-256 as secret vault key"},
+ 	{2, OTP_KEY_TYPE_AES,   1, "AES-256 as OEM platform key for image encryption/decryption in Mode 2 or AES-256 as OEM DSS keys for Mode GCM"},
+-	{8, OTP_KEY_TYPE_RSA,   1, "RSA-public as OEM DSS public keys in Mode 2"},
+-	{10, OTP_KEY_TYPE_RSA,  0, "RSA-public as AES key decryption key"},
+-	{14, OTP_KEY_TYPE_RSA,  0, "RSA-private as AES key decryption key"},
++	{8, OTP_KEY_TYPE_RSA_PUB,   1, "RSA-public as OEM DSS public keys in Mode 2"},
++	{10, OTP_KEY_TYPE_RSA_PUB,  0, "RSA-public as AES key decryption key"},
++	{14, OTP_KEY_TYPE_RSA_PRIV,  0, "RSA-private as AES key decryption key"},
+ };
+ 
++/*
++ * AMI mark it, the reason is  build erro => 「a2_key_type」 defined but not used [-Werror=unused-const-variable=]
+ static const struct otpkey_type a2_key_type[] = {
+ 	{1, OTP_KEY_TYPE_VAULT, 0, "AES-256 as secret vault key"},
+ 	{2, OTP_KEY_TYPE_AES,   1, "AES-256 as OEM platform key for image encryption/decryption in Mode 2 or AES-256 as OEM DSS keys for Mode GCM"},
+-	{8, OTP_KEY_TYPE_RSA,   1, "RSA-public as OEM DSS public keys in Mode 2"},
+-	{10, OTP_KEY_TYPE_RSA,  0, "RSA-public as AES key decryption key"},
+-	{14, OTP_KEY_TYPE_RSA,  0, "RSA-private as AES key decryption key"},
++	{8, OTP_KEY_TYPE_RSA_PUB,   1, "RSA-public as OEM DSS public keys in Mode 2"},
++	{10, OTP_KEY_TYPE_RSA_PUB,  0, "RSA-public as AES key decryption key"},
++	{14, OTP_KEY_TYPE_RSA_PRIV,  0, "RSA-private as AES key decryption key"},
++};
++*/
++
++static const struct otpkey_type a3_key_type[] = {
++	{1, OTP_KEY_TYPE_VAULT, 0, "AES-256 as secret vault key"},
++	{2, OTP_KEY_TYPE_AES,   1, "AES-256 as OEM platform key for image encryption/decryption in Mode 2 or AES-256 as OEM DSS keys for Mode GCM"},
++	{8, OTP_KEY_TYPE_RSA_PUB,   1, "RSA-public as OEM DSS public keys in Mode 2"},
++	{9, OTP_KEY_TYPE_RSA_PUB,   1, "RSA-public as OEM DSS public keys in Mode 2(big endian)"},
++	{10, OTP_KEY_TYPE_RSA_PUB,  0, "RSA-public as AES key decryption key"},
++	{11, OTP_KEY_TYPE_RSA_PUB,  0, "RSA-public as AES key decryption key(big endian)"},
++	{12, OTP_KEY_TYPE_RSA_PRIV,  0, "RSA-private as AES key decryption key"},
++	{13, OTP_KEY_TYPE_RSA_PRIV,  0, "RSA-private as AES key decryption key(big endian)"},
+ };
+ 
+ static uint32_t  chip_version(void)
+@@ -202,6 +217,7 @@
+ 
+ static void otp_write(uint32_t otp_addr, uint32_t data)
+ {
++	otp_write(0x0, data);
+ 	writel(otp_addr, OTP_ADDR); //write address
+ 	writel(data, OTP_COMPARE_1); //write data
+ 	writel(0x23b1e362, OTP_COMMAND); //write command
+@@ -423,6 +439,7 @@
+ 
+ static void otp_prog(uint32_t otp_addr, uint32_t prog_bit)
+ {
++	otp_write(0x0, prog_bit);
+ 	writel(otp_addr, OTP_ADDR); //write address
+ 	writel(prog_bit, OTP_COMPARE_1); //write data
+ 	writel(0x23b1e364, OTP_COMMAND); //write command
+@@ -1023,7 +1040,8 @@
+ 				printf("HMAC(SHA512)\n");
+ 				break;
+ 			}
+-		} else if (key_info.key_type == OTP_KEY_TYPE_RSA) {
++		} else if (key_info.key_type == OTP_KEY_TYPE_RSA_PRIV ||
++			   key_info.key_type == OTP_KEY_TYPE_RSA_PUB) {
+ 			printf("RSA SHA Type: ");
+ 			switch (key_length) {
+ 			case 0:
+@@ -1071,11 +1089,16 @@
+ 				buf_print(&byte_buf[key_offset + 0x20], 0x20);
+ 			}
+ 
+-		} else if (key_info.key_type == OTP_KEY_TYPE_RSA) {
++		} else if (key_info.key_type == OTP_KEY_TYPE_RSA_PRIV) {
+ 			printf("RSA mod:\n");
+ 			buf_print(&byte_buf[key_offset], len / 2);
+ 			printf("RSA exp:\n");
+ 			buf_print(&byte_buf[key_offset + (len / 2)], len / 2);
++		} else if (key_info.key_type == OTP_KEY_TYPE_RSA_PUB) {
++			printf("RSA mod:\n");
++			buf_print(&byte_buf[key_offset], len / 2);
++			printf("RSA exp:\n");
++			buf_print((uint8_t *)"\x01\x00\x01", 3);
+ 		}
+ 		if (last)
+ 			break;
+@@ -2072,8 +2095,8 @@
+ 		info_cb.conf_info_len = ARRAY_SIZE(a2_conf_info);
+ 		info_cb.strap_info = a2_strap_info;
+ 		info_cb.strap_info_len = ARRAY_SIZE(a2_strap_info);
+-		info_cb.key_info = a2_key_type;
+-		info_cb.key_info_len = ARRAY_SIZE(a2_key_type);
++		info_cb.key_info = a3_key_type;
++		info_cb.key_info_len = ARRAY_SIZE(a3_key_type);
+ 		break;
+ 	default:
+ 		printf("SOC is not supported\n");
+--- uboot/common/image-fit.c	2020-11-20 17:00:27.000000000 +0800
++++ uboot.new/common/image-fit.c	2021-07-12 14:52:22.817312705 +0800
+@@ -984,8 +984,10 @@
+ 	if (external_data) {
+ 		debug("External Data\n");
+ 		ret = fit_image_get_data_size(fit, noffset, &len);
+-		*data = fit + offset;
+-		*size = len;
++		if (!ret) {
++			*data = fit + offset;
++			*size = len;
++		}
+ 	} else {
+ 		ret = fit_image_get_data(fit, noffset, data, size);
+ 	}
+@@ -1462,6 +1464,12 @@
+  */
+ int fit_check_format(const void *fit)
+ {
++	/* A FIT image must be a valid FDT */
++	if (fdt_check_header(fit)) {
++		debug("Wrong FIT format: not a flattened device tree\n");
++		return 0;
++	}
++
+ 	/* mandatory / node 'description' property */
+ 	if (fdt_getprop(fit, 0, FIT_DESC_PROP, NULL) == NULL) {
+ 		debug("Wrong FIT format: no description\n");
+@@ -1868,7 +1876,7 @@
+ 		fit_uname = fit_get_name(fit, noffset, NULL);
+ 	}
+ 	if (noffset < 0) {
+-		puts("Could not find subimage node\n");
++		printf("Could not find subimage node type '%s'\n", prop_name);
+ 		bootstage_error(bootstage_id + BOOTSTAGE_SUB_SUBNODE);
+ 		return -ENOENT;
+ 	}
+--- uboot/common/image-sig.c	2020-11-20 17:00:27.000000000 +0800
++++ uboot.new/common/image-sig.c	2021-07-12 15:51:26.458979934 +0800
+@@ -211,7 +211,7 @@
+ 	info->required_keynode = required_keynode;
+ 	printf("%s:%s", algo_name, info->keyname);
+ 
+-	if (!info->checksum || !info->crypto) {
++	if (!info->checksum || !info->crypto || !info->padding) {
+ 		*err_msgp = "Unknown signature algorithm";
+ 		return -1;
+ 	}
+@@ -330,20 +330,39 @@
+ 	return 0;
+ }
+ 
+-int fit_config_check_sig(const void *fit, int noffset, int required_keynode,
+-			 char **err_msgp)
++/**
++ * fit_config_check_sig() - Check the signature of a config
++ *
++ * @fit: FIT to check
++ * @noffset: Offset of configuration node (e.g. /configurations/conf-1)
++ * @required_keynode:	Offset in the control FDT of the required key node,
++ *			if any. If this is given, then the configuration wil not
++ *			pass verification unless that key is used. If this is
++ *			-1 then any signature will do.
++ * @conf_noffset: Offset of the configuration subnode being checked (e.g.
++ *	 /configurations/conf-1/kernel)
++ * @err_msgp:		In the event of an error, this will be pointed to a
++ *			help error string to display to the user.
++ * @return 0 if all verified ok, <0 on error
++ */
++static int fit_config_check_sig(const void *fit, int noffset,
++				int required_keynode, int conf_noffset,
++				char **err_msgp)
+ {
+ 	char * const exc_prop[] = {"data"};
+ 	const char *prop, *end, *name;
+ 	struct image_sign_info info;
+ 	const uint32_t *strings;
++	const char *config_name;
+ 	uint8_t *fit_value;
+ 	int fit_value_len;
++	bool found_config;
+ 	int max_regions;
+ 	int i, prop_len;
+ 	char path[200];
+ 	int count;
+ 
++	config_name = fit_get_name(fit, conf_noffset, NULL);
+ 	debug("%s: fdt=%p, conf='%s', sig='%s'\n", __func__, gd_fdt_blob(),
+ 	      fit_get_name(fit, noffset, NULL),
+ 	      fit_get_name(gd_fdt_blob(), required_keynode, NULL));
+@@ -384,9 +403,20 @@
+ 	char *node_inc[count];
+ 
+ 	debug("Hash nodes (%d):\n", count);
++	found_config = false;
+ 	for (name = prop, i = 0; name < end; name += strlen(name) + 1, i++) {
+ 		debug("   '%s'\n", name);
+ 		node_inc[i] = (char *)name;
++				if (!strncmp(FIT_CONFS_PATH, name, strlen(FIT_CONFS_PATH)) &&
++		    name[sizeof(FIT_CONFS_PATH) - 1] == '/' &&
++		    !strcmp(name + sizeof(FIT_CONFS_PATH), config_name)) {
++			debug("      (found config node %s)", config_name);
++			found_config = true;
++		}
++	}
++	if (!found_config) {
++		*err_msgp = "Selected config not in hashed nodes";
++		return -1;
+ 	}
+ 
+ 	/*
+@@ -454,7 +484,7 @@
+ 		if (!strncmp(name, FIT_SIG_NODENAME,
+ 			     strlen(FIT_SIG_NODENAME))) {
+ 			ret = fit_config_check_sig(fit, noffset, sig_offset,
+-						   &err_msg);
++						conf_noffset, &err_msg);
+ 			if (ret) {
+ 				puts("- ");
+ 			} else {
+@@ -470,13 +500,13 @@
+ 		goto error;
+ 	}
+ 
+-	return verified ? 0 : -EPERM;
+-
++	if (verified)
++		return 0;
+ error:
+ 	printf(" error!\n%s for '%s' hash node in '%s' config node\n",
+ 	       err_msg, fit_get_name(fit, noffset, NULL),
+ 	       fit_get_name(fit, conf_noffset, NULL));
+-	return -1;
++	return -EPERM;
+ }
+ 
+ int fit_config_verify_required_sigs(const void *fit, int conf_noffset,
+--- uboot/common/spl/spl_fit.c	2020-11-20 17:00:27.000000000 +0800
++++ uboot.new/common/spl/spl_fit.c	2021-07-12 14:56:05.799272414 +0800
+@@ -361,6 +361,7 @@
+ 	int images, ret;
+ 	int base_offset, hsize, align_len = ARCH_DMA_MINALIGN - 1;
+ 	int index = 0;
++	int firmware_node;
+ 
+ 	/*
+ 	 * For FIT with external data, figure out where the external images
+@@ -490,6 +491,7 @@
+ 		spl_fit_append_fdt(spl_image, info, sector, fit,
+ 				   images, base_offset);
+ 
++	firmware_node = node;
+ 	/* Now check if there are more images for us to load */
+ 	for (; ; index++) {
+ 		uint8_t os_type = IH_OS_INVALID;
+@@ -498,6 +500,14 @@
+ 		if (node < 0)
+ 			break;
+ 
++		/*
++		 * if the firmware is also a loadable, skip it because
++		 * it already has been loaded. This is typically the case with
++		 * u-boot.img generated by mkimage.
++		 */
++		if (firmware_node == node)
++			continue;
++
+ 		ret = spl_load_fit_image(info, sector, fit, base_offset, node,
+ 					 &image_info);
+ 		if (ret < 0)
+--- uboot/drivers/clk/aspeed/clk_ast2600.c	2021-07-12 14:59:37.897186355 +0800
++++ uboot.new/drivers/clk/aspeed/clk_ast2600.c	2021-07-12 14:58:28.829877777 +0800
+@@ -1204,6 +1204,25 @@
+ 	return 0;
+ }
+ 
++/* also known as yclk */
++static ulong ast2600_enable_haceclk(struct ast2600_scu *scu)
++{
++	u32 reset_bit;
++	u32 clkstop_bit;
++
++	reset_bit = BIT(ASPEED_RESET_HACE);
++	clkstop_bit = BIT(13);
++
++	writel(reset_bit, &scu->sysreset_ctrl1);
++	udelay(100);
++	writel(clkstop_bit, &scu->clk_stop_clr_ctrl1);
++	mdelay(20);
++
++	writel(reset_bit, &scu->sysreset_clr_ctrl1);
++
++	return 0;
++}
++
+ static int ast2600_clk_enable(struct clk *clk)
+ {
+ 	struct ast2600_clk_priv *priv = dev_get_priv(clk->dev);
+@@ -1242,6 +1261,9 @@
+ 	case ASPEED_CLK_GATE_USBPORT2CLK:
+ 		ast2600_enable_usbbhclk(priv->scu);
+ 		break;
++	case ASPEED_CLK_GATE_YCLK:
++		ast2600_enable_haceclk(priv->scu);
++		break;
+ 	default:
+ 		pr_err("can't enable clk\n");
+ 		return -ENOENT;
+--- uboot/tools/image-host.c	2020-11-20 17:00:27.000000000 +0800
++++ uboot.new/tools/image-host.c	2021-07-12 14:37:26.654874062 +0800
+@@ -743,7 +743,8 @@
+ 	if (!cfg_noffset)
+ 		return -1;
+ 
+-	printf("Verifying Hash Integrity ... ");
++	printf("Verifying Hash Integrity for node '%s'... ",
++		fdt_get_name(fit, cfg_noffset, NULL));
+ 	ret = fit_config_verify(fit, cfg_noffset);
+ 	if (ret)
+ 		return ret;

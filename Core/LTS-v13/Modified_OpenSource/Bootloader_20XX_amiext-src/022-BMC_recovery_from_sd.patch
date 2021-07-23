@@ -1,0 +1,119 @@
+--- uboot_old/oem/ami/fwupdate/fwupdate.c	2021-02-16 16:26:44.515554293 +0530
++++ uboot/oem/ami/fwupdate/fwupdate.c	2021-02-18 18:05:40.706748394 +0530
+@@ -39,6 +39,7 @@
+ #ifdef CONFIG_SPX_FEATURE_BMC_FIRMWARE_AUTO_RECOVERY
+ # include <oem/ami/fmh/fmh.h>
+ # include "fat.h"
++#include <ext4fs.h>
+ #include <mmc.h>
+ #endif
+ #include <environment.h>
+@@ -192,9 +193,10 @@
+ int CopyRecoveryImage(void)
+ {
+     struct blk_desc* desc = NULL;
++    disk_partition_t info;
+ 	int ret=-1;
+     long size;
+-    unsigned long cnt = 0;
++    loff_t offset = 0, len = 0, actread = 0;
+     int dev = 0, part = 1;
+     char fname[20] = {0};
+ 
+@@ -206,6 +208,51 @@
+         return -1;
+     }
+ 
++    memset(&info, 0, sizeof(info));
++
++    /* Read the partition table, if present */
++    if (part_get_info(desc, part, &info)) {
++        if (part != 0) {
++            printf("** Partition %d not valid on device %d **\n",
++                                    part, desc->devnum);
++            return -1;
++        }
++
++            info.start = 0;     //first block in partition
++            info.size = desc->lba;      //number of blocks in partition
++            info.blksz = desc->blksz;   //block size in bytes
++            info.name[0] = 0;   //partition name
++            info.type[0] = 0;   //string type description
++            info.bootable = 0;  //Bootable flag
++#if CONFIG_IS_ENABLED(PARTITION_UUIDS)
++            info.uuid[0] = 0;   //type GUID as string , if exists
++#endif
++    }
++
++    /*Register the MMC device partition with EXT file system*/
++    if(ext4fs_probe(desc, &info) != 0){
++        printf("CopyRecoveryImage: ext4fs_probe from SD failed...\n");
++        return -1;
++    }
++
++    ret = snprintf(fname, sizeof(fname), "%s", "rom.ima");
++    if((ret < 0) || (ret >= (signed)sizeof(fname)))
++    {
++	    printf("CopyRecoveryImage: Buffer Overflow...\n");
++	    return -1;
++    }
++    
++    printf("CopyRecoveryImage: %s\n",fname);
++
++    /*Read the recovery image from file system*/
++    size = ext4_read_file(fname,(unsigned char *)YAFU_IMAGE_UPLOAD_LOCATION,offset,len,&actread);
++    if(size <= -1){
++        printf("CopyRecoveryImage: ext4_read_file from SD failed...\n");
++        return -1;
++    }
++
++#if 0
++    unsigned long cnt = 0;
+     /*Register the MMC device partition with FAT file system*/
+     if(fat_register_device(desc,part) != 0){
+         return -1;
+@@ -215,10 +262,12 @@
+ 
+     /*Read the recovery image from file system*/
+     size = file_fat_read(fname,(unsigned char *)YAFU_IMAGE_UPLOAD_LOCATION,cnt);
+-    if(size == -1){
++    if(size <= -1){
+         return -1;
+     }
+-    return -1;
++#endif
++
++    return 0;
+ }
+ 
+ int VerifyRAMImage(unsigned long *ConfStart, unsigned long *ConfSize)
+@@ -532,7 +581,7 @@
+         env_save();
+     }
+ 
+-    goto SUCCESS;
++    goto success;
+ 
+ TFTP:
+     printf("TFTP Recovery Image Booting started...\n");
+@@ -548,7 +597,7 @@
+     env_set("lastrecoveryboot","tftp");
+     env_save();
+ 
+-SUCCESS:
++success:
+ 	/*After successfully flashing the image, start the watchdog timer to detect the kernel boot success.*/
+ 
+ 	if(wdt_reset_status || force_recovery || imgheadererr)
+@@ -567,8 +616,10 @@
+ 		env_set("currentbootretry",NULL);
+ 		env_save();
+ 		Enable_watchdog(&wdt_reset_status);
+-		printf("Recovery Image Flashing is success!! Booting Recovery Image...\n");
++		printf("Recovery Image Flashing is success!! BMC will be reset now...\n");
+ 	}
++	
++	do_reset(NULL, 0, 0, NULL);
+ 
+     return 0;
+ }

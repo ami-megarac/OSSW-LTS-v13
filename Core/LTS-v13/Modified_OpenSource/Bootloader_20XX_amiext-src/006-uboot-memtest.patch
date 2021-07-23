@@ -1,0 +1,168 @@
+diff -Naur uboot/common/main.c uboot.new/common/main.c
+--- uboot/common/main.c	2020-11-20 04:00:27.000000000 -0500
++++ uboot.new/common/main.c	2020-12-14 19:55:21.000000000 -0500
+@@ -11,6 +11,7 @@
+ #include <cli.h>
+ #include <console.h>
+ #include <version.h>
++#include <environment.h>
+ 
+ /*
+  * Board-specific Platform code can reimplement show_boot_progress () if needed
+@@ -37,11 +38,79 @@
+ #endif /* CONFIG_PREBOOT */
+ }
+ 
++/* memtest at initial boot */
++#ifdef CONFIG_MEMTEST_ENABLE
++int do_mtest(vu_long *start,vu_long *end,ulong pattern)
++{
++	vu_long *addr;
++	ulong incr=0;
++	int rcode = 0,i;
++	ulong   val;
++	ulong   readback;
++
++	incr = 1;
++	/*Allow only 4 Iteration now*/
++	for (i=0;i<4;i++) {
++		if (ctrlc()) {
++			putc ('\n');
++			return 1;
++		}
++
++		printf ("\rPattern %08lX  Writing..."
++					"%12s"
++					"\b\b\b\b\b\b\b\b\b\b",
++					pattern, "");
++
++		for (addr=start,val=pattern; addr<end; addr++) {
++			*addr = val;
++			val  += incr;
++		}
++
++		puts ("Reading...");
++
++		for (addr=start,val=pattern; addr<end; addr++) {
++			readback = *addr;
++			if (readback != val) {
++				printf ("\nMem error @ 0x%08X: "
++						"found %08lX, expected %08lX\n",
++						(uint)addr, readback, val);
++				rcode = 1;
++			}
++			val += incr;
++		}
++
++		/*
++		* Flip the pattern each time to make lots of zeros and
++		* then, the next time, lots of ones.  We decrement
++		* the "negative" patterns and increment the "positive"
++		* patterns to preserve this feature.
++		*/
++		if(pattern & 0x80000000) {
++			pattern = -pattern; /* complement & increment */
++		}
++		else {
++			pattern = ~pattern;
++		}
++		incr = -incr;
++	}
++	return rcode;
++
++}
++#endif
++
+ /* We come here after U-Boot is initialised and ready to process commands */
+ void main_loop(void)
+ {
+ 	const char *s;
+ 
++#ifdef CONFIG_MEMTEST_ENABLE
++	char *mtest = NULL;
++	int mRet = 0;
++	vu_long *start = NULL,*end = NULL;
++	ulong pattern = 0;
++#endif
++
++
+ 	bootstage_mark_name(BOOTSTAGE_ID_MAIN_LOOP, "main_loop");
+ 
+ 	if (IS_ENABLED(CONFIG_VERSION_VARIABLE))
+@@ -51,6 +120,41 @@
+ 
+ 	run_preboot_environment_command();
+ 
++#ifdef CONFIG_MEMTEST_ENABLE
++	/*Doing Memory Test*/
++	mtest = env_get("do_memtest");
++	if(strcmp(mtest ,"1") == 0)
++	{
++		start = (ulong *)CONFIG_SYS_MEMTEST_START;
++		end = (ulong *)CONFIG_SYS_MEMTEST_END;
++		pattern = 0;    /*As of now set the pattern as 0*/
++		mRet = do_mtest(start,end,pattern);
++		if(mRet == 0)
++		{
++			env_set("memtest_pass","yes");
++			/*Save the new value into spi*/
++			env_save();
++		}
++		else
++		{
++			env_set("memtest_pass","no");
++			/*Save the new value into spi*/
++			env_save();
++		}
++	}
++	else
++	{
++		mtest=env_get("memtest_pass");
++		if(strcmp(mtest,"idle") != 0)
++		{
++			/*Change the Memory Test staus as idle if the memtest is disabled*/
++			env_set("memtest_pass","idle");
++			/*Save the new value into spi*/
++			env_save();
++		}
++	}
++#endif
++
+ 	if (IS_ENABLED(CONFIG_UPDATE_TFTP))
+ 		update_tftp(0UL, NULL, NULL);
+ 
+diff -Naur uboot/include/configs/aspeed-common.h uboot.new/include/configs/aspeed-common.h
+--- uboot/include/configs/aspeed-common.h	2020-12-14 18:20:41.933288610 -0500
++++ uboot.new/include/configs/aspeed-common.h	2020-12-14 19:59:39.000000000 -0500
+@@ -44,6 +44,8 @@
+ #else
+ #define CONFIG_BIGPHYSAREA          "6144"
+ #endif
++
++#define CONFIG_MEMTEST_ENABLE       0
+ /*
+  * BOOTP options
+  */
+@@ -63,6 +65,7 @@
+ 	"autoload=no\0"			\
+ 	"verify=yes\0"	\
+ 	"spi_dma=no\0" \
++	"do_memtest=" __stringify(CONFIG_MEMTEST_ENABLE)        "\0" \
+ 	""
+ 
+ /* Environment */
+diff -Naur uboot/include/configs/evb_ast2600.h uboot.new/include/configs/evb_ast2600.h
+--- uboot/include/configs/evb_ast2600.h	2020-11-20 04:00:27.000000000 -0500
++++ uboot.new/include/configs/evb_ast2600.h	2020-12-14 20:12:10.000000000 -0500
+@@ -8,8 +8,10 @@
+
+ #include <configs/aspeed-common.h>
+
+-#define CONFIG_SYS_MEMTEST_START   (CONFIG_SYS_SDRAM_BASE + 0x300000)
+-#define CONFIG_SYS_MEMTEST_END     (CONFIG_SYS_MEMTEST_START + 0x5000000)
++//#define CONFIG_SYS_MEMTEST_START (CONFIG_SYS_SDRAM_BASE + 0x300000)
++//#define CONFIG_SYS_MEMTEST_END       (CONFIG_SYS_MEMTEST_START + 0x5000000)
++#define CONFIG_SYS_MEMTEST_START        0x81000000
++#define CONFIG_SYS_MEMTEST_END          0x85000000
+
+ #define CONFIG_SYS_UBOOT_BASE      CONFIG_SYS_TEXT_BASE

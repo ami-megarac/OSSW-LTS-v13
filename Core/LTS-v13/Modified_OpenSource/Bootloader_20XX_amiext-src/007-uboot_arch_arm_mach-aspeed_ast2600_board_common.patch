@@ -1,0 +1,16 @@
+diff -Naur uboot/arch/arm/mach-aspeed/ast2600/board_common.c uboot.new/arch/arm/mach-aspeed/ast2600/board_common.c
+--- uboot/arch/arm/mach-aspeed/ast2600/board_common.c	2020-11-20 04:00:27.000000000 -0500
++++ uboot.new/arch/arm/mach-aspeed/ast2600/board_common.c	2020-12-15 09:27:53.000000000 -0500
+@@ -75,7 +75,11 @@
+ 		if (ret)
+ 			break;
+ 	}
+-
++	// Hardware Strap 2, set decode 0x4E 
++	*(volatile u32 *)(0x1e6e2000) = 0x1688A8A8;
++	*(volatile u32 *)(0x1e6e2000 + 0x510) |= 0x4;
++	//*(volatile u32 *)(0x1e6e2000) = 0;	
++	// End of setting decode to 0x4E
+ 	return 0;
+ }
+ 

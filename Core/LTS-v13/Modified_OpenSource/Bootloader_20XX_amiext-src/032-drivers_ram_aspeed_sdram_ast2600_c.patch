@@ -1,0 +1,23 @@
+--- uboot.old/drivers/ram/aspeed/sdram_ast2600.c	2021-04-21 14:00:45.371315005 +0800
++++ uboot/drivers/ram/aspeed/sdram_ast2600.c	2021-04-21 14:34:04.730378381 +0800
+@@ -150,7 +150,7 @@
+ static const u32 ddr4_ac_timing[4] = {0x040e0307, 0x0f4711f1, 0x0e060304,
+                                       0x00001240};
+ 
+-static const u32 ddr_max_grant_params[4] = {0x44444444, 0x44444444, 0x44444444,
++static const u32 ddr_max_grant_params[4] = {0x44444444, 0x44444466, 0x44444444,
+                                             0x44444444};
+ #endif
+ 
+@@ -757,9 +757,8 @@
+ 
+         writel(MCR34_MREQI_DIS | MCR34_RESETN_DIS, &regs->power_ctrl);
+         writel(SDRAM_VIDEO_UNLOCK_KEY, &regs->gm_protection_key);
+-        writel(0x10 << MCR38_RW_MAX_GRANT_CNT_RQ_SHIFT,
+-               &regs->arbitration_ctrl);
+-        writel(0xFFBBFFF4, &regs->req_limit_mask);
++	writel(0x101010, &regs->arbitration_ctrl);
++	writel(0x0FFFFCFC, &regs->req_limit_mask);
+ 
+ 	for (i = 0; i < ARRAY_SIZE(ddr_max_grant_params); ++i)
+                 writel(ddr_max_grant_params[i], &regs->max_grant_len[i]);

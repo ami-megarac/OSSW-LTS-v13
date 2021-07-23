@@ -1,0 +1,619 @@
+diff -Naur uboot_old/include/configs/aspeed-common.h uboot_new/include/configs/aspeed-common.h
+--- uboot_old/include/configs/aspeed-common.h	2020-12-31 14:36:55.210089878 +0530
++++ uboot_new/include/configs/aspeed-common.h	2020-12-31 14:51:29.491267916 +0530
+@@ -80,6 +80,8 @@
+ 	"verify=yes\0"	\
+ 	"spi_dma=no\0" \
+ 	"do_memtest=" __stringify(CONFIG_MEMTEST_ENABLE)        "\0" \
++	"bootselector=1\0" \
++	"recentlyprogfw=1\0" \
+ 	""
+ 
+ /* Environment */
+diff -Naur uboot_old/oem/ami/fmh/ast_wdt.c uboot_new/oem/ami/fmh/ast_wdt.c
+--- uboot_old/oem/ami/fmh/ast_wdt.c	2020-12-31 14:36:55.258090168 +0530
++++ uboot_new/oem/ami/fmh/ast_wdt.c	2021-01-04 11:46:37.049263003 +0530
+@@ -24,8 +24,9 @@
+ #define WDT_CLOCK               0x10                    // 1MHz Clock for WDT
+ #define WDT_RESET_SYSTEM        0x02                    // Enable System-Reset-On-Timeout
+ #define WDT_CLR_EVT_COUNTER     0x76                    // Clear the Timeout Counter & Boot Source code
+-#define WDT2_SECOND_BOOT_CODE   0x80                    // Enable Second Boot Code upon reset
+-#define WDT_CUR_BOOTSRC_MASK    0x00000002
++#define WDT2_SECOND_BOOT_CODE   0x01                    // Enable Second Boot Code upon reset
++#define WDT_CUR_BOOTSRC_MASK    0x08
++#define FMC_WDT2_REG		0x1e620000+0x64
+ 
+ #ifdef CONFIG_SPX_FEATURE_HW_FAILSAFE_BOOT 
+ extern unsigned char broken_spi_banks;// specify the number of broken SPI flash bank
+@@ -45,9 +46,12 @@
+ 
+        /* Set the Watchdog clock to 1MHz clock */
+        *((volatile unsigned long *)(WDT2_CONTROL_REG)) |= (WDT_CLOCK);
+-
++#ifdef CONFIG_SPX_FEATURE_HW_FAILSAFE_BOOT
+        /* Reading the Watchdog Timeout event counter*/
++       *wdt_timeout_status = *((volatile unsigned long *)(FMC_WDT2_REG));
++#else
+        *wdt_timeout_status = *((volatile unsigned long *)(WDT2_TIMEOUT_STAT_REG));
++#endif
+ #ifdef CONFIG_SPX_FEATURE_GLOBAL_DUAL_IMAGE_SUPPORT
+        /*clear boot source to restore address mapping... */
+ #ifdef CONFIG_SPX_FEATURE_HW_FAILSAFE_BOOT
+@@ -60,12 +64,15 @@
+        }
+ #endif
+ 
++#if 0
+ #ifdef CONFIG_SPX_FEATURE_HW_FAILSAFE_BOOT
+        /* Enabling the Second Boot code upon reset */
+        *((volatile unsigned long *)(WDT2_CONTROL_REG)) |= (WDT2_SECOND_BOOT_CODE);
+ #else
+        *((volatile unsigned long *)(WDT2_CONTROL_REG)) &= ~(WDT2_SECOND_BOOT_CODE);
+ #endif
++#endif
++
+        /* Enable back the Watchdog timer to start the Watchdog */
+        /* Also set the Flag to reset the CPU on Timeout */
+        *((volatile unsigned long *)(WDT2_CONTROL_REG)) |= (WDT_RESET_SYSTEM | WDT_ENABLE);
+@@ -74,8 +81,10 @@
+ 	if (broken_spi_banks == 1) 
+            return 1;// if bank#0 is broken then dont clear address mapping and bootimage 1 
+        else 
+-#endif
+            return (((*wdt_timeout_status) & (WDT_CUR_BOOTSRC_MASK)) >> 1 ) + 1 ;
++#else
++       	return 0;
++#endif
+ }
+ 
+ /**
+@@ -93,7 +102,7 @@
+        *((volatile unsigned long *)(WDT2_CONTROL_REG)) &= ~(WDT_RESET_SYSTEM | WDT_ENABLE);
+     }
+ #ifdef CONFIG_SPX_FEATURE_HW_FAILSAFE_BOOT
+-	if ((broken_spi_banks == 2) && (*((volatile unsigned long *)(WDT2_TIMEOUT_STAT_REG)) & WDT_CUR_BOOTSRC_MASK))
++	if ((broken_spi_banks == 2) && (*((volatile unsigned long *)(FMC_WDT2_REG)) & WDT_CUR_BOOTSRC_MASK))
+ 		broken_spi_banks = 1;
+ #endif
+     return 0;
+diff -Naur uboot_old/oem/ami/fmh/cmd_fmh.c uboot_new/oem/ami/fmh/cmd_fmh.c
+--- uboot_old/oem/ami/fmh/cmd_fmh.c	2020-12-31 14:36:55.258090168 +0530
++++ uboot_new/oem/ami/fmh/cmd_fmh.c	2021-01-04 11:46:46.229333804 +0530
+@@ -11,6 +11,7 @@
+ #include <spi_flash.h>
+ #include <environment.h>
+ #include <console.h>
++#include "soc_hw.h"
+ 
+ 
+ #ifdef CONFIG_SPX_FEATURE_SECURE_BOOT_SUPPORT 
+@@ -53,6 +54,14 @@
+ #endif
+ }VersionInfo;
+ 
++#ifdef CONFIG_SPX_FEATURE_DEDICATED_SPI_FLASH_BANK
++        #define CE1_ADDRESS_SEGMENT 0x28000000
++        struct spi_flash *flashspi[CONFIG_SPX_FEATURE_GLOBAL_FLASH_BANKS]={NULL};
++#endif
++#ifdef CONFIG_SPX_FEATURE_HW_FAILSAFE_BOOT
++unsigned char broken_spi_banks = 0;// specify the number of broken SPI flash bank
++#endif
++
+ #ifdef CONFIG_BOOTLOGO_SUPPORT
+ extern int ShowBootLogoByAddress(unsigned int logo_bin_addr, int idx);
+ #endif
+@@ -65,6 +74,16 @@
+ 
+ int check_firmware_recovery(void);
+ 
++#ifdef CONFIG_SPX_FEATURE_GLOBAL_DUAL_IMAGE_SUPPORT
++#define WDT_ENABLE                      0x01
++#define WDT_TIMEOUT                     0xF4240     // 1 second
++#define WDT_TRIGGER                     0x00004755  // Trigger Passcode
++#define WDT_CLOCK                       0x10        // 1MHz Clock for WDT
++#define WDT_RESET_SYSTEM                0x02        // Enable System-Reset-On-Timeout
++#define WDT_CLR_EVT_COUNTER             0x76        // Clear the Timeout Counter & Boot Source code
++#define WDT2_SECOND_BOOT_CODE           0x80        // Enable Second Boot Code upon reset
++#define WDT_CUR_BOOTSRC_MASK            0x00000002
++#endif
+ 
+ #if defined(CONFIG_SPX_FEATURE_FAIL_SAFE_BOOTING) || defined(CONFIG_SPX_FEATURE_BMC_FIRMWARE_AUTO_RECOVERY)
+ extern int Enable_watchdog(unsigned long *wdt_timeout_status);
+@@ -224,7 +243,12 @@
+ ListFMH(void)
+ {
+     //unsigned char buf[64*1024] = {0};
+-    struct spi_flash *flash;
++#ifdef CONFIG_SPX_FEATURE_DEDICATED_SPI_FLASH_BANK
++    struct spi_flash *flash[CONFIG_SPX_FEATURE_GLOBAL_FLASH_BANKS]= {NULL};
++#else
++    struct spi_flash *flash=NULL;
++#endif
++
+     unsigned long flashsize=0,SectorCount=0;
+     unsigned long SectorSize=0;
+     int i=0;
+@@ -232,6 +256,83 @@
+     unsigned char Name[9] = {0};
+     MODULE_INFO *mod;
+     long SkipSize;
++#ifdef CONFIG_SPX_FEATURE_DEDICATED_SPI_FLASH_BANK
++    int cs=0;
++    for(cs=0; cs < CONFIG_SPX_FEATURE_GLOBAL_FLASH_BANKS ; cs++)
++    {
++        flash[cs] = spi_flash_probe(CONFIG_ENV_SPI_BUS, cs,
++                            CONFIG_ENV_SPI_MAX_HZ, CONFIG_ENV_SPI_MODE);
++        if (flash[cs] == NULL)
++        {
++            printf("\nspi_flash_probe failed on cs = %d\n",cs);
++            continue;
++        }
++
++        flashsize = flash[cs]->size;
++        SectorSize = 0x10000; //flash->erase_size;//0x10000;//flash->sector_size;
++        SectorCount = flashsize/SectorSize;
++        printf("chip %d Flash size 0x%lx Sector size 0x%lx SectorCount 0x%lx\n",cs,flashsize,SectorSize,SectorCount);
++
++        for(i=0;i<SectorCount;)
++        {
++            #if 0
++            fmh = ScanforFMH((unsigned char *)(CONFIG_SYS_FLASH_BASE+(i*SectorSize)),SectorSize);
++            if (fmh == NULL)
++            {
++                i++;
++                continue;
++            }
++            #endif
++
++            fmh = ScanforFMH(flash[cs],((i*SectorSize)),SectorSize);
++            if (fmh == NULL)
++            {
++                i++;
++                continue;
++            }
++	    /* Print Information about the FMH and its module */
++            printf("\nFMH Located at 0x%08lx of Size 0x%08x\n",
++                    (unsigned long)((i*SectorSize)),le32_to_host(fmh->FMH_AllocatedSize));
++
++            mod = &(fmh->Module_Info);
++            strncpy((char *)Name,(char *)mod->Module_Name,8);
++            Name[8]=0;
++            printf("Name    : %s\n",Name);
++
++            if( FMH_MAJOR==1 && FMH_MINOR>=7 )
++                printf("Ver     : %d.%02d.%.6s\n",mod->Module_Ver_Major,mod->Module_Ver_Minor,mod->Module_Ver_Aux);
++            else if( FMH_MAJOR==1 && FMH_MINOR==6 )
++                printf("Ver     : %d.%02d.%.2s\n",mod->Module_Ver_Major,mod->Module_Ver_Minor,mod->Module_Ver_Aux);
++            else
++                printf("Ver     : %d.%02d\n",mod->Module_Ver_Major,mod->Module_Ver_Minor);
++
++            printf("Type    : 0x%04x\n",le16_to_host(mod->Module_Type));
++            printf("Flags   : 0x%04x\n",le16_to_host(mod->Module_Flags));
++            printf("Size    : 0x%08x\n",le32_to_host(mod->Module_Size));
++
++            if ((fmh->FMH_Ver_Major == 1) && (fmh->FMH_Ver_Minor >= 8))
++                printf("Location: 0x%08x\n", le32_to_host(mod->Module_Location));
++            else
++                printf("Location: 0x%08lx\n",((i*SectorSize)) + le32_to_host(mod->Module_Location));
++
++            printf("LoadAddr: 0x%08x\n",le32_to_host(mod->Module_Load_Address));
++            printf("--------------------------------------------------\n");
++	    
++	               if (i*SectorSize > le32_to_host(mod->Module_Location)) /* Special case of AltFMH (FMH location > Module_Location */
++                SkipSize=SectorSize;
++            else
++                /* Skip the Sectors occupied by the Module */
++                SkipSize = le32_to_host(fmh->FMH_AllocatedSize);
++
++            while ((SkipSize > 0) && (i < SectorCount))
++            {
++                SkipSize-=SectorSize;
++                i++;
++            }
++
++        } /* sector */
++    }
++#else	   
+ 
+     flash = spi_flash_probe(CONFIG_ENV_SPI_BUS, CONFIG_ENV_SPI_CS,
+                         CONFIG_ENV_SPI_MAX_HZ, CONFIG_ENV_SPI_MODE);
+@@ -241,8 +342,8 @@
+         hang();
+     }
+ 
+-    //flashsize = flash->mtd.size;
+-    flashsize = CONFIG_SPX_FEATURE_GLOBAL_USED_FLASH_SIZE;
++    flashsize = flash->size;
++    //flashsize = CONFIG_SPX_FEATURE_GLOBAL_USED_FLASH_SIZE;
+     SectorSize = 0x10000; //flash->erase_size;//0x10000;//flash->sector_size;
+     SectorCount = flashsize/SectorSize;
+    printf("Flash size 0x%lx Sector size 0x%lx SectorCount 0x%lx\n",flashsize,SectorSize,SectorCount);
+@@ -419,36 +520,44 @@
+ 			
+ 		} /* sector */
+ #endif
++#endif
+ 	return 0;
+ }
+ 
+ int
+ GetFMHSectorLocationSize(char * Name, unsigned long * Location, unsigned long * Size)
+ {
+-#if 0
+-        flash_info_t *flinfo;
++	//flash_info_t *flinfo;
++                struct spi_flash *flash;
+         unsigned long SectorSize=CONFIG_SPX_FEATURE_GLOBAL_ERASE_BLOCK_SIZE;
+         unsigned long SectorCount=0,flashsize=0;
+         long SkipSize;
+-        int i,bank;
++        int i;
+         FMH     *fmh;
+         MODULE_INFO *mod;
+ 
+-	if ((NULL == Name) || (NULL == Location) || (NULL == Size))
+-	{
+-		printf ("Invalid pointers to get FMH information\n");
+-		return -1;
+-	}
+-
++        if ((NULL == Name) || (NULL == Location) || (NULL == Size))
++        {
++                printf ("Invalid pointers to get FMH information\n");
++                return -1;
++        }
+ 
+-        for (bank=0;bank<CONFIG_SYS_MAX_FLASH_BANKS;bank++)
++	/* for (bank=0;bank<CONFIG_SYS_MAX_FLASH_BANKS;bank++)
+         {
+                 flinfo = &flash_info[bank];
+                 flashsize += flinfo->size;
+                 if (flinfo->size == 0)
+                         break;
+-        }
+-
++        }*/
++        flash = spi_flash_probe(CONFIG_ENV_SPI_BUS, CONFIG_ENV_SPI_CS,
++                        CONFIG_ENV_SPI_MAX_HZ, CONFIG_ENV_SPI_MODE);
++    	if (flash == NULL)
++    	{
++        	puts("\nspi_flash_probe failed");
++        	hang();
++    	}
++	flashsize = CONFIG_SPX_FEATURE_GLOBAL_USED_FLASH_SIZE;
++                SectorSize = 0x10000;
+         SectorCount = flashsize/SectorSize;
+         for (i=0;i<SectorCount;)
+         {
+@@ -458,30 +567,30 @@
+                 if( (i*SectorSize) >= CONFIG_SPX_FEATURE_GLOBAL_USED_FLASH_SIZE ) { break; }
+                 #endif
+ 
+-                fmh = ScanforFMH((unsigned char *)(CONFIG_SYS_FLASH_BASE+(i*SectorSize)),SectorSize);
++                //fmh = ScanforFMH((unsigned char *)(CONFIG_SYS_FLASH_BASE+(i*SectorSize)),SectorSize);
++                                fmh = ScanforFMH(flash,(i*SectorSize),SectorSize);
+                 if (fmh == NULL)
+                 {
+                         i++;
+                         continue;
+                 }
+-
+-                mod = &(fmh->Module_Info);
++		mod = &(fmh->Module_Info);
+                 if (0 == strncmp((char *)Name,(char *)mod->Module_Name,8))
+                 {
+                         *Size = le32_to_host(mod->Module_Size);
+-						if ((fmh->FMH_Ver_Major == 1) && (fmh->FMH_Ver_Minor >= 8))
+-                        	*Location = CONFIG_SYS_FLASH_BASE  + le32_to_host(mod->Module_Location);
+-						else
+-                        	*Location = CONFIG_SYS_FLASH_BASE + (i*SectorSize) + le32_to_host(mod->Module_Location);
+-			break;
++                                                if ((fmh->FMH_Ver_Major == 1) && (fmh->FMH_Ver_Minor >= 8))
++                                *Location = le32_to_host(mod->Module_Location);
++                                                else
++                                *Location = (i*SectorSize) + le32_to_host(mod->Module_Location);
++                        break;
+                 }
+ 
+-				if (i*SectorSize > le32_to_host(mod->Module_Location)) /* Special case of AltFMH (FMH location > Module_Location */
+-					SkipSize=SectorSize;
+-				else
+-					/* Skip the Sectors occupied by the Module */
+-					SkipSize = le32_to_host(fmh->FMH_AllocatedSize);
+-                while ((SkipSize > 0) && (i < SectorCount))
++                                if (i*SectorSize > le32_to_host(mod->Module_Location)) /* Special case of AltFMH (FMH location > Module_Location */
++                                        SkipSize=SectorSize;
++                                else
++                                        /* Skip the Sectors occupied by the Module */
++                                        SkipSize = le32_to_host(fmh->FMH_AllocatedSize);
++		while ((SkipSize > 0) && (i < SectorCount))
+                 {
+                         SkipSize-=SectorSize;
+                         i++;
+@@ -490,8 +599,6 @@
+         } /* sector */
+ 
+         return (i >= SectorCount) ? -1 : 0;
+-#endif
+-return 0;
+ }
+ 
+ /****************************************************************************/
+@@ -701,38 +808,64 @@
+ 
+ int GetBootImage(u8 *imagetoboot)
+ {
+-#if 0
+-	flash_info_t *flinfo;
++
++//	flash_info_t *flinfo;
+ 	unsigned long i=0,SectorSize=CONFIG_SPX_FEATURE_GLOBAL_ERASE_BLOCK_SIZE;
+ 	unsigned long SectorCount=0,flashsize=0;
+ 	unsigned long watchdog_reset_status = 0;
+-	u8 imgIndex=0,bank=0,img1_presence=0,img2_presence=0;
++	u8 imgIndex=0,img1_presence=0,img2_presence=0;
+ 	FMH	*fmh = NULL;
+ 	MODULE_INFO *mod = NULL;
+-	VersionInfo firmware_ver[2], platform_ver[2];
+-
++	struct spi_flash *flash;
+ 
++#ifdef CONFIG_SPX_FEATURE_DEDICATED_SPI_FLASH_BANK
++        VersionInfo firmware_ver[CONFIG_SPX_FEATURE_GLOBAL_FLASH_BANKS], platform_ver[CONFIG_SPX_FEATURE_GLOBAL_FLASH_BANKS];
++#else
++        VersionInfo firmware_ver[2], platform_ver[2];
++#endif
+ #ifdef CONFIG_SPX_FEATURE_FAIL_SAFE_BOOTING
+ #ifdef CONFIG_SPX_FEATURE_SW_FAILSAFE_BOOT
+     Enable_watchdog(&watchdog_reset_status);
+ #else
+     *imagetoboot=Enable_watchdog(&watchdog_reset_status);
+-    return 0;
+ #endif
+ #endif
+ 
++#if defined CONFIG_SPX_FEATURE_DEDICATED_SPI_FLASH_BANK
++    int cs=0;
++    for(cs=0; cs<CONFIG_SPX_FEATURE_GLOBAL_FLASH_BANKS ; cs++)
++    {
++        flashspi[cs]= spi_flash_probe(CONFIG_ENV_SPI_BUS, cs,
++                      CONFIG_ENV_SPI_MAX_HZ, CONFIG_ENV_SPI_MODE);
++        if (flashspi[cs] == NULL)
++        {
++            printf("\nspi_flash_probe failed for cS=%d\n",cs);
++            continue;
++        }
++#ifdef CONFIG_SPX_FEATURE_HW_FAILSAFE_BOOT
++        /* Boot from first bank when alternative boot occurs
++        * therefore determine bank 1 is broken or not.
++        */
++        if (cs == 1)
++            broken_spi_banks = 2;
++#endif
++    }
++    return 0;
++#endif
+ 
+-	for (bank=0;bank<CONFIG_SYS_MAX_FLASH_BANKS;bank++)
++
++	flash = spi_flash_probe(CONFIG_ENV_SPI_BUS, CONFIG_ENV_SPI_CS,
++					CONFIG_ENV_SPI_MAX_HZ, CONFIG_ENV_SPI_MODE);
++	if(flash == NULL)
+ 	{
+-		flinfo = &flash_info[bank];
+-		flashsize += flinfo->size;
+-		if (flinfo->size == 0)
+-			break;
++		puts("\nspi_flash_probe failed");
++		hang();
+ 	}
+ 
+-	SectorCount=flashsize/SectorSize;
+ 
+-        memset(&firmware_ver,0,sizeof(firmware_ver));
++	flashsize = flash->size;
++	SectorSize = 0x10000;
++	SectorCount = flashsize/SectorSize;
+         memset(&platform_ver,0,sizeof(platform_ver));
+  
+ 		/* Scan through the flash for FMH */
+@@ -746,7 +879,7 @@
+         	        if( (i*SectorSize) >= CONFIG_SPX_FEATURE_GLOBAL_USED_FLASH_SIZE ) { break; }
+ 	            #endif
+ 			/* Check if FMH found at this sector */
+-			fmh = ScanforFMH((unsigned char *)(CONFIG_SYS_FLASH_BASE+(i*SectorSize)),SectorSize);
++			fmh = ScanforFMH(flash,(i*SectorSize),SectorSize);
+ 			if (fmh == NULL)
+ 			{
+ 				i++;
+@@ -853,7 +986,7 @@
+ 				#endif
+ 		 	 }
+ 		}
+-#endif
++
+ return 0;
+ }
+ 
+@@ -938,6 +1071,45 @@
+ }
+ #endif
+ 
++#ifdef  CONFIG_SPX_FEATURE_GLOBAL_DUAL_IMAGE_SUPPORT
++static int TriggerWDT2(void)
++{
++       /*Check for WDT2 enable, if enabled it means that panic occurs before boot complete*/
++       if(!(*((volatile unsigned long *)(WDT2_CONTROL_REG)) & WDT_ENABLE ))
++       {
++           return -1;
++       }
++
++ 	/* Disable the Watchdog Timer */
++       *((volatile unsigned long *)(WDT2_CONTROL_REG)) &= ~(WDT_RESET_SYSTEM | WDT_ENABLE);
++
++       /* Set the Timeout value to reboot immediately */
++       *((volatile unsigned long *)(WDT2_RELOAD_REG)) = WDT_TIMEOUT;
++
++       /* Set the Trigger value to restart Timer freshly */
++       *((volatile unsigned long *)(WDT2_CNT_RESTART_REG)) = WDT_TRIGGER;
++
++       /* Set the Watchdog clock to 1MHz clock */
++       *((volatile unsigned long *)(WDT2_CONTROL_REG)) |= (WDT_CLOCK);
++
++       /* Reading the Watchdog Timeout event counter*/
++       {
++           *((volatile unsigned long *)(WDT2_CLR_TIMEOUT_STAT_REG)) = 0x00000001;
++       }
++#if 0
++#ifdef CONFIG_SPX_FEATURE_HW_FAILSAFE_BOOT
++       /* Enabling the Second Boot code upon reset */
++       *((volatile unsigned long *)(WDT2_CONTROL_REG)) |= (WDT2_SECOND_BOOT_CODE);
++#else
++       *((volatile unsigned long *)(WDT2_CONTROL_REG)) &= ~(WDT2_SECOND_BOOT_CODE);
++#endif
++#endif
++       /* Enable back the Watchdog timer to start the Watchdog */
++       /* Also set the Flag to reset the CPU on Timeout */
++       *((volatile unsigned long *)(WDT2_CONTROL_REG)) |= (WDT_RESET_SYSTEM | WDT_ENABLE);
++       return 0;
++}
++#endif
+ 	
+ int
+ BootFMH(unsigned short PathID)
+@@ -1038,7 +1210,15 @@
+ 	{
+ 		return 0;			/* Full Access to Uboot Console */
+ 	}
+-
++#ifndef CONFIG_SPX_FEATURE_DEDICATED_SPI_FLASH_BANK
++	flash = spi_flash_probe(CONFIG_ENV_SPI_BUS, CONFIG_ENV_SPI_CS,
++                        CONFIG_ENV_SPI_MAX_HZ, CONFIG_ENV_SPI_MODE);
++    	if (flash == NULL)
++    	{
++        	puts("\nspi_flash_probe failed");
++        	hang();
++    	}
++#endif
+ #ifdef CONFIG_SPX_FEATURE_GLOBAL_DUAL_IMAGE_SUPPORT
+     if( GetBootImage(&imagetoboot) != 0 )
+ 	 return -1;
+@@ -1052,30 +1232,27 @@
+ 	printf("Image to be booted is %d\n",imagetoboot);
+ 
+ 
+-    flash = spi_flash_probe(CONFIG_ENV_SPI_BUS, CONFIG_ENV_SPI_CS,
+-                        CONFIG_ENV_SPI_MAX_HZ, CONFIG_ENV_SPI_MODE);
+-    if (flash == NULL) 
+-    {
+-        puts("\nspi_flash_probe failed");
+-        hang();
+-    }
+-
+     if(imagetoboot == IMAGE_1)
+     {
++#ifdef CONFIG_SPX_FEATURE_DEDICATED_SPI_FLASH_BANK
++        flash = flashspi[0];
+         SectorCount = (CONFIG_SPX_FEATURE_GLOBAL_USED_FLASH_SIZE/SectorSize);
+         StartingSector = 0;
+-        //startaddress=CONFIG_SYS_FLASH_BASE;
+         startaddress=0;
++#else
++        SectorCount = (CONFIG_SPX_FEATURE_GLOBAL_USED_FLASH_SIZE/SectorSize);
++        StartingSector = 0;
++        startaddress=0;
++#endif
++
+     }
+     else//for image2
+     {
+ #if defined CONFIG_SPX_FEATURE_DEDICATED_SPI_FLASH_BANK
+-        StartingSector=0;
+-        for(i=0;i< CONFIG_SPX_FEATURE_SECONDARY_IMAGE_SPI; i++){
+-            StartingSector+=flash_info[i].size;
+-        }
++        flash = flashspi[1];
++        StartingSector = CONFIG_SPX_FEATURE_GLOBAL_USED_FLASH_SIZE;
+         SectorCount=StartingSector+CONFIG_SPX_FEATURE_GLOBAL_USED_FLASH_SIZE;
+-        startaddress=CONFIG_SYS_FLASH_BASE+StartingSector;
++        startaddress=CE1_ADDRESS_SEGMENT;
+         StartingSector/=SectorSize;
+         SectorCount/=SectorSize;
+ #else
+@@ -1215,7 +1392,7 @@
+ 
+ 		if (le16_to_host(mod->Module_Type) == MODULE_FPGA)
+ 		{
+-			dtsaddr = le32_to_host(mod->Module_Location);
++			dtsaddr = startaddress + le32_to_host(mod->Module_Location);
+ 		}
+ 
+ 
+@@ -1522,6 +1699,9 @@
+ 		console_assign(stdout,"serial");
+ #else
+         printf("Error locating Kernel. Reset the board\n");
++#ifdef  CONFIG_SPX_FEATURE_GLOBAL_DUAL_IMAGE_SUPPORT
++        TriggerWDT2();
++#endif	
+ #endif                
+ 		printf("Unable to locate %s\n",KERNEL_FILE);
+ 	}
+@@ -1580,6 +1760,9 @@
+ 	UpdateFirmware();
+ #else
+    printf("Error locating Kernel. Reset the board\n");
++#ifdef CONFIG_SPX_FEATURE_GLOBAL_DUAL_IMAGE_SUPPORT
++	TriggerWDT2();
++#endif
+ #endif
+ 
+ 	UpdateFirmware();
+diff -Naur uboot_old/oem/ami/fmh/fmhcore.c uboot_new/oem/ami/fmh/fmhcore.c
+--- uboot_old/oem/ami/fmh/fmhcore.c	2020-12-31 14:36:55.258090168 +0530
++++ uboot_new/oem/ami/fmh/fmhcore.c	2020-12-31 15:01:34.454801350 +0530
+@@ -182,10 +182,11 @@
+ 	ALT_FMH *altfmh;
+ 	unsigned long FMH_Offset;
+ #if defined CONFIG_SPX_FEATURE_DEDICATED_SPI_FLASH_BANK
+-	unsigned long StartAddr = (unsigned long)SectorAddr;
+-	unsigned long SecStartAddr = 0;
+-	unsigned long i = 0;
++	//unsigned long StartAddr = (unsigned long)SectorAddr;
++	//unsigned long SecStartAddr = 0;
++	//unsigned long i = 0;
+ #elif defined CONFIG_SPX_FEATURE_CONTIGIOUS_SPI_MEMORY
++	MODULE_INFO *mod;
+ 	unsigned long StartAddr = (unsigned long)SectorAddr;
+ #endif
+     int ret=0;
+@@ -219,15 +220,22 @@
+ 		return NULL;
+ 	
+ #if defined CONFIG_SPX_FEATURE_DEDICATED_SPI_FLASH_BANK
+-	for(i = 0; i < CONFIG_SPX_FEATURE_SECONDARY_IMAGE_SPI; i++)
+-		SecStartAddr += flash_info[i].size;
+-
+-	if ((StartAddr - CONFIG_SYS_FLASH_BASE) >= SecStartAddr)
+-		flash_read((ulong)CONFIG_SYS_FLASH_BASE+SecStartAddr+FMH_Offset, sizeof(FMH),(char *)&fmh_buffer);
++	ret = spi_flash_read(flash, FMH_Offset, sizeof(FMH), (void *)&fmh_buffer);
++    	if(ret)
++    	{
++		puts("Error in reading SPI\n");
++    	}	
+ 	else
+ #elif defined CONFIG_SPX_FEATURE_CONTIGIOUS_SPI_MEMORY
+-	if ((StartAddr - CONFIG_SYS_FLASH_BASE) >= CONFIG_SPX_FEATURE_GLOBAL_USED_FLASH_SIZE)
+-		flash_read((ulong)CONFIG_SYS_FLASH_BASE+CONFIG_SPX_FEATURE_GLOBAL_USED_FLASH_SIZE+FMH_Offset, sizeof(FMH), (char *)&fmh_buffer);
++	mod = &(fmh->Module_Info);
++        if ((StartAddr - le32_to_host(mod->Module_Location)) >= CONFIG_SPX_FEATURE_GLOBAL_USED_FLASH_SIZE)
++        {
++                ret=spi_flash_read(flash,le32_to_host(mod->Module_Location)+CONFIG_SPX_FEATURE_GLOBAL_USED_FLASH_SIZE+FMH_Offset, sizeof(FMH), (void *)&fmh_buffer);
++                if(ret)
++                {
++                        puts("Error in reading SPI\n");
++                }
++        }
+ 	else
+ #endif
+ 

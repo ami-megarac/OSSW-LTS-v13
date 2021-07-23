@@ -1,0 +1,15 @@
+--- busybox/networking/udhcp/common.h	2019-01-21 18:24:38.390496646 +0800
++++ busybox/networking/udhcp/common.h	2019-01-22 10:08:49.607930163 +0800
+@@ -194,6 +194,12 @@
+ unsigned FAST_FUNC udhcp_option_idx(const char *name);
+ 
+ uint8_t *udhcp_get_option(struct dhcp_packet *packet, int code) FAST_FUNC;
++
++/* Same as above + ensures that option length is 4 bytes
++ * (returns NULL if size is different)
++ */
++uint8_t *udhcp_get_option32(struct dhcp_packet *packet, int code) FAST_FUNC;
++
+ int udhcp_end_option(uint8_t *optionptr) FAST_FUNC;
+ void udhcp_add_binary_option(struct dhcp_packet *packet, uint8_t *addopt) FAST_FUNC;
+ void udhcp_add_simple_option(struct dhcp_packet *packet, uint8_t code, uint32_t data) FAST_FUNC;
