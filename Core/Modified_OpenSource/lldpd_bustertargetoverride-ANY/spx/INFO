@@ -1,0 +1,17 @@
+Package : lldpd_bustertargetoverride
+Version :   13.2.0.0.0
+SPX-Version : 4.0
+SPX-Format : 2.0
+Owner : AMI
+Maintainer : shahin shaikh (shahinshaikhf@amiindia.co.in)
+Section : TargetUpdate
+License : OPENSOURCE
+Source-Location : https://packages.debian.org/buster/lldpd
+Source-Version : 1.0.3
+Group : BASE
+Essential : YES
+Feature-Required : CONFIG_SPX_FEATURE_GLOBAL_TARGET_BUSTER
+Architecture : ANY
+Urgency :   high
+Description : lldpd buster target override to ignore protocol 88f8
+.

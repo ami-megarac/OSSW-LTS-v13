@@ -1,0 +1,63 @@
+Binary Package Name : stunnel4_5.30-1~bpo8+1.debian.tar.xz  stunnel4_5.30-1~bpo8+1.dsc stunnel4_5.30.orig.tar.gz
+Binary Package Location : http://cdn-fastly.deb.debian.org/debian/pool/main/s/stunnel4/
+
+Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: stunnel
+Upstream-Contact: Michal Trojnara <Michal.Trojnara@mirt.net>
+Source: http://www.stunnel.org/download/source.html
+License: GPL-2+-openssl
+
+Files: *
+Copyright:
+  (C) 1998-2016  Michal Trojnara <Michal.Trojnara@mirt.net>
+  (c) 2014 Mark Theunissen
+License: GPL-2+-openssl
+
+Files: src/stunnel3.in
+Copyright: (C) 2004-2012 Michal Trojnara <Michal.Trojnara@mirt.net>
+License: GPL-2+
+
+Files: debian/*
+Copyright:
+ (C) 1998-2001  Paolo Molaro <lupus@debian.org>
+ (C) 2003-2007  Julien Lemoine <speedblue@debian.org>
+ (C) 2007-2012  Luis Rodrigo Gallardo Cruz <rodrigo@debian.org>
+ (C) 2013       Salvatore Bonaccorso <carnil@debian.org>
+ (C) 2014-2016  Peter Pentchev <roam@ringlet.net>
+License: GPL-2+-openssl
+
+License: GPL-2+-openssl
+ This program is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation; either version 2 of the License, or
+ (at your option) any later version.
+ .
+ On Debian systems, the complete text of the GNU General Public License
+ can be found in file "/usr/share/common-licenses/GPL-2".
+ .
+ Linking stunnel statically or dynamically with other modules is making
+ a combined work based on stunnel. Thus, the terms and conditions of the
+ GNU General Public License cover the whole combination.
+ .
+ In addition, as a special exception, the copyright holder of stunnel gives you
+ permission to combine stunnel with free software programs or libraries that
+ are released under the GNU LGPL and with code included in the standard release
+ of OpenSSL under the OpenSSL License (or modified versions of such code, with
+ unchanged license). You may copy and distribute such a system following the
+ terms of the GNU GPL for stunnel and the licenses of the other code concerned.
+ .
+ Note that people who make modified versions of stunnel are not obligated to
+ grant this special exception for their modified versions; it is their choice
+ whether to do so. The GNU General Public License gives permission to release
+ a modified version without this exception; this exception also makes it
+ possible to release a modified version which carries forward this exception.
+
+License: GPL-2+
+ This program is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation; either version 2 of the License, or
+ (at your option) any later version.
+ .
+ On Debian systems, the complete text of the GNU General Public License
+ can be found in file "/usr/share/common-licenses/GPL-2".
+

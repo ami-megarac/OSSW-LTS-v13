@@ -1,0 +1,17 @@
+Package : stunnel_bustertargetoverride
+Version : 13.0.0.0.0
+SPX-Version : 4.0
+SPX-Format : 2.0
+Owner : AMI
+Maintainer : Winston (winstont@ami.com)
+Section : TargetUpdate
+License : GPL-V2
+Source-Location : https://stunnel.org
+Source-Version : 5.56
+Group : BASE
+Essential : YES
+Feature-Required : CONFIG_SPX_FEATURE_GLOBAL_TARGET_BUSTER
+Architecture : ARM
+Urgency :   critical
+Description : This package is to override stunnel in Buster Target.
+.

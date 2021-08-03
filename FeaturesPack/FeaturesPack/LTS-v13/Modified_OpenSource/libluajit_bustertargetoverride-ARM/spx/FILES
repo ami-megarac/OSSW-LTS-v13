@@ -1,0 +1,12 @@
+./jit/bc.lua 5606 e763ff4b7689b3df8c7b65e334c157ee
+./jit/bcsave.lua 18146 5c5fd24f598e6b11e4cd4d82ee0fe038
+./jit/dis_arm.lua 19345 d88a1fe93c99df8ca0a20f464c80a0a1
+./jit/dis_mips.lua 13186 54e7c910176bf0336ca5ed6e78bed1a1
+./jit/dis_mipsel.lua 710 a9127a8b172f24879dedc0b87192cac1
+./jit/dis_ppc.lua 20302 2e4d05af8d4926147604e6605e5c382e
+./jit/dis_x64.lua 707 ba042424c474b442c07ee3178605a535
+./jit/dis_x86.lua 29330 525f6d4acda29d0ba883da693c97d2ea
+./jit/dump.lua 19588 95497a886a4cb0c56669ecade6661015
+./jit/v.lua 5614 51ff2579a0e6105f929e35f8e07bfead
+./jit/vmdef.lua 6676 09ac5ffe631dbd0bbe026e4c731970e8
+./luajit-2.0.5 382820 154fb9af22ec1e383de30ff0a0c834b9

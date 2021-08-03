@@ -1,0 +1,26 @@
+Package: stunnel_bustertargetoverride (13.0.0.0.0); urgency = critical
+
+Abstract:
+	Push the Stunnel override package (senguttuvanm@ami.com)
+
+Files Added: data/stunnel, spx/CHANGELOG, spx/DATA/keep.folder, spx/DOCS/COO_LICENSE, spx/FILES, spx/INFO, spx/LICENSES/LICENSE.GPL-V2, spx/SCRIPTS/dev-install.py
+
+--Submitter: Senguttuvan M (senguttuvanm)() 2020-02-20T14:45:23-05:00
+
+Package: stunnel_bustertargetoverride (1.0.0.0.0); urgency = low
+
+Abstract:
+	Added stunnel override for buster target
+Compiled latest stunnel with hard coded dh params to avoid high cpu usage. (hariharanr@amiindia.co.in)
+
+Files Added: data/stunnel, spx/CHANGELOG, spx/DATA/keep.folder, spx/DOCS/COO_LICENSE, spx/FILES, spx/INFO, spx/LICENSES/LICENSE.GPL-V2, spx/SCRIPTS/dev-install.py
+
+--Submitter: Winston Thangapandian (winstont)() 2020-02-06T11:07:20-05:00
+
+Package:stunnel_bustertargetoverride (1.0.0.0.0);urgency=new
+
+Abstract:
+	This package is to override stunnel in Buster Target.
+
+--Submitter: Winston (winstont@ami.com) Wed, 5 Feb 2020 10:30:09 +0530
+

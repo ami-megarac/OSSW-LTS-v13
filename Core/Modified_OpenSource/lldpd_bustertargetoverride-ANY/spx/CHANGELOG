@@ -1,0 +1,43 @@
+Package: lldpd_bustertargetoverride (13.2.0.0.0); urgency = high
+
+Abstract:
+	Python3 support (senguttuvanm@ami.com)
+
+Files Modified: spx/SCRIPTS/dev-install.py
+
+--Submitter: Senguttuvan M (senguttuvanm)() 2020-09-08T16:47:51-04:00
+
+Package: lldpd_bustertargetoverride (13.1.0.0.0); urgency = high
+
+Abstract:
+	Changes for LLDP binary strip (senguttuvanm@ami.com)
+
+Files Modified: spx/SCRIPTS/dev-install.py
+
+--Submitter: Senguttuvan M (senguttuvanm)() 2020-03-05T17:52:49-05:00
+
+Package: lldpd_bustertargetoverride (13.0.0.0.0); urgency = high
+
+Abstract:
+	Added the LLDP Support (senguttuvanm@ami.com)
+
+Files Added: data/lldpctl, data/lldpd, spx/CHANGELOG, spx/DATA/keep.folder, spx/FILES, spx/INFO, spx/LICENSES/LICENSE.OPENSOURCE, spx/SCRIPTS/dev-install.py
+
+--Submitter: Senguttuvan M (senguttuvanm)() 2020-03-04T11:16:59-05:00
+
+Package: lldpd_bustertargetoverride (6.0.0.0.0); urgency = high
+
+Abstract:
+	adding lldp support in buster target (arjuncr@amiindia.co.in)
+
+Files Added: data/lldpctl, data/lldpd, spx/CHANGELOG, spx/DATA/keep.folder, spx/FILES, spx/INFO, spx/LICENSES/LICENSE.OPENSOURCE, spx/SCRIPTS/dev-install.py
+
+--Submitter: Winston Thangapandian (winstont)() 2020-02-05T23:38:26-05:00
+
+Package:lldpd_bustertargetoverride (6.0.0.0.0);urgency=new
+
+Abstract:
+	lldpd buster target override to ignore protocol 88f8
+
+--Submitter: shahin shaikh (shahinshaikhf@amiindia.co.in) Wed, 5 Feb 2020 13:36:55 +0530
+

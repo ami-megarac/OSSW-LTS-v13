@@ -1,0 +1,25 @@
+Package: openslp_bustertargetoverride (13.1.0.0.0); urgency = high
+
+Abstract:
+	Python3 support (senguttuvanm@ami.com)
+
+Files Modified: spx/SCRIPTS/dev-install.py
+
+--Submitter: Senguttuvan M (senguttuvanm)() 2020-09-08T16:47:51-04:00
+
+Package: openslp_bustertargetoverride (6.0.0.0.0); urgency = low
+
+Abstract:
+	OpenSLP support for Buster Target (winstont@ami.com)
+
+Files Added: data/libslp.so.1.0.1, data/slp.conf, data/slp.h, data/slp.reg, data/slp.spi, data/slpd, data/slpd-init, spx/CHANGELOG, spx/DATA/keep.folder, spx/FILES, spx/INFO, spx/LICENSES/LICENSE.CALDERA, spx/SCRIPTS/dev-install.py
+
+--Submitter: Prakash Shanmugakani (prakashs)() 2020-01-05T16:41:59-05:00
+
+Package:openslp_bustertargetoverride (1.0.0.0.0);urgency=new
+
+Abstract:
+	OpenSLP binaries of version 1.2.1
+
+--Submitter: Winston T (winstont@ami.com) Sat, 4 Jan 2020 23:05:11 -0500
+

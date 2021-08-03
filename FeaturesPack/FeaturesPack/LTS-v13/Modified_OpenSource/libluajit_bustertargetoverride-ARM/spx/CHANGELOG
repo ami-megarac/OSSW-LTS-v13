@@ -1,0 +1,27 @@
+Package: libluajit_bustertargetoverride (1.1.0.0.0); urgency = low
+
+Abstract:
+	LuaJIT-2.0.5 Upgrade From 2.0.3 (johnw@ami.com)
+
+Files Added: data/jit/dis_mips.lua, data/jit/dis_mipsel.lua, data/jit/dis_ppc.lua, data/luajit-2.0.5
+Files Modified: data/jit/bc.lua, data/jit/bcsave.lua, data/jit/dis_arm.lua, data/jit/dis_x64.lua, data/jit/dis_x86.lua, data/jit/dump.lua, data/jit/v.lua, data/jit/vmdef.lua, spx/SCRIPTS/dev-install.py
+Files Removed: data/luajit-2.0.3
+
+--Submitter: Manikandan Palaniappan (manikandanp)() 2020-02-20T12:46:00-05:00
+
+Package: libluajit_bustertargetoverride (1.0.0.0.0); urgency = low
+
+Abstract:
+	Luajit 2.0.3 Override with libluaturbo fix (johnw@ami,com)
+
+Files Added: data/jit/bc.lua, data/jit/bcsave.lua, data/jit/dis_arm.lua, data/jit/dis_x64.lua, data/jit/dis_x86.lua, data/jit/dump.lua, data/jit/v.lua, data/jit/vmdef.lua, data/luajit-2.0.3, spx/CHANGELOG, spx/DATA/keep.folder, spx/FILES, spx/INFO, spx/LICENSES/LICENSE.MIT, spx/SCRIPTS/dev-install.py
+
+--Submitter: Manikandan Palaniappan (manikandanp)() 2020-02-04T12:35:02-05:00
+
+Package:libluajit_bustertargetoverride (1.0.0.0.0);urgency=new
+
+Abstract:
+	This package is to override luajit in Buster Target.
+
+--Submitter: Suraj Rao (surajr@ami.com) Thu, 16 Jan 2020 13:52:05 -0500
+

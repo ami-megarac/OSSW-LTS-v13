@@ -1,0 +1,17 @@
+Package : libluajit_bustertargetoverride
+Version : 13.0.0.0.0
+SPX-Version : 4.0
+SPX-Format : 2.0
+Owner : AMI
+Maintainer : Suraj Rao (surajr@ami.com)
+Section : TargetUpdate
+License : MIT
+Source-Location : AMI
+Source-Version : 0.0.0
+Group : BASE
+Essential : YES
+Feature-Required : CONFIG_SPX_FEATURE_GLOBAL_TARGET_BUSTER
+Architecture : ARM
+Urgency :   low
+Description : This package is to override luajit in Buster Target.
+.

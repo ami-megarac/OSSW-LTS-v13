@@ -1,0 +1,17 @@
+Package : openslp_bustertargetoverride
+Version :   13.1.0.0.0
+SPX-Version : 4.0
+SPX-Format : 2.0
+Owner : AMI
+Maintainer : Winston T (winstont@ami.com)
+Section : TargetUpdate
+License : CALDERA
+Source-Location : https://packages.debian.org/jessie/slpd
+Source-Version : 1.2.1
+Group : BASE
+Essential : YES
+Feature-Required : CONFIG_SPX_FEATURE_GLOBAL_TARGET_BUSTER
+Architecture : ARM
+Urgency :   high
+Description : OpenSLP binaries of version 1.2.1
+.

@@ -1,0 +1,17 @@
+Package : netsnmp_bustertargetoverride
+Version :   13.2.0.0.0
+SPX-Version : 4.0
+SPX-Format : 2.0
+Owner : AMI
+Maintainer : Winston (winstont@ami.com)
+Section : TargetUpdate
+License : BSD
+Source-Location : www.net-snmp.org/download
+Source-Version : 5.8
+Group : BASE
+Essential : YES
+Feature-Required : CONFIG_SPX_FEATURE_GLOBAL_TARGET_BUSTER
+Architecture : ARM
+Urgency :   high
+Description : Replaces net-snmp binaries of version 5.8 to target.
+.
