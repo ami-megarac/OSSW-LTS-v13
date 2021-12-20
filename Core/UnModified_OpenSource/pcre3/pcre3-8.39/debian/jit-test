@@ -1,0 +1,8 @@
+#!/bin/sh
+
+arch=$(dpkg-architecture -qDEB_HOST_GNU_TYPE)
+
+$arch-gcc debian/jit-test.c -o/dev/null
+if [ $? -eq 0 ]; then
+   echo "--enable-jit"
+fi

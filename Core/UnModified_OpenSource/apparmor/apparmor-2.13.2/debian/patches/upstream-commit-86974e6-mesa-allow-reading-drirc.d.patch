@@ -1,0 +1,20 @@
+From: Christian Boltz <gitlab2@cboltz.de>
+Date: Sat, 19 Jan 2019 17:37:07 +0000
+Subject: mesa: allow reading drirc.d
+
+---
+ profiles/apparmor.d/abstractions/mesa | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/profiles/apparmor.d/abstractions/mesa b/profiles/apparmor.d/abstractions/mesa
+index 68e7579..6e4a8c9 100644
+--- a/profiles/apparmor.d/abstractions/mesa
++++ b/profiles/apparmor.d/abstractions/mesa
+@@ -3,6 +3,7 @@
+ 
+   # System files
+   /dev/dri/ r, # libGLX_mesa.so calls drmGetDevice2()
++  /usr/share/drirc.d/{,*.conf} r,
+ 
+   # User files
+   owner @{HOME}/.cache/ w, # if user clears all caches

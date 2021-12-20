@@ -1,0 +1,7 @@
+#
+#=DESCRIPTION includes testing - recursive include should fail
+#=EXRESULT FAIL
+#
+/does/not/exist {
+  include <include_tests/recursive.sd>
+}

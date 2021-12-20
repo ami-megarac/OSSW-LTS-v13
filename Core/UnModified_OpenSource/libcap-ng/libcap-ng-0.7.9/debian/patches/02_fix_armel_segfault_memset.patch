@@ -1,0 +1,51 @@
+Index: libcap-ng/src/cap-ng.c
+===================================================================
+--- libcap-ng.orig/src/cap-ng.c
++++ libcap-ng/src/cap-ng.c
+@@ -146,6 +146,11 @@ struct cap_ng
+ 	__u32 bounds[2];
+ };
+ 
++
++static struct __user_cap_header_struct hdrzz = {0, 0};
++static cap_data_t datazz = { {0, 0, 0} };
++static __u32 boundzz = {0};
++
+ // Global variables with per thread uniqueness
+ static __thread struct cap_ng m =	{ 1,
+ 					{0, 0},
+@@ -182,7 +187,7 @@ static void init(void)
+ 	if (m.state != CAPNG_NEW)
+ 		return;
+ 
+-	memset(&m.hdr, 0, sizeof(m.hdr));
++	m.hdr = hdrzz;
+ 	(void)capget(&m.hdr, NULL); // Returns -EINVAL
+ 	if (m.hdr.version == _LINUX_CAPABILITY_VERSION_3 ||
+ 		m.hdr.version == _LINUX_CAPABILITY_VERSION_2) {
+@@ -194,7 +199,7 @@ static void init(void)
+ 		return;
+ 	}
+ 
+-	memset(&m.data, 0, sizeof(cap_data_t));
++	m.data = datazz;
+ #ifdef HAVE_SYSCALL_H
+ 	m.hdr.pid = (unsigned)syscall(__NR_gettid);
+ #else
+@@ -236,10 +241,13 @@ void capng_clear(capng_select_t set)
+ 		return;
+ 
+ 	if (set & CAPNG_SELECT_CAPS)
+-		memset(&m.data, 0, sizeof(cap_data_t));
++		m.data = datazz;
+ #ifdef PR_CAPBSET_DROP
+-	if (set & CAPNG_SELECT_BOUNDS)
+-		memset(m.bounds, 0, sizeof(m.bounds));
++	if (set & CAPNG_SELECT_BOUNDS) {
++		unsigned i;
++		for (i=0; i<sizeof(m.bounds)/sizeof(__u32); i++)
++			m.bounds[i] = boundzz;
++	}
+ #endif
+ 	m.state = CAPNG_INIT;
+ }

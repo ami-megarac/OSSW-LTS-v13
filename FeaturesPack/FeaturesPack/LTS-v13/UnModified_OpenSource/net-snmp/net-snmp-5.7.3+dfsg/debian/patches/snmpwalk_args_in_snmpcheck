@@ -1,0 +1,26 @@
+From: Craig Small <csmall@debian.org>
+Date: Fri, 20 Jul 2018 20:32:41 +1000
+Subject: Correct snmpwalk args in snmpcheck
+
+snmpcheck used the old command line arguments for snmpwalk giving an
+error and no data.
+
+Closes: #898197
+
+References:
+ https://bugs.kali.org/view.php?id=4655
+---
+
+--- a/local/snmpcheck.def
++++ b/local/snmpcheck.def
+@@ -27,8 +27,8 @@ $mibupdateconfig="$mibheadall.VERSIONMIB
+ 		 '.LOADAVEMIBNUM.1' => 1,
+ 		 '.ERRORMIBNUM' => 1);
+ $errlog="/net/tyfon/1/OV/log/ece-log";
+-$default_get_args = "-v 1 %s private";
+-$default_set_args = "-v 1 %s private";
++$default_get_args = "-v 1 -c private %s";
++$default_set_args = "-v 1 -c private %s";
+ $andlog=0;
+ $snmppath="BINDIR";
+ $eraseline="                                                                           \r";

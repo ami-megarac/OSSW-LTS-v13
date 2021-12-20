@@ -1,0 +1,18 @@
+Description: Work around guile-snarf hardcoding the at-build default compiler
+ which breaks when it changes ion Debian.
+Author: Andreas Metzler <ametzler@debian.org>
+Origin: vendor
+Bug-Debian: https://bugs.debian.org/759096
+Last-Update: 2014-08-24
+
+--- gnutls28-3.3.6.orig/guile/src/Makefile.am
++++ gnutls28-3.3.6/guile/src/Makefile.am
+@@ -15,6 +15,8 @@
+ #  License along with GnuTLS; if not, write to the Free Software
+ #  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ 
++export CPP := @CPP@
++
+ GUILE_FOR_BUILD =						\
+   GUILE_AUTO_COMPILE=0 $(GUILE) -L $(top_srcdir)/guile/modules
+ 

@@ -1,0 +1,10 @@
+#
+#=Description basic rules to test the "make-unbindable" mount option
+#=EXRESULT PASS
+/usr/bin/foo {
+  mount options=make-unbindable -> /1,
+  mount options=(make-unbindable) -> /2,
+  mount options=(rw,make-unbindable) -> /3,
+  mount options in (make-unbindable) -> /4,
+  mount options in (ro,make-unbindable) -> /5,
+}

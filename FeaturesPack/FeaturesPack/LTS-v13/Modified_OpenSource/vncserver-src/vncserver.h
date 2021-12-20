@@ -18,7 +18,7 @@
 
 /************************Define*******************/
 #define PRINT_DLFCN_ERR printf("%s\n",dlerror())
-#define FB_FILE 		"/dev/fb0"
+#define FB_FILE 		"/dev/fb1"
 #define SET_CMD_IN_PROGRESS "/var/set_kvm_client_in_progress"
 //To debug log, change DISABLE to 1
 #define DISABLE 0
@@ -237,10 +237,10 @@ sem_t	mStartCursorCapture;
 
 int g_kvm_client_state = -1;
 #define HID_INITILIZATION "HID Initilization InProgress.."
-#if defined(SOC_PILOT_III) || defined(SOC_PILOT_IV)	
+#if defined(SOC_PILOT_III) || defined(SOC_PILOT_IV)	|| defined(CONFIG_SPX_FEATURE_VIDEO_RVAS)
 #define ESTABLISHING_VNC_SESSION "Establishing the VNC Session..."
 #endif
-#if defined(SOC_AST2400) || defined(SOC_AST2500) || defined(SOC_AST2600)
+#if defined(SOC_AST2400) || defined(SOC_AST2500) ||( defined(SOC_AST2600) && !defined(CONFIG_SPX_FEATURE_VIDEO_RVAS) )
 #define VIDEOCAP_JPEG_ENABLE "/proc/ractrends/videocap/jpeg_enable"
 #endif
 

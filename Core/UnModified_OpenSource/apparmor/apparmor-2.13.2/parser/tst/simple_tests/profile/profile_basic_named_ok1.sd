@@ -1,0 +1,19 @@
+#
+# $Id$
+#=DESCRIPTION Basic parsing test, name profile duplicate mode bits
+#=EXRESULT PASS
+# vim:syntax=subdomain
+# Last Modified: Sun Apr 17 19:44:44 2005
+#
+profile exist /does/not/exist {
+  #include <includes/base>
+
+  /usr/X11R6/lib/lib*so* rrr,
+  /does/not/exist r,
+  /var/log/messages www,
+  /tmp/sd*.foo rwrwwrll,
+  /bin/cat pxpxpxpxpx,
+  /bin/ls ixixixix,
+  /bin/echo uxuxuxuxux,
+}
+

@@ -1,0 +1,15 @@
+#=DESCRIPTION conditional else in invalid locations
+#=EXRESULT FAIL
+
+$BAR = false
+$FOO=true
+$FALSE = false
+
+/bin/true {
+    if $FOO {
+      /bin/true rix,
+    }
+
+} else if $FALSE {
+    /dev/null w,
+  }

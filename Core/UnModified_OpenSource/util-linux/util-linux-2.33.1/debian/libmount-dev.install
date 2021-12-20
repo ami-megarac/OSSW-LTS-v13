@@ -1,0 +1,4 @@
+usr/include/libmount
+usr/lib/*/libmount.a
+usr/lib/*/libmount.so
+usr/lib/*/pkgconfig/mount.pc

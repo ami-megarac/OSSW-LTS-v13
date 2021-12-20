@@ -1,0 +1,170 @@
+#!/bin/sh
+
+set -e
+set -u
+
+exec 2>&1
+set -x
+
+failed=
+# An ordinary, unprivileged user
+user="${AUTOPKGTEST_NORMAL_USER:-nobody}"
+
+as_normal_user () {
+    runuser -u "$user" -- "$@"
+}
+
+test -S /var/run/dbus/system_bus_socket || failed=1
+test /run/dbus/system_bus_socket -ef /var/run/dbus/system_bus_socket || failed=1
+getent passwd messagebus || failed=1
+getent group messagebus || failed=1
+
+if [ -d /run/systemd ]; then
+    journalctl -f &
+    journalctl_pid="$!"
+fi
+
+as_normal_user dbus-send --system --dest="org.freedesktop.DBus" \
+    --type=method_call --print-reply \
+    /org/freedesktop/DBus org.freedesktop.DBus.Introspectable.Introspect \
+    || failed=1
+
+as_normal_user dbus-send --system --dest="org.freedesktop.DBus" \
+    --type=method_call --print-reply \
+    /org/freedesktop/DBus org.freedesktop.DBus.ListNames \
+    || failed=1
+
+as_normal_user dbus-send --system --dest="org.freedesktop.DBus" \
+    --type=method_call --print-reply \
+    /org/freedesktop/DBus org.freedesktop.DBus.ListActivatableNames \
+    || failed=1
+
+if as_normal_user dbus-send --system --dest="org.freedesktop.DBus" \
+    --type=method_call --print-reply \
+    /org/freedesktop/DBus org.freedesktop.DBus.RequestName \
+    string:com.example.Nope uint32:0 \
+; then
+    set +x
+    echo "Owning name com.example.Nope should not have been allowed"
+    set -x
+    failed=1
+fi
+
+if dbus-send --system --dest="org.freedesktop.DBus" \
+    --type=method_call --print-reply \
+    /org/freedesktop/DBus org.freedesktop.DBus.RequestName \
+    string:com.example.Nope uint32:0 \
+; then
+    set +x
+    echo "Owning name com.example.Nope should not have been allowed for root"
+    set -x
+    failed=1
+fi
+
+dbus-send --system --dest="org.freedesktop.DBus" \
+    --type=method_call --print-reply \
+    /org/freedesktop/DBus org.freedesktop.DBus.Debug.Stats.GetStats \
+    || failed=1
+
+if as_normal_user dbus-send --system --dest="org.freedesktop.DBus" \
+    --type=method_call --print-reply \
+    /org/freedesktop/DBus org.freedesktop.DBus.Debug.Stats.GetStats \
+; then
+    set +x
+    echo "Unprivileged user should not have been able to get stats"
+    set -x
+    failed=1
+fi
+
+install -d /usr/local/share/dbus-1/system-services
+cat > /usr/local/share/dbus-1/system-services/org.debian.packages.dbus.TradActivation.service <<EOF
+[D-BUS Service]
+Name=org.debian.packages.dbus.TradActivation
+Exec=/usr/bin/dbus-test-tool echo --system --name=org.debian.packages.dbus.TradActivation
+User=daemon
+EOF
+cat > /usr/local/share/dbus-1/system-services/org.debian.packages.dbus.SystemdActivation.service <<EOF
+[D-BUS Service]
+Name=org.debian.packages.dbus.SystemdActivation
+Exec=/bin/false
+User=daemon
+SystemdService=dbus-org.debian.packages.dbus.SystemdActivation.service
+EOF
+install -d /etc/systemd/system
+cat > /etc/systemd/system/dbus-org.debian.packages.dbus.SystemdActivation.service <<EOF
+[Unit]
+Description=systemd-activatable D-Bus service
+[Service]
+Type=dbus
+BusName=org.debian.packages.dbus.SystemdActivation
+User=daemon
+ExecStart=/usr/bin/dbus-test-tool echo --system --name=org.debian.packages.dbus.SystemdActivation
+EOF
+
+install -d /etc/dbus-1/system.d
+cat > /etc/dbus-1/system.d/org.debian.packages.dbus.Test.conf <<EOF
+<busconfig>
+  <policy user="daemon">
+    <allow own="org.debian.packages.dbus.TradActivation"/>
+    <allow own="org.debian.packages.dbus.SystemdActivation"/>
+  </policy>
+  <policy context="default">
+    <allow send_destination="org.debian.packages.dbus.TradActivation"/>
+    <allow send_destination="org.debian.packages.dbus.SystemdActivation"/>
+  </policy>
+</busconfig>
+EOF
+
+dbus-send --system --dest=org.freedesktop.DBus --type=method_call \
+    --print-reply /org/freedesktop/DBus org.freedesktop.DBus.ReloadConfig \
+    || failed=1
+dbus-send --system --dest="org.debian.packages.dbus.TradActivation" \
+    --type=method_call --print-reply \
+    / org.freedesktop.DBus.Peer.Ping \
+    || failed=1
+
+if [ -d /run/systemd ]; then
+    systemctl daemon-reload
+
+    dbus-send --system --dest="org.debian.packages.dbus.SystemdActivation" \
+        --type=method_call --print-reply \
+        / org.freedesktop.DBus.Peer.Ping \
+        || failed=1
+
+    for api in hostname1 locale1 login1 systemd1 timedate1; do
+        dbus-send --system --dest="org.freedesktop.$api" \
+            --type=method_call --print-reply \
+            / org.freedesktop.DBus.Peer.Ping \
+            || failed=1
+    done
+
+    kill -INT "$journalctl_pid"
+fi
+
+if [ -n "$failed" ]; then
+    exit 1
+fi
+
+set +x
+
+case "${AUTOPKGTEST_REBOOT_MARK-}" in
+    ("")
+       if [ -x /tmp/autopkgtest-reboot ]; then
+           /tmp/autopkgtest-reboot rebooted
+       fi
+       ;;
+
+    (rebooted)
+       ;;
+
+    (*)
+       echo "internal error" >&2
+       exit 2
+       ;;
+esac
+
+if [ -n "$failed" ]; then
+    exit 1
+fi
+
+exit 0

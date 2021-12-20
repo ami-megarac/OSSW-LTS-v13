@@ -1,0 +1,10 @@
+#
+#=Description basic rules to test the "dev" mount option
+#=EXRESULT PASS
+/usr/bin/foo {
+  mount options=dev /a -> /1,
+  mount options=(dev) /b -> /2,
+  mount options=(rw,dev) /c -> /3,
+  mount options in (dev) /d -> /4,
+  mount options in (ro,dev) /e -> /5,
+}

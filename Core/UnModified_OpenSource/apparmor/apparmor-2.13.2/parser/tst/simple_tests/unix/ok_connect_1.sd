@@ -1,0 +1,7 @@
+#
+#=DESCRIPTION simple unix connect acceptance test
+#=EXRESULT PASS
+
+profile a_profile {
+  unix connect,
+}

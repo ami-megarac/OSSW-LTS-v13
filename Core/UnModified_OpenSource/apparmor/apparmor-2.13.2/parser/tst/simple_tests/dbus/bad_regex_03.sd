@@ -1,0 +1,8 @@
+#
+#=DESCRIPTION dbus rule with a bad peer regex expansion
+#=EXRESULT FAIL
+#
+
+profile foo {
+  dbus send bus=session peer=(label=spl{at),
+}

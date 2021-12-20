@@ -1,0 +1,23 @@
+From: Net-SNMP Packaging Team <pkg-net-snmp-devel@lists.alioth.debian.org>
+Date: Mon, 5 Mar 2018 21:13:51 +1100
+Subject: callback_print
+
+---
+ perl/SNMP/SNMP.xs | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/perl/SNMP/SNMP.xs b/perl/SNMP/SNMP.xs
+index 288c6a6..0199978 100644
+--- a/perl/SNMP/SNMP.xs
++++ b/perl/SNMP/SNMP.xs
+@@ -1300,6 +1300,10 @@ void *cb_data;
+          netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_OIDS, 1);
+          netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_OID_OUTPUT_FORMAT, NETSNMP_OID_OUTPUT_NUMERIC);
+       }
++      if (SvIV(*hv_fetch((HV*)SvRV(sess_ref),"UseEnums", 8, 1)))
++         sprintval_flag = USE_ENUMS;
++      if (SvIV(*hv_fetch((HV*)SvRV(sess_ref),"UseSprintValue", 14, 1)))
++         sprintval_flag = USE_SPRINT_VALUE;
+ 
+       sv_bless(varlist_ref, gv_stashpv("SNMP::VarList",0));
+       for(vars = (pdu?pdu->variables:NULL); vars; vars = vars->next_variable) {

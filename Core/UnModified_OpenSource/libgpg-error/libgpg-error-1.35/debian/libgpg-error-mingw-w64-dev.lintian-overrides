@@ -1,0 +1,22 @@
+# libgpg-error-mingw-w64-dev is "arch-independent" from debian's perspective,
+# since it ships binaries that are only used during cross-building
+# windows software.
+libgpg-error-mingw-w64-dev: arch-independent-package-contains-binary-or-object
+
+# The location of these cross-building tools is the result of
+# discussion with mingw maintainers:
+# https://lists.alioth.debian.org/pipermail/pkg-gnupg-maint/2016-February/003281.html
+libgpg-error-mingw-w64-dev: file-in-unusual-dir
+libgpg-error-mingw-w64-dev: non-standard-dir-in-usr
+
+# DLLs exported via Samba need to be executable (see #796224)
+libgpg-error-mingw-w64-dev: executable-not-elf-or-script
+
+# the dependency_libs that are present in these win32 files are
+# -lws2_32, which refers to /usr/i686-w64-mingw32/lib/libws2_32.a and
+# /usr/x86_64-w64-mingw32/lib/libws2_32.a; this is necessary for
+# building static Windows executables (like gpgv.exe), so i don't
+# think it's an actual error to leave it in the distributed .la
+# objects.
+libgpg-error-mingw-w64-dev: non-empty-dependency_libs-in-la-file usr/i686-w64-mingw32/lib/libgpg-error.la
+libgpg-error-mingw-w64-dev: non-empty-dependency_libs-in-la-file usr/x86_64-w64-mingw32/lib/libgpg-error.la

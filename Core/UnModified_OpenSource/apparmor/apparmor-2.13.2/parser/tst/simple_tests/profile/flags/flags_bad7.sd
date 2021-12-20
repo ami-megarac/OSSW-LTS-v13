@@ -1,0 +1,16 @@
+#
+#=DESCRIPTION Ensure really bad parsing fails
+#=EXRESULT FAIL
+# vim:syntax=subdomain
+# Last Modified: Sun Apr 17 19:44:44 2005
+#
+/does/not/exist (blahblab {
+
+  /usr/X11R6/lib/lib*so* r
+  /does/not/exist r
+}
+
+audit) {
+  /usr/X11R6/lib/lib*so* r,
+  /does/not/exist2 r,
+}

@@ -1,0 +1,1 @@
+Jun 19 12:00:55 piorun kernel: [4475115.459952] audit: type=1400 audit(1434708055.676:19629): apparmor="ALLOWED" operation="file_perm" profile="/usr/sbin/apache2" pid=3512 comm="apache2" laddr=::ffff:192.168.236.159 lport=80 faddr=::ffff:192.168.103.80 fport=61985 family="inet6" sock_type="stream" protocol=6

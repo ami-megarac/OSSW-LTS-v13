@@ -1,0 +1,7 @@
+The apparmor_parser allows you to add, replace, and remove AppArmor
+policy through the use of command line options. The default is to add.
+`apparmor_parser --help` shows what the command line options are.
+
+You can also find more information at https://wiki.apparmor.net
+
+-- The AppArmor development team

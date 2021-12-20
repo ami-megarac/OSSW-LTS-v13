@@ -1,0 +1,221 @@
+# This publication is intellectual property of Canonical Ltd. Its contents
+# can be duplicated, either in part or in whole, provided that a copyright
+# label is visibly located on each copy.
+#
+# All information found in this book has been compiled with utmost
+# attention to detail. However, this does not guarantee complete accuracy.
+# Neither Canonical Ltd, the authors, nor the translators shall be held
+# liable for possible errors or the consequences thereof.
+#
+# Many of the software and hardware descriptions cited in this book
+# are registered trademarks. All trade names are subject to copyright
+# restrictions and may be registered trade marks. Canonical Ltd.
+# essentially adhere to the manufacturer's spelling.
+#
+# Names of products and trademarks appearing in this book (with or without
+# specific notation) are likewise subject to trademark and trade protection
+# laws and may thus fall under copyright restrictions.
+#
+
+
+=pod
+
+=head1 NAME
+
+aa_stack_profile, aa_stack_onexec - combine multiple profiles to confine a task
+
+=head1 SYNOPSIS
+
+B<#include E<lt>sys/apparmor.hE<gt>>
+
+B<int aa_stack_profile(const char *profile);>
+
+B<int aa_stack_onexec(const char *profile);>
+
+Link with B<-lapparmor> when compiling.
+
+=head1 DESCRIPTION
+
+AppArmor supports stacking two or more profiles when confining a task. The
+result is an intersection of all profiles which are stacked. Stacking profiles
+together is desirable when wanting to ensure that confinement will never become
+more permissive. When changing between two profiles, as performed with
+aa_change_profile(2), there is always the possibility that the new profile is
+more permissive than the old profile but that possibility is eliminated when
+using aa_stack_profile().
+
+To stack a profile with the current confinement context, a task can use the
+aa_stack_profile() function. The I<profile> parameter is a NUL-terminated
+string indicating a profile name that should be stacked with the current
+confinement.
+
+Calling aa_stack_profile("profile_a") while unconfined is equivalent to calling
+aa_change_profile("profile_a") since the intersection of unconfined and
+"profile_a" is "profile_a". Calling aa_stack_profile("profile_b") while
+confined by "profile_a" results in the task's confinement to be the
+intersection of "profile_a" and "profile_b". The resulting confinement context
+will be represented as "profile_a//&profile_b" in audit log messages, the
+return value of aa_getcon(2), etc.
+
+Confined programs wanting to use aa_stack_profile() need to have rules
+permitting stacking the named profile. See apparmor.d(8) for details.
+
+Open file descriptors may not be remediated after a call to aa_stack_profile()
+so the calling program must close(2) open file descriptors to ensure they
+are not available after calling aa_stack_profile().
+
+The aa_stack_onexec() function is like the aa_stack_profile() function
+except it specifies that the stacking should take place on the next exec
+instead of immediately. The delayed profile change takes precedence over any
+exec transition rules within the confining profile. Delaying the stacking
+boundary has a couple of advantages, it removes the need for stub transition
+profiles and the exec boundary is a natural security layer where potentially
+sensitive memory is unmapped.
+
+=head1 RETURN VALUE
+
+On success zero is returned. On error, -1 is returned, and
+errno(3) is set appropriately.
+
+=head1 ERRORS
+
+=over 4
+
+=item B<EINVAL>
+
+AppArmor is not loaded, neither a profile nor a namespace was specified,
+or the communication via the F</proc/*/attr/current> file did not conform
+to protocol.
+
+=item B<ENOMEM>
+
+Insufficient kernel memory was available.
+
+=item B<ENOENT>
+
+The specified profile does not exist, or is not visible from the current
+namespace.
+
+=back
+
+=head1 NOTES
+
+Using aa_stack_profile() and related libapparmor functions are the only way to
+ensure compatibility between varying kernel versions. However, there may be
+some situations where libapparmor is not available and directly interacting
+with the AppArmor filesystem is required to stack a profile.
+
+To immediately stack a profile named "profile_a", as performed with
+aa_stack_profile("profile_a"), the equivalent of this shell command can be
+used:
+
+ $ echo -n "stackprofile profile_a" > /proc/self/attr/current
+
+To stack a profile named "profile_a" at the next exec, as performed with
+aa_stack_onexec("profile_a"), the equivalent of this shell command can be used:
+
+ $ echo -n "stackexec profile_a" > /proc/self/attr/exec
+
+These raw AppArmor filesystem operations must only be used when using
+libapparmor is not a viable option.
+
+=head1 EXAMPLE
+
+The following example shows a simple, if contrived, use of
+aa_stack_profile().
+
+ #include <stdlib.h>
+ #include <string.h>
+ #include <sys/apparmor.h>
+ #include <sys/types.h>
+ #include <sys/stat.h>
+ #include <fcntl.h>
+ #include <stdio.h>
+ #include <unistd.h>
+
+ static void read_passwd()
+ {
+         int fd;
+         char buf[10];
+ 
+         if ((fd=open("/etc/passwd", O_RDONLY)) < 0) {
+                perror("Failure opening /etc/passwd");
+                _exit(1);
+         }
+ 
+         /* Verify that we can read /etc/passwd */
+         memset(&buf, 0, 10);
+         if (read(fd, &buf, 10) == -1) {
+                 perror("Failure reading /etc/passwd");
+                 _exit(1);
+         }
+         buf[9] = '\0';
+         printf("/etc/passwd: %s\n", buf);
+         close(fd);
+ }
+ 
+ int main(int argc, char * argv[])
+ {
+         printf("Before aa_stack_profile():\n");
+         read_passwd();
+ 
+         /* stack the "i_cant_be_trusted_anymore" profile, which
+          * should not have read access to /etc/passwd. */
+         if (aa_stack_profile("i_cant_be_trusted_anymore") < 0) {
+             perror("Failure changing profile -- aborting");
+             _exit(1);
+         }
+ 
+         printf("After aa_stack_profile():\n");
+         read_passwd();
+         _exit(0);
+ }
+
+This code example requires a profile similar to the following to be loaded
+with apparmor_parser(8):
+
+ # Confine stack_p to be able to read /etc/passwd and aa_stack_profile()
+ # to the 'i_cant_be_trusted_anymore' profile.
+ /tmp/stack_p {
+     /etc/ld.so.cache          mr,
+     /lib/ld-*.so*             mrix,
+     /lib/libc*.so*            mr,
+
+     /etc/passwd               r,
+
+     # Needed for aa_stack_profile()
+     /usr/lib/libapparmor*.so* mr,
+     /proc/[0-9]*/attr/current w,
+ }
+
+As well as the profile to stack:
+
+ profile i_cant_be_trusted_anymore {
+     /etc/ld.so.cache      mr,
+     /lib/ld-*.so*         mrix,
+     /lib/libc*.so*        mr,
+ }
+
+The output when run:
+
+ $ /tmp/stack_p
+ Before aa_stack_profile():
+ /etc/passwd: root:x:0:
+ After aa_stack_profile():
+ Failure opening /etc/passwd: Permission denied
+ $
+
+=head1 BUGS
+
+None known. If you find any, please report them at
+L<https://bugs.launchpad.net/apparmor/+filebug>. Note that using
+aa_stack_profile(2) without execve(2) provides no memory barriers between
+different areas of a program; if address space separation is required, then
+separate processes should be used.
+
+=head1 SEE ALSO
+
+apparmor(7), apparmor.d(5), apparmor_parser(8), aa_change_profile(2),
+aa_getcon(2) and L<https://wiki.apparmor.net>.
+
+=cut

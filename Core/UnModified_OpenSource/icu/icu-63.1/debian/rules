@@ -1,0 +1,74 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+include /usr/share/dpkg/architecture.mk
+
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+export DEB_LDFLAGS_MAINT_APPEND = -Wl,--as-needed
+DPKG_EXPORT_BUILDFLAGS = 1
+include /usr/share/dpkg/buildflags.mk
+
+l_SONAME=63
+
+override_dh_auto_clean:
+	dh_auto_clean --no-parallel
+
+override_dh_clean:
+	dh_clean
+	find $(CURDIR)/source/ \( -name Makefile -o -name pkgdataMakefile \) \
+		-exec rm {} \;
+	rm -Rf build-native
+
+override_dh_auto_configure:
+ifeq ($(DEB_BUILD_ARCH),$(DEB_HOST_ARCH))
+	dh_auto_configure -- --enable-static --disable-layoutex --disable-icu-config
+else
+	dh_auto_configure -B $(CURDIR)/build-native -- --host=$(DEB_BUILD_GNU_TYPE) --disable-layoutex --disable-icu-config
+	dh_auto_build -B $(CURDIR)/build-native
+	dh_auto_configure -- --enable-static --with-cross-build=$(CURDIR)/build-native
+endif
+
+override_dh_auto_build:
+	dh_auto_build --parallel -- VERBOSE=1
+	dh_auto_build --parallel -- VERBOSE=1 doc
+
+override_dh_auto_test:
+ifeq (,$(findstring $(DEB_BUILD_ARCH),i386 hurd-i386 kfreebsd-i386))
+	dh_auto_test
+else
+	# French locale has test problems on x86 architectures
+	-dh_auto_test
+endif
+
+override_dh_auto_install:
+	dh_auto_install
+	$(MAKE) -C $(CURDIR)/source/ install-doc DESTDIR=$(CURDIR)/debian/tmp/
+	# delete extra license file
+	$(RM) $(CURDIR)/debian/tmp/usr/share/icu/$(l_SONAME).?/LICENSE
+	# remove not needed manpage
+#	$(RM) $(CURDIR)/debian/tmp/usr/share/man/man1/icu-config.1
+
+override_dh_installdocs-indep:
+	dh_installdocs -i
+	# symlink duplicated files
+	for file in `find debian/icu-doc/usr/share/doc/icu-doc/html/ -name \*icu_1_1\*`; do \
+		normal=`echo $$file | sed s/icu_1_1//`; \
+		if [ -f $$normal ]; then \
+			$(RM) $$file; \
+			ln -s `basename $$normal` $$file; \
+		fi; \
+	done
+
+override_dh_missing:
+	dh_missing --list-missing
+
+%:
+	dh $@ --sourcedirectory=$(CURDIR)/source/
+
+.PHONY: override_dh_auto_clean override_dh_clean override_dh_auto_configure \
+	override_dh_auto_build override_dh_auto_test \
+	override_dh_auto_install override_dh_installdocs-indep \
+	override_dh_missing

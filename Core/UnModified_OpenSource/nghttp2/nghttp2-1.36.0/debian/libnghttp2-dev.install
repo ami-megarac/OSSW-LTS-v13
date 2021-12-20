@@ -1,0 +1,4 @@
+debian/tmp/usr/include/nghttp2/*.h
+debian/tmp/usr/lib/*/libnghttp2.a
+debian/tmp/usr/lib/*/libnghttp2.so
+debian/tmp/usr/lib/*/pkgconfig/libnghttp2.pc

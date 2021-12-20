@@ -1,0 +1,39 @@
+#
+#=DESCRIPTION dupe profiles
+#=EXRESULT FAIL
+#
+/does/not/exist1 {
+  #include <includes/base>
+
+  /usr/X11R6/lib/lib*so* r,
+  /usr/bin/emacs r,
+}
+
+/does/not/exist2 {
+  #include <includes/base>
+
+  /usr/X11R6/lib/lib*so* r,
+  /usr/bin/emacs r,
+}
+
+/does/not/exist {
+  #include <includes/base>
+
+  /usr/X11R6/lib/lib*so* r,
+  /usr/bin/emacs r,
+}
+
+/does/not/exist2 {
+  #include <includes/base>
+
+  /usr/X11R6/lib/lib*so* r,
+  /does/not/exist r,
+}
+
+/does/not/exist3 {
+  #include <includes/base>
+
+  /usr/X11R6/lib/lib*so* r,
+  /usr/bin/emacs r,
+}
+

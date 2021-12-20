@@ -1,0 +1,9 @@
+#=DESCRIPTION reference variables in name and attachment
+#=EXRESULT PASS
+
+@{FOO}=bar
+@{BAR}=baz
+
+profile /does/not@{BAR} /exist@{FOO} {
+  /does/not/exist r,
+}

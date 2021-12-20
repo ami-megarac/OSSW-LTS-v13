@@ -1,0 +1,28 @@
+From: intrigeri <intrigeri@boum.org>
+Date: Thu, 31 Jan 2019 09:29:24 +0000
+Subject: audio abstraction: grant read access to the libao configuration
+ files.
+
+Bug-Debian: https://bugs.debian.org/920670
+Origin: https://gitlab.com/apparmor/apparmor/merge_requests/320
+
+Relevant documentation: https://xiph.org/ao/doc/config.html
+---
+ profiles/apparmor.d/abstractions/audio | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/profiles/apparmor.d/abstractions/audio b/profiles/apparmor.d/abstractions/audio
+index 5f202d2..f4dbaac 100644
+--- a/profiles/apparmor.d/abstractions/audio
++++ b/profiles/apparmor.d/abstractions/audio
+@@ -45,6 +45,10 @@ owner @{HOME}/.esd_auth r,
+ owner @{HOME}/.asoundrc r,
+ /etc/esound/esd.conf r,
+ 
++# libao
++/etc/libao.conf r,
++owner @{HOME}/.libao r,
++
+ # libcanberra
+ owner @{HOME}/.cache/event-sound-cache.* rwk,
+ 

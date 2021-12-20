@@ -1,0 +1,8 @@
+#
+#=DESCRIPTION unix bind with non-bind member modifier
+#=EXRESULT FAIL
+#
+
+profile foo {
+  unix bind peer=(addr=@foo ),
+}

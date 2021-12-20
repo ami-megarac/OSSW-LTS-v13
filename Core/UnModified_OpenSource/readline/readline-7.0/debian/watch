@@ -1,0 +1,2 @@
+version=3
+http://ftp.gnu.org/gnu/readline/ (?:|.*/)readline(?:[_\-]v?|)(\d[^\s/]*)\.(?:tar\.xz|txz|tar\.bz2|tbz2|tar\.gz|tgz)

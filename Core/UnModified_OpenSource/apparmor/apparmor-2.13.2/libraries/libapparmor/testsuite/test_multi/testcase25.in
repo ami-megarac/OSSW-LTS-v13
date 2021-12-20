@@ -1,0 +1,1 @@
+type=APPARMOR_HINT msg=audit(1190503291.842:27382):  type=1504 operation="clone" task=20401 pid=20400 profile="null-complain-profile"

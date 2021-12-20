@@ -1,0 +1,2 @@
+mod debian/tmp/usr/lib/apache2/modules/mod_apparmor.so
+mod debian/etc/apache2/mods-available/apparmor.load

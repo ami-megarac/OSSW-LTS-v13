@@ -1,0 +1,216 @@
+# Danish translation of the libidn2 gettext message catalogue
+# Copyright (C) 2017 Free Software Foundation, Inc.
+# This file is distributed under the same license as the libidn2 package.
+# Joe Hansen <joedalton2@yahoo.dk>, 2015, 2017.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: libidn2-2.0.4\n"
+"Report-Msgid-Bugs-To: bug-libidn2@gnu.org\n"
+"POT-Creation-Date: 2018-05-18 09:59+0200\n"
+"PO-Revision-Date: 2017-12-28 17:38+0100\n"
+"Last-Translator: Joe Hansen <joedalton2@yahoo.dk>\n"
+"Language-Team: Danish <dansk@dansk-gruppen.dk>\n"
+"Language: da\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Bugs: Report translation errors to the Language-Team address.\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+
+#: lib/error.c:56
+msgid "success"
+msgstr "lykkedes"
+
+#: lib/error.c:60
+msgid "out of memory"
+msgstr "ikke nok hukommelse"
+
+#: lib/error.c:64
+msgid "could not determine locale encoding format"
+msgstr "kunne ikke bestemme kodningsformat for sproget"
+
+#: lib/error.c:68
+msgid "could not convert string to UTF-8"
+msgstr "kunne ikke omdanne streng til UTF-8"
+
+#: lib/error.c:72
+msgid "string encoding error"
+msgstr "kodningsfejl for streng"
+
+#: lib/error.c:76
+msgid "string could not be NFC normalized"
+msgstr "streng kunne ikke blive NFC-normaliseret"
+
+#: lib/error.c:80
+msgid "string contains invalid punycode data"
+msgstr "streng indeholder ugyldige punycode-data"
+
+#: lib/error.c:84
+msgid "punycode encoded data will be too large"
+msgstr "punycode-kodede data vil være for store"
+
+#: lib/error.c:88
+msgid "punycode conversion resulted in overflow"
+msgstr "puyncode-omdannelse medførte overløb"
+
+#: lib/error.c:92
+msgid "domain name longer than 255 characters"
+msgstr "domænenavn længere end 255 tegn"
+
+#: lib/error.c:96
+msgid "domain label longer than 63 characters"
+msgstr "domæneetiket længere end 63 tegn"
+
+#: lib/error.c:100
+msgid "input A-label is not valid"
+msgstr "angivne A-etiket er ikke gyldig"
+
+#: lib/error.c:104
+msgid "input A-label and U-label does not match"
+msgstr "angivne A-etiket og U-etiket matcher ikke"
+
+#: lib/error.c:108
+msgid "string is not in Unicode NFC format"
+msgstr "streng er ikke i Unicode NFC-format"
+
+#: lib/error.c:112
+msgid "string contains forbidden two hyphens pattern"
+msgstr "streng indeholder forbudt mønster med to bindestreger"
+
+#: lib/error.c:116
+msgid "string start/ends with forbidden hyphen"
+msgstr "streng starter/slutter med forbudt bindestreg"
+
+#: lib/error.c:120
+msgid "string contains a forbidden leading combining character"
+msgstr "streng indeholder et forbudt foranstillet kombinationstegn"
+
+#: lib/error.c:124
+msgid "string contains a disallowed character"
+msgstr "streng indeholder et forbudt tegn"
+
+#: lib/error.c:128
+msgid "string contains a forbidden context-j character"
+msgstr "streng indeholder et forbudt kontekst-j tegn"
+
+#: lib/error.c:132
+msgid "string contains a context-j character with null rule"
+msgstr "streng indeholder et kontekst-j tegn med nul-regel"
+
+#: lib/error.c:136
+msgid "string contains a forbidden context-o character"
+msgstr "streng indeholder et forbudt kontekst-o tegn"
+
+#: lib/error.c:140
+msgid "string contains a context-o character with null rule"
+msgstr "streng indeholder et kontekst-o tegn med nul-regel"
+
+#: lib/error.c:144
+msgid "string contains unassigned code point"
+msgstr "streng indeholder ikke-tildelt kodepunkt"
+
+#: lib/error.c:148
+msgid "string has forbidden bi-directional properties"
+msgstr "streng har forbudte tovejsegenskaber"
+
+#: lib/error.c:152
+msgid "Unknown error"
+msgstr "Ukendt fejl"
+
+#: src/idn2.c:59
+#, c-format
+msgid "Try `%s --help' for more information.\n"
+msgstr "Prøv »%s --help« for yderligere information.\n"
+
+#: src/idn2.c:63
+#, c-format
+msgid "Usage: %s [OPTION]... [STRINGS]...\n"
+msgstr "Brug: %s [TILVALG]... [STRENGE]...\n"
+
+#: src/idn2.c:66
+msgid ""
+"Internationalized Domain Name (IDNA2008) convert STRINGS, or standard "
+"input.\n"
+"\n"
+msgstr ""
+"Internationalized Domain Name (IDNA2008) omdan STRENGE - eller "
+"standardinddata.\n"
+"\n"
+
+#: src/idn2.c:70
+msgid ""
+"Command line interface to the Libidn2 implementation of IDNA2008.\n"
+"\n"
+"All strings are expected to be encoded in the locale charset.\n"
+"\n"
+"To process a string that starts with `-', for example `-foo', use `--'\n"
+"to signal the end of parameters, as in `idn2 --quiet -- -foo'.\n"
+"\n"
+"Mandatory arguments to long options are mandatory for short options too.\n"
+msgstr ""
+"Kommandolinjebrugerflade til Libidn2-implementeringen af IDNA2008.\n"
+"\n"
+"Alle tekststrenge forventes at være kodet i sprogets tegnsæt.\n"
+"\n"
+"For at behandle en tekststreng der begynder med »-«, f.eks. »-foo«, så\n"
+"brug »--« for at signalere at der ikke følger flere parametre, som i\n"
+"»idn2 --quiet -- -foo«.\n"
+"\n"
+"Obligatoriske parametre som gælder for langforms-tilvalg er ligeledes\n"
+"obligatoriske for kortforms-tilvalg.\n"
+
+#: src/idn2.c:80
+msgid ""
+"  -h, --help               Print help and exit\n"
+"  -V, --version            Print version and exit\n"
+msgstr ""
+"  -h, --help               Vis hælpen og afslut\n"
+"  -V, --version            Vis version og afslut\n"
+
+#: src/idn2.c:84
+msgid ""
+"  -d, --decode             Decode (punycode) domain name\n"
+"  -l, --lookup             Lookup domain name (default)\n"
+"  -r, --register           Register label\n"
+msgstr ""
+"  -d, --decode             Afkod (punycode) domænenavn\n"
+"  -l, --lookup             Slå domænenavn op (standard)\n"
+"  -r, --register           Registrer etiket\n"
+
+#: src/idn2.c:89
+msgid ""
+"  -T, --tr46t              Enable TR46 transitional processing\n"
+"  -N, --tr46nt             Enable TR46 non-transitional processing\n"
+"      --no-tr46            Disable TR46 processing\n"
+msgstr ""
+"  -T, --tr46t              Aktiver TR46-overgangsbehandling\n"
+"  -N, --tr46nt             Aktiver TR46 uden overgangsbehandling\n"
+"      --no-tr46            Deaktiver TR46-behandling\n"
+
+#: src/idn2.c:94
+#, fuzzy
+msgid ""
+"      --usestd3asciirules  Enable STD3 ASCII rules\n"
+"      --debug              Print debugging information\n"
+"      --quiet              Silent operation\n"
+msgstr ""
+"      --nostd3asciirules   Deaktiver STD3 ASCII-regler\n"
+"      --debug              Udskriv fejlsøgningsinformation\n"
+"      --quiet              Stille kørsel\n"
+
+#: src/idn2.c:216
+#, c-format
+msgid "Charset: %s\n"
+msgstr "Tegnsæt: %s\n"
+
+#: src/idn2.c:220
+msgid ""
+"Type each input string on a line by itself, terminated by a newline "
+"character.\n"
+msgstr ""
+"Indtast hver streng på en særskilt linje - afsluttet med et nylinje-tegn.\n"
+
+#: src/idn2.c:248
+msgid "input error"
+msgstr "fejl i inddata"

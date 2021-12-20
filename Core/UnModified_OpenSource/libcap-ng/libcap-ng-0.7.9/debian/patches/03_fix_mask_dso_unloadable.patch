@@ -1,0 +1,28 @@
+From 3c42afac11c323fee5da7db771cd20d414fa265d Mon Sep 17 00:00:00 2001
+From: Rene Luria <rene.luria@infomaniak.com>
+Date: Sun, 9 Dec 2018 21:51:54 +0100
+Subject: [PATCH] Fix mark the DSOs as unloadable
+
+as suggested by Simon McVittie in
+https://github.com/stevegrubb/libcap-ng/issues/5 and Carlos O'Donell at
+https://sourceware.org/bugzilla/show_bug.cgi?id=13502 mark the DSOs as
+unloadable with -z nodelete to prevent crashes at fork
+
+https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=904808
+
+Fix: https://github.com/stevegrubb/libcap-ng/issues/5
+---
+ src/Makefile.am | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+Index: libcap-ng/src/Makefile.am
+===================================================================
+--- libcap-ng.orig/src/Makefile.am
++++ libcap-ng/src/Makefile.am
+@@ -34,5 +34,5 @@ noinst_HEADERS = captab.h
+ libcap_ng_la_SOURCES = cap-ng.c lookup_table.c
+ libcap_ng_la_LIBADD =
+ libcap_ng_la_DEPENDENCIES = $(libcap_ng_la_SOURCES) ../config.h
+-libcap_ng_la_LDFLAGS = -Wl,-z,relro
++libcap_ng_la_LDFLAGS = -Wl,-z,relro -Wl,-z,nodelete
+ 

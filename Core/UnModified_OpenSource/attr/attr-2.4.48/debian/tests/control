@@ -1,0 +1,7 @@
+Tests: test-func
+Restrictions: flaky rw-build-tree
+Depends: build-essential, autoconf, automake, autopoint, libtool, attr
+
+Tests: test-func-root
+Restrictions: flaky rw-build-tree needs-root
+Depends: build-essential, autoconf, automake, autopoint, libtool, attr

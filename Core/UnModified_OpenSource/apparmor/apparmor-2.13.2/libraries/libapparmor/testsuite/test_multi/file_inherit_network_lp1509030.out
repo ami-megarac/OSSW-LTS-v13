@@ -1,0 +1,14 @@
+START
+File: file_inherit_network_lp1509030.in
+Event type: AA_RECORD_DENIED
+Audit ID: 1445522258.769:1054
+Operation: file_inherit
+Profile: /usr/lib/NetworkManager/nm-dhcp-client.action
+Command: nm-dhcp-client.
+PID: 2407
+Network family: inet6
+Socket type: dgram
+Protocol: udp
+Local port: 10580
+Epoch: 1445522258
+Audit subid: 1054

@@ -1,0 +1,11 @@
+#
+#=DESCRIPTION audit deny change_profile with quotes
+#=EXRESULT PASS
+#
+/usr/bin/foo {
+   audit deny change_profile -> "/bin/foo",
+}
+
+/usr/bin/foo2 {
+   audit deny change_profile -> "/bin/ foo",
+}

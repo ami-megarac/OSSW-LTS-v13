@@ -1,0 +1,41 @@
+#
+#=DESCRIPTION validate audit allow w/capabilities.
+#=EXRESULT PASS
+# vim:syntax=apparmor
+# Last Modified: Sun Apr 17 19:44:44 2005
+#
+/does/not/exist {
+  audit allow capability chown,
+  audit allow capability dac_override,
+  audit allow capability dac_read_search,
+  audit allow capability fowner,
+  audit allow capability fsetid,
+  audit allow capability kill,
+  audit allow capability setgid,
+  audit allow capability setuid,
+  audit allow capability setpcap,
+  audit allow capability linux_immutable,
+  audit allow capability net_bind_service,
+  audit allow capability net_broadcast,
+  audit allow capability net_admin,
+  audit allow capability net_raw,
+  audit allow capability ipc_lock,
+  audit allow capability ipc_owner,
+  audit allow capability sys_module,
+  audit allow capability sys_rawio,
+  audit allow capability sys_chroot,
+  audit allow capability sys_ptrace,
+  audit allow capability sys_pacct,
+  audit allow capability sys_admin,
+  audit allow capability sys_boot,
+  audit allow capability sys_nice,
+  audit allow capability sys_resource,
+  audit allow capability sys_time,
+  audit allow capability sys_tty_config,
+  audit allow capability mknod,
+  audit allow capability lease,
+  audit allow capability audit_write,
+  audit allow capability audit_control,
+  audit allow capability setfcap,
+  audit allow capability mac_override,
+}

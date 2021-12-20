@@ -1,0 +1,13 @@
+START
+File: testcase_dbus_05.in
+Event type: AA_RECORD_DENIED
+Audit ID: 1375323416.656:167
+Operation: dbus_bind
+Denied Mask: bind
+Profile: /tmp/apparmor-2.8.0/tests/regression/apparmor/dbus_service
+Name: org.freedesktop.nm_dhcp_client
+Command: /bin/dbus-daemon
+PID: 2838
+DBus bus: system
+Epoch: 1375323416
+Audit subid: 167

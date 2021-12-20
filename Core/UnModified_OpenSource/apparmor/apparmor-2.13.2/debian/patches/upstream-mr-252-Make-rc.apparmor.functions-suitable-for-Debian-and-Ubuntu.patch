@@ -1,0 +1,330 @@
+From: intrigeri <intrigeri@boum.org>
+Date: Fri, 28 Dec 2018 16:11:26 +0000
+Subject: Make rc.apparmor.functions suitable for Debian and Ubuntu
+
+Origin: https://gitlab.com/apparmor/apparmor/merge_requests/252
+---
+ parser/rc.apparmor.functions | 217 +++++++++++++++++++++++++------------------
+ 1 file changed, 125 insertions(+), 92 deletions(-)
+
+diff --git a/parser/rc.apparmor.functions b/parser/rc.apparmor.functions
+index 5655d04..36b6ec6 100644
+--- a/parser/rc.apparmor.functions
++++ b/parser/rc.apparmor.functions
+@@ -1,7 +1,7 @@
+ #!/bin/sh
+ # ----------------------------------------------------------------------
+ #    Copyright (c) 1999-2008 NOVELL (All rights reserved)
+-#    Copyright (c) 2009-2012 Canonical Ltd. (All rights reserved)
++#    Copyright (c) 2009-2018 Canonical Ltd. (All rights reserved)
+ #
+ #    This program is free software; you can redistribute it and/or
+ #    modify it under the terms of version 2 of the GNU General Public
+@@ -31,28 +31,23 @@
+ 
+ # Some nice defines that we use
+ 
+-CONFIG_DIR=/etc/apparmor
+ MODULE=apparmor
+-if [ -f "${CONFIG_DIR}/${MODULE}.conf" ] ; then
+-	APPARMOR_CONF="${CONFIG_DIR}/${MODULE}.conf"
+-else
+-	aa_log_warning_msg "Unable to find config file in ${CONFIG_DIR}, installation problem?"
++PARSER=/sbin/apparmor_parser
++PARSER_OPTS=
++# Suppress warnings when booting in quiet mode
++if [ "${QUIET:-no}" = yes ] || [ "${quiet:-n}" = y ]; then
++	PARSER_OPTS="$PARSER_OPTS --quiet"
+ fi
+ 
+-if [ -f "${APPARMOR_CONF}" ] ; then
+-	#parse the conf file to see what we should do
+-	. "${APPARMOR_CONF}"
++if [ -d /etc/apparmor.d ] ; then
++	PROFILE_DIRS=/etc/apparmor.d
++else
++	aa_log_warning_msg "Unable to find profiles directory, installation problem?"
+ fi
+-
+-PARSER=/sbin/apparmor_parser
+-
+-# APPARMOR_DIR might be defined in apparmor.conf
+-if [ -d "${APPARMOR_DIR}" ] ; then
+-	PROFILE_DIR=${APPARMOR_DIR}
+-elif [ -d /etc/apparmor.d ] ; then
+-	PROFILE_DIR=/etc/apparmor.d
++ADDITIONAL_PROFILE_DIR=/var/lib/snapd/apparmor/profiles
++if [ -d "$ADDITIONAL_PROFILE_DIR" ]; then
++	PROFILE_DIRS="${PROFILE_DIRS} ${ADDITIONAL_PROFILE_DIR}"
+ fi
+-ABSTRACTIONS="-I${PROFILE_DIR}"
+ AA_STATUS=/usr/sbin/aa-status
+ SECURITYFS=/sys/kernel/security
+ 
+@@ -61,17 +56,54 @@ STATUS=0
+ 
+ # Test if the apparmor "module" is present.
+ is_apparmor_present() {
+-	local modules=$1
+-	shift
++	[ -d /sys/module/apparmor ]
++}
+ 
+-	while [ $# -gt 0 ] ; do
+-		modules="$modules|$1"
+-		shift
+-	done
++# Checks to see if the current container is capable of having internal AppArmor
++# profiles that should be loaded. Callers of this function should have already
++# verified that they're running inside of a container environment with
++# something like `systemd-detect-virt --container`.
++#
++# The only known container environments capable of supporting internal policy
++# are LXD and LXC environment.
++#
++# Returns 0 if the container environment is capable of having its own internal
++# policy and non-zero otherwise.
++#
++# IMPORTANT: This function will return 0 in the case of a non-LXD/non-LXC
++# system container technology being nested inside of a LXD/LXC container that
++# utilized an AppArmor namespace and profile stacking. The reason 0 will be
++# returned is because .ns_stacked will be "yes" and .ns_name will still match
++# "lx[dc]-*" since the nested system container technology will not have set up
++# a new AppArmor profile namespace. This will result in the nested system
++# container's boot process to experience failed policy loads but the boot
++# process should continue without any loss of functionality. This is an
++# unsupported configuration that cannot be properly handled by this function.
++is_container_with_internal_policy() {
++	local ns_stacked_path="${SFS_MOUNTPOINT}/.ns_stacked"
++	local ns_name_path="${SFS_MOUNTPOINT}/.ns_name"
++	local ns_stacked
++	local ns_name
++
++	if ! [ -f "$ns_stacked_path" ] || ! [ -f "$ns_name_path" ]; then
++		return 1
++	fi
+ 
+-	[ $? -ne 0 -a -d /sys/module/apparmor ]
++	read -r ns_stacked < "$ns_stacked_path"
++	if [ "$ns_stacked" != "yes" ]; then
++		return 1
++	fi
+ 
+-	return $?
++	# LXD and LXC set up AppArmor namespaces starting with "lxd-" and
++	# "lxc-", respectively. Return non-zero for all other namespace
++	# identifiers.
++	read -r ns_name < "$ns_name_path"
++	if [ "${ns_name#lxd-*}" = "$ns_name" ] && \
++	   [ "${ns_name#lxc-*}" = "$ns_name" ]; then
++		return 1
++	fi
++
++	return 0
+ }
+ 
+ # This set of patterns to skip needs to be kept in sync with
+@@ -85,7 +117,6 @@ skip_profile() {
+ 	     "${profile%.rpmsave}" != "${profile}" -o \
+ 	     "${profile%.orig}" != "${profile}" -o \
+ 	     "${profile%.rej}" != "${profile}" -o \
+-	     -e "${PROFILE_DIR}/disable/`basename ${profile}`" -o \
+ 	     "${profile%\~}" != "${profile}" ] ; then
+ 		return 1
+ 	fi
+@@ -106,30 +137,68 @@ skip_profile() {
+ 	return 0
+ }
+ 
+-force_complain() {
+-	local profile=$1
++__parse_profiles_dir() {
++	local parser_cmd="$1"
++	local profile_dir="$2"
++	local status=0
+ 
+-	# if profile not in complain mode
+-	if ! egrep -q "^/.*[ \t]+flags[ \t]*=[ \t]*\([ \t]*complain[ \t]*\)[ \t]+{" $profile ; then
+-		local link="${PROFILE_DIR}/force-complain/`basename ${profile}`"
+-		if [ -e "$link" ] ; then
+-			aa_log_warning_msg "found $link, forcing complain mode"
+-			return 0
+-		fi
++	if [ ! -d "$profile_dir" ]; then
++		aa_log_failure_msg "Profile directory not found: $profile_dir"
++		return 1
++	fi
++
++	if [ -z "$(ls $profile_dir/)" ]; then
++		aa_log_failure_msg "No profiles found in $profile_dir"
++		return 1
+ 	fi
+ 
+-	return 1
++	# Note: the parser automatically skips files that match skip_profile()
++	# when we pass it a directory, but not when we pass it an individual
++	# profile. So we need to use skip_profile only in the latter case,
++	# as long as the parser is in sync' with skip_profile().
++	"$PARSER" $PARSER_OPTS $parser_cmd -- "$profile_dir" || {
++		# FIXME: once the parser properly handles broken profiles
++		# (LP: #1377338), remove the following code and the
++		# skip_profile() function. For now, if the parser returns
++		# an error, just run it again separately on each profile.
++		for profile in $profile_dir/*; do
++			skip_profile "${profile}"
++			skip=$?
++			if [ "$skip" -eq 2 ]; then
++				# Ignore skip status == 2 (silent skip)
++				continue
++			elif [ "$skip" -ne 0 ] ; then
++				aa_log_skipped_msg "$profile"
++				logger -t "AppArmor(init)" -p daemon.warn \
++					"Skipping profile $profile"
++				continue
++			fi
++			if [ ! -f "${profile}" ] ; then
++				continue
++			fi
++			echo "$profile"
++		done | \
++		# Use xargs to parallelize calls to the parser over all CPUs
++		xargs -n1 -d"\n" --max-procs=$(getconf _NPROCESSORS_ONLN) \
++			"$PARSER" $PARSER_OPTS $parser_cmd --
++		if [ $? -ne 0 ]; then
++			status=1
++			aa_log_failure_msg "At least one profile failed to load"
++		fi
++	}
++
++	return $status
+ }
+ 
+ parse_profiles() {
+ 	# get parser arg
+ 	case "$1" in
+ 		load)
+-			PARSER_ARGS="--add"
++			PARSER_CMD="--add"
+ 			PARSER_MSG="Loading AppArmor profiles "
+ 			;;
+ 		reload)
+-			PARSER_ARGS="--replace"
++			PARSER_CMD="--replace"
+ 			PARSER_MSG="Reloading AppArmor profiles "
+ 			;;
+ 		*)
+@@ -145,45 +214,10 @@ parse_profiles() {
+ 		exit 1
+ 	fi
+ 
+-	if [ ! -d "$PROFILE_DIR" ]; then
+-		aa_log_failure_msg "Profile directory not found"
+-		aa_log_action_end 1
+-		exit 1
+-	fi
+-
+-	if [ -z "$(ls $PROFILE_DIR/)" ]; then
+-		aa_log_failure_msg "No profiles found"
+-		aa_log_action_end 1
+-		return 1
+-	fi
+-
+-	for profile in $PROFILE_DIR/*; do
+-		skip_profile "${profile}"
+-		skip=$?
+-		# Ignore skip status == 2 (silent skip)
+-		if [ "$skip" -eq 1 ] ; then
+-			aa_log_skipped_msg "$profile"
+-			logger -t "AppArmor(init)" -p daemon.warn "Skipping profile $profile"
+-			STATUS=2
+-			continue
+-		elif [ "$skip" -ne 0 ]; then
+-			continue
+-		fi
+-		if [ -f "${profile}" ] ; then
+-			COMPLAIN=""
+-			if force_complain "${profile}" ; then
+-				COMPLAIN="-C"
+-			fi
+-			$PARSER $ABSTRACTIONS $PARSER_ARGS $COMPLAIN "$profile" > /dev/null
+-			if [ $? -ne 0 ]; then
+-				aa_log_failure_msg "$profile failed to load"
+-				STATUS=1
+-			fi
+-		fi
++	for profile_dir in $PROFILE_DIRS; do
++		__parse_profiles_dir "$PARSER_CMD" "$profile_dir" || STATUS=$?
+ 	done
+-	if [ $STATUS -eq 2 ]; then
+-		STATUS=0
+-	fi
++
+ 	aa_log_action_end "$STATUS"
+ 	return $STATUS
+ }
+@@ -195,18 +229,20 @@ profiles_names_list() {
+ 		exit 1
+ 	fi
+ 
+-	if [ ! -d "$PROFILE_DIR" ]; then
+-		aa_log_failure_msg "- Profile directory not found"
+-		exit 1
+-	fi
++	for profile_dir in $PROFILE_DIRS; do
++		if [ ! -d "$profile_dir" ]; then
++			aa_log_warning_msg "- Profile directory not found: $profile_dir"
++			continue
++		fi
+ 
+-	for profile in $PROFILE_DIR/*; do
+-	        if skip_profile "${profile}" && [ -f "${profile}" ] ; then
+-			LIST_ADD=$($PARSER $ABSTRACTIONS -N "$profile" )
+-			if [ $? -eq 0 ]; then
+-				echo "$LIST_ADD"
++		for profile in $profile_dir/*; do
++			if skip_profile "${profile}" && [ -f "${profile}" ] ; then
++				LIST_ADD=$($PARSER -N "$profile" )
++				if [ $? -eq 0 ]; then
++					echo "$LIST_ADD"
++				fi
+ 			fi
+-		fi
++		done
+ 	done
+ }
+ 
+@@ -231,7 +267,7 @@ is_apparmor_loaded() {
+ 		return 0
+ 	fi
+ 
+-	is_apparmor_present apparmor
++	is_apparmor_present
+ 
+ 	return $?
+ }
+@@ -268,8 +304,6 @@ apparmor_start() {
+ 		return 1
+ 	fi
+ 
+-	configure_owlsm
+-
+ 	# if there is anything in the profiles file don't load
+ 	if ! read line < "$SFS_MOUNTPOINT/profiles"; then
+ 		parse_profiles load
+@@ -331,7 +365,7 @@ apparmor_kill() {
+ 		return 1
+ 	fi
+ 
+-	if is_apparmor_present apparmor ; then
++	if is_apparmor_present ; then
+ 		MODULE=apparmor
+ 	else
+ 		aa_log_failure_msg "AppArmor is builtin"
+@@ -351,7 +385,6 @@ __apparmor_restart() {
+ 
+ 	aa_log_daemon_msg "Restarting AppArmor"
+ 
+-	configure_owlsm
+ 	parse_profiles reload
+ 
+ 	rc=$?

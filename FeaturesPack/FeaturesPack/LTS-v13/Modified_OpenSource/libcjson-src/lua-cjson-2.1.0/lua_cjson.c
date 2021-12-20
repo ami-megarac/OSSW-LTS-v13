@@ -74,6 +74,8 @@
 #define DEFAULT_DECODE_INVALID_NUMBERS 0
 #endif
 
+int stringify_flag = 0;
+
 typedef enum {
     T_OBJ_BEGIN,
     T_OBJ_END,
@@ -994,14 +996,28 @@ static int json_is_invalid_number(json_parse_t *json)
 static void json_next_number_token(json_parse_t *json, json_token_t *token)
 {
     char *endptr;
+    char str_ptr[25] = {0};
+    int i;
 
     token->type = T_NUMBER;
-    token->value.number = fpconv_strtod(json->ptr, &endptr);
-    if (json->ptr == endptr)
+    token->value.number = fpconv_strtod(json->ptr, &endptr,str_ptr);
+    if (json->ptr == endptr){
         json_set_token_error(token, json, "invalid number");
-    else
+	}
+    else{
         json->ptr = endptr;     /* Skip the processed number */
-
+        /* if the number is greater than lua limits then sent it as string instead of number */
+		if (token->value.number >= 99999999999999 && stringify_flag == 1){
+			token->type = T_STRING;
+			strbuf_reset(json->tmp);
+			token->string_len = strnlen(str_ptr,25);
+			for(i =0; str_ptr[i] != '\0'; i++){
+				strbuf_append_char_unsafe(json->tmp, str_ptr[i]);
+			}
+			strbuf_ensure_null(json->tmp);
+			token->value.string = strbuf_string(json->tmp, &token->string_len);
+		}
+	}
     return;
 }
 
@@ -1253,11 +1269,24 @@ static int json_decode(lua_State *l)
     json_parse_t json;
     json_token_t token;
     size_t json_len;
-
-    luaL_argcheck(l, lua_gettop(l) == 1, 1, "expected 1 argument");
+	int nargs = lua_gettop(l);
+	
+	if(nargs == 1)
+	{
+		json.data = luaL_checklstring(l, 1, &json_len);
+		
+	}
+	else if(nargs == 2)
+	{
+		json.data = luaL_checklstring(l, 1, &json_len);
+		stringify_flag = luaL_checkint(l,2);
+	}
+	else
+	{
+		luaL_argcheck(l, lua_gettop(l) == 1, 1, "expected 1 argument");
+	}
 
     json.cfg = json_fetch_config(l);
-    json.data = luaL_checklstring(l, 1, &json_len);
     json.current_depth = 0;
     json.ptr = json.data;
 
@@ -1284,6 +1313,7 @@ static int json_decode(lua_State *l)
         json_throw_parse_error(l, &json, "the end", &token);
 
     strbuf_free(json.tmp);
+    stringify_flag = 0;
 
     return 1;
 }

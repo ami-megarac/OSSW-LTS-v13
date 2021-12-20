@@ -16,6 +16,9 @@ CFLAGS += -I${SPXINC}/userprivilege
 CFLAGS += -I${SPXINC}/ldapconf
 CFLAGS += -I${TARGETDIR}/usr/include
 CFLAGS += -I${SPXINC}/unix
+CFLAGS += -I${SPXINC}/ipmi
+CFLAGS += -I${SPXINC}/network
+CFLAGS += -I${SPXINC}/hostname
 
 LIBS += -L$(SPXLIB)/dbgout -Wl,-rpath /usr/local/lib -ldbgout
 LIBS += -L$(SPXLIB)/iniparser -Wl,-rpath /usr/local/lib -liniparser

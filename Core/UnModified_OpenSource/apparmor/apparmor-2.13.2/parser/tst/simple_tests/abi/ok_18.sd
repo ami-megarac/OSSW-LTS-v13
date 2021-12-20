@@ -1,0 +1,9 @@
+#
+#=DESCRIPTION abi testing - abi path no space between and and path
+#=EXRESULT PASS
+#
+
+abi"abi/4.19",
+
+/does/not/exist {
+}

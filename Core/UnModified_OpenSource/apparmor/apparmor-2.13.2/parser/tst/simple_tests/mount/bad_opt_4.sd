@@ -1,0 +1,6 @@
+#
+#=Description basic rule to test the invalid "rec" mount option
+#=EXRESULT FAIL
+/usr/bin/foo {
+  mount options=(rec) /a -> /1,
+}

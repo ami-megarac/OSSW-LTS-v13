@@ -1,0 +1,8 @@
+#
+#=DESCRIPTION test for conflict safe and unsafe exec condition
+#=EXRESULT FAIL
+#
+/usr/bin/foo {
+   change_profile safe /onexec -> /bin/foo,
+   change_profile unsafe /onexec -> /bin/foo,
+}

@@ -1,0 +1,8 @@
+#
+#=Description basic rules to test the "r" mount option
+#=EXRESULT PASS
+/usr/bin/foo {
+  mount options=r /a -> /1,
+  mount options=(r) /b -> /2,
+  mount options in (r) /d -> /4,
+}

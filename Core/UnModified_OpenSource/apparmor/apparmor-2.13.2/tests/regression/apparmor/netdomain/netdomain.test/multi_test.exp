@@ -1,0 +1,8 @@
+if { [catch {  set filenames [glob $srcdir/*.send] } ] } {
+    puts "No .send files found"
+} else {
+    # foreach file, call multi-run (from testsuite/lib)
+
+    foreach file $filenames { multi-run $file }
+}
+

@@ -1,0 +1,10 @@
+#
+#=Description basic rules to test the "rbind" mount option
+#=EXRESULT PASS
+/usr/bin/foo {
+  mount options=rbind /a -> /1,
+  mount options=(rbind) /b -> /2,
+  mount options=(rw,rbind) /c -> /3,
+  mount options in (rbind) /d -> /4,
+  mount options in (ro,rbind) /e -> /5,
+}

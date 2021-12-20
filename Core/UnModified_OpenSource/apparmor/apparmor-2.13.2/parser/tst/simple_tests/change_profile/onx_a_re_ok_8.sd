@@ -1,0 +1,45 @@
+#
+#=DESCRIPTION audit change_profile /onexec re with quotes
+#=EXRESULT PASS
+#
+
+/usr/bin/foo5 {
+   audit change_profile /onexec -> "/bin/*",
+}
+
+/usr/bin/foo6 {
+   audit change_profile /onexec -> "/bin/**",
+}
+
+/usr/bin/foo7 {
+   audit change_profile /onexec -> "/bin/[ab]",
+}
+
+/usr/bin/foo8 {
+   audit change_profile /onexec -> "/bin/[^ab]",
+}
+
+/usr/bin/foo10 {
+   audit change_profile /onexec -> "/bin/?ab",
+}
+
+/usr/bin/foo11 {
+   audit change_profile /onexec -> "/bin/ *",
+}
+
+/usr/bin/foo12 {
+   audit change_profile /onexec -> "/bin/ **",
+}
+
+/usr/bin/foo13 {
+   audit change_profile /onexec -> "/bin/ [ab]",
+}
+
+/usr/bin/foo14 {
+   audit change_profile /onexec -> "/bin/ [^ab]",
+}
+
+/usr/bin/foo15 {
+   audit change_profile /onexec -> "/bin/ ?ab",
+}
+

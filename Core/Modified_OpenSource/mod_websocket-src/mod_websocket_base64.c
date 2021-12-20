@@ -88,7 +88,7 @@ int mod_websocket_base64_decode(unsigned char **dst, size_t *dstsiz, const unsig
         return -1;
     }
     base64.x = 0UL;
-    *dst = (unsigned char *)malloc(srcsiz);/* SCA Fix [String not null terminated : Memory - corruptions]:: False Positive *//* Reason for False Positive - The source buffer is containing a NULL terminator*/
+    *dst = (unsigned char *)malloc(srcsiz+1);
     if (!*dst) {
         return -1;
     }

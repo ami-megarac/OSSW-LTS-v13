@@ -1,0 +1,8 @@
+#
+#=DESCRIPTION audit change_profile @{var}
+#=EXRESULT PASS
+#
+@{var}=/test
+/usr/bin/foo {
+   audit change_profile @{var} -> /bin/foo,
+}

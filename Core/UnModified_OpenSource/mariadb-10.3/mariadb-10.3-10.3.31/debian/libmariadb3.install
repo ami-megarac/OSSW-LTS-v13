@@ -1,0 +1,5 @@
+usr/lib/*/libmariadb.so.*
+usr/lib/*/mariadb19/plugin/caching_sha2_password.so
+usr/lib/*/mariadb19/plugin/client_ed25519.so
+usr/lib/*/mariadb19/plugin/dialog.so
+usr/lib/*/mariadb19/plugin/mysql_clear_password.so

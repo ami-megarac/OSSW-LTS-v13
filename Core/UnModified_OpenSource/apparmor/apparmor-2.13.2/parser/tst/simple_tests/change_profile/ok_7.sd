@@ -1,0 +1,11 @@
+#
+#=DESCRIPTION change_profile to a hat with quotes
+#=EXRESULT PASS
+#
+/usr/bin/foo {
+   change_profile -> "/bin/foo//bar",
+}
+
+/usr/bin/foo2 {
+   change_profile -> "/bin/foo// bar",
+}

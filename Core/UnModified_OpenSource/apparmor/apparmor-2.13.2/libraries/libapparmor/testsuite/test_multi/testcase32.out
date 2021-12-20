@@ -1,0 +1,8 @@
+START
+File: testcase32.in
+Event type: AA_RECORD_INVALID
+Audit ID: 1190410201.037:20926
+Operation: CRED_ACQ
+Info: user pid=24337 uid=0 auid=4294967295 msg='op=PAM:setcred acct=root exe="/usr/sbin/cron" (hostname=?, addr=?, terminal=cron res=success)'
+Epoch: 1190410201
+Audit subid: 20926

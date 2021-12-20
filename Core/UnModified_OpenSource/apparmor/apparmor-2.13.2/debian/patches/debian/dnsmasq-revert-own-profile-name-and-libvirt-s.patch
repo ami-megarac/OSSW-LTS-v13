@@ -1,0 +1,40 @@
+From: intrigeri <intrigeri@boum.org>
+Date: Sun, 27 Jan 2019 17:33:18 +0000
+Subject: dnsmasq: revert own profile name and libvirt's.
+
+The libvirtd profile expects the dnsmasq one to be called /usr/sbin/dnsmasq,
+let's revert to this for now. Symmetrically, the libvirtd profile is called
+/usr/sbin/libvirtd, so don't expect a different name for now.
+
+There's WIP to give both of these profiles a name that's not path-based
+(respectively "libvirtd" and "dnsmasq") but I doubt this will be ready
+in time for Buster.
+---
+ profiles/apparmor.d/usr.sbin.dnsmasq | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/profiles/apparmor.d/usr.sbin.dnsmasq b/profiles/apparmor.d/usr.sbin.dnsmasq
+index 3f66a17..6bc9b85 100644
+--- a/profiles/apparmor.d/usr.sbin.dnsmasq
++++ b/profiles/apparmor.d/usr.sbin.dnsmasq
+@@ -12,7 +12,7 @@
+ @{TFTP_DIR}=/var/tftp /srv/tftpboot
+ 
+ #include <tunables/global>
+-/usr/{bin,sbin}/dnsmasq flags=(attach_disconnected) {
++/usr/sbin/dnsmasq flags=(attach_disconnected) {
+   #include <abstractions/base>
+   #include <abstractions/dbus>
+   #include <abstractions/nameservice>
+@@ -27,9 +27,9 @@
+   network inet raw,
+   network inet6 raw,
+ 
+-  signal (receive) peer=/usr/{bin,sbin}/libvirtd,
++  signal (receive) peer=/usr/sbin/libvirtd,
+   signal (receive) peer=libvirtd,
+-  ptrace (readby) peer=/usr/{bin,sbin}/libvirtd,
++  ptrace (readby) peer=/usr/sbin/libvirtd,
+   ptrace (readby) peer=libvirtd,
+ 
+   owner /dev/tty rw,

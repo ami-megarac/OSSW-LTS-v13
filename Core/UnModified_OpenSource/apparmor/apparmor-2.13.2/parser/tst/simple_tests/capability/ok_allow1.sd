@@ -1,0 +1,41 @@
+#
+#=DESCRIPTION validate uses of allow/capabilities.
+#=EXRESULT PASS
+# vim:syntax=apparmor
+# Last Modified: Sun Apr 17 19:44:44 2005
+#
+/does/not/exist {
+  allow capability chown,
+  allow capability dac_override,
+  allow capability dac_read_search,
+  allow capability fowner,
+  allow capability fsetid,
+  allow capability kill,
+  allow capability setgid,
+  allow capability setuid,
+  allow capability setpcap,
+  allow capability linux_immutable,
+  allow capability net_bind_service,
+  allow capability net_broadcast,
+  allow capability net_admin,
+  allow capability net_raw,
+  allow capability ipc_lock,
+  allow capability ipc_owner,
+  allow capability sys_module,
+  allow capability sys_rawio,
+  allow capability sys_chroot,
+  allow capability sys_ptrace,
+  allow capability sys_pacct,
+  allow capability sys_admin,
+  allow capability sys_boot,
+  allow capability sys_nice,
+  allow capability sys_resource,
+  allow capability sys_time,
+  allow capability sys_tty_config,
+  allow capability mknod,
+  allow capability lease,
+  allow capability audit_write,
+  allow capability audit_control,
+  allow capability setfcap,
+  allow capability mac_override,
+}

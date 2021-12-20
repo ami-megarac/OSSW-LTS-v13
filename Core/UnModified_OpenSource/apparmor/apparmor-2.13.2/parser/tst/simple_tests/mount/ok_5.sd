@@ -1,0 +1,10 @@
+#
+#=Description basic mount rule
+#=EXRESULT PASS
+#
+
+@{mntpnt}=/foo/bar
+
+/usr/bin/foo {
+  mount @{mntpnt},
+}

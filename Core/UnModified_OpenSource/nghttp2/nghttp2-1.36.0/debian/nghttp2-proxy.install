@@ -1,0 +1,2 @@
+debian/tmp/usr/bin/nghttpx usr/sbin
+debian/tmp/usr/share/nghttp2/fetch-ocsp-response usr/share/nghttp2

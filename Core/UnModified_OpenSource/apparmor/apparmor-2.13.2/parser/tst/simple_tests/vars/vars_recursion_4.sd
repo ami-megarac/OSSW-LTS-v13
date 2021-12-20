@@ -1,0 +1,11 @@
+#=DESCRIPTION recursion with multiple values
+#=EXRESULT FAIL
+
+@{FOO} = foo bar baz
+@{BAR} = @{FOO}
+@{FOO} += {BAR,foo} @{BAR}
+
+/bin/foo {
+	@{FOO} r,
+	/bin/@{BAR} rw,
+}

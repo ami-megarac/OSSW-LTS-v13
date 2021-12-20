@@ -1,0 +1,51 @@
+#
+#=DESCRIPTION audit deny change_profile with a variable (LP: #390810)
+#=EXRESULT PASS
+#
+
+@{LIBVIRT}="libvirt"
+@{LIBVIRT_RE}="libvirt*"
+
+/usr/bin/foo {
+   audit deny change_profile -> @{LIBVIRT}-fo*,
+}
+
+/usr/bin/foo2 {
+   audit deny change_profile -> @{LIBVIRT}-fo**,
+}
+
+/usr/bin/foo3 {
+   audit deny change_profile -> @{LIBVIRT}-fo[ab],
+}
+
+/usr/bin/foo4 {
+   audit deny change_profile -> @{LIBVIRT}-fo[^ab],
+}
+
+/usr/bin/foo5 {
+   audit deny change_profile -> @{LIBVIRT}-fo?,
+}
+
+/usr/bin/foo6 {
+   audit deny change_profile -> @{LIBVIRT_RE}-foo,
+}
+
+/usr/bin/foo7 {
+   audit deny change_profile -> @{LIBVIRT_RE}-fo*,
+}
+
+/usr/bin/foo8 {
+   audit deny change_profile -> @{LIBVIRT_RE}-fo**,
+}
+
+/usr/bin/foo9 {
+   audit deny change_profile -> @{LIBVIRT_RE}-fo?,
+}
+
+/usr/bin/foo10 {
+   audit deny change_profile -> @{LIBVIRT_RE}-fo[ab],
+}
+
+/usr/bin/foo11 {
+   audit deny change_profile -> @{LIBVIRT_RE}-fo[^ab],
+}

@@ -1,0 +1,81 @@
+Source: libmnl
+Priority: important
+Maintainer: Anibal Monsalve Salazar <anibal@debian.org>
+Uploaders: Neutron Soutmun <neutrons@debian.org>
+Build-Depends:
+ autotools-dev,
+ debhelper (>= 9~),
+ dh-autoreconf,
+ dh-exec,
+ dpkg-dev (>= 1.16.1~)
+Standards-Version: 3.9.8
+Section: libs
+Homepage: http://netfilter.org/projects/libmnl/
+Vcs-Browser: https://anonscm.debian.org/cgit/collab-maint/libmnl.git
+Vcs-Git: https://anonscm.debian.org/git/collab-maint/libmnl.git
+
+Package: libmnl-dev
+Section: libdevel
+Architecture: linux-any
+Depends: libmnl0 (= ${binary:Version}), ${misc:Depends}
+Description: minimalistic Netlink communication library (devel)
+ libmnl is a minimalistic user-space library oriented to Netlink developers.
+ There are a lot of common tasks in parsing, validating, constructing of
+ both the Netlink header and TLVs that are repetitive and easy to get wrong.
+ This library aims to provide simple helpers that allows you to re-use code
+ and to avoid re-inventing the wheel.
+ .
+ The main features of this library are:
+ .
+ Small: the shared library requires around 30KB for an x86-based computer.
+ .
+ Simple: this library avoids complexity and elaborated abstractions that
+ tend to hide Netlink details.
+ .
+ Easy to use: the library simplifies the work for Netlink-wise developers.
+ It provides functions to make socket handling, message building,
+ validating, parsing and sequence tracking, easier.
+ .
+ Easy to re-use: you can use the library to build your own abstraction
+ layer on top of this library.
+ .
+ Decoupling: the interdependency of the main bricks that compose the
+ library is reduced, i.e. the library provides many helpers, but the
+ programmer is not forced to use them.
+ .
+ This package contains the development libraries and header files you need
+ to develop your programs using the minimalistic Netlink communication
+ library.
+
+Package: libmnl0
+Architecture: linux-any
+Multi-Arch: same
+Pre-Depends: ${misc:Pre-Depends}
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Description: minimalistic Netlink communication library
+ libmnl is a minimalistic user-space library oriented to Netlink developers.
+ There are a lot of common tasks in parsing, validating, constructing of
+ both the Netlink header and TLVs that are repetitive and easy to get wrong.
+ This library aims to provide simple helpers that allows you to re-use code
+ and to avoid re-inventing the wheel.
+ .
+ The main features of this library are:
+ .
+ Small: the shared library requires around 30KB for an x86-based computer.
+ .
+ Simple: this library avoids complexity and elaborated abstractions that
+ tend to hide Netlink details.
+ .
+ Easy to use: the library simplifies the work for Netlink-wise developers.
+ It provides functions to make socket handling, message building,
+ validating, parsing and sequence tracking, easier.
+ .
+ Easy to re-use: you can use the library to build your own abstraction
+ layer on top of this library.
+ .
+ Decoupling: the interdependency of the main bricks that compose the
+ library is reduced, i.e. the library provides many helpers, but the
+ programmer is not forced to use them.
+ .
+ This package contains the shared libraries needed to run programs that use
+ the minimalistic Netlink communication library.

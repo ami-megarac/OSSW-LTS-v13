@@ -1,0 +1,7 @@
+#
+#=DESCRIPTION bare file rule outside of a profile
+#=EXRESULT FAIL
+#
+
+file,
+

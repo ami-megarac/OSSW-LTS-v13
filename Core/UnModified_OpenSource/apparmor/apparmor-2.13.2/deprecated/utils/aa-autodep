@@ -1,0 +1,122 @@
+#!/usr/bin/perl
+# ----------------------------------------------------------------------
+#    Copyright (c) 2005 Novell, Inc. All Rights Reserved.
+#    Copyright (c) 2011 Canonical, Ltd.
+#
+#    This program is free software; you can redistribute it and/or
+#    modify it under the terms of version 2 of the GNU General Public
+#    License as published by the Free Software Foundation.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program; if not, contact Novell, Inc.
+#
+#    To contact Novell about this file by physical or electronic mail,
+#    you may find current contact information at www.novell.com.
+# ----------------------------------------------------------------------
+
+use strict;
+use FindBin;
+use Getopt::Long;
+
+use Immunix::AppArmor;
+
+use Data::Dumper;
+
+use Locale::gettext;
+use POSIX;
+
+# force $PATH to be sane
+$ENV{PATH} = "/bin:/sbin:/usr/bin:/usr/sbin";
+
+# initialize the local poo
+setlocale(LC_MESSAGES, "");
+textdomain("apparmor-utils");
+
+$UI_Mode = "text";
+
+# options variables
+my $help  = '';
+my $force = undef;
+
+GetOptions(
+    'force'   => \$force,
+    'dir|d=s' => \$profiledir,
+    'help|h'  => \$help,
+);
+
+# tell 'em how to use it...
+&usage && exit if $help;
+
+my $sd_mountpoint = check_for_subdomain();
+
+# let's convert it to full path...
+$profiledir = get_full_path($profiledir);
+
+unless (-d $profiledir) {
+    UI_Important(sprintf(gettext('Can\'t find AppArmor profiles in %s.'), $profiledir));
+    exit 1;
+}
+
+# what are we profiling?
+my @profiling = @ARGV;
+
+unless (@profiling) {
+    @profiling = (UI_GetString(gettext("Please enter the program to create a profile for: "), ""));
+}
+
+for my $profiling (@profiling) {
+
+    next unless $profiling;
+
+    my $fqdbin;
+    if (-e $profiling) {
+        $fqdbin = get_full_path($profiling);
+        chomp($fqdbin);
+    } else {
+        if ($profiling !~ /\//) {
+            my $which = which($profiling);
+            if ($which) {
+                $fqdbin = get_full_path($which);
+            }
+        }
+    }
+
+    # make sure that the app they're requesting to profile is not marked as
+    # not allowed to have it's own profile
+    if ($qualifiers{$fqdbin}) {
+        unless ($qualifiers{$fqdbin} =~ /p/) {
+            UI_Info(sprintf(gettext('%s is currently marked as a program that should not have it\'s own profile.  Usually, programs are marked this way if creating a profile for them is likely to break the rest of the system.  If you know what you\'re doing and are certain you want to create a profile for this program, edit the corresponding entry in the [qualifiers] section in /etc/apparmor/logprof.conf.'), $fqdbin));
+            exit 1;
+        }
+    }
+
+    if (-e $fqdbin) {
+        if (-e getprofilefilename($fqdbin) && !$force) {
+            UI_Info(sprintf(gettext('Profile for %s already exists - skipping.'), $fqdbin));
+        } else {
+            autodep($fqdbin);
+            reload($fqdbin) if $sd_mountpoint;
+        }
+    } else {
+        if ($profiling =~ /^[^\/]+$/) {
+            UI_Info(sprintf(gettext('Can\'t find %s in the system path list.  If the name of the application is correct, please run \'which %s\' as a user with the correct PATH environment set up in order to find the fully-qualified path.'), $profiling, $profiling));
+            exit 1;
+        } else {
+            UI_Info(sprintf(gettext('%s does not exist, please double-check the path.'), $profiling));
+            exit 1;
+        }
+    }
+}
+
+exit 0;
+
+sub usage {
+    UI_Info("usage: $0 [ --force ] [ -d /path/to/profiles ]");
+    exit 0;
+}
+

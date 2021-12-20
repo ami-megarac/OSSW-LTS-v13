@@ -31,7 +31,11 @@
 #include "examples/radon.h"
 #include "vncserver.h"
 //#include "videopkt_vnc_soc.h"
-#include "vnc.h"
+#ifdef CONFIG_SPX_FEATURE_VIDEO_RVAS
+#include "vnc_rvas.h"
+#else
+#include "vnc_ast.h"
+#endif
 #if defined(SOC_AST2600)
 #include "libusbgadget_vnc.h"
 #endif
@@ -60,23 +64,26 @@ pthread_t cmdThread = NULL;
 int session_management = -1;
 sem_t getResponse;
 sem_t waitForAMIVncResponse;
-extern int maxx, maxy, pre_maxx, pre_maxy; // holds previous video resolution when showing empty screen
+extern int maxx, maxy, pre_maxx, pre_maxy;// holds previous video resolution when showing empty screen
 extern int gUsbDevice;
 int isUSBRunning = 0;
 extern int actvSessCount;
 
 
 
-#if defined(SOC_AST2400) || defined(SOC_AST2500) || defined(SOC_AST2600)
+#if defined(SOC_AST2400) || defined(SOC_AST2500) || ( defined(SOC_AST2600) && !defined(CONFIG_SPX_FEATURE_VIDEO_RVAS) )
 int bsodCapture = 0;
+#else
+unsigned long video_buffer_offset; 
 #endif
+
 /* Contains last time (in seconds) since mouse queue became full */
 static long mouse_queue_full = 0;
 // In some cases of text mode, the value of rect size is greater than maxRectColumn.
 // Added a bigger size 72 (multiples of 8) to hold the rectangle and prevent out bound access.
 #define RECT_UPDATE_SIZE 72
 extern rfbClientIteratorPtr rfbGetClientIteratorWithClosed(rfbScreenInfoPtr rfbScreen);
-#if defined(SOC_AST2400) || defined(SOC_AST2500) || defined(SOC_AST2600)
+#if defined(SOC_AST2400) || defined(SOC_AST2500) || ( defined(SOC_AST2600) && !defined(CONFIG_SPX_FEATURE_VIDEO_RVAS) )
 void saveBsodCapturedata(void* p_data_buf);
 #endif
 int fb_setup_status = -1;
@@ -196,7 +203,7 @@ void rfbDrawStringPerLine(rfbScreenInfoPtr rfbScreen,rfbFontDataPtr font,
 }
 
 int setupFb(struct fb_info_t* fb_info) {
-#if defined(SOC_PILOT_III) || defined(SOC_PILOT_IV)
+#if defined(SOC_PILOT_III) || defined(SOC_PILOT_IV) || defined(CONFIG_SPX_FEATURE_VIDEO_RVAS)
 	int fd = -1;
 
 	fd = open(FB_FILE, O_RDONLY);
@@ -237,16 +244,18 @@ void adoptResolutionChange(rfbClientPtr cl) {
 	rfbPixelFormat prevFormat;
 	rfbBool updateFormat = FALSE;
 	rfbClientIteratorPtr iterator;
-	
-	//update screen information and intimate all active clients
-	prevFormat = cl->screen->serverFormat;
 
 	//resolution changed, so get new resolution.
 	if( isResolutionChanged ) {
 		getResolution(&maxx,&maxy);
 		isResolutionChanged = 0;
+#if defined(CONFIG_SPX_FEATURE_VIDEO_RVAS)
+		getVideoBufferOffset(&video_buffer_offset);
+		rfbScreen->frameBuffer = (char*) fb_info.fbmem+video_buffer_offset;
+#endif
 	}
-
+	//update screen information and intimate all active clients
+	prevFormat = cl->screen->serverFormat;
 	if (maxx & 3)
 		printf("\n updated width [%d] is not a multiple of 4.\n", maxx);
 
@@ -276,7 +285,7 @@ void adoptResolutionChange(rfbClientPtr cl) {
 		if (updateFormat)
 			  cl->screen->setTranslateFunction(cl);
 
-#if defined(SOC_AST2400) || defined(SOC_AST2500) || defined(SOC_AST2600)
+#if defined(SOC_AST2400) || defined(SOC_AST2500) ||( defined(SOC_AST2600) && !defined(CONFIG_SPX_FEATURE_VIDEO_RVAS) )
 	rfbFramebufferUpdateMsg *fu = (rfbFramebufferUpdateMsg *)cl->updateBuf;
 #endif
 
@@ -290,7 +299,7 @@ void adoptResolutionChange(rfbClientPtr cl) {
 		if (cl->useNewFBSize)
 			cl->newFBSizePending = TRUE;
 
-#if defined(SOC_AST2400) || defined(SOC_AST2500) || defined(SOC_AST2600)
+#if defined(SOC_AST2400) || defined(SOC_AST2500) || ( defined(SOC_AST2600) && !defined(CONFIG_SPX_FEATURE_VIDEO_RVAS) )
 		fu->type = rfbFramebufferUpdate;
 		fu->nRects = Swap16IfLE(1);
 		cl->ublen = sz_rfbFramebufferUpdateMsg;
@@ -372,7 +381,7 @@ static void init_fb_server(int argc, char **argv) {
 				};
 		rfbScreen->serverFormat = pixfmt;
 		rfbScreen->alwaysShared = TRUE;
-#if defined(SOC_PILOT_III) || defined(SOC_PILOT_IV)
+#if defined(SOC_PILOT_III) || defined(SOC_PILOT_IV) || defined(CONFIG_SPX_FEATURE_VIDEO_RVAS)
 		rfbScreen->frameBuffer = (char*) fb_info.fbmem;//(char*)vncbuf;
 #endif
 		rfbScreen->ptrAddEvent = handleMouseEvent;
@@ -453,7 +462,7 @@ void onStartStopVnc(int mode) {
 	}
 }
 
-#if defined(SOC_AST2400) || defined(SOC_AST2500) || defined(SOC_AST2600)
+#if defined(SOC_AST2400) || defined(SOC_AST2500) || ( defined(SOC_AST2600) && !defined(CONFIG_SPX_FEATURE_VIDEO_RVAS) )
 int checkJpegSoi(char * src_buff, int src_len)
 {
 	int i;
@@ -569,7 +578,7 @@ void* updateVideo()
 
 	struct rectUpdate_t recUpdate[RECT_UPDATE_SIZE];
 	struct timespec tv;
-	#if defined(SOC_PILOT_III) || defined(SOC_PILOT_IV)	
+	#if defined(SOC_PILOT_III) || defined(SOC_PILOT_IV)	|| defined(CONFIG_SPX_FEATURE_VIDEO_RVAS)
 	int initialVideoUpdate = 0;
 	#endif
 
@@ -604,7 +613,7 @@ void* updateVideo()
 		{
 			powerCons = 1;
 		}
-		#if defined(SOC_PILOT_III) || defined(SOC_PILOT_IV)	
+		#if defined(SOC_PILOT_III) || defined(SOC_PILOT_IV)	|| defined(CONFIG_SPX_FEATURE_VIDEO_RVAS)
 		else
 		{
 			initialVideoUpdate = 1;//Libvncserver takes sometime,to update the video data when the initial connection comes.
@@ -632,7 +641,7 @@ void* updateVideo()
 			}
 			
 			//Need to display HID inititlation info in vnc client
-			#if defined(SOC_PILOT_III) || defined(SOC_PILOT_IV)
+			#if defined(SOC_PILOT_III) || defined(SOC_PILOT_IV) || defined(CONFIG_SPX_FEATURE_VIDEO_RVAS)
 			if(powerCons == 1 || initialVideoUpdate == 1){
 			#else
 			if(powerCons == 1){
@@ -646,7 +655,7 @@ void* updateVideo()
 					if(g_prv_capture_status != capture){
 						//X and Y position has been calculated accordingly to show text in middle of the screen
 						//showBlankScreen(HID_INITILIZATION,(VNC_MIN_RESX/2) - (sizeof(HID_INITILIZATION)),VNC_MIN_RESY/2);
-						#if defined(SOC_PILOT_III) || defined(SOC_PILOT_IV)	
+						#if defined(SOC_PILOT_III) || defined(SOC_PILOT_IV)	|| defined(CONFIG_SPX_FEATURE_VIDEO_RVAS)
 						if(powerCons == 1)
 						{
 							showBlankScreen(HID_INITILIZATION,(maxx/2) - 100,maxy/2);
@@ -659,7 +668,7 @@ void* updateVideo()
 						showBlankScreen(HID_INITILIZATION,(maxx/2) - 100,maxy/2);
 						#endif
 						
-#if defined(SOC_AST2400) || defined(SOC_AST2500) || defined(SOC_AST2600)
+#if defined(SOC_AST2400) || defined(SOC_AST2500) || ( defined(SOC_AST2600) && !defined(CONFIG_SPX_FEATURE_VIDEO_RVAS) )
 						i = rfbGetClientIteratorWithClosed(rfbScreen);
 						cl=rfbClientIteratorHead(i);
 						while (cl)
@@ -675,7 +684,7 @@ void* updateVideo()
 				else
 				{
 					powerCons = 0;
-#if defined(SOC_PILOT_III) || defined(SOC_PILOT_IV)
+#if defined(SOC_PILOT_III) || defined(SOC_PILOT_IV) || defined(CONFIG_SPX_FEATURE_VIDEO_RVAS)
 					initialVideoUpdate =0;
 					if(rfbScreen->frameBuffer != (char*) fb_info.fbmem){
 						rfbScreen->frameBuffer = (char*) fb_info.fbmem;
@@ -697,15 +706,15 @@ void* updateVideo()
 						usleep(100000);
 					}
 				}
-				#if defined(SOC_AST2400) || defined(SOC_AST2500) || defined(SOC_AST2600)
+#if defined(SOC_AST2400) || defined(SOC_AST2500) || ( defined(SOC_AST2600) && !defined(CONFIG_SPX_FEATURE_VIDEO_RVAS) )
 				//while running vnc service,if the BSOD capture signale comes,after capture the video data, saving in to the file
 				if((bsodCapture == 1) && (g_tile_info.compressed_size > 0))
 				{
 					saveBsodCapturedata(frame_hdr_vnc.frame_addr);
 					bsodCapture = 0;
 				}
-				#endif
-#if defined(SOC_PILOT_III) || defined(SOC_PILOT_IV)
+#endif
+#if defined(SOC_PILOT_III) || defined(SOC_PILOT_IV) || defined(CONFIG_SPX_FEATURE_VIDEO_RVAS)
 				if(RESOLUTION_CHANGED == capture){
 					if(rfbScreen->frameBuffer != (char*) fb_info.fbmem){
                                                 rfbScreen->frameBuffer = (char*) fb_info.fbmem;
@@ -721,8 +730,8 @@ void* updateVideo()
 					{
 						showBlankScreen((char*)tile_info, SCREEN_POS_X, SCREEN_POS_Y);
 					}
-					else if(rfbScreen->frameBuffer != (char*) fb_info.fbmem){
-						rfbScreen->frameBuffer = (char*) fb_info.fbmem;
+					else if(rfbScreen->frameBuffer != (char*) fb_info.fbmem+video_buffer_offset ){
+						rfbScreen->frameBuffer = (char*) fb_info.fbmem+video_buffer_offset;
 						// restore previous resolution and call resolution change when switching between textmode/hid/blankscreen and video
 						maxx = pre_maxx;
 						maxy = pre_maxy;
@@ -751,15 +760,15 @@ void* updateVideo()
 							x = (*(tile_info+pos+1));
 							y = (*(tile_info+pos));
 							posy = y *TILE_HEIGHT;
-					#if defined(SOC_PILOT_III) || defined(SOC_PILOT_IV)
+#if defined(SOC_PILOT_III) || defined(SOC_PILOT_IV) || defined(CONFIG_SPX_FEATURE_VIDEO_RVAS)
 							posx = x *TILE_WIDTH;
 							width = posx+TILE_WIDTH;
 							height = posy+TILE_HEIGHT;
-					#elif defined(SOC_AST2400) || defined(SOC_AST2500) || defined(SOC_AST2600)
+#elif defined(SOC_AST2400) || defined(SOC_AST2500) || ( defined(SOC_AST2600) && !defined(CONFIG_SPX_FEATURE_VIDEO_RVAS) )
 							posx = (x-1) *TILE_WIDTH;
 							width = TILE_WIDTH;
 							height = TILE_HEIGHT;
-					#endif
+#endif
 							rfbMarkRectAsModified(rfbScreen,posx,posy,width,height);
 							pos +=2;
 						}
@@ -772,7 +781,6 @@ void* updateVideo()
 					if (RESOLUTION_CHANGED == capture)
 					{
 						isResolutionChanged = 1;
-						adoptResolutionChange(pCl);
 					}
 				}
 				else if(VIDEO_NO_CHANGE == capture)
@@ -783,7 +791,7 @@ void* updateVideo()
 				else if(VIDEO_NO_SIGNAL== capture){
 					if(g_prv_capture_status != capture){
 						showBlankScreen(EMPTY_STRING,VNC_MIN_RESX/2,VNC_MIN_RESY/2);
-#if defined(SOC_AST2400) || defined(SOC_AST2500) || defined(SOC_AST2600)
+#if defined(SOC_AST2400) || defined(SOC_AST2500) || ( defined(SOC_AST2600) && !defined(CONFIG_SPX_FEATURE_VIDEO_RVAS) )
 						i = rfbGetClientIteratorWithClosed(rfbScreen);
 						cl = rfbClientIteratorHead(i);
 						while (cl)
@@ -814,7 +822,7 @@ void* updateVideo()
 			i = rfbGetClientIteratorWithClosed(rfbScreen);
 			cl=rfbClientIteratorHead(i);
 
-			#if defined(SOC_PILOT_III) || defined(SOC_PILOT_IV)
+			#if defined(SOC_PILOT_III) || defined(SOC_PILOT_IV) || defined(CONFIG_SPX_FEATURE_VIDEO_RVAS)
 			
 		    /* If master session preferred encoding is tight(UltraVNC/TightVNC clients), and slave session doesn't support
 			** tight encoding(RealVNC client) then video update is not happening in mater session. To fix this issue updating the
@@ -831,9 +839,12 @@ void* updateVideo()
 
 			while(cl) {
 #ifdef DEFER_VIDEO_UPDATE
-	#if defined(SOC_AST2400) || defined(SOC_AST2500) || defined(SOC_AST2600)
+	#if defined(SOC_AST2400) || defined(SOC_AST2500) ||( defined(SOC_AST2600) && !defined(CONFIG_SPX_FEATURE_VIDEO_RVAS) )
 				if (cl->state >= RFB_NORMAL)
 				{
+					if ( isResolutionChanged == 1) {
+						adoptResolutionChange(pCl);
+					}
 					if ((powerCons == 0) && (g_tile_info.compressed_size > 0))
 					{
 						sendJpegFrameToClients(cl);
@@ -1020,7 +1031,7 @@ void showBlankScreen(char *message,int xPos,int yPos) {
 	char formattedString[TEXT_LEN] = {0};
 	int resChanged = 0;
 	if(rfbScreen->frameBuffer != emptyScreen){
-#if defined(SOC_PILOT_III) || defined(SOC_PILOT_IV)
+#if defined(SOC_PILOT_III) || defined(SOC_PILOT_IV) || defined(CONFIG_SPX_FEATURE_VIDEO_RVAS)
 		rfbScreen->frameBuffer = emptyScreen;
 
 		if(maxx != VNC_MIN_RESX)
@@ -1037,7 +1048,7 @@ void showBlankScreen(char *message,int xPos,int yPos) {
 		}
 		if(resChanged)
 			adoptResolutionChange(pCl);
-#elif defined(SOC_AST2400) || defined(SOC_AST2500) || defined(SOC_AST2600)
+#elif defined(SOC_AST2400) || defined(SOC_AST2500) || ( defined(SOC_AST2600) && !defined(CONFIG_SPX_FEATURE_VIDEO_RVAS) )
 		if( maxx != VNC_MIN_RESX || maxy != VNC_MIN_RESY ) {
 			if(emptyScreen != NULL) {
 				free(emptyScreen);
@@ -1046,7 +1057,7 @@ void showBlankScreen(char *message,int xPos,int yPos) {
 			}
 		}
 		rfbScreen->frameBuffer = emptyScreen;
-		adoptResolutionChange(pCl);
+		isResolutionChanged = 1;
 #endif
 	}
 
@@ -1529,7 +1540,7 @@ void onClientGone(SOCKET* active_sock_list) {
 }
 
 void on_vnc_no_session(){
-#if defined(SOC_AST2400) || defined(SOC_AST2500) || defined(SOC_AST2600)
+#if defined(SOC_AST2400) || defined(SOC_AST2500) || ( defined(SOC_AST2600) && !defined(CONFIG_SPX_FEATURE_VIDEO_RVAS) )
 	memset(&g_tile_info, 0, sizeof(g_tile_info));
 #endif
 	//combine it with client gone	
@@ -1573,7 +1584,7 @@ int openVncPipe(char *pipename) {
 	return fd;
 }
 
-#if defined(SOC_AST2400) || defined(SOC_AST2500) || defined(SOC_AST2600)
+#if defined(SOC_AST2400) || defined(SOC_AST2500) || ( defined(SOC_AST2600) && !defined(CONFIG_SPX_FEATURE_VIDEO_RVAS) )
 /*updateBsodCapturedate: write the capture data in to a file. 
 */
 void saveBsodCapturedata(void* p_data_buf)
@@ -1600,7 +1611,7 @@ void saveBsodCapturedata(void* p_data_buf)
 void* checkIncomingCmd() {
 	cmd_info_t cmd;
 	pthread_t self;
-	#if defined(SOC_AST2400) || defined(SOC_AST2500) || defined(SOC_AST2600)
+	#if defined(SOC_AST2400) || defined(SOC_AST2500) || ( defined(SOC_AST2600) && !defined(CONFIG_SPX_FEATURE_VIDEO_RVAS) )
 	int capture = VIDEO_ERROR;
 	void* p_frame_hdr = NULL;
         void* p_data_buf = NULL;
@@ -1728,7 +1739,7 @@ void* checkIncomingCmd() {
 					}
 					break;
 #endif
-					#if defined(SOC_AST2400) || defined(SOC_AST2500) || defined(SOC_AST2600)
+					#if defined(SOC_AST2400) || defined(SOC_AST2500) || ( defined(SOC_AST2600) && !defined(CONFIG_SPX_FEATURE_VIDEO_RVAS) )
 					case VNC_BSOD_CAPTURE:
 						isNewSession = TRUE;
 						if( actvSessCount == 0 )
@@ -1820,7 +1831,7 @@ int requestKVMClientstate()
 static enum rfbNewClientAction newclient(rfbClientPtr cl) {
 	struct sysinfo sys_info;
 	struct timespec tv;
-#if defined(SOC_AST2400) || defined(SOC_AST2500) || defined(SOC_AST2600)
+#if defined(SOC_AST2400) || defined(SOC_AST2500) || ( defined(SOC_AST2600) && !defined(CONFIG_SPX_FEATURE_VIDEO_RVAS) )
 	FILE *fp=NULL;
 #endif
 	if(fb_setup_status == -1)
@@ -1864,7 +1875,7 @@ static enum rfbNewClientAction newclient(rfbClientPtr cl) {
 			rfbCloseClient(cl);
 			return RFB_CLIENT_REFUSE;
 		}
-#if defined(SOC_AST2400) || defined(SOC_AST2500) || defined(SOC_AST2600)
+#if defined(SOC_AST2400) || defined(SOC_AST2500) ||  ( defined(SOC_AST2600) && !defined(CONFIG_SPX_FEATURE_VIDEO_RVAS) )
 		// Intimate video driver to switch JPEG capture mode
 		fp = fopen(VIDEOCAP_JPEG_ENABLE, "w");
 		if (fp != NULL)
@@ -2234,18 +2245,18 @@ int frameRectFromTiles(rectUpdate_t* recUpdate)
 		x = (*(tile_info+pos+1));
 		y = (*(tile_info+pos));
 		posy = y *TILE_HEIGHT;
-#if defined(SOC_PILOT_III) || defined(SOC_PILOT_IV)
+#if defined(SOC_PILOT_III) || defined(SOC_PILOT_IV) || defined(CONFIG_SPX_FEATURE_VIDEO_RVAS)
 		posx = x *TILE_WIDTH;
 		width = posx+TILE_WIDTH;
 		height = posy+TILE_HEIGHT;
-#elif defined(SOC_AST2400) || defined(SOC_AST2500) || defined(SOC_AST2600)
+#elif defined(SOC_AST2400) || defined(SOC_AST2500) ||  ( defined(SOC_AST2600) && !defined(CONFIG_SPX_FEATURE_VIDEO_RVAS) )
 		posx = (x-1) *TILE_WIDTH;
 		width = TILE_WIDTH;
 		height = TILE_HEIGHT;
 #endif
 		if(0 < count)
 		{
-#if defined(SOC_AST2400) || defined(SOC_AST2500) || defined(SOC_AST2600)
+#if defined(SOC_AST2400) || defined(SOC_AST2500) ||  ( defined(SOC_AST2600) && !defined(CONFIG_SPX_FEATURE_VIDEO_RVAS) )
 			if(count >= maxRectColumn)
 			{
 				count --;
@@ -2265,10 +2276,10 @@ int frameRectFromTiles(rectUpdate_t* recUpdate)
 						continue;
 					}
 					//update already found rect region
-#if defined(SOC_PILOT_III) || defined(SOC_PILOT_IV)
+#if defined(SOC_PILOT_III) || defined(SOC_PILOT_IV) || defined(CONFIG_SPX_FEATURE_VIDEO_RVAS)
 					recUpdate[j].width = width;
 					recUpdate[j].height = height;
-#elif defined(SOC_AST2400) || defined(SOC_AST2500) || defined(SOC_AST2600)
+#elif defined(SOC_AST2400) || defined(SOC_AST2500) || ( defined(SOC_AST2600) && !defined(CONFIG_SPX_FEATURE_VIDEO_RVAS) )
 					recUpdate[j].width = width+TILE_HEIGHT;
 					recUpdate[j].height = height+TILE_HEIGHT;
 #endif

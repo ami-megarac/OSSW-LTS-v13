@@ -1,0 +1,2541 @@
+Source: gcc-8
+Section: devel
+Priority: optional
+Maintainer: Debian GCC Maintainers <debian-gcc@lists.debian.org>
+Uploaders: Matthias Klose <doko@debian.org>
+Standards-Version: 4.3.0
+Build-Depends: debhelper (>= 9.20141010), dpkg-dev (>= 1.17.14), g++-multilib [amd64 i386 kfreebsd-amd64 mips mips64 mips64el mips64r6 mips64r6el mipsel mipsn32 mipsn32el mipsn32r6 mipsn32r6el mipsr6 mipsr6el powerpc ppc64 s390 s390x sparc sparc64 x32] <!cross>, 
+  libc6.1-dev (>= 2.13-5) [alpha ia64] | libc0.3-dev (>= 2.13-5) [hurd-i386] | libc0.1-dev (>= 2.13-5) [kfreebsd-i386 kfreebsd-amd64] | libc6-dev (>= 2.13-5), libc6-dev (>= 2.13-31) [armel armhf], libc6-dev-amd64 [i386 x32], libc6-dev-sparc64 [sparc], libc6-dev-sparc [sparc64], libc6-dev-s390 [s390x], libc6-dev-s390x [s390], libc6-dev-i386 [amd64 x32], libc6-dev-powerpc [ppc64], libc6-dev-ppc64 [powerpc], libc0.1-dev-i386 [kfreebsd-amd64], lib32gcc1 [amd64 ppc64 kfreebsd-amd64 mipsn32 mipsn32el mips64 mips64el mipsn32r6 mipsn32r6el mips64r6 mips64r6el s390x sparc64 x32], libn32gcc1 [mips mipsel mips64 mips64el mipsr6 mipsr6el mips64r6 mips64r6el], lib64gcc1 [i386 mips mipsel mipsn32 mipsn32el mipsr6 mipsr6el mipsn32r6 mipsn32r6el powerpc sparc s390 x32], libc6-dev-mips64 [mips mipsel mipsn32 mipsn32el mipsr6 mipsr6el mipsn32r6 mipsn32r6el], libc6-dev-mipsn32 [mips mipsel mips64 mips64el mipsr6 mipsr6el mips64r6 mips64r6el], libc6-dev-mips32 [mipsn32 mipsn32el mips64 mips64el mipsn32r6 mipsn32r6el mips64r6 mips64r6el], libc6-dev-x32 [amd64 i386], libx32gcc1 [amd64 i386], libc6.1-dbg [alpha ia64] | libc0.3-dbg [hurd-i386] | libc0.1-dbg [kfreebsd-i386 kfreebsd-amd64] | libc6-dbg, 
+  kfreebsd-kernel-headers (>= 0.84) [kfreebsd-any], linux-libc-dev [m68k], 
+  m4, libtool, autoconf2.64, 
+  dwz, libunwind8-dev [ia64], libatomic-ops-dev [ia64], 
+  gawk, lzma, xz-utils, patchutils, 
+  zlib1g-dev, systemtap-sdt-dev [linux-any kfreebsd-any hurd-any], 
+  binutils:native (>= 2.30) | binutils-multiarch:native (>= 2.30), binutils-hppa64-linux-gnu:native (>= 2.30) [hppa amd64 i386 x32], 
+  gperf (>= 3.0.1), bison (>= 1:2.3), flex, gettext, 
+  gdb:native [!riscv64], nvptx-tools [amd64], 
+  texinfo (>= 4.3), locales-all, sharutils, 
+  procps, gnat-8:native [!m32r !riscv64 !sh3 !sh3eb !sh4eb !m68k !powerpcspe], g++-8:native, netbase, 
+  libisl-dev (>= 0.20), libmpc-dev (>= 1.0), libmpfr-dev (>= 3.0.0-9~), libgmp-dev (>= 2:5.0.1~), lib32z1-dev [amd64 kfreebsd-amd64], lib64z1-dev [i386], 
+  dejagnu [!m68k !hurd-amd64 !hurd-i386 !hurd-alpha !kfreebsd-amd64 !kfreebsd-i386 !kfreebsd-alpha] <!nocheck>, coreutils (>= 2.26) | realpath (>= 1.9.12), chrpath, lsb-release, quilt, 
+  pkg-config, libgc-dev, 
+   g++-8-alpha-linux-gnu [alpha] <cross>, gobjc-8-alpha-linux-gnu [alpha] <cross>, gfortran-8-alpha-linux-gnu [alpha] <cross>, gdc-8-alpha-linux-gnu [alpha] <cross>, gccgo-8-alpha-linux-gnu [alpha] <cross>, gnat-8-alpha-linux-gnu [alpha] <cross>, g++-8-x86-64-linux-gnu [amd64] <cross>, gobjc-8-x86-64-linux-gnu [amd64] <cross>, gfortran-8-x86-64-linux-gnu [amd64] <cross>, gdc-8-x86-64-linux-gnu [amd64] <cross>, gccgo-8-x86-64-linux-gnu [amd64] <cross>, gnat-8-x86-64-linux-gnu [amd64] <cross>, g++-8-arm-linux-gnueabi [armel] <cross>, gobjc-8-arm-linux-gnueabi [armel] <cross>, gfortran-8-arm-linux-gnueabi [armel] <cross>, gdc-8-arm-linux-gnueabi [armel] <cross>, gccgo-8-arm-linux-gnueabi [armel] <cross>, gnat-8-arm-linux-gnueabi [armel] <cross>, g++-8-arm-linux-gnueabihf [armhf] <cross>, gobjc-8-arm-linux-gnueabihf [armhf] <cross>, gfortran-8-arm-linux-gnueabihf [armhf] <cross>, gdc-8-arm-linux-gnueabihf [armhf] <cross>, gccgo-8-arm-linux-gnueabihf [armhf] <cross>, gnat-8-arm-linux-gnueabihf [armhf] <cross>, g++-8-aarch64-linux-gnu [arm64] <cross>, gobjc-8-aarch64-linux-gnu [arm64] <cross>, gfortran-8-aarch64-linux-gnu [arm64] <cross>, gdc-8-aarch64-linux-gnu [arm64] <cross>, gccgo-8-aarch64-linux-gnu [arm64] <cross>, gnat-8-aarch64-linux-gnu [arm64] <cross>, g++-8-i686-linux-gnu [i386] <cross>, gobjc-8-i686-linux-gnu [i386] <cross>, gfortran-8-i686-linux-gnu [i386] <cross>, gdc-8-i686-linux-gnu [i386] <cross>, gccgo-8-i686-linux-gnu [i386] <cross>, gnat-8-i686-linux-gnu [i386] <cross>, g++-8-mips-linux-gnu [mips] <cross>, gobjc-8-mips-linux-gnu [mips] <cross>, gfortran-8-mips-linux-gnu [mips] <cross>, gdc-8-mips-linux-gnu [mips] <cross>, gccgo-8-mips-linux-gnu [mips] <cross>, gnat-8-mips-linux-gnu [mips] <cross>, g++-8-mipsel-linux-gnu [mipsel] <cross>, gobjc-8-mipsel-linux-gnu [mipsel] <cross>, gfortran-8-mipsel-linux-gnu [mipsel] <cross>, gdc-8-mipsel-linux-gnu [mipsel] <cross>, gccgo-8-mipsel-linux-gnu [mipsel] <cross>, gnat-8-mipsel-linux-gnu [mipsel] <cross>, g++-8-mips64-linux-gnuabi64 [mips64] <cross>, gobjc-8-mips64-linux-gnuabi64 [mips64] <cross>, gfortran-8-mips64-linux-gnuabi64 [mips64] <cross>, gdc-8-mips64-linux-gnuabi64 [mips64] <cross>, gccgo-8-mips64-linux-gnuabi64 [mips64] <cross>, gnat-8-mips64-linux-gnuabi64 [mips64] <cross>, g++-8-mips64el-linux-gnuabi64 [mips64el] <cross>, gobjc-8-mips64el-linux-gnuabi64 [mips64el] <cross>, gfortran-8-mips64el-linux-gnuabi64 [mips64el] <cross>, gdc-8-mips64el-linux-gnuabi64 [mips64el] <cross>, gccgo-8-mips64el-linux-gnuabi64 [mips64el] <cross>, gnat-8-mips64el-linux-gnuabi64 [mips64el] <cross>, g++-8-mips64-linux-gnuabin32 [mipsn32] <cross>, gobjc-8-mips64-linux-gnuabin32 [mipsn32] <cross>, gfortran-8-mips64-linux-gnuabin32 [mipsn32] <cross>, gdc-8-mips64-linux-gnuabin32 [mipsn32] <cross>, gccgo-8-mips64-linux-gnuabin32 [mipsn32] <cross>, gnat-8-mips64-linux-gnuabin32 [mipsn32] <cross>, g++-8-powerpc-linux-gnu [powerpc] <cross>, gobjc-8-powerpc-linux-gnu [powerpc] <cross>, gfortran-8-powerpc-linux-gnu [powerpc] <cross>, gdc-8-powerpc-linux-gnu [powerpc] <cross>, gccgo-8-powerpc-linux-gnu [powerpc] <cross>, gnat-8-powerpc-linux-gnu [powerpc] <cross>, g++-8-powerpc-linux-gnuspe [powerpcspe] <cross>, gobjc-8-powerpc-linux-gnuspe [powerpcspe] <cross>, gfortran-8-powerpc-linux-gnuspe [powerpcspe] <cross>, gdc-8-powerpc-linux-gnuspe [powerpcspe] <cross>, gccgo-8-powerpc-linux-gnuspe [powerpcspe] <cross>, gnat-8-powerpc-linux-gnuspe [powerpcspe] <cross>, g++-8-powerpc64-linux-gnu [ppc64] <cross>, gobjc-8-powerpc64-linux-gnu [ppc64] <cross>, gfortran-8-powerpc64-linux-gnu [ppc64] <cross>, gdc-8-powerpc64-linux-gnu [ppc64] <cross>, gccgo-8-powerpc64-linux-gnu [ppc64] <cross>, gnat-8-powerpc64-linux-gnu [ppc64] <cross>, g++-8-powerpc64le-linux-gnu [ppc64el] <cross>, gobjc-8-powerpc64le-linux-gnu [ppc64el] <cross>, gfortran-8-powerpc64le-linux-gnu [ppc64el] <cross>, gdc-8-powerpc64le-linux-gnu [ppc64el] <cross>, gccgo-8-powerpc64le-linux-gnu [ppc64el] <cross>, gnat-8-powerpc64le-linux-gnu [ppc64el] <cross>, g++-8-m68k-linux-gnu [m68k] <cross>, gobjc-8-m68k-linux-gnu [m68k] <cross>, gfortran-8-m68k-linux-gnu [m68k] <cross>, gdc-8-m68k-linux-gnu [m68k] <cross>, g++-8-sh4-linux-gnu [sh4] <cross>, gobjc-8-sh4-linux-gnu [sh4] <cross>, gfortran-8-sh4-linux-gnu [sh4] <cross>, gnat-8-sh4-linux-gnu [sh4] <cross>, g++-8-sparc64-linux-gnu [sparc64] <cross>, gobjc-8-sparc64-linux-gnu [sparc64] <cross>, gfortran-8-sparc64-linux-gnu [sparc64] <cross>, gdc-8-sparc64-linux-gnu [sparc64] <cross>, gccgo-8-sparc64-linux-gnu [sparc64] <cross>, gnat-8-sparc64-linux-gnu [sparc64] <cross>, g++-8-s390x-linux-gnu [s390x] <cross>, gobjc-8-s390x-linux-gnu [s390x] <cross>, gfortran-8-s390x-linux-gnu [s390x] <cross>, gdc-8-s390x-linux-gnu [s390x] <cross>, gccgo-8-s390x-linux-gnu [s390x] <cross>, gnat-8-s390x-linux-gnu [s390x] <cross>, g++-8-x86-64-linux-gnux32 [x32] <cross>, gobjc-8-x86-64-linux-gnux32 [x32] <cross>, gfortran-8-x86-64-linux-gnux32 [x32] <cross>, gdc-8-x86-64-linux-gnux32 [x32] <cross>, gccgo-8-x86-64-linux-gnux32 [x32] <cross>, gnat-8-x86-64-linux-gnux32 [x32] <cross>, g++-8-mips64el-linux-gnuabin32 [mipsn32el] <cross>, gobjc-8-mips64el-linux-gnuabin32 [mipsn32el] <cross>, gfortran-8-mips64el-linux-gnuabin32 [mipsn32el] <cross>, gdc-8-mips64el-linux-gnuabin32 [mipsn32el] <cross>, gccgo-8-mips64el-linux-gnuabin32 [mipsn32el] <cross>, gnat-8-mips64el-linux-gnuabin32 [mipsn32el] <cross>, g++-8-mipsisa32r6-linux-gnu [mipsr6] <cross>, gobjc-8-mipsisa32r6-linux-gnu [mipsr6] <cross>, gfortran-8-mipsisa32r6-linux-gnu [mipsr6] <cross>, gdc-8-mipsisa32r6-linux-gnu [mipsr6] <cross>, gccgo-8-mipsisa32r6-linux-gnu [mipsr6] <cross>, gnat-8-mipsisa32r6-linux-gnu [mipsr6] <cross>, g++-8-mipsisa32r6el-linux-gnu [mipsr6el] <cross>, gobjc-8-mipsisa32r6el-linux-gnu [mipsr6el] <cross>, gfortran-8-mipsisa32r6el-linux-gnu [mipsr6el] <cross>, gdc-8-mipsisa32r6el-linux-gnu [mipsr6el] <cross>, gccgo-8-mipsisa32r6el-linux-gnu [mipsr6el] <cross>, gnat-8-mipsisa32r6el-linux-gnu [mipsr6el] <cross>, g++-8-mipsisa64r6-linux-gnuabi64 [mips64r6] <cross>, gobjc-8-mipsisa64r6-linux-gnuabi64 [mips64r6] <cross>, gfortran-8-mipsisa64r6-linux-gnuabi64 [mips64r6] <cross>, gdc-8-mipsisa64r6-linux-gnuabi64 [mips64r6] <cross>, gccgo-8-mipsisa64r6-linux-gnuabi64 [mips64r6] <cross>, gnat-8-mipsisa64r6-linux-gnuabi64 [mips64r6] <cross>, g++-8-mipsisa64r6el-linux-gnuabi64 [mips64r6el] <cross>, gobjc-8-mipsisa64r6el-linux-gnuabi64 [mips64r6el] <cross>, gfortran-8-mipsisa64r6el-linux-gnuabi64 [mips64r6el] <cross>, gdc-8-mipsisa64r6el-linux-gnuabi64 [mips64r6el] <cross>, gccgo-8-mipsisa64r6el-linux-gnuabi64 [mips64r6el] <cross>, gnat-8-mipsisa64r6el-linux-gnuabi64 [mips64r6el] <cross>, g++-8-mipsisa64r6-linux-gnuabin32 [mipsn32r6] <cross>, gobjc-8-mipsisa64r6-linux-gnuabin32 [mipsn32r6] <cross>, gfortran-8-mipsisa64r6-linux-gnuabin32 [mipsn32r6] <cross>, gdc-8-mipsisa64r6-linux-gnuabin32 [mipsn32r6] <cross>, gccgo-8-mipsisa64r6-linux-gnuabin32 [mipsn32r6] <cross>, gnat-8-mipsisa64r6-linux-gnuabin32 [mipsn32r6] <cross>, g++-8-mipsisa64r6el-linux-gnuabin32 [mipsn32r6el] <cross>, gobjc-8-mipsisa64r6el-linux-gnuabin32 [mipsn32r6el] <cross>, gfortran-8-mipsisa64r6el-linux-gnuabin32 [mipsn32r6el] <cross>, gdc-8-mipsisa64r6el-linux-gnuabin32 [mipsn32r6el] <cross>, gccgo-8-mipsisa64r6el-linux-gnuabin32 [mipsn32r6el] <cross>, gnat-8-mipsisa64r6el-linux-gnuabin32 [mipsn32r6el] <cross>, 
+Build-Depends-Indep: doxygen (>= 1.7.2), graphviz (>= 2.2), ghostscript, texlive-latex-base, xsltproc, libxml2-utils, docbook-xsl-ns
+Homepage: http://gcc.gnu.org/
+Vcs-Browser: https://salsa.debian.org/toolchain-team/gcc/tree/gcc-8-debian
+Vcs-Git: https://salsa.debian.org/toolchain-team/gcc.git -b gcc-8-debian
+XS-Testsuite: autopkgtest
+
+Package: gcc-8-base
+Architecture: any
+Multi-Arch: same
+Section: libs
+Priority: required
+Depends: ${misc:Depends}
+Replaces: ${base:Replaces}
+Breaks: ${base:Breaks}
+Description: GCC, the GNU Compiler Collection (base package)
+ This package contains files common to all languages and libraries
+ contained in the GNU Compiler Collection (GCC).
+
+Package: libgcc1
+X-DH-Build-For-Type: target
+Architecture: any
+Section: libs
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), ${shlibs:Depends}, ${misc:Depends}
+Provides: libgcc1-armel [armel], libgcc1-armhf [armhf]
+Multi-Arch: same
+Pre-Depends: ${misc:Pre-Depends}
+Breaks: ${multiarch:breaks}
+Description: GCC support library
+ Shared version of the support library, a library of internal subroutines
+ that GCC uses to overcome shortcomings of particular machines, or
+ special needs for some languages.
+
+Package: libgcc1-dbg
+X-DH-Build-For-Type: target
+Architecture: any
+Section: debug
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), libgcc1 (= ${gcc:EpochVersion}), ${misc:Depends}
+Provides: libgcc1-dbg-armel [armel], libgcc1-dbg-armhf [armhf]
+Multi-Arch: same
+Description: GCC support library (debug symbols)
+ Debug symbols for the GCC support library.
+
+Package: libgcc2
+X-DH-Build-For-Type: target
+Architecture: m68k
+Section: libs
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), ${shlibs:Depends}, ${misc:Depends}
+Multi-Arch: same
+Pre-Depends: ${misc:Pre-Depends}
+Breaks: ${multiarch:breaks}
+Description: GCC support library
+ Shared version of the support library, a library of internal subroutines
+ that GCC uses to overcome shortcomings of particular machines, or
+ special needs for some languages.
+
+Package: libgcc2-dbg
+X-DH-Build-For-Type: target
+Architecture: m68k
+Section: debug
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), libgcc2 (= ${gcc:EpochVersion}), ${misc:Depends}
+Multi-Arch: same
+Description: GCC support library (debug symbols)
+ Debug symbols for the GCC support library.
+
+Package: libgcc-8-dev
+X-DH-Build-For-Type: target
+Architecture: any
+Section: libdevel
+Priority: optional
+Recommends: ${dep:libcdev}
+Depends: gcc-8-base (= ${gcc:Version}), ${dep:libgcc}, ${dep:libssp}, ${dep:libgomp}, ${dep:libitm},
+ ${dep:libatomic}, ${dep:libbtrace}, ${dep:libasan}, ${dep:liblsan},
+ ${dep:libtsan}, ${dep:libubsan}, ${dep:libvtv},
+ ${dep:libmpx},
+ ${dep:libqmath}, ${dep:libunwinddev}, ${shlibs:Depends}, ${misc:Depends}
+Multi-Arch: same
+Replaces: gccgo-8 (<< ${gcc:Version})
+Description: GCC support library (development files)
+ This package contains the headers and static library files necessary for
+ building C programs which use libgcc, libgomp, libquadmath, libssp or libitm.
+
+Package: libgcc4
+X-DH-Build-For-Type: target
+Architecture: hppa
+Multi-Arch: same
+Pre-Depends: ${misc:Pre-Depends}
+Breaks: ${multiarch:breaks}
+Section: libs
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), ${shlibs:Depends}, ${misc:Depends}
+Description: GCC support library
+ Shared version of the support library, a library of internal subroutines
+ that GCC uses to overcome shortcomings of particular machines, or
+ special needs for some languages.
+
+Package: libgcc4-dbg
+X-DH-Build-For-Type: target
+Architecture: hppa
+Multi-Arch: same
+Section: debug
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), libgcc4 (= ${gcc:EpochVersion}), ${misc:Depends}
+Description: GCC support library (debug symbols)
+ Debug symbols for the GCC support library.
+
+Package: lib64gcc1
+X-DH-Build-For-Type: target
+Architecture: i386 powerpc sparc s390 mips mipsel mipsn32 mipsn32el mipsr6 mipsr6el mipsn32r6 mipsn32r6el x32
+Section: libs
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), ${dep:libcbiarch}, ${misc:Depends}
+Conflicts: libgcc1 (<= 1:3.3-0pre9)
+Description: GCC support library (64bit)
+ Shared version of the support library, a library of internal subroutines
+ that GCC uses to overcome shortcomings of particular machines, or
+ special needs for some languages.
+
+Package: lib64gcc1-dbg
+X-DH-Build-For-Type: target
+Architecture: i386 powerpc sparc s390 mips mipsel mipsn32 mipsn32el mipsr6 mipsr6el mipsn32r6 mipsn32r6el x32
+Section: debug
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), lib64gcc1 (= ${gcc:EpochVersion}), ${misc:Depends}
+Description: GCC support library (debug symbols)
+ Debug symbols for the GCC support library.
+
+Package: lib64gcc-8-dev
+X-DH-Build-For-Type: target
+Architecture: i386 powerpc sparc s390 mips mipsel mipsn32 mipsn32el mipsr6 mipsr6el mipsn32r6 mipsn32r6el x32
+Section: libdevel
+Priority: optional
+Recommends: ${dep:libcdev}
+Depends: gcc-8-base (= ${gcc:Version}), ${dep:libgccbiarch}, ${dep:libsspbiarch},
+ ${dep:libgompbiarch}, ${dep:libitmbiarch}, ${dep:libatomicbiarch},
+ ${dep:libbtracebiarch}, ${dep:libasanbiarch}, ${dep:liblsanbiarch},
+ ${dep:libtsanbiarch}, ${dep:libubsanbiarch},
+ ${dep:libvtvbiarch}, ${dep:libmpxbiarch},
+ ${dep:libqmathbiarch}, ${shlibs:Depends}, ${misc:Depends}
+Replaces: gccgo-8-multilib (<< ${gcc:Version})
+Description: GCC support library (64bit development files)
+ This package contains the headers and static library files necessary for
+ building C programs which use libgcc, libgomp, libquadmath, libssp or libitm.
+
+Package: lib32gcc1
+X-DH-Build-For-Type: target
+Architecture: amd64 ppc64 kfreebsd-amd64 s390x sparc64 x32 mipsn32 mipsn32el mips64 mips64el mipsn32r6 mipsn32r6el mips64r6 mips64r6el
+Section: libs
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), ${dep:libcbiarch}, ${misc:Depends}
+Conflicts: ${confl:lib32}
+Description: GCC support library (32 bit Version)
+ Shared version of the support library, a library of internal subroutines
+ that GCC uses to overcome shortcomings of particular machines, or
+ special needs for some languages.
+
+Package: lib32gcc1-dbg
+X-DH-Build-For-Type: target
+Architecture: amd64 ppc64 kfreebsd-amd64 s390x sparc64 x32 mipsn32 mipsn32el mips64 mips64el mipsn32r6 mipsn32r6el mips64r6 mips64r6el
+Section: debug
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), lib32gcc1 (= ${gcc:EpochVersion}), ${misc:Depends}
+Description: GCC support library (debug symbols)
+ Debug symbols for the GCC support library.
+
+Package: lib32gcc-8-dev
+X-DH-Build-For-Type: target
+Architecture: amd64 ppc64 kfreebsd-amd64 s390x sparc64 x32 mipsn32 mipsn32el mips64 mips64el mipsn32r6 mipsn32r6el mips64r6 mips64r6el
+Section: libdevel
+Priority: optional
+Recommends: ${dep:libcdev}
+Depends: gcc-8-base (= ${gcc:Version}), ${dep:libgccbiarch}, ${dep:libsspbiarch},
+ ${dep:libgompbiarch}, ${dep:libitmbiarch}, ${dep:libatomicbiarch},
+ ${dep:libbtracebiarch}, ${dep:libasanbiarch}, ${dep:liblsanbiarch},
+ ${dep:libtsanbiarch}, ${dep:libubsanbiarch},
+ ${dep:libvtvbiarch}, ${dep:libmpxbiarch},
+ ${dep:libqmathbiarch}, ${shlibs:Depends}, ${misc:Depends}
+Replaces: gccgo-8-multilib (<< ${gcc:Version})
+Description: GCC support library (32 bit development files)
+ This package contains the headers and static library files necessary for
+ building C programs which use libgcc, libgomp, libquadmath, libssp or libitm.
+
+Package: libn32gcc1
+X-DH-Build-For-Type: target
+Architecture: mips mipsel mips64 mips64el mipsr6 mipsr6el mips64r6 mips64r6el
+Section: libs
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), ${dep:libcbiarch}, ${misc:Depends}
+Conflicts: libgcc1 (<= 1:3.3-0pre9)
+Description: GCC support library (n32)
+ Shared version of the support library, a library of internal subroutines
+ that GCC uses to overcome shortcomings of particular machines, or
+ special needs for some languages.
+
+Package: libn32gcc1-dbg
+X-DH-Build-For-Type: target
+Architecture: mips mipsel mips64 mips64el mipsr6 mipsr6el mips64r6 mips64r6el
+Section: debug
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), libn32gcc1 (= ${gcc:EpochVersion}), ${misc:Depends}
+Description: GCC support library (debug symbols)
+ Debug symbols for the GCC support library.
+
+Package: libn32gcc-8-dev
+X-DH-Build-For-Type: target
+Architecture: mips mipsel mips64 mips64el mipsr6 mipsr6el mips64r6 mips64r6el
+Section: libdevel
+Priority: optional
+Recommends: ${dep:libcdev}
+Depends: gcc-8-base (= ${gcc:Version}), ${dep:libgccbiarch}, ${dep:libsspbiarch},
+ ${dep:libgompbiarch}, ${dep:libitmbiarch}, ${dep:libatomicbiarch},
+ ${dep:libbtracebiarch}, ${dep:libasanbiarch}, ${dep:liblsanbiarch},
+ ${dep:libtsanbiarch}, ${dep:libubsanbiarch},
+ ${dep:libvtvbiarch}, ${dep:libmpxbiarch},
+ ${dep:libqmathbiarch}, ${shlibs:Depends}, ${misc:Depends}
+Replaces: gccgo-8-multilib (<< ${gcc:Version})
+Description: GCC support library (n32 development files)
+ This package contains the headers and static library files necessary for
+ building C programs which use libgcc, libgomp, libquadmath, libssp or libitm.
+
+Package: libx32gcc1
+X-DH-Build-For-Type: target
+Architecture: amd64 i386
+Section: libs
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), ${dep:libcbiarch}, ${misc:Depends}
+Description: GCC support library (x32)
+ Shared version of the support library, a library of internal subroutines
+ that GCC uses to overcome shortcomings of particular machines, or
+ special needs for some languages.
+
+Package: libx32gcc1-dbg
+X-DH-Build-For-Type: target
+Architecture: amd64 i386
+Section: debug
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), libx32gcc1 (= ${gcc:EpochVersion}), ${misc:Depends}
+Description: GCC support library (debug symbols)
+ Debug symbols for the GCC support library.
+
+Package: libx32gcc-8-dev
+X-DH-Build-For-Type: target
+Architecture: amd64 i386
+Section: libdevel
+Priority: optional
+Recommends: ${dep:libcdev}
+Depends: gcc-8-base (= ${gcc:Version}), ${dep:libgccbiarch}, ${dep:libsspbiarch},
+ ${dep:libgompbiarch}, ${dep:libitmbiarch}, ${dep:libatomicbiarch},
+ ${dep:libbtracebiarch}, ${dep:libasanbiarch}, ${dep:liblsanbiarch},
+ ${dep:libtsanbiarch}, ${dep:libubsanbiarch},
+ ${dep:libvtvbiarch}, ${dep:libmpxbiarch},
+ ${dep:libqmathbiarch}, ${shlibs:Depends}, ${misc:Depends}
+Replaces: gccgo-8-multilib (<< ${gcc:Version})
+Description: GCC support library (x32 development files)
+ This package contains the headers and static library files necessary for
+ building C programs which use libgcc, libgomp, libquadmath, libssp or libitm.
+
+Package: gcc-8
+Architecture: any
+Section: devel
+Priority: optional
+Depends: cpp-8 (= ${gcc:Version}), gcc-8-base (= ${gcc:Version}),
+    ${dep:libcc1}, 
+  binutils (>= ${binutils:Version}), 
+  ${dep:libgccdev}, ${shlibs:Depends}, ${misc:Depends}
+Recommends: ${dep:libcdev}
+Replaces: gccgo-8 (<< ${gcc:Version}), cpp-8 (<< 7.1.1-8)
+Suggests: ${gcc:multilib}, gcc-8-doc (>= ${gcc:SoftVersion}),
+ gcc-8-locales (>= ${gcc:SoftVersion}),
+ libgcc1-dbg (>= ${libgcc:Version}),
+ libgomp1-dbg (>= ${gcc:Version}),
+ libitm1-dbg (>= ${gcc:Version}),
+ libatomic1-dbg (>= ${gcc:Version}),
+ libasan5-dbg (>= ${gcc:Version}),
+ liblsan0-dbg (>= ${gcc:Version}),
+ libtsan0-dbg (>= ${gcc:Version}),
+ libubsan1-dbg (>= ${gcc:Version}),
+ libmpx2-dbg (>= ${gcc:Version}),
+ libquadmath0-dbg (>= ${gcc:Version})
+Provides: c-compiler
+Description: GNU C compiler
+ This is the GNU C compiler, a fairly portable optimizing compiler for C.
+
+Package: gcc-8-multilib
+Architecture: amd64 i386 kfreebsd-amd64 mips mips64 mips64el mips64r6 mips64r6el mipsel mipsn32 mipsn32el mipsn32r6 mipsn32r6el mipsr6 mipsr6el powerpc ppc64 s390 s390x sparc sparc64 x32
+Section: devel
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), gcc-8 (= ${gcc:Version}), ${dep:libcbiarchdev}, ${dep:libgccbiarchdev}, ${shlibs:Depends}, ${misc:Depends}
+Description: GNU C compiler (multilib support)
+ This is the GNU C compiler, a fairly portable optimizing compiler for C.
+ .
+ This is a dependency package, depending on development packages
+ for the non-default multilib architecture(s).
+
+Package: gcc-8-test-results
+Architecture: any
+Section: devel
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), ${misc:Depends}
+Replaces: g++-5 (<< 5.2.1-28)
+Description: Test results for the GCC test suite
+ This package contains the test results for running the GCC test suite
+ for a post build analysis.
+
+Package: gcc-8-plugin-dev
+Architecture: any
+Section: devel
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), gcc-8 (= ${gcc:Version}), libgmp-dev (>= 2:5.0.1~), libmpc-dev (>= 1.0), ${shlibs:Depends}, ${misc:Depends}
+Description: Files for GNU GCC plugin development.
+ This package contains (header) files for GNU GCC plugin development. It
+ is only used for the development of GCC plugins, but not needed to run
+ plugins.
+
+Package: gcc-8-hppa64-linux-gnu
+Architecture: hppa amd64 i386 x32
+Section: devel
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), gcc-8 (= ${gcc:Version}),
+  binutils-hppa64-linux-gnu | binutils-hppa64, 
+  ${shlibs:Depends}, ${misc:Depends}
+Description: GNU C compiler (cross compiler for hppa64)
+ This is the GNU C compiler, a fairly portable optimizing compiler for C.
+
+Package: cpp-8
+Architecture: any
+Section: interpreters
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), ${shlibs:Depends}, ${misc:Depends}
+Suggests: gcc-8-locales (>= ${gcc:SoftVersion})
+Replaces: gccgo-8 (<< ${gcc:Version})
+Breaks: libmagics++-dev (<< 2.28.0-4), hardening-wrapper (<< 2.8+nmu3)
+Description: GNU C preprocessor
+ A macro processor that is used automatically by the GNU C compiler
+ to transform programs before actual compilation.
+ .
+ This package has been separated from gcc for the benefit of those who
+ require the preprocessor but not the compiler.
+
+Package: gcc-8-locales
+Architecture: all
+Section: devel
+Priority: optional
+Depends: gcc-8-base (>= ${gcc:SoftVersion}), cpp-8 (>= ${gcc:SoftVersion}), ${misc:Depends}
+Recommends: gcc-8 (>= ${gcc:SoftVersion})
+Description: GCC, the GNU compiler collection (native language support files)
+ Native language support for GCC. Lets GCC speak your language,
+ if translations are available.
+ .
+ Please do NOT submit bug reports in other languages than "C".
+ Always reset your language settings to use the "C" locales.
+
+Package: g++-8
+Architecture: any
+Section: devel
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), gcc-8 (= ${gcc:Version}), libstdc++-8-dev (= ${gcc:Version}), ${shlibs:Depends}, ${misc:Depends}
+Provides: c++-compiler, c++abi2-dev
+Suggests: ${gxx:multilib}, gcc-8-doc (>= ${gcc:SoftVersion}), libstdc++6-8-dbg (>= ${gcc:Version})
+Description: GNU C++ compiler
+ This is the GNU C++ compiler, a fairly portable optimizing compiler for C++.
+
+Package: g++-8-multilib
+Architecture: amd64 i386 kfreebsd-amd64 mips mips64 mips64el mips64r6 mips64r6el mipsel mipsn32 mipsn32el mipsn32r6 mipsn32r6el mipsr6 mipsr6el powerpc ppc64 s390 s390x sparc sparc64 x32
+Section: devel
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), g++-8 (= ${gcc:Version}), gcc-8-multilib (= ${gcc:Version}), ${dep:libcxxbiarchdev}, ${shlibs:Depends}, ${misc:Depends}
+Suggests: ${dep:libcxxbiarchdbg}
+Description: GNU C++ compiler (multilib support)
+ This is the GNU C++ compiler, a fairly portable optimizing compiler for C++.
+ .
+ This is a dependency package, depending on development packages
+ for the non-default multilib architecture(s).
+
+Package: libgomp1
+X-DH-Build-For-Type: target
+Section: libs
+Architecture: any
+Provides: libgomp1-armel [armel], libgomp1-armhf [armhf]
+Multi-Arch: same
+Pre-Depends: ${misc:Pre-Depends}
+Breaks: ${multiarch:breaks}
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), ${shlibs:Depends}, ${misc:Depends}
+Description: GCC OpenMP (GOMP) support library
+ GOMP is an implementation of OpenMP for the C, C++, and Fortran compilers
+ in the GNU Compiler Collection.
+
+Package: libgomp1-dbg
+X-DH-Build-For-Type: target
+Architecture: any
+Section: debug
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), libgomp1 (= ${gcc:Version}), ${misc:Depends}
+Provides: libgomp1-dbg-armel [armel], libgomp1-dbg-armhf [armhf]
+Multi-Arch: same
+Description: GCC OpenMP (GOMP) support library (debug symbols)
+ GOMP is an implementation of OpenMP for the C, C++, and Fortran compilers
+ in the GNU Compiler Collection.
+
+Package: lib32gomp1
+X-DH-Build-For-Type: target
+Section: libs
+Architecture: amd64 ppc64 kfreebsd-amd64 s390x sparc64 x32 mipsn32 mipsn32el mips64 mips64el mipsn32r6 mipsn32r6el mips64r6 mips64r6el
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), ${dep:libcbiarch}, ${shlibs:Depends}, ${misc:Depends}
+Conflicts: ${confl:lib32}
+Description: GCC OpenMP (GOMP) support library (32bit)
+ GOMP is an implementation of OpenMP for the C, C++, and Fortran compilers
+ in the GNU Compiler Collection.
+
+Package: lib32gomp1-dbg
+X-DH-Build-For-Type: target
+Architecture: amd64 ppc64 kfreebsd-amd64 s390x sparc64 x32 mipsn32 mipsn32el mips64 mips64el mipsn32r6 mipsn32r6el mips64r6 mips64r6el
+Section: debug
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), lib32gomp1 (= ${gcc:Version}), ${misc:Depends}
+Description: GCC OpenMP (GOMP) support library (32 bit debug symbols)
+ GOMP is an implementation of OpenMP for the C, C++, and Fortran compilers
+ in the GNU Compiler Collection.
+
+Package: lib64gomp1
+X-DH-Build-For-Type: target
+Section: libs
+Architecture: i386 powerpc sparc s390 mips mipsel mipsn32 mipsn32el mipsr6 mipsr6el mipsn32r6 mipsn32r6el x32
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), ${dep:libcbiarch}, ${shlibs:Depends}, ${misc:Depends}
+Description: GCC OpenMP (GOMP) support library (64bit)
+ GOMP is an implementation of OpenMP for the C, C++, and Fortran compilers
+ in the GNU Compiler Collection.
+
+Package: lib64gomp1-dbg
+X-DH-Build-For-Type: target
+Architecture: i386 powerpc sparc s390 mips mipsel mipsn32 mipsn32el mipsr6 mipsr6el mipsn32r6 mipsn32r6el x32
+Section: debug
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), lib64gomp1 (= ${gcc:Version}), ${misc:Depends}
+Description: GCC OpenMP (GOMP) support library (64bit debug symbols)
+ GOMP is an implementation of OpenMP for the C, C++, and Fortran compilers
+ in the GNU Compiler Collection.
+
+Package: libn32gomp1
+X-DH-Build-For-Type: target
+Section: libs
+Architecture: mips mipsel mips64 mips64el mipsr6 mipsr6el mips64r6 mips64r6el
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), ${dep:libcbiarch}, ${shlibs:Depends}, ${misc:Depends}
+Description: GCC OpenMP (GOMP) support library (n32)
+ GOMP is an implementation of OpenMP for the C, C++, and Fortran compilers
+ in the GNU Compiler Collection.
+
+Package: libn32gomp1-dbg
+X-DH-Build-For-Type: target
+Architecture: mips mipsel mips64 mips64el mipsr6 mipsr6el mips64r6 mips64r6el
+Section: debug
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), libn32gomp1 (= ${gcc:Version}), ${misc:Depends}
+Description: GCC OpenMP (GOMP) support library (n32 debug symbols)
+ GOMP is an implementation of OpenMP for the C, C++, and Fortran compilers
+
+Package: libx32gomp1
+X-DH-Build-For-Type: target
+Section: libs
+Architecture: amd64 i386
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), ${dep:libcbiarch}, ${shlibs:Depends}, ${misc:Depends}
+Description: GCC OpenMP (GOMP) support library (x32)
+ GOMP is an implementation of OpenMP for the C, C++, and Fortran compilers
+ in the GNU Compiler Collection.
+
+Package: libx32gomp1-dbg
+X-DH-Build-For-Type: target
+Architecture: amd64 i386
+Section: debug
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), libx32gomp1 (= ${gcc:Version}), ${misc:Depends}
+Description: GCC OpenMP (GOMP) support library (x32 debug symbols)
+ GOMP is an implementation of OpenMP for the C, C++, and Fortran compilers
+
+Package: libitm1
+X-DH-Build-For-Type: target
+Section: libs
+Architecture: any
+Provides: libitm1-armel [armel], libitm1-armhf [armhf]
+Multi-Arch: same
+Pre-Depends: ${misc:Pre-Depends}
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), ${shlibs:Depends}, ${misc:Depends}
+Description: GNU Transactional Memory Library
+ GNU Transactional Memory Library (libitm) provides transaction support for
+ accesses to the memory of a process, enabling easy-to-use synchronization of
+ accesses to shared memory by several threads.
+
+Package: libitm1-dbg
+X-DH-Build-For-Type: target
+Architecture: any
+Section: debug
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), libitm1 (= ${gcc:Version}), ${misc:Depends}
+Provides: libitm1-dbg-armel [armel], libitm1-dbg-armhf [armhf]
+Multi-Arch: same
+Description: GNU Transactional Memory Library (debug symbols)
+ GNU Transactional Memory Library (libitm) provides transaction support for
+ accesses to the memory of a process, enabling easy-to-use synchronization of
+ accesses to shared memory by several threads.
+
+Package: lib32itm1
+X-DH-Build-For-Type: target
+Section: libs
+Architecture: amd64 ppc64 kfreebsd-amd64 s390x sparc64 x32 mipsn32 mipsn32el mips64 mips64el mipsn32r6 mipsn32r6el mips64r6 mips64r6el
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), ${dep:libcbiarch}, ${shlibs:Depends}, ${misc:Depends}
+Conflicts: ${confl:lib32}
+Description: GNU Transactional Memory Library (32bit)
+ GNU Transactional Memory Library (libitm) provides transaction support for
+ accesses to the memory of a process, enabling easy-to-use synchronization of
+ accesses to shared memory by several threads.
+
+Package: lib32itm1-dbg
+X-DH-Build-For-Type: target
+Architecture: amd64 ppc64 kfreebsd-amd64 s390x sparc64 x32 mipsn32 mipsn32el mips64 mips64el mipsn32r6 mipsn32r6el mips64r6 mips64r6el
+Section: debug
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), lib32itm1 (= ${gcc:Version}), ${misc:Depends}
+Description: GNU Transactional Memory Library (32 bit debug symbols)
+ GNU Transactional Memory Library (libitm) provides transaction support for
+ accesses to the memory of a process, enabling easy-to-use synchronization of
+ accesses to shared memory by several threads.
+
+Package: lib64itm1
+X-DH-Build-For-Type: target
+Section: libs
+Architecture: i386 powerpc sparc s390 mips mipsel mipsn32 mipsn32el mipsr6 mipsr6el mipsn32r6 mipsn32r6el x32
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), ${dep:libcbiarch}, ${shlibs:Depends}, ${misc:Depends}
+Description: GNU Transactional Memory Library (64bit)
+ GNU Transactional Memory Library (libitm) provides transaction support for
+ accesses to the memory of a process, enabling easy-to-use synchronization of
+ accesses to shared memory by several threads.
+
+Package: lib64itm1-dbg
+X-DH-Build-For-Type: target
+Architecture: i386 powerpc sparc s390 mips mipsel mipsn32 mipsn32el mipsr6 mipsr6el mipsn32r6 mipsn32r6el x32
+Section: debug
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), lib64itm1 (= ${gcc:Version}), ${misc:Depends}
+Description: GNU Transactional Memory Library (64bit debug symbols)
+ GNU Transactional Memory Library (libitm) provides transaction support for
+ accesses to the memory of a process, enabling easy-to-use synchronization of
+ accesses to shared memory by several threads.
+
+#Package: libn32itm`'ITM_SO`'LS
+#Section: ifdef(`TARGET',`devel',`libs')
+#Architecture: ifdef(`TARGET',`CROSS_ARCH',`biarchn32_archs')
+#Priority: optional
+#Depends: BASELDEP, ${dep:libcbiarch}, ${shlibs:Depends}, ${misc:Depends}
+#BUILT_USING`'dnl
+#Description: GNU Transactional Memory Library (n32)
+# GNU Transactional Memory Library (libitm) provides transaction support for
+# accesses to the memory of a process, enabling easy-to-use synchronization of
+# accesses to shared memory by several threads.
+
+#Package: libn32itm`'ITM_SO-dbg`'LS
+#Architecture: ifdef(`TARGET',`CROSS_ARCH',`biarchn32_archs')
+#Section: debug
+#Priority: optional
+#Depends: BASELDEP, libdep(itm`'ITM_SO,n32,=), ${misc:Depends}
+#BUILT_USING`'dnl
+#Description: GNU Transactional Memory Library (n32 debug symbols)
+# GNU Transactional Memory Library (libitm) provides transaction support for
+# accesses to the memory of a process, enabling easy-to-use synchronization of
+# accesses to shared memory by several threads.
+
+Package: libx32itm1
+X-DH-Build-For-Type: target
+Section: libs
+Architecture: amd64 i386
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), ${dep:libcbiarch}, ${shlibs:Depends}, ${misc:Depends}
+Description: GNU Transactional Memory Library (x32)
+ This manual documents the usage and internals of libitm. It provides
+ transaction support for accesses to the memory of a process, enabling
+ easy-to-use synchronization of accesses to shared memory by several threads.
+
+Package: libx32itm1-dbg
+X-DH-Build-For-Type: target
+Architecture: amd64 i386
+Section: debug
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), libx32itm1 (= ${gcc:Version}), ${misc:Depends}
+Description: GNU Transactional Memory Library (x32 debug symbols)
+ This manual documents the usage and internals of libitm. It provides
+ transaction support for accesses to the memory of a process, enabling
+ easy-to-use synchronization of accesses to shared memory by several threads.
+
+Package: libatomic1
+X-DH-Build-For-Type: target
+Section: libs
+Architecture: any
+Provides: libatomic1-armel [armel], libatomic1-armhf [armhf]
+Multi-Arch: same
+Pre-Depends: ${misc:Pre-Depends}
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), ${shlibs:Depends}, ${misc:Depends}
+Description: support library providing __atomic built-in functions
+ library providing __atomic built-in functions. When an atomic call cannot
+ be turned into lock-free instructions, GCC will make calls into this library.
+
+Package: libatomic1-dbg
+X-DH-Build-For-Type: target
+Architecture: any
+Section: debug
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), libatomic1 (= ${gcc:Version}), ${misc:Depends}
+Provides: libatomic1-dbg-armel [armel], libatomic1-dbg-armhf [armhf]
+Multi-Arch: same
+Description: support library providing __atomic built-in functions (debug symbols)
+ library providing __atomic built-in functions. When an atomic call cannot
+ be turned into lock-free instructions, GCC will make calls into this library.
+
+Package: lib32atomic1
+X-DH-Build-For-Type: target
+Section: libs
+Architecture: amd64 ppc64 kfreebsd-amd64 s390x sparc64 x32 mipsn32 mipsn32el mips64 mips64el mipsn32r6 mipsn32r6el mips64r6 mips64r6el
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), ${dep:libcbiarch}, ${shlibs:Depends}, ${misc:Depends}
+Conflicts: ${confl:lib32}
+Description: support library providing __atomic built-in functions (32bit)
+ library providing __atomic built-in functions. When an atomic call cannot
+ be turned into lock-free instructions, GCC will make calls into this library.
+
+Package: lib32atomic1-dbg
+X-DH-Build-For-Type: target
+Architecture: amd64 ppc64 kfreebsd-amd64 s390x sparc64 x32 mipsn32 mipsn32el mips64 mips64el mipsn32r6 mipsn32r6el mips64r6 mips64r6el
+Section: debug
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), lib32atomic1 (= ${gcc:Version}), ${misc:Depends}
+Description: support library providing __atomic built-in functions (32 bit debug symbols)
+ library providing __atomic built-in functions. When an atomic call cannot
+ be turned into lock-free instructions, GCC will make calls into this library.
+
+Package: lib64atomic1
+X-DH-Build-For-Type: target
+Section: libs
+Architecture: i386 powerpc sparc s390 mips mipsel mipsn32 mipsn32el mipsr6 mipsr6el mipsn32r6 mipsn32r6el x32
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), ${dep:libcbiarch}, ${shlibs:Depends}, ${misc:Depends}
+Description: support library providing __atomic built-in functions (64bit)
+ library providing __atomic built-in functions. When an atomic call cannot
+ be turned into lock-free instructions, GCC will make calls into this library.
+
+Package: lib64atomic1-dbg
+X-DH-Build-For-Type: target
+Architecture: i386 powerpc sparc s390 mips mipsel mipsn32 mipsn32el mipsr6 mipsr6el mipsn32r6 mipsn32r6el x32
+Section: debug
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), lib64atomic1 (= ${gcc:Version}), ${misc:Depends}
+Description: support library providing __atomic built-in functions (64bit debug symbols)
+ library providing __atomic built-in functions. When an atomic call cannot
+ be turned into lock-free instructions, GCC will make calls into this library.
+
+Package: libn32atomic1
+X-DH-Build-For-Type: target
+Section: libs
+Architecture: mips mipsel mips64 mips64el mipsr6 mipsr6el mips64r6 mips64r6el
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), ${dep:libcbiarch}, ${shlibs:Depends}, ${misc:Depends}
+Description: support library providing __atomic built-in functions (n32)
+ library providing __atomic built-in functions. When an atomic call cannot
+ be turned into lock-free instructions, GCC will make calls into this library.
+
+Package: libn32atomic1-dbg
+X-DH-Build-For-Type: target
+Architecture: mips mipsel mips64 mips64el mipsr6 mipsr6el mips64r6 mips64r6el
+Section: debug
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), libn32atomic1 (= ${gcc:Version}), ${misc:Depends}
+Description: support library providing __atomic built-in functions (n32 debug symbols)
+ library providing __atomic built-in functions. When an atomic call cannot
+ be turned into lock-free instructions, GCC will make calls into this library.
+
+Package: libx32atomic1
+X-DH-Build-For-Type: target
+Section: libs
+Architecture: amd64 i386
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), ${dep:libcbiarch}, ${shlibs:Depends}, ${misc:Depends}
+Description: support library providing __atomic built-in functions (x32)
+ library providing __atomic built-in functions. When an atomic call cannot
+ be turned into lock-free instructions, GCC will make calls into this library.
+
+Package: libx32atomic1-dbg
+X-DH-Build-For-Type: target
+Architecture: amd64 i386
+Section: debug
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), libx32atomic1 (= ${gcc:Version}), ${misc:Depends}
+Description: support library providing __atomic built-in functions (x32 debug symbols)
+ library providing __atomic built-in functions. When an atomic call cannot
+ be turned into lock-free instructions, GCC will make calls into this library.
+
+Package: libasan5
+X-DH-Build-For-Type: target
+Section: libs
+Architecture: any
+Provides: libasan5-armel [armel], libasan5-armhf [armhf]
+Multi-Arch: same
+Pre-Depends: ${misc:Pre-Depends}
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), ${shlibs:Depends}, ${misc:Depends}
+Description: AddressSanitizer -- a fast memory error detector
+ AddressSanitizer (ASan) is a fast memory error detector.  It finds
+ use-after-free and {heap,stack,global}-buffer overflow bugs in C/C++ programs.
+
+Package: libasan5-dbg
+X-DH-Build-For-Type: target
+Architecture: any
+Section: debug
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), libasan5 (= ${gcc:Version}), ${misc:Depends}
+Provides: libasan5-dbg-armel [armel], libasan5-dbg-armhf [armhf]
+Multi-Arch: same
+Description: AddressSanitizer -- a fast memory error detector (debug symbols)
+ AddressSanitizer (ASan) is a fast memory error detector.  It finds
+ use-after-free and {heap,stack,global}-buffer overflow bugs in C/C++ programs.
+
+Package: lib32asan5
+X-DH-Build-For-Type: target
+Section: libs
+Architecture: amd64 ppc64 kfreebsd-amd64 s390x sparc64 x32 mipsn32 mipsn32el mips64 mips64el mipsn32r6 mipsn32r6el mips64r6 mips64r6el
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), ${dep:libcbiarch}, ${shlibs:Depends}, ${misc:Depends}
+Conflicts: ${confl:lib32}
+Description: AddressSanitizer -- a fast memory error detector (32bit)
+ AddressSanitizer (ASan) is a fast memory error detector.  It finds
+ use-after-free and {heap,stack,global}-buffer overflow bugs in C/C++ programs.
+
+Package: lib32asan5-dbg
+X-DH-Build-For-Type: target
+Architecture: amd64 ppc64 kfreebsd-amd64 s390x sparc64 x32 mipsn32 mipsn32el mips64 mips64el mipsn32r6 mipsn32r6el mips64r6 mips64r6el
+Section: debug
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), lib32asan5 (= ${gcc:Version}), ${misc:Depends}
+Description: AddressSanitizer -- a fast memory error detector (32 bit debug symbols)
+ AddressSanitizer (ASan) is a fast memory error detector.  It finds
+ use-after-free and {heap,stack,global}-buffer overflow bugs in C/C++ programs.
+
+Package: lib64asan5
+X-DH-Build-For-Type: target
+Section: libs
+Architecture: i386 powerpc sparc s390 mips mipsel mipsn32 mipsn32el mipsr6 mipsr6el mipsn32r6 mipsn32r6el x32
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), ${dep:libcbiarch}, ${shlibs:Depends}, ${misc:Depends}
+Description: AddressSanitizer -- a fast memory error detector (64bit)
+ AddressSanitizer (ASan) is a fast memory error detector.  It finds
+ use-after-free and {heap,stack,global}-buffer overflow bugs in C/C++ programs.
+
+Package: lib64asan5-dbg
+X-DH-Build-For-Type: target
+Architecture: i386 powerpc sparc s390 mips mipsel mipsn32 mipsn32el mipsr6 mipsr6el mipsn32r6 mipsn32r6el x32
+Section: debug
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), lib64asan5 (= ${gcc:Version}), ${misc:Depends}
+Description: AddressSanitizer -- a fast memory error detector (64bit debug symbols)
+ AddressSanitizer (ASan) is a fast memory error detector.  It finds
+ use-after-free and {heap,stack,global}-buffer overflow bugs in C/C++ programs.
+
+#Package: libn32asan`'ASAN_SO`'LS
+#Section: ifdef(`TARGET',`devel',`libs')
+#Architecture: ifdef(`TARGET',`CROSS_ARCH',`biarchn32_archs')
+#Priority: optional
+#Depends: BASELDEP, ${dep:libcbiarch}, ${shlibs:Depends}, ${misc:Depends}
+#BUILT_USING`'dnl
+#Description: AddressSanitizer -- a fast memory error detector (n32)
+# AddressSanitizer (ASan) is a fast memory error detector.  It finds
+# use-after-free and {heap,stack,global}-buffer overflow bugs in C/C++ programs.
+
+#Package: libn32asan`'ASAN_SO-dbg`'LS
+#Architecture: ifdef(`TARGET',`CROSS_ARCH',`biarchn32_archs')
+#Section: debug
+#Priority: optional
+#Depends: BASELDEP, libdep(asan`'ASAN_SO,n32,=), ${misc:Depends}
+#BUILT_USING`'dnl
+#Description: AddressSanitizer -- a fast memory error detector (n32 debug symbols)
+# AddressSanitizer (ASan) is a fast memory error detector.  It finds
+# use-after-free and {heap,stack,global}-buffer overflow bugs in C/C++ programs.
+
+Package: libx32asan5
+X-DH-Build-For-Type: target
+Section: libs
+Architecture: amd64 i386
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), ${dep:libcbiarch}, ${shlibs:Depends}, ${misc:Depends}
+Description: AddressSanitizer -- a fast memory error detector (x32)
+ AddressSanitizer (ASan) is a fast memory error detector.  It finds
+ use-after-free and {heap,stack,global}-buffer overflow bugs in C/C++ programs.
+
+Package: libx32asan5-dbg
+X-DH-Build-For-Type: target
+Architecture: amd64 i386
+Section: debug
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), libx32asan5 (= ${gcc:Version}), ${misc:Depends}
+Description: AddressSanitizer -- a fast memory error detector (x32 debug symbols)
+ AddressSanitizer (ASan) is a fast memory error detector.  It finds
+ use-after-free and {heap,stack,global}-buffer overflow bugs in C/C++ programs.
+
+Package: liblsan0
+X-DH-Build-For-Type: target
+Section: libs
+Architecture: any
+Multi-Arch: same
+Pre-Depends: ${misc:Pre-Depends}
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), ${shlibs:Depends}, ${misc:Depends}
+Description: LeakSanitizer -- a memory leak detector (runtime)
+ LeakSanitizer (Lsan) is a memory leak detector which is integrated
+ into AddressSanitizer.
+
+Package: liblsan0-dbg
+X-DH-Build-For-Type: target
+Architecture: any
+Section: debug
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), liblsan0 (= ${gcc:Version}), ${misc:Depends}
+Multi-Arch: same
+Description: LeakSanitizer -- a memory leak detector (debug symbols)
+ LeakSanitizer (Lsan) is a memory leak detector which is integrated
+ into AddressSanitizer.
+
+Package: lib32lsan0
+X-DH-Build-For-Type: target
+Section: libs
+Architecture: amd64 ppc64 kfreebsd-amd64 s390x sparc64 x32 mipsn32 mipsn32el mips64 mips64el mipsn32r6 mipsn32r6el mips64r6 mips64r6el
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), ${dep:libcbiarch}, ${shlibs:Depends}, ${misc:Depends}
+Conflicts: ${confl:lib32}
+Description: LeakSanitizer -- a memory leak detector (32bit)
+ LeakSanitizer (Lsan) is a memory leak detector which is integrated
+ into AddressSanitizer (empty package).
+
+Package: lib32lsan0-dbg
+X-DH-Build-For-Type: target
+Architecture: amd64 ppc64 kfreebsd-amd64 s390x sparc64 x32 mipsn32 mipsn32el mips64 mips64el mipsn32r6 mipsn32r6el mips64r6 mips64r6el
+Section: debug
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), lib32lsan0 (= ${gcc:Version}), ${misc:Depends}
+Description: LeakSanitizer -- a memory leak detector (32 bit debug symbols)
+ LeakSanitizer (Lsan) is a memory leak detector which is integrated
+ into AddressSanitizer (empty package).
+
+#Package: lib64lsan`'LSAN_SO`'LS
+#Section: ifdef(`TARGET',`devel',`libs')
+#Architecture: ifdef(`TARGET',`CROSS_ARCH',`biarch64_archs')
+#Priority: optional
+#Depends: BASELDEP, ${dep:libcbiarch}, ${shlibs:Depends}, ${misc:Depends}
+#BUILT_USING`'dnl
+#Description: LeakSanitizer -- a memory leak detector (64bit)
+# LeakSanitizer (Lsan) is a memory leak detector which is integrated
+# into AddressSanitizer.
+
+#Package: lib64lsan`'LSAN_SO-dbg`'LS
+#Architecture: ifdef(`TARGET',`CROSS_ARCH',`biarch64_archs')
+#Section: debug
+#Priority: optional
+#Depends: BASELDEP, libdep(lsan`'LSAN_SO,64,=), ${misc:Depends}
+#BUILT_USING`'dnl
+#Description: LeakSanitizer -- a memory leak detector (64bit debug symbols)
+# LeakSanitizer (Lsan) is a memory leak detector which is integrated
+# into AddressSanitizer.
+
+#Package: libn32lsan`'LSAN_SO`'LS
+#Section: ifdef(`TARGET',`devel',`libs')
+#Architecture: ifdef(`TARGET',`CROSS_ARCH',`biarchn32_archs')
+#Priority: optional
+#Depends: BASELDEP, ${dep:libcbiarch}, ${shlibs:Depends}, ${misc:Depends}
+#BUILT_USING`'dnl
+#Description: LeakSanitizer -- a memory leak detector (n32)
+# LeakSanitizer (Lsan) is a memory leak detector which is integrated
+# into AddressSanitizer.
+
+#Package: libn32lsan`'LSAN_SO-dbg`'LS
+#Architecture: ifdef(`TARGET',`CROSS_ARCH',`biarchn32_archs')
+#Section: debug
+#Priority: optional
+#Depends: BASELDEP, libdep(lsan`'LSAN_SO,n32,=), ${misc:Depends}
+#BUILT_USING`'dnl
+#Description: LeakSanitizer -- a memory leak detector (n32 debug symbols)
+# LeakSanitizer (Lsan) is a memory leak detector which is integrated
+# into AddressSanitizer.
+
+Package: libx32lsan0
+X-DH-Build-For-Type: target
+Section: libs
+Architecture: amd64 i386
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), ${dep:libcbiarch}, ${shlibs:Depends}, ${misc:Depends}
+Description: LeakSanitizer -- a memory leak detector (x32)
+ LeakSanitizer (Lsan) is a memory leak detector which is integrated
+ into AddressSanitizer (empty package).
+
+Package: libx32lsan0-dbg
+X-DH-Build-For-Type: target
+Architecture: amd64 i386
+Section: debug
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), libx32lsan0 (= ${gcc:Version}), ${misc:Depends}
+Description: LeakSanitizer -- a memory leak detector (x32 debug symbols)
+ LeakSanitizer (Lsan) is a memory leak detector which is integrated
+ into AddressSanitizer (empty package).
+
+Package: libtsan0
+X-DH-Build-For-Type: target
+Section: libs
+Architecture: any
+Provides: libtsan0-armel [armel], libtsan0-armhf [armhf]
+Multi-Arch: same
+Pre-Depends: ${misc:Pre-Depends}
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), ${shlibs:Depends}, ${misc:Depends}
+Description: ThreadSanitizer -- a Valgrind-based detector of data races (runtime)
+ ThreadSanitizer (Tsan) is a data race detector for C/C++ programs. 
+ The Linux and Mac versions are based on Valgrind. 
+
+Package: libtsan0-dbg
+X-DH-Build-For-Type: target
+Architecture: any
+Section: debug
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), libtsan0 (= ${gcc:Version}), ${misc:Depends}
+Provides: libtsan0-dbg-armel [armel], libtsan0-dbg-armhf [armhf]
+Multi-Arch: same
+Description: ThreadSanitizer -- a Valgrind-based detector of data races (debug symbols)
+ ThreadSanitizer (Tsan) is a data race detector for C/C++ programs. 
+ The Linux and Mac versions are based on Valgrind. 
+
+Package: libubsan1
+X-DH-Build-For-Type: target
+Section: libs
+Architecture: any
+Provides: libubsan1-armel [armel], libubsan1-armhf [armhf]
+Multi-Arch: same
+Pre-Depends: ${misc:Pre-Depends}
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), ${shlibs:Depends}, ${misc:Depends}
+Description: UBSan -- undefined behaviour sanitizer (runtime)
+ UndefinedBehaviorSanitizer can be enabled via -fsanitize=undefined.
+ Various computations will be instrumented to detect undefined behavior
+ at runtime. Available for C and C++.
+
+Package: libubsan1-dbg
+X-DH-Build-For-Type: target
+Architecture: any
+Section: debug
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), libubsan1 (= ${gcc:Version}), ${misc:Depends}
+Provides: libubsan1-dbg-armel [armel], libubsan1-dbg-armhf [armhf]
+Multi-Arch: same
+Description: UBSan -- undefined behaviour sanitizer (debug symbols)
+ UndefinedBehaviorSanitizer can be enabled via -fsanitize=undefined.
+ Various computations will be instrumented to detect undefined behavior
+ at runtime. Available for C and C++.
+
+Package: lib32ubsan1
+X-DH-Build-For-Type: target
+Section: libs
+Architecture: amd64 ppc64 kfreebsd-amd64 s390x sparc64 x32 mipsn32 mipsn32el mips64 mips64el mipsn32r6 mipsn32r6el mips64r6 mips64r6el
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), ${dep:libcbiarch}, ${shlibs:Depends}, ${misc:Depends}
+Conflicts: ${confl:lib32}
+Description: UBSan -- undefined behaviour sanitizer (32bit)
+ UndefinedBehaviorSanitizer can be enabled via -fsanitize=undefined.
+ Various computations will be instrumented to detect undefined behavior
+ at runtime. Available for C and C++.
+
+Package: lib32ubsan1-dbg
+X-DH-Build-For-Type: target
+Architecture: amd64 ppc64 kfreebsd-amd64 s390x sparc64 x32 mipsn32 mipsn32el mips64 mips64el mipsn32r6 mipsn32r6el mips64r6 mips64r6el
+Section: debug
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), lib32ubsan1 (= ${gcc:Version}), ${misc:Depends}
+Description: UBSan -- undefined behaviour sanitizer (32 bit debug symbols)
+ UndefinedBehaviorSanitizer can be enabled via -fsanitize=undefined.
+ Various computations will be instrumented to detect undefined behavior
+ at runtime. Available for C and C++.
+
+Package: lib64ubsan1
+X-DH-Build-For-Type: target
+Section: libs
+Architecture: i386 powerpc sparc s390 mips mipsel mipsn32 mipsn32el mipsr6 mipsr6el mipsn32r6 mipsn32r6el x32
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), ${dep:libcbiarch}, ${shlibs:Depends}, ${misc:Depends}
+Description: UBSan -- undefined behaviour sanitizer (64bit)
+ UndefinedBehaviorSanitizer can be enabled via -fsanitize=undefined.
+ Various computations will be instrumented to detect undefined behavior
+ at runtime. Available for C and C++.
+
+Package: lib64ubsan1-dbg
+X-DH-Build-For-Type: target
+Architecture: i386 powerpc sparc s390 mips mipsel mipsn32 mipsn32el mipsr6 mipsr6el mipsn32r6 mipsn32r6el x32
+Section: debug
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), lib64ubsan1 (= ${gcc:Version}), ${misc:Depends}
+Description: UBSan -- undefined behaviour sanitizer (64bit debug symbols)
+ UndefinedBehaviorSanitizer can be enabled via -fsanitize=undefined.
+ Various computations will be instrumented to detect undefined behavior
+ at runtime. Available for C and C++.
+
+#Package: libn32ubsan`'UBSAN_SO`'LS
+#Section: ifdef(`TARGET',`devel',`libs')
+#Architecture: ifdef(`TARGET',`CROSS_ARCH',`biarchn32_archs')
+#Priority: optional
+#Depends: BASELDEP, ${dep:libcbiarch}, ${shlibs:Depends}, ${misc:Depends}
+#BUILT_USING`'dnl
+#Description: UBSan -- undefined behaviour sanitizer (n32)
+# UndefinedBehaviorSanitizer can be enabled via -fsanitize=undefined.
+# Various computations will be instrumented to detect undefined behavior
+# at runtime. Available for C and C++.
+
+#Package: libn32ubsan`'UBSAN_SO-dbg`'LS
+#Architecture: ifdef(`TARGET',`CROSS_ARCH',`biarchn32_archs')
+#Section: debug
+#Priority: optional
+#Depends: BASELDEP, libdep(ubsan`'UBSAN_SO,n32,=), ${misc:Depends}
+#BUILT_USING`'dnl
+#Description: UBSan -- undefined behaviour sanitizer (n32 debug symbols)
+# UndefinedBehaviorSanitizer can be enabled via -fsanitize=undefined.
+# Various computations will be instrumented to detect undefined behavior
+# at runtime. Available for C and C++.
+
+Package: libx32ubsan1
+X-DH-Build-For-Type: target
+Section: libs
+Architecture: amd64 i386
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), ${dep:libcbiarch}, ${shlibs:Depends}, ${misc:Depends}
+Description: UBSan -- undefined behaviour sanitizer (x32)
+ UndefinedBehaviorSanitizer can be enabled via -fsanitize=undefined.
+ Various computations will be instrumented to detect undefined behavior
+ at runtime. Available for C and C++.
+
+Package: libx32ubsan1-dbg
+X-DH-Build-For-Type: target
+Architecture: amd64 i386
+Section: debug
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), libx32ubsan1 (= ${gcc:Version}), ${misc:Depends}
+Description: UBSan -- undefined behaviour sanitizer (x32 debug symbols)
+ UndefinedBehaviorSanitizer can be enabled via -fsanitize=undefined.
+ Various computations will be instrumented to detect undefined behavior
+ at runtime. Available for C and C++.
+
+Package: libmpx2
+X-DH-Build-For-Type: target
+Section: libs
+Architecture: any
+Provides: libmpx2-armel [armel], libmpx2-armhf [armhf]
+Multi-Arch: same
+Pre-Depends: ${misc:Pre-Depends}
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), ${shlibs:Depends}, ${misc:Depends}
+Replaces: libmpx0 (<< 6-20160120-1)
+Description: Intel memory protection extensions (runtime)
+ Intel MPX is a set of processor features which, with compiler,
+ runtime library and OS support, brings increased robustness to
+ software by checking pointer references whose compile time normal
+ intentions are usurped at runtime due to buffer overflow.
+
+Package: libmpx2-dbg
+X-DH-Build-For-Type: target
+Architecture: any
+Section: debug
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), libmpx2 (= ${gcc:Version}), ${misc:Depends}
+Provides: libmpx2-dbg-armel [armel], libmpx2-dbg-armhf [armhf]
+Multi-Arch: same
+Description: Intel memory protection extensions (debug symbols)
+ Intel MPX is a set of processor features which, with compiler,
+ runtime library and OS support, brings increased robustness to
+ software by checking pointer references whose compile time normal
+ intentions are usurped at runtime due to buffer overflow.
+
+Package: lib32mpx2
+X-DH-Build-For-Type: target
+Section: libs
+Architecture: amd64 ppc64 kfreebsd-amd64 s390x sparc64 x32 mipsn32 mipsn32el mips64 mips64el mipsn32r6 mipsn32r6el mips64r6 mips64r6el
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), ${dep:libcbiarch}, ${shlibs:Depends}, ${misc:Depends}
+Conflicts: ${confl:lib32}
+Replaces: lib32mpx0 (<< 6-20160120-1)
+Description: Intel memory protection extensions (32bit)
+ Intel MPX is a set of processor features which, with compiler,
+ runtime library and OS support, brings increased robustness to
+ software by checking pointer references whose compile time normal
+ intentions are usurped at runtime due to buffer overflow.
+
+Package: lib32mpx2-dbg
+X-DH-Build-For-Type: target
+Architecture: amd64 ppc64 kfreebsd-amd64 s390x sparc64 x32 mipsn32 mipsn32el mips64 mips64el mipsn32r6 mipsn32r6el mips64r6 mips64r6el
+Section: debug
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), lib32mpx2 (= ${gcc:Version}), ${misc:Depends}
+Description: Intel memory protection extensions (32 bit debug symbols)
+ Intel MPX is a set of processor features which, with compiler,
+ runtime library and OS support, brings increased robustness to
+ software by checking pointer references whose compile time normal
+ intentions are usurped at runtime due to buffer overflow.
+
+Package: lib64mpx2
+X-DH-Build-For-Type: target
+Section: libs
+Architecture: i386 powerpc sparc s390 mips mipsel mipsn32 mipsn32el mipsr6 mipsr6el mipsn32r6 mipsn32r6el x32
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), ${dep:libcbiarch}, ${shlibs:Depends}, ${misc:Depends}
+Replaces: lib64mpx0 (<< 6-20160120-1)
+Description: Intel memory protection extensions (64bit)
+ Intel MPX is a set of processor features which, with compiler,
+ runtime library and OS support, brings increased robustness to
+ software by checking pointer references whose compile time normal
+ intentions are usurped at runtime due to buffer overflow.
+
+Package: lib64mpx2-dbg
+X-DH-Build-For-Type: target
+Architecture: i386 powerpc sparc s390 mips mipsel mipsn32 mipsn32el mipsr6 mipsr6el mipsn32r6 mipsn32r6el x32
+Section: debug
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), lib64mpx2 (= ${gcc:Version}), ${misc:Depends}
+Description: Intel memory protection extensions (64bit debug symbols)
+ Intel MPX is a set of processor features which, with compiler,
+ runtime library and OS support, brings increased robustness to
+ software by checking pointer references whose compile time normal
+ intentions are usurped at runtime due to buffer overflow.
+
+Package: libquadmath0
+X-DH-Build-For-Type: target
+Section: libs
+Architecture: any
+Multi-Arch: same
+Pre-Depends: ${misc:Pre-Depends}
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), ${shlibs:Depends}, ${misc:Depends}
+Description: GCC Quad-Precision Math Library
+ A library, which provides quad-precision mathematical functions on targets
+ supporting the __float128 datatype. The library is used to provide on such
+ targets the REAL(16) type in the GNU Fortran compiler.
+
+Package: libquadmath0-dbg
+X-DH-Build-For-Type: target
+Architecture: any
+Section: debug
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), libquadmath0 (= ${gcc:Version}), ${misc:Depends}
+Multi-Arch: same
+Description: GCC Quad-Precision Math Library (debug symbols)
+ A library, which provides quad-precision mathematical functions on targets
+ supporting the __float128 datatype.
+
+Package: lib32quadmath0
+X-DH-Build-For-Type: target
+Section: libs
+Architecture: amd64 ppc64 kfreebsd-amd64 s390x sparc64 x32 mipsn32 mipsn32el mips64 mips64el mipsn32r6 mipsn32r6el mips64r6 mips64r6el
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), ${dep:libcbiarch}, ${shlibs:Depends}, ${misc:Depends}
+Conflicts: ${confl:lib32}
+Description: GCC Quad-Precision Math Library (32bit)
+ A library, which provides quad-precision mathematical functions on targets
+ supporting the __float128 datatype. The library is used to provide on such
+ targets the REAL(16) type in the GNU Fortran compiler.
+
+Package: lib32quadmath0-dbg
+X-DH-Build-For-Type: target
+Architecture: amd64 ppc64 kfreebsd-amd64 s390x sparc64 x32 mipsn32 mipsn32el mips64 mips64el mipsn32r6 mipsn32r6el mips64r6 mips64r6el
+Section: debug
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), lib32quadmath0 (= ${gcc:Version}), ${misc:Depends}
+Description: GCC Quad-Precision Math Library (32 bit debug symbols)
+ A library, which provides quad-precision mathematical functions on targets
+ supporting the __float128 datatype.
+
+Package: lib64quadmath0
+X-DH-Build-For-Type: target
+Section: libs
+Architecture: i386 powerpc sparc s390 mips mipsel mipsn32 mipsn32el mipsr6 mipsr6el mipsn32r6 mipsn32r6el x32
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), ${dep:libcbiarch}, ${shlibs:Depends}, ${misc:Depends}
+Description: GCC Quad-Precision Math Library  (64bit)
+ A library, which provides quad-precision mathematical functions on targets
+ supporting the __float128 datatype. The library is used to provide on such
+ targets the REAL(16) type in the GNU Fortran compiler.
+
+Package: lib64quadmath0-dbg
+X-DH-Build-For-Type: target
+Architecture: i386 powerpc sparc s390 mips mipsel mipsn32 mipsn32el mipsr6 mipsr6el mipsn32r6 mipsn32r6el x32
+Section: debug
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), lib64quadmath0 (= ${gcc:Version}), ${misc:Depends}
+Description: GCC Quad-Precision Math Library  (64bit debug symbols)
+ A library, which provides quad-precision mathematical functions on targets
+ supporting the __float128 datatype.
+
+#Package: libn32quadmath`'QMATH_SO`'LS
+#Section: ifdef(`TARGET',`devel',`libs')
+#Architecture: ifdef(`TARGET',`CROSS_ARCH',`biarchn32_archs')
+#Priority: optional
+#Depends: BASELDEP, ${dep:libcbiarch}, ${shlibs:Depends}, ${misc:Depends}
+#BUILT_USING`'dnl
+#Description: GCC Quad-Precision Math Library (n32)
+# A library, which provides quad-precision mathematical functions on targets
+# supporting the __float128 datatype. The library is used to provide on such
+# targets the REAL(16) type in the GNU Fortran compiler.
+
+#Package: libn32quadmath`'QMATH_SO-dbg`'LS
+#Architecture: ifdef(`TARGET',`CROSS_ARCH',`biarchn32_archs')
+#Section: debug
+#Priority: optional
+#Depends: BASELDEP, libdep(quadmath`'QMATH_SO,n32,=), ${misc:Depends}
+#BUILT_USING`'dnl
+#Description: GCC Quad-Precision Math Library (n32 debug symbols)
+# A library, which provides quad-precision mathematical functions on targets
+# supporting the __float128 datatype.
+
+Package: libx32quadmath0
+X-DH-Build-For-Type: target
+Section: libs
+Architecture: amd64 i386
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), ${dep:libcbiarch}, ${shlibs:Depends}, ${misc:Depends}
+Description: GCC Quad-Precision Math Library (x32)
+ A library, which provides quad-precision mathematical functions on targets
+ supporting the __float128 datatype. The library is used to provide on such
+ targets the REAL(16) type in the GNU Fortran compiler.
+
+Package: libx32quadmath0-dbg
+X-DH-Build-For-Type: target
+Architecture: amd64 i386
+Section: debug
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), libx32quadmath0 (= ${gcc:Version}), ${misc:Depends}
+Description: GCC Quad-Precision Math Library (x32 debug symbols)
+ A library, which provides quad-precision mathematical functions on targets
+ supporting the __float128 datatype.
+
+Package: libcc1-0
+Section: libs
+Architecture: any
+Multi-Arch: same
+Pre-Depends: ${misc:Pre-Depends}
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), ${shlibs:Depends}, ${misc:Depends}
+Description: GCC cc1 plugin for GDB
+ libcc1 is a plugin for GDB.
+
+Package: libgccjit0
+Section: libs
+Architecture: any
+Multi-Arch: same
+Pre-Depends: ${misc:Pre-Depends}
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), libgcc-8-dev, binutils, ${shlibs:Depends}, ${misc:Depends}
+Breaks: python-gccjit (<< 0.4-4), python3-gccjit (<< 0.4-4)
+Description: GCC just-in-time compilation (shared library)
+ libgccjit provides an embeddable shared library with an API for adding
+ compilation to existing programs using GCC.
+
+Package: libgccjit0-dbg
+Section: debug
+Architecture: any
+Multi-Arch: same
+Pre-Depends: ${misc:Pre-Depends}
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), libgccjit0 (= ${gcc:Version}),
+ ${shlibs:Depends}, ${misc:Depends}
+Breaks: libgccjit-5-dbg, libgccjit-6-dbg
+Replaces: libgccjit-5-dbg, libgccjit-6-dbg
+Description: GCC just-in-time compilation (debug information)
+ libgccjit provides an embeddable shared library with an API for adding
+ compilation to existing programs using GCC.
+
+Package: libgccjit-8-doc
+Section: doc
+Architecture: all
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), ${misc:Depends}
+Conflicts: libgccjit-5-doc, libgccjit-6-doc, libgccjit-7-doc
+Description: GCC just-in-time compilation (documentation)
+ libgccjit provides an embeddable shared library with an API for adding
+ compilation to existing programs using GCC.
+
+Package: libgccjit-8-dev
+Section: libdevel
+Architecture: any
+Multi-Arch: same
+Pre-Depends: ${misc:Pre-Depends}
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), libgccjit0 (>= ${gcc:Version}),
+ ${shlibs:Depends}, ${misc:Depends}
+Suggests: libgccjit-8-dbg
+Description: GCC just-in-time compilation (development files)
+ libgccjit provides an embeddable shared library with an API for adding
+ compilation to existing programs using GCC.
+
+Package: gobjc++-8
+Architecture: any
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), gobjc-8 (= ${gcc:Version}), g++-8 (= ${gcc:Version}), ${shlibs:Depends}, libobjc-8-dev (= ${gcc:Version}), ${misc:Depends}
+Suggests: ${gobjcxx:multilib}, gcc-8-doc (>= ${gcc:SoftVersion})
+Provides: objc++-compiler
+Description: GNU Objective-C++ compiler
+ This is the GNU Objective-C++ compiler, which compiles
+ Objective-C++ on platforms supported by the gcc compiler. It uses the
+ gcc backend to generate optimized code.
+
+Package: gobjc++-8-multilib
+Architecture: amd64 i386 kfreebsd-amd64 mips mips64 mips64el mips64r6 mips64r6el mipsel mipsn32 mipsn32el mipsn32r6 mipsn32r6el mipsr6 mipsr6el powerpc ppc64 s390 s390x sparc sparc64 x32
+Section: devel
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), gobjc++-8 (= ${gcc:Version}), g++-8-multilib (= ${gcc:Version}), gobjc-8-multilib (= ${gcc:Version}), ${shlibs:Depends}, ${misc:Depends}
+Description: GNU Objective-C++ compiler (multilib support)
+ This is the GNU Objective-C++ compiler, which compiles Objective-C++ on
+ platforms supported by the gcc compiler.
+ .
+ This is a dependency package, depending on development packages
+ for the non-default multilib architecture(s).
+
+Package: gobjc-8
+Architecture: any
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), gcc-8 (= ${gcc:Version}), ${dep:libcdev}, ${shlibs:Depends}, libobjc-8-dev (= ${gcc:Version}), ${misc:Depends}
+Suggests: ${gobjc:multilib}, gcc-8-doc (>= ${gcc:SoftVersion}), libobjc4-dbg (>= ${gcc:Version})
+Provides: objc-compiler
+Description: GNU Objective-C compiler
+ This is the GNU Objective-C compiler, which compiles
+ Objective-C on platforms supported by the gcc compiler. It uses the
+ gcc backend to generate optimized code.
+
+Package: gobjc-8-multilib
+Architecture: amd64 i386 kfreebsd-amd64 mips mips64 mips64el mips64r6 mips64r6el mipsel mipsn32 mipsn32el mipsn32r6 mipsn32r6el mipsr6 mipsr6el powerpc ppc64 s390 s390x sparc sparc64 x32
+Section: devel
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), gobjc-8 (= ${gcc:Version}), gcc-8-multilib (= ${gcc:Version}), ${dep:libobjcbiarchdev}, ${shlibs:Depends}, ${misc:Depends}
+Description: GNU Objective-C compiler (multilib support)
+ This is the GNU Objective-C compiler, which compiles Objective-C on platforms
+ supported by the gcc compiler.
+ .
+ This is a dependency package, depending on development packages
+ for the non-default multilib architecture(s).
+
+Package: libobjc-8-dev
+X-DH-Build-For-Type: target
+Architecture: any
+Section: libdevel
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), libgcc-8-dev (= ${gcc:Version}), libobjc4 (>= ${gcc:Version}), ${shlibs:Depends}, ${misc:Depends}
+Multi-Arch: same
+Description: Runtime library for GNU Objective-C applications (development files)
+ This package contains the headers and static library files needed to build
+ GNU ObjC applications.
+
+Package: lib64objc-8-dev
+X-DH-Build-For-Type: target
+Architecture: i386 powerpc sparc s390 mips mipsel mipsn32 mipsn32el mipsr6 mipsr6el mipsn32r6 mipsn32r6el x32
+Section: libdevel
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), lib64gcc-8-dev (= ${gcc:Version}), lib64objc4 (>= ${gcc:Version}), ${shlibs:Depends}, ${misc:Depends}
+Description: Runtime library for GNU Objective-C applications (64bit development files)
+ This package contains the headers and static library files needed to build
+ GNU ObjC applications.
+
+Package: lib32objc-8-dev
+X-DH-Build-For-Type: target
+Architecture: amd64 ppc64 kfreebsd-amd64 s390x sparc64 x32 mipsn32 mipsn32el mips64 mips64el mipsn32r6 mipsn32r6el mips64r6 mips64r6el
+Section: libdevel
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), lib32gcc-8-dev (= ${gcc:Version}), lib32objc4 (>= ${gcc:Version}), ${shlibs:Depends}, ${misc:Depends}
+Description: Runtime library for GNU Objective-C applications (32bit development files)
+ This package contains the headers and static library files needed to build
+ GNU ObjC applications.
+
+Package: libn32objc-8-dev
+X-DH-Build-For-Type: target
+Architecture: mips mipsel mips64 mips64el mipsr6 mipsr6el mips64r6 mips64r6el
+Section: libdevel
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), libn32gcc-8-dev (= ${gcc:Version}), libn32objc4 (>= ${gcc:Version}), ${shlibs:Depends}, ${misc:Depends}
+Description: Runtime library for GNU Objective-C applications (n32 development files)
+ This package contains the headers and static library files needed to build
+ GNU ObjC applications.
+
+Package: libx32objc-8-dev
+X-DH-Build-For-Type: target
+Architecture: amd64 i386
+Section: libdevel
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), libx32gcc-8-dev (= ${gcc:Version}), libx32objc4 (>= ${gcc:Version}), ${shlibs:Depends}, ${misc:Depends}
+Description: Runtime library for GNU Objective-C applications (x32 development files)
+ This package contains the headers and static library files needed to build
+ GNU ObjC applications.
+
+Package: libobjc4
+X-DH-Build-For-Type: target
+Section: libs
+Architecture: any
+Provides: libobjc4-armel [armel], libobjc4-armhf [armhf]
+Multi-Arch: same
+Pre-Depends: ${misc:Pre-Depends}
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), ${shlibs:Depends}, ${misc:Depends}
+Description: Runtime library for GNU Objective-C applications
+ Library needed for GNU ObjC applications linked against the shared library.
+
+Package: libobjc4-dbg
+X-DH-Build-For-Type: target
+Section: debug
+Architecture: any
+Provides: libobjc4-dbg-armel [armel], libobjc4-dbg-armhf [armhf]
+Multi-Arch: same
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), libobjc4 (= ${gcc:Version}), libgcc1-dbg (>= ${libgcc:Version}), ${misc:Depends}
+Description: Runtime library for GNU Objective-C applications (debug symbols)
+ Library needed for GNU ObjC applications linked against the shared library.
+
+Package: lib64objc4
+X-DH-Build-For-Type: target
+Section: libs
+Architecture: i386 powerpc sparc s390 mips mipsel mipsn32 mipsn32el mipsr6 mipsr6el mipsn32r6 mipsn32r6el x32
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), ${dep:libcbiarch}, ${shlibs:Depends}, ${misc:Depends}
+Description: Runtime library for GNU Objective-C applications (64bit)
+ Library needed for GNU ObjC applications linked against the shared library.
+
+Package: lib64objc4-dbg
+X-DH-Build-For-Type: target
+Section: debug
+Architecture: i386 powerpc sparc s390 mips mipsel mipsn32 mipsn32el mipsr6 mipsr6el mipsn32r6 mipsn32r6el x32
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), lib64objc4 (= ${gcc:Version}), lib64gcc1-dbg (>= ${gcc:EpochVersion}), ${misc:Depends}
+Description: Runtime library for GNU Objective-C applications (64 bit debug symbols)
+ Library needed for GNU ObjC applications linked against the shared library.
+
+Package: lib32objc4
+X-DH-Build-For-Type: target
+Section: libs
+Architecture: amd64 ppc64 kfreebsd-amd64 s390x sparc64 x32 mipsn32 mipsn32el mips64 mips64el mipsn32r6 mipsn32r6el mips64r6 mips64r6el
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), ${dep:libcbiarch}, ${shlibs:Depends}, ${misc:Depends}
+Conflicts: ${confl:lib32}
+Description: Runtime library for GNU Objective-C applications (32bit)
+ Library needed for GNU ObjC applications linked against the shared library.
+
+Package: lib32objc4-dbg
+X-DH-Build-For-Type: target
+Section: debug
+Architecture: amd64 ppc64 kfreebsd-amd64 s390x sparc64 x32 mipsn32 mipsn32el mips64 mips64el mipsn32r6 mipsn32r6el mips64r6 mips64r6el
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), lib32objc4 (= ${gcc:Version}), lib32gcc1-dbg (>= ${gcc:EpochVersion}), ${misc:Depends}
+Description: Runtime library for GNU Objective-C applications (32 bit debug symbols)
+ Library needed for GNU ObjC applications linked against the shared library.
+
+Package: libn32objc4
+X-DH-Build-For-Type: target
+Section: libs
+Architecture: mips mipsel mips64 mips64el mipsr6 mipsr6el mips64r6 mips64r6el
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), ${dep:libcbiarch}, ${shlibs:Depends}, ${misc:Depends}
+Description: Runtime library for GNU Objective-C applications (n32)
+ Library needed for GNU ObjC applications linked against the shared library.
+
+Package: libn32objc4-dbg
+X-DH-Build-For-Type: target
+Section: debug
+Architecture: mips mipsel mips64 mips64el mipsr6 mipsr6el mips64r6 mips64r6el
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), libn32objc4 (= ${gcc:Version}), libn32gcc1-dbg (>= ${gcc:EpochVersion}), ${misc:Depends}
+Description: Runtime library for GNU Objective-C applications (n32 debug symbols)
+ Library needed for GNU ObjC applications linked against the shared library.
+
+Package: libx32objc4
+X-DH-Build-For-Type: target
+Section: libs
+Architecture: amd64 i386
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), ${dep:libcbiarch}, ${shlibs:Depends}, ${misc:Depends}
+Description: Runtime library for GNU Objective-C applications (x32)
+ Library needed for GNU ObjC applications linked against the shared library.
+
+Package: libx32objc4-dbg
+X-DH-Build-For-Type: target
+Section: debug
+Architecture: amd64 i386
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), libx32objc4 (= ${gcc:Version}), libx32gcc1-dbg (>= ${gcc:EpochVersion}), ${misc:Depends}
+Description: Runtime library for GNU Objective-C applications (x32 debug symbols)
+ Library needed for GNU ObjC applications linked against the shared library.
+
+Package: gfortran-8
+Architecture: any
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), gcc-8 (= ${gcc:Version}), libgfortran-8-dev (= ${gcc:Version}), ${dep:libcdev}, ${shlibs:Depends}, ${misc:Depends}
+Provides: fortran95-compiler, ${fortran:mod-version}
+Suggests: ${gfortran:multilib}, gfortran-8-doc,
+ libgfortran5-dbg (>= ${gcc:Version}),
+ libcoarrays-dev
+Description: GNU Fortran compiler
+ This is the GNU Fortran compiler, which compiles
+ Fortran on platforms supported by the gcc compiler. It uses the
+ gcc backend to generate optimized code.
+
+Package: gfortran-8-multilib
+Architecture: amd64 i386 kfreebsd-amd64 mips mips64 mips64el mips64r6 mips64r6el mipsel mipsn32 mipsn32el mipsn32r6 mipsn32r6el mipsr6 mipsr6el powerpc ppc64 s390 s390x sparc sparc64 x32
+Section: devel
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), gfortran-8 (= ${gcc:Version}), gcc-8-multilib (= ${gcc:Version}), ${dep:libgfortranbiarchdev}, ${shlibs:Depends}, ${misc:Depends}
+Description: GNU Fortran compiler (multilib support)
+ This is the GNU Fortran compiler, which compiles Fortran on platforms
+ supported by the gcc compiler.
+ .
+ This is a dependency package, depending on development packages
+ for the non-default multilib architecture(s).
+
+Package: libgfortran-8-dev
+X-DH-Build-For-Type: target
+Architecture: any
+Section: libdevel
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), libgcc-8-dev (= ${gcc:Version}), libgfortran5 (>= ${gcc:Version}), ${shlibs:Depends}, ${misc:Depends}
+Multi-Arch: same
+Description: Runtime library for GNU Fortran applications (development files)
+ This package contains the headers and static library files needed to build
+ GNU Fortran applications.
+
+Package: lib64gfortran-8-dev
+X-DH-Build-For-Type: target
+Architecture: i386 powerpc sparc s390 mips mipsel mipsn32 mipsn32el mipsr6 mipsr6el mipsn32r6 mipsn32r6el x32
+Section: libdevel
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), lib64gcc-8-dev (= ${gcc:Version}), lib64gfortran5 (>= ${gcc:Version}), ${shlibs:Depends}, ${misc:Depends}
+Description: Runtime library for GNU Fortran applications (64bit development files)
+ This package contains the headers and static library files needed to build
+ GNU Fortran applications.
+
+Package: lib32gfortran-8-dev
+X-DH-Build-For-Type: target
+Architecture: amd64 ppc64 kfreebsd-amd64 s390x sparc64 x32 mipsn32 mipsn32el mips64 mips64el mipsn32r6 mipsn32r6el mips64r6 mips64r6el
+Section: libdevel
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), lib32gcc-8-dev (= ${gcc:Version}), lib32gfortran5 (>= ${gcc:Version}), ${shlibs:Depends}, ${misc:Depends}
+Description: Runtime library for GNU Fortran applications (32bit development files)
+ This package contains the headers and static library files needed to build
+ GNU Fortran applications.
+
+Package: libn32gfortran-8-dev
+X-DH-Build-For-Type: target
+Architecture: mips mipsel mips64 mips64el mipsr6 mipsr6el mips64r6 mips64r6el
+Section: libdevel
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), libn32gcc-8-dev (= ${gcc:Version}), libn32gfortran5 (>= ${gcc:Version}), ${shlibs:Depends}, ${misc:Depends}
+Description: Runtime library for GNU Fortran applications (n32 development files)
+ This package contains the headers and static library files needed to build
+ GNU Fortran applications.
+
+Package: libx32gfortran-8-dev
+X-DH-Build-For-Type: target
+Architecture: amd64 i386
+Section: libdevel
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), libx32gcc-8-dev (= ${gcc:Version}), libx32gfortran5 (>= ${gcc:Version}), ${shlibs:Depends}, ${misc:Depends}
+Description: Runtime library for GNU Fortran applications (x32 development files)
+ This package contains the headers and static library files needed to build
+ GNU Fortran applications.
+
+Package: libgfortran5
+X-DH-Build-For-Type: target
+Section: libs
+Architecture: any
+Provides: libgfortran5-armel [armel], libgfortran5-armhf [armhf]
+Multi-Arch: same
+Pre-Depends: ${misc:Pre-Depends}
+Breaks: ${multiarch:breaks}
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), ${shlibs:Depends}, ${misc:Depends}
+Description: Runtime library for GNU Fortran applications
+ Library needed for GNU Fortran applications linked against the
+ shared library.
+
+Package: libgfortran5-dbg
+X-DH-Build-For-Type: target
+Section: debug
+Architecture: any
+Provides: libgfortran5-dbg-armel [armel], libgfortran5-dbg-armhf [armhf]
+Multi-Arch: same
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), libgfortran5 (= ${gcc:Version}), libgcc1-dbg (>= ${libgcc:Version}), ${misc:Depends}
+Description: Runtime library for GNU Fortran applications (debug symbols)
+ Library needed for GNU Fortran applications linked against the
+ shared library.
+
+Package: lib64gfortran5
+X-DH-Build-For-Type: target
+Section: libs
+Architecture: i386 powerpc sparc s390 mips mipsel mipsn32 mipsn32el mipsr6 mipsr6el mipsn32r6 mipsn32r6el x32
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), ${dep:libcbiarch}, ${shlibs:Depends}, ${misc:Depends}
+Description: Runtime library for GNU Fortran applications (64bit)
+ Library needed for GNU Fortran applications linked against the
+ shared library.
+
+Package: lib64gfortran5-dbg
+X-DH-Build-For-Type: target
+Section: debug
+Architecture: i386 powerpc sparc s390 mips mipsel mipsn32 mipsn32el mipsr6 mipsr6el mipsn32r6 mipsn32r6el x32
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), lib64gfortran5 (= ${gcc:Version}), ${misc:Depends}
+Description: Runtime library for GNU Fortran applications (64bit debug symbols)
+ Library needed for GNU Fortran applications linked against the
+ shared library.
+
+Package: lib32gfortran5
+X-DH-Build-For-Type: target
+Section: libs
+Architecture: amd64 ppc64 kfreebsd-amd64 s390x sparc64 x32 mipsn32 mipsn32el mips64 mips64el mipsn32r6 mipsn32r6el mips64r6 mips64r6el
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), ${dep:libcbiarch}, ${shlibs:Depends}, ${misc:Depends}
+Conflicts: ${confl:lib32}
+Description: Runtime library for GNU Fortran applications (32bit)
+ Library needed for GNU Fortran applications linked against the
+ shared library.
+
+Package: lib32gfortran5-dbg
+X-DH-Build-For-Type: target
+Section: debug
+Architecture: amd64 ppc64 kfreebsd-amd64 s390x sparc64 x32 mipsn32 mipsn32el mips64 mips64el mipsn32r6 mipsn32r6el mips64r6 mips64r6el
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), lib32gfortran5 (= ${gcc:Version}), ${misc:Depends}
+Description: Runtime library for GNU Fortran applications (32 bit debug symbols)
+ Library needed for GNU Fortran applications linked against the
+ shared library.
+
+Package: libn32gfortran5
+X-DH-Build-For-Type: target
+Section: libs
+Architecture: mips mipsel mips64 mips64el mipsr6 mipsr6el mips64r6 mips64r6el
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), ${dep:libcbiarch}, ${shlibs:Depends}, ${misc:Depends}
+Description: Runtime library for GNU Fortran applications (n32)
+ Library needed for GNU Fortran applications linked against the
+ shared library.
+
+Package: libn32gfortran5-dbg
+X-DH-Build-For-Type: target
+Section: debug
+Architecture: mips mipsel mips64 mips64el mipsr6 mipsr6el mips64r6 mips64r6el
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), libn32gfortran5 (= ${gcc:Version}), ${misc:Depends}
+Description: Runtime library for GNU Fortran applications (n32 debug symbols)
+ Library needed for GNU Fortran applications linked against the
+ shared library.
+
+Package: libx32gfortran5
+X-DH-Build-For-Type: target
+Section: libs
+Architecture: amd64 i386
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), ${dep:libcbiarch}, ${shlibs:Depends}, ${misc:Depends}
+Description: Runtime library for GNU Fortran applications (x32)
+ Library needed for GNU Fortran applications linked against the
+ shared library.
+
+Package: libx32gfortran5-dbg
+X-DH-Build-For-Type: target
+Section: debug
+Architecture: amd64 i386
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), libx32gfortran5 (= ${gcc:Version}), ${misc:Depends}
+Description: Runtime library for GNU Fortran applications (x32 debug symbols)
+ Library needed for GNU Fortran applications linked against the
+ shared library.
+
+Package: gccgo-8
+Architecture: any
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), gcc-8 (= ${gcc:Version}), libgo13 (>= ${gcc:Version}), ${dep:libcdev}, ${shlibs:Depends}, ${misc:Depends}
+Provides: go-compiler
+Suggests: ${go:multilib}, gccgo-8-doc, libgo13-dbg (>= ${gcc:Version})
+Conflicts: ${golang:Conflicts}
+Breaks: libgo12 (<< 8-20171209-2)
+Replaces: libgo12 (<< 8-20171209-2)
+Description: GNU Go compiler
+ This is the GNU Go compiler, which compiles Go on platforms supported
+ by the gcc compiler. It uses the gcc backend to generate optimized code.
+
+Package: gccgo-8-multilib
+Architecture: amd64 i386 kfreebsd-amd64 mips mips64 mips64el mips64r6 mips64r6el mipsel mipsn32 mipsn32el mipsn32r6 mipsn32r6el mipsr6 mipsr6el powerpc ppc64 s390 s390x sparc sparc64 x32
+Section: devel
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), gccgo-8 (= ${gcc:Version}), gcc-8-multilib (= ${gcc:Version}), ${dep:libgobiarch}, ${shlibs:Depends}, ${misc:Depends}
+Suggests: ${dep:libgobiarchdbg}
+Breaks: lib32go12 (<< 8-20171209-2),
+  libn32go12 (<< 8-20171209-2), 
+  libx32go12 (<< 8-20171209-2), 
+  lib64go12 (<< 8-20171209-2)
+Replaces: lib32go12 (<< 8-20171209-2),
+  libn32go12 (<< 8-20171209-2), 
+  libx32go12 (<< 8-20171209-2), 
+  lib64go12 (<< 8-20171209-2)
+Description: GNU Go compiler (multilib support)
+ This is the GNU Go compiler, which compiles Go on platforms supported
+ by the gcc compiler.
+ .
+ This is a dependency package, depending on development packages
+ for the non-default multilib architecture(s).
+
+Package: libgo13
+X-DH-Build-For-Type: target
+Section: libs
+Architecture: any
+Provides: libgo13-armel [armel], libgo13-armhf [armhf]
+Multi-Arch: same
+Pre-Depends: ${misc:Pre-Depends}
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), ${shlibs:Depends}, ${misc:Depends}
+Replaces: libgo3, libgo8
+Description: Runtime library for GNU Go applications
+ Library needed for GNU Go applications linked against the
+ shared library.
+
+Package: libgo13-dbg
+X-DH-Build-For-Type: target
+Section: debug
+Architecture: any
+Provides: libgo13-dbg-armel [armel], libgo13-dbg-armhf [armhf]
+Multi-Arch: same
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), libgo13 (= ${gcc:Version}), ${misc:Depends}
+Description: Runtime library for GNU Go applications (debug symbols)
+ Library needed for GNU Go applications linked against the
+ shared library. This currently is an empty package, because the
+ library is completely unstripped.
+
+Package: lib64go13
+X-DH-Build-For-Type: target
+Section: libs
+Architecture: i386 powerpc sparc s390 mips mipsel mipsn32 mipsn32el mipsr6 mipsr6el mipsn32r6 mipsn32r6el x32
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), ${dep:libcbiarch}, ${shlibs:Depends}, ${misc:Depends}
+Replaces: lib64go3, lib64go8
+Description: Runtime library for GNU Go applications (64bit)
+ Library needed for GNU Go applications linked against the
+ shared library.
+
+Package: lib64go13-dbg
+X-DH-Build-For-Type: target
+Section: debug
+Architecture: i386 powerpc sparc s390 mips mipsel mipsn32 mipsn32el mipsr6 mipsr6el mipsn32r6 mipsn32r6el x32
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), lib64go13 (= ${gcc:Version}), ${misc:Depends}
+Description: Runtime library for GNU Go applications (64bit debug symbols)
+ Library needed for GNU Go applications linked against the
+ shared library. This currently is an empty package, because the
+ library is completely unstripped.
+
+Package: lib32go13
+X-DH-Build-For-Type: target
+Section: libs
+Architecture: amd64 ppc64 kfreebsd-amd64 s390x sparc64 x32 mipsn32 mipsn32el mips64 mips64el mipsn32r6 mipsn32r6el mips64r6 mips64r6el
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), ${dep:libcbiarch}, ${shlibs:Depends}, ${misc:Depends}
+Conflicts: ${confl:lib32}
+Replaces: lib32go3, lib32go8
+Description: Runtime library for GNU Go applications (32bit)
+ Library needed for GNU Go applications linked against the
+ shared library.
+
+Package: lib32go13-dbg
+X-DH-Build-For-Type: target
+Section: debug
+Architecture: amd64 ppc64 kfreebsd-amd64 s390x sparc64 x32 mipsn32 mipsn32el mips64 mips64el mipsn32r6 mipsn32r6el mips64r6 mips64r6el
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), lib32go13 (= ${gcc:Version}), ${misc:Depends}
+Description: Runtime library for GNU Go applications (32 bit debug symbols)
+ Library needed for GNU Go applications linked against the
+ shared library. This currently is an empty package, because the
+ library is completely unstripped.
+
+Package: libn32go13
+X-DH-Build-For-Type: target
+Section: libs
+Architecture: mips mipsel mips64 mips64el mipsr6 mipsr6el mips64r6 mips64r6el
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), ${dep:libcbiarch}, ${shlibs:Depends}, ${misc:Depends}
+Replaces: libn32go3, libn32go8
+Description: Runtime library for GNU Go applications (n32)
+ Library needed for GNU Go applications linked against the
+ shared library.
+
+Package: libn32go13-dbg
+X-DH-Build-For-Type: target
+Section: debug
+Architecture: mips mipsel mips64 mips64el mipsr6 mipsr6el mips64r6 mips64r6el
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), libn32go13 (= ${gcc:Version}), ${misc:Depends}
+Description: Runtime library for GNU Go applications (n32 debug symbols)
+ Library needed for GNU Go applications linked against the
+ shared library. This currently is an empty package, because the
+ library is completely unstripped.
+
+Package: libx32go13
+X-DH-Build-For-Type: target
+Section: libs
+Architecture: amd64 i386
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), ${dep:libcbiarch}, ${shlibs:Depends}, ${misc:Depends}
+Replaces: libx32go3, libx32go8
+Description: Runtime library for GNU Go applications (x32)
+ Library needed for GNU Go applications linked against the
+ shared library.
+
+Package: libx32go13-dbg
+X-DH-Build-For-Type: target
+Section: debug
+Architecture: amd64 i386
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), libx32go13 (= ${gcc:Version}), ${misc:Depends}
+Description: Runtime library for GNU Go applications (x32 debug symbols)
+ Library needed for GNU Go applications linked against the
+ shared library. This currently is an empty package, because the
+ library is completely unstripped.
+
+Package: libstdc++6
+X-DH-Build-For-Type: target
+Architecture: any
+Section: libs
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), ${dep:libc}, ${shlibs:Depends}, ${misc:Depends}
+Provides: libstdc++6-armel [armel], libstdc++6-armhf [armhf]
+Multi-Arch: same
+Pre-Depends: ${misc:Pre-Depends}
+Breaks: ${multiarch:breaks}, libantlr-dev (<= 2.7.7+dfsg-6), libaqsis1 (<= 1.8.2-1), libassimp3 (<= 3.0~dfsg-4), blockattack (<= 1.4.1+ds1-2.1+b2), boo (<= 0.9.5~git20110729.r1.202a430-2), libboost-date-time1.54.0, libboost-date-time1.55.0, libcpprest2.4 (<= 2.4.0-2), printer-driver-brlaser (<= 3-3), c++-annotations (<= 10.2.0-1), clustalx (<= 2.1+lgpl-3), libdavix0 (<= 0.4.0-1+b1), libdballe6 (<= 6.8-1), dff (<= 1.3.0+dfsg.1-4.1+b3), libdiet-sed2.8 (<= 2.8.0-1+b3), libdiet-client2.8 (<= 2.8.0-1+b3), libdiet-admin2.8 (<= 2.8.0-1+b3), digikam-private-libs (<= 4:4.4.0-1.1+b2), emscripten (<= 1.22.1-1), ergo (<= 3.4.0-1), fceux (<= 2.2.2+dfsg0-1), flush (<= 0.9.12-3.1), libfreefem++ (<= 3.37.1-1), freeorion (<= 0.4.4+git20150327-2), fslview (<= 4.0.1-4), fwbuilder (<= 5.1.0-4), libgazebo5 (<= 5.0.1+dfsg-2.1), libgetfem4++ (<= 4.2.1~beta1~svn4635~dfsg-3+b1), libgmsh2 (<= 2.9.3+dfsg1-1), gnote (<= 3.16.2-1), gnudatalanguage (<= 0.9.5-2+b2), python-healpy (<= 1.8.1-1+b1), innoextract (<= 1.4-1+b1), libinsighttoolkit4.7 (<= 4.7.2-2), libdap17 (<= 3.14.0-2), libdapclient6 (<= 3.14.0-2), libdapserver7 (<= 3.14.0-2), libkolabxml1 (<= 1.1.0-3), libpqxx-4.0 (<= 4.0.1+dfsg-3), libreoffice-core (<= 1:4.4.5-2), librime1 (<= 1.2+dfsg-2), libwibble-dev (<= 1.1-1), lightspark (<= 0.7.2+git20150512-2+b1), libmarisa0 (<= 0.2.4-8), mira-assembler (<= 4.9.5-1), mongodb (<= 1:2.4.14-2), mongodb-server (<= 1:2.4.14-2), ncbi-blast+ (<= 2.2.30-4), libogre-1.8.0 (<= 1.8.0+dfsg1-7+b1), libogre-1.9.0 (<= 1.9.0+dfsg1-4), openscad (<= 2014.03+dfsg-1+b1), libopenwalnut1 (<= 1.4.0~rc1+hg3a3147463ee2-1+b1), passepartout (<= 0.7.1-1.1), pdf2djvu (<= 0.7.21-2), photoprint (<= 0.4.2~pre2-2.3+b2), plastimatch (<= 1.6.2+dfsg-1), plee-the-bear (<= 0.6.0-3.1), povray (<= 1:3.7.0.0-8), powertop (<= 2.6.1-1), psi4 (<= 4.0~beta5+dfsg-2+b1), python3-taglib (<= 0.3.6+dfsg-2+b2), realtimebattle (<= 1.0.8-14), ruby-passenger (<= 5.0.7-1), libapache2-mod-passenger (<= 5.0.7-1), schroot (<= 1.6.10-1+b1), sqlitebrowser (<= 3.5.1-3), tecnoballz (<= 0.93.1-6), wesnoth-1.12-core (<= 1:1.12.4-1), widelands (<= 1:18-3+b1), libwreport2 (<= 2.14-1), xflr5 (<= 6.09.06-2), libxmltooling6 (<= 1.5.3-2.1), libchemps2-1 (<= 1.5-1), python-fiona (<= 1.5.1-2), python3-fiona (<= 1.5.1-2), fiona (<= 1.5.1-2), python-guiqwt (<= 2.3.1-1), python-htseq (<= 0.5.4p3-2), python-imposm (<= 2.5.0-3+b2), python-pysph (<= 0~20150606.gitfa26de9-5), python3-taglib (<= 0.3.6+dfsg-2+b2), python-scipy (<= 0.14.1-1), python3-scipy (<= 0.14.1-1), python-sfml (<= 2.2~git20150611.196c88+dfsg-1+b1), python3-sfml (<= 2.2~git20150611.196c88+dfsg-1+b1), python-rasterio (<= 0.24.0-1), libktoblzcheck1c2a, libaqbanking34-plugins, liblhapdf0, libpythia8, libxapian30 (<= 1.4.1-1~bpo8+1), dnsdist (<< 1.3.3-3), lambda-align (<< 1.0.3-5), libllvm3.8, libllvm3.9, libllvm4.0, mednafen (<< 1.22.1+dfsg-1), nghttp2-proxy (<< 1.36.0-2), osm2pgsql (<< 0.96.0+ds-2), osmcoastline (<< 2.2.4-1), osmium-tool (<< 1.10.0-1), pdns-recursor (<< 4.1.11-1), poedit (<< 2.2.1-2), python-pyosmium (<< 2.15.1-1), python3-pyosmium (<< 2.15.1-1), seer (<< 1.1.4-2), libsimgrid3.14, undertaker (<< 1.6.1-4.2), libusbguard0 (<< 0.7.4+ds-1), 
+Conflicts: scim (<< 1.4.2-1)
+Replaces: libstdc++6-8-dbg (<< 4.9.0-3)
+Description: GNU Standard C++ Library v3
+ This package contains an additional runtime library for C++ programs
+ built with the GNU compiler.
+ .
+ libstdc++-v3 is a complete rewrite from the previous libstdc++-v2, which
+ was included up to g++-2.95. The first version of libstdc++-v3 appeared
+ in g++-3.0.
+
+Package: lib32stdc++6
+X-DH-Build-For-Type: target
+Architecture: amd64 ppc64 kfreebsd-amd64 s390x sparc64 x32 mipsn32 mipsn32el mips64 mips64el mipsn32r6 mipsn32r6el mips64r6 mips64r6el
+Section: libs
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), lib32gcc1 (>= ${gcc:Version}), ${shlibs:Depends}, ${misc:Depends}
+Conflicts: ${confl:lib32}
+Description: GNU Standard C++ Library v3 (32 bit Version)
+ This package contains an additional runtime library for C++ programs
+ built with the GNU compiler.
+
+Package: lib64stdc++6
+X-DH-Build-For-Type: target
+Architecture: i386 powerpc sparc s390 mips mipsel mipsn32 mipsn32el mipsr6 mipsr6el mipsn32r6 mipsn32r6el x32
+Section: libs
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), lib64gcc1 (>= ${gcc:Version}), ${shlibs:Depends}, ${misc:Depends}
+Description: GNU Standard C++ Library v3 (64bit)
+ This package contains an additional runtime library for C++ programs
+ built with the GNU compiler.
+ .
+ libstdc++-v3 is a complete rewrite from the previous libstdc++-v2, which
+ was included up to g++-2.95. The first version of libstdc++-v3 appeared
+ in g++-3.0.
+
+Package: libn32stdc++6
+X-DH-Build-For-Type: target
+Architecture: mips mipsel mips64 mips64el mipsr6 mipsr6el mips64r6 mips64r6el
+Section: libs
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), libn32gcc1 (>= ${gcc:Version}), ${shlibs:Depends}, ${misc:Depends}
+Description: GNU Standard C++ Library v3 (n32)
+ This package contains an additional runtime library for C++ programs
+ built with the GNU compiler.
+ .
+ libstdc++-v3 is a complete rewrite from the previous libstdc++-v2, which
+ was included up to g++-2.95. The first version of libstdc++-v3 appeared
+ in g++-3.0.
+
+Package: libx32stdc++6
+X-DH-Build-For-Type: target
+Architecture: amd64 i386
+Section: libs
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), libx32gcc1 (>= ${gcc:Version}), ${shlibs:Depends}, ${misc:Depends}
+Description: GNU Standard C++ Library v3 (x32)
+ This package contains an additional runtime library for C++ programs
+ built with the GNU compiler.
+ .
+ libstdc++-v3 is a complete rewrite from the previous libstdc++-v2, which
+ was included up to g++-2.95. The first version of libstdc++-v3 appeared
+ in g++-3.0.
+
+Package: libstdc++-8-dev
+X-DH-Build-For-Type: target
+Architecture: any
+Multi-Arch: same
+Section: libdevel
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), libgcc-8-dev (= ${gcc:Version}),
+ libstdc++6 (>= ${gcc:Version}), ${dep:libcdev}, ${misc:Depends}
+Conflicts: libg++27-dev, libg++272-dev (<< 2.7.2.8-1), libstdc++2.8-dev,
+ libg++2.8-dev, libstdc++2.9-dev, libstdc++2.9-glibc2.1-dev,
+ libstdc++2.10-dev (<< 1:2.95.3-2), libstdc++3.0-dev
+Suggests: libstdc++-8-doc
+Provides: libstdc++-dev
+Description: GNU Standard C++ Library v3 (development files)
+ This package contains the headers and static library files necessary for
+ building C++ programs which use libstdc++.
+ .
+ libstdc++-v3 is a complete rewrite from the previous libstdc++-v2, which
+ was included up to g++-2.95. The first version of libstdc++-v3 appeared
+ in g++-3.0.
+
+Package: libstdc++-8-pic
+X-DH-Build-For-Type: target
+Architecture: any
+Multi-Arch: same
+Section: libdevel
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), libstdc++6 (>= ${gcc:Version}),
+ libstdc++-8-dev (= ${gcc:Version}), ${misc:Depends}
+Description: GNU Standard C++ Library v3 (shared library subset kit)
+ This is used to develop subsets of the libstdc++ shared libraries for
+ use on custom installation floppies and in embedded systems.
+ .
+ Unless you are making one of those, you will not need this package.
+
+Package: libstdc++6-8-dbg
+X-DH-Build-For-Type: target
+Architecture: any
+Section: debug
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), libstdc++6 (>= ${gcc:Version}),
+ libgcc1-dbg (>= ${libgcc:Version}), ${shlibs:Depends}, ${misc:Depends}
+Provides: libstdc++6-8-dbg-armel [armel], libstdc++6-8-dbg-armhf [armhf]
+Multi-Arch: same
+Recommends: libstdc++-8-dev (= ${gcc:Version})
+Conflicts: libstdc++5-dbg, libstdc++5-3.3-dbg, libstdc++6-dbg,
+ libstdc++6-4.0-dbg, libstdc++6-4.1-dbg, libstdc++6-4.2-dbg,
+ libstdc++6-4.3-dbg, libstdc++6-4.4-dbg, libstdc++6-4.5-dbg,
+ libstdc++6-4.6-dbg, libstdc++6-4.7-dbg, libstdc++6-4.8-dbg,
+ libstdc++6-4.9-dbg, libstdc++6-5-dbg, libstdc++6-6-dbg,
+ libstdc++6-7-dbg
+Description: GNU Standard C++ Library v3 (debugging files)
+ This package contains the shared library of libstdc++ compiled with
+ debugging symbols.
+
+Package: lib32stdc++-8-dev
+X-DH-Build-For-Type: target
+Architecture: amd64 ppc64 kfreebsd-amd64 s390x sparc64 x32 mipsn32 mipsn32el mips64 mips64el mipsn32r6 mipsn32r6el mips64r6 mips64r6el
+Section: libdevel
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), lib32gcc-8-dev (= ${gcc:Version}),
+ lib32stdc++6 (>= ${gcc:Version}), libstdc++-8-dev (= ${gcc:Version}), ${misc:Depends}
+Description: GNU Standard C++ Library v3 (development files)
+ This package contains the headers and static library files necessary for
+ building C++ programs which use libstdc++.
+ .
+ libstdc++-v3 is a complete rewrite from the previous libstdc++-v2, which
+ was included up to g++-2.95. The first version of libstdc++-v3 appeared
+ in g++-3.0.
+
+Package: lib32stdc++6-8-dbg
+X-DH-Build-For-Type: target
+Architecture: amd64 ppc64 kfreebsd-amd64 s390x sparc64 x32 mipsn32 mipsn32el mips64 mips64el mipsn32r6 mipsn32r6el mips64r6 mips64r6el
+Section: debug
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), lib32stdc++6 (>= ${gcc:Version}),
+ libstdc++-8-dev (= ${gcc:Version}), lib32gcc1-dbg (>= ${gcc:EpochVersion}),
+ ${shlibs:Depends}, ${misc:Depends}
+Conflicts: lib32stdc++6-dbg, lib32stdc++6-4.0-dbg,
+ lib32stdc++6-4.1-dbg, lib32stdc++6-4.2-dbg, lib32stdc++6-4.3-dbg,
+ lib32stdc++6-4.4-dbg, lib32stdc++6-4.5-dbg, lib32stdc++6-4.6-dbg,
+ lib32stdc++6-4.7-dbg, lib32stdc++6-4.8-dbg, lib32stdc++6-4.9-dbg,
+ lib32stdc++6-5-dbg, lib32stdc++6-6-dbg, lib32stdc++6-7-dbg
+Description: GNU Standard C++ Library v3 (debugging files)
+ This package contains the shared library of libstdc++ compiled with
+ debugging symbols.
+
+Package: lib64stdc++-8-dev
+X-DH-Build-For-Type: target
+Architecture: i386 powerpc sparc s390 mips mipsel mipsn32 mipsn32el mipsr6 mipsr6el mipsn32r6 mipsn32r6el x32
+Section: libdevel
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), lib64gcc-8-dev (= ${gcc:Version}),
+ lib64stdc++6 (>= ${gcc:Version}), libstdc++-8-dev (= ${gcc:Version}), ${misc:Depends}
+Description: GNU Standard C++ Library v3 (development files)
+ This package contains the headers and static library files necessary for
+ building C++ programs which use libstdc++.
+ .
+ libstdc++-v3 is a complete rewrite from the previous libstdc++-v2, which
+ was included up to g++-2.95. The first version of libstdc++-v3 appeared
+ in g++-3.0.
+
+Package: lib64stdc++6-8-dbg
+X-DH-Build-For-Type: target
+Architecture: i386 powerpc sparc s390 mips mipsel mipsn32 mipsn32el mipsr6 mipsr6el mipsn32r6 mipsn32r6el x32
+Section: debug
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), lib64stdc++6 (>= ${gcc:Version}),
+ libstdc++-8-dev (= ${gcc:Version}), lib64gcc1-dbg (>= ${gcc:EpochVersion}),
+ ${shlibs:Depends}, ${misc:Depends}
+Conflicts: lib64stdc++6-dbg, lib64stdc++6-4.0-dbg,
+ lib64stdc++6-4.1-dbg, lib64stdc++6-4.2-dbg, lib64stdc++6-4.3-dbg,
+ lib64stdc++6-4.4-dbg, lib64stdc++6-4.5-dbg, lib64stdc++6-4.6-dbg,
+ lib64stdc++6-4.7-dbg, lib64stdc++6-4.8-dbg, lib64stdc++6-4.9-dbg,
+ lib64stdc++6-5-dbg, lib64stdc++6-6-dbg, lib64stdc++6-7-dbg,
+Description: GNU Standard C++ Library v3 (debugging files)
+ This package contains the shared library of libstdc++ compiled with
+ debugging symbols.
+
+Package: libn32stdc++-8-dev
+X-DH-Build-For-Type: target
+Architecture: mips mipsel mips64 mips64el mipsr6 mipsr6el mips64r6 mips64r6el
+Section: libdevel
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), libn32gcc-8-dev (= ${gcc:Version}),
+ libn32stdc++6 (>= ${gcc:Version}), libstdc++-8-dev (= ${gcc:Version}), ${misc:Depends}
+Description: GNU Standard C++ Library v3 (development files)
+ This package contains the headers and static library files necessary for
+ building C++ programs which use libstdc++.
+ .
+ libstdc++-v3 is a complete rewrite from the previous libstdc++-v2, which
+ was included up to g++-2.95. The first version of libstdc++-v3 appeared
+ in g++-3.0.
+
+Package: libn32stdc++6-8-dbg
+X-DH-Build-For-Type: target
+Architecture: mips mipsel mips64 mips64el mipsr6 mipsr6el mips64r6 mips64r6el
+Section: debug
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), libn32stdc++6 (>= ${gcc:Version}),
+ libstdc++-8-dev (= ${gcc:Version}), libn32gcc1-dbg (>= ${gcc:EpochVersion}),
+ ${shlibs:Depends}, ${misc:Depends}
+Conflicts: libn32stdc++6-dbg, libn32stdc++6-4.0-dbg,
+ libn32stdc++6-4.1-dbg, libn32stdc++6-4.2-dbg, libn32stdc++6-4.3-dbg,
+ libn32stdc++6-4.4-dbg, libn32stdc++6-4.5-dbg, libn32stdc++6-4.6-dbg,
+ libn32stdc++6-4.7-dbg, libn32stdc++6-4.8-dbg, libn32stdc++6-4.9-dbg,
+ libn32stdc++6-5-dbg, libn32stdc++6-6-dbg, libn32stdc++6-7-dbg,
+Description: GNU Standard C++ Library v3 (debugging files)
+ This package contains the shared library of libstdc++ compiled with
+ debugging symbols.
+
+Package: libx32stdc++-8-dev
+X-DH-Build-For-Type: target
+Architecture: amd64 i386
+Section: libdevel
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), libx32gcc-8-dev (= ${gcc:Version}), libx32stdc++6 (>= ${gcc:Version}),
+ libstdc++-8-dev (= ${gcc:Version}), ${misc:Depends}
+Description: GNU Standard C++ Library v3 (development files)
+ This package contains the headers and static library files necessary for
+ building C++ programs which use libstdc++.
+ .
+ libstdc++-v3 is a complete rewrite from the previous libstdc++-v2, which
+ was included up to g++-2.95. The first version of libstdc++-v3 appeared
+ in g++-3.0.
+
+Package: libx32stdc++6-8-dbg
+X-DH-Build-For-Type: target
+Architecture: amd64 i386
+Section: debug
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), libx32stdc++6 (>= ${gcc:Version}),
+ libstdc++-8-dev (= ${gcc:Version}), libx32gcc1-dbg (>= ${gcc:EpochVersion}),
+ ${shlibs:Depends}, ${misc:Depends}
+Conflicts: libx32stdc++6-dbg, libx32stdc++6-4.6-dbg,
+ libx32stdc++6-4.7-dbg, libx32stdc++6-4.8-dbg, libx32stdc++6-4.9-dbg,
+ libx32stdc++6-5-dbg, libx32stdc++6-6-dbg, libx32stdc++6-7-dbg,
+Description: GNU Standard C++ Library v3 (debugging files)
+ This package contains the shared library of libstdc++ compiled with
+ debugging symbols.
+
+Package: libstdc++-8-doc
+Architecture: all
+Section: doc
+Priority: optional
+Depends: gcc-8-base (>= ${gcc:SoftVersion}), ${misc:Depends}
+Conflicts: libstdc++5-doc, libstdc++5-3.3-doc, libstdc++6-doc,
+ libstdc++6-4.0-doc, libstdc++6-4.1-doc, libstdc++6-4.2-doc, libstdc++6-4.3-doc,
+ libstdc++6-4.4-doc, libstdc++6-4.5-doc, libstdc++6-4.6-doc, libstdc++6-4.7-doc,
+ libstdc++-4.8-doc, libstdc++-4.9-doc, libstdc++-5-doc, libstdc++-6-doc,
+ libstdc++-7-doc,
+Description: GNU Standard C++ Library v3 (documentation files)
+ This package contains documentation files for the GNU stdc++ library.
+ .
+ One set is the distribution documentation, the other set is the
+ source documentation including a namespace list, class hierarchy,
+ alphabetical list, compound list, file list, namespace members,
+ compound members and file members.
+
+Package: gnat-8
+Architecture: any
+Priority: optional
+Pre-Depends: ${misc:Pre-Depends}
+Depends: gcc-8-base (= ${gcc:Version}), gcc-8 (>= ${gcc:SoftVersion}), ${dep:libgnat}, ${dep:libcdev}, ${shlibs:Depends}, ${misc:Depends}
+Suggests: gnat-8-doc, ada-reference-manual-2012, gnat-8-sjlj
+Breaks:   gnat (<< 4.6.1), dh-ada-library (<< 6.0), gnat-4.6-base (= 4.6.4-2),
+ gnat-4.9-base (= 4.9-20140330-1)
+Replaces: gnat (<< 4.6.1), dh-ada-library (<< 6.0), gnat-4.6-base (= 4.6.4-2),
+ gnat-4.9-base (= 4.9-20140330-1)
+# Takes over symlink from gnat (<< 4.6.1): /usr/bin/gnatgcc.
+# Takes over file from dh-ada-library (<< 6.0): debian_packaging.mk.
+# g-base 4.6.4-2, 4.9-20140330-1 contain debian_packaging.mk by mistake.
+# Newer versions of gnat and dh-ada-library will not provide these files.
+Conflicts: gnat (<< 4.1), gnat-3.1, gnat-3.2, gnat-3.3, gnat-3.4, gnat-3.5,
+ gnat-4.0, gnat-4.1, gnat-4.2, gnat-4.3, gnat-4.4, gnat-4.6, gnat-4.7, gnat-4.8,
+ gnat-4.9, gnat-5, gnat-6, gnat-7,
+# These other packages will continue to provide /usr/bin/gnatmake and
+# other files.
+Description: GNU Ada compiler
+ GNAT is a compiler for the Ada programming language. It produces optimized
+ code on platforms supported by the GNU Compiler Collection (GCC).
+ .
+ This package provides the compiler, tools and runtime library that handles
+ exceptions using the default zero-cost mechanism.
+
+Package: gnat-8-sjlj
+Architecture: any
+Priority: optional
+Pre-Depends: ${misc:Pre-Depends}
+Depends: gcc-8-base (= ${gcc:Version}), gnat-8 (= ${gnat:Version}), ${misc:Depends}
+Description: GNU Ada compiler (setjump/longjump runtime library)
+ GNAT is a compiler for the Ada programming language. It produces optimized
+ code on platforms supported by the GNU Compiler Collection (GCC).
+ .
+ This package provides an alternative runtime library that handles
+ exceptions using the setjump/longjump mechanism (as a static library
+ only).  You can install it to supplement the normal compiler.
+
+Package: libgnat-8
+X-DH-Build-For-Type: target
+Section: libs
+Architecture: any
+Multi-Arch: same
+Pre-Depends: ${misc:Pre-Depends}
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), ${shlibs:Depends}, ${misc:Depends}
+Description: runtime for applications compiled with GNAT (shared library)
+ GNAT is a compiler for the Ada programming language. It produces optimized
+ code on platforms supported by the GNU Compiler Collection (GCC).
+ .
+ The libgnat library provides runtime components needed by most
+ applications produced with GNAT.
+ .
+ This package contains the runtime shared library.
+
+Package: libgnat-8-dbg
+X-DH-Build-For-Type: target
+Section: debug
+Architecture: any
+Multi-Arch: same
+Pre-Depends: ${misc:Pre-Depends}
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), libgnat-8 (= ${gnat:Version}), ${misc:Depends}
+Description: runtime for applications compiled with GNAT (debugging symbols)
+ GNAT is a compiler for the Ada programming language. It produces optimized
+ code on platforms supported by the GNU Compiler Collection (GCC).
+ .
+ The libgnat library provides runtime components needed by most
+ applications produced with GNAT.
+ .
+ This package contains the debugging symbols.
+
+Package: libgnatvsn8-dev
+X-DH-Build-For-Type: target
+Section: libdevel
+Architecture: any
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), gnat-8 (= ${gnat:Version}),
+ libgnatvsn8 (= ${gnat:Version}), ${misc:Depends}
+Conflicts: libgnatvsn-dev (<< 8),
+ libgnatvsn4.1-dev, libgnatvsn4.3-dev, libgnatvsn4.4-dev,
+ libgnatvsn4.5-dev, libgnatvsn4.6-dev, libgnatvsn4.9-dev,
+ libgnatvsn5-dev, libgnatvsn6-dev, libgnatvsn7-dev,
+Description: GNU Ada compiler selected components (development files)
+ GNAT is a compiler for the Ada programming language. It produces optimized
+ code on platforms supported by the GNU Compiler Collection (GCC).
+ .
+ The libgnatvsn library exports selected GNAT components for use in other
+ packages, most notably ASIS tools. It is licensed under the GNAT-Modified
+ GPL, allowing to link proprietary programs with it.
+ .
+ This package contains the development files and static library.
+
+Package: libgnatvsn8
+X-DH-Build-For-Type: target
+Architecture: any
+Multi-Arch: same
+Pre-Depends: ${misc:Pre-Depends}
+Priority: optional
+Section: libs
+Depends: gcc-8-base (= ${gcc:Version}), libgnat-8 (= ${gnat:Version}),
+ ${shlibs:Depends}, ${misc:Depends}
+Description: GNU Ada compiler selected components (shared library)
+ GNAT is a compiler for the Ada programming language. It produces optimized
+ code on platforms supported by the GNU Compiler Collection (GCC).
+ .
+ The libgnatvsn library exports selected GNAT components for use in other
+ packages, most notably ASIS tools. It is licensed under the GNAT-Modified
+ GPL, allowing to link proprietary programs with it.
+ .
+ This package contains the runtime shared library.
+
+Package: libgnatvsn8-dbg
+X-DH-Build-For-Type: target
+Architecture: any
+Multi-Arch: same
+Pre-Depends: ${misc:Pre-Depends}
+Priority: optional
+Section: debug
+Depends: gcc-8-base (= ${gcc:Version}), libgnatvsn8 (= ${gnat:Version}), ${misc:Depends}
+Suggests: gnat
+Description: GNU Ada compiler selected components (debugging symbols)
+ GNAT is a compiler for the Ada programming language. It produces optimized
+ code on platforms supported by the GNU Compiler Collection (GCC).
+ .
+ The libgnatvsn library exports selected GNAT components for use in other
+ packages, most notably ASIS tools. It is licensed under the GNAT-Modified
+ GPL, allowing to link proprietary programs with it.
+ .
+ This package contains the debugging symbols.
+
+Package: gdc-8
+Architecture: any
+Priority: optional
+Depends: gcc-8-base (>= ${gcc:SoftVersion}), g++-8 (>= ${gcc:SoftVersion}), ${dep:gdccross}, ${dep:phobosdev}, ${shlibs:Depends}, ${misc:Depends}
+Provides: gdc, d-compiler, d-v2-compiler
+Replaces: gdc (<< 4.4.6-5)
+Description: GNU D compiler (version 2)
+ This is the GNU D compiler, which compiles D on platforms supported by gcc.
+ It uses the gcc backend to generate optimised code.
+ .
+ This compiler supports D language version 2.
+
+Package: gdc-8-multilib
+Architecture: any
+Priority: optional
+Depends: gcc-8-base (>= ${gcc:SoftVersion}), gdc-8 (= ${gcc:Version}), gcc-8-multilib (= ${gcc:Version}), ${dep:libphobosbiarchdev}${shlibs:Depends}, ${misc:Depends}
+Description: GNU D compiler (version 2, multilib support)
+ This is the GNU D compiler, which compiles D on platforms supported by gcc.
+ It uses the gcc backend to generate optimised code.
+ .
+ This is a dependency package, depending on development packages
+ for the non-default multilib architecture(s).
+
+Package: libgphobos-8-dev
+X-DH-Build-For-Type: target
+Architecture: amd64 arm64 armel armhf i386 x32 kfreebsd-amd64 kfreebsd-i386
+Multi-Arch: same
+Section: libdevel
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), libgphobos76 (>= ${gdc:Version}),
+  zlib1g-dev, ${shlibs:Depends}, ${misc:Depends}
+Description: Phobos D standard library
+ This is the Phobos standard library that comes with the D2 compiler.
+ .
+ For more information check http://www.dlang.org/phobos/
+
+Package: lib64gphobos-8-dev
+X-DH-Build-For-Type: target
+Architecture: i386 powerpc sparc s390 mips mipsel mipsn32 mipsn32el mipsr6 mipsr6el mipsn32r6 mipsn32r6el x32
+Section: libdevel
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), lib64gphobos76 (>= ${gdc:Version}),
+  lib64gcc-8-dev (= ${gcc:Version}), lib64z1-dev, ${shlibs:Depends}, ${misc:Depends}
+Description: Phobos D standard library (64bit development files)
+ This is the Phobos standard library that comes with the D2 compiler.
+ .
+ For more information check http://www.dlang.org/phobos/
+
+Package: lib32gphobos-8-dev
+X-DH-Build-For-Type: target
+Architecture: amd64 ppc64 kfreebsd-amd64 s390x sparc64 x32 mipsn32 mipsn32el mips64 mips64el mipsn32r6 mipsn32r6el mips64r6 mips64r6el
+Section: libdevel
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), lib32gphobos76 (>= ${gdc:Version}),
+  lib32gcc-8-dev (= ${gcc:Version}), lib32z1-dev, ${shlibs:Depends}, ${misc:Depends}
+Description: Phobos D standard library (32bit development files)
+ This is the Phobos standard library that comes with the D2 compiler.
+ .
+ For more information check http://www.dlang.org/phobos/
+
+Package: libx32gphobos-8-dev
+X-DH-Build-For-Type: target
+Architecture: amd64 i386
+Section: libdevel
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), libx32gphobos76 (>= ${gdc:Version}),
+  libx32gcc-8-dev (= ${gcc:Version}), ${dep:libx32z}, ${shlibs:Depends}, ${misc:Depends}
+Description: Phobos D standard library (x32 development files)
+ This is the Phobos standard library that comes with the D2 compiler.
+ .
+ For more information check http://www.dlang.org/phobos/
+
+Package: libgphobos76
+X-DH-Build-For-Type: target
+Section: libs
+Architecture: amd64 arm64 armel armhf i386 x32 kfreebsd-amd64 kfreebsd-i386
+Multi-Arch: same
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), ${shlibs:Depends}, ${misc:Depends}
+Replaces: libgphobos68
+Description: Phobos D standard library (runtime library)
+ This is the Phobos standard library that comes with the D2 compiler.
+ .
+ For more information check http://www.dlang.org/phobos/
+
+Package: libgphobos76-dbg
+X-DH-Build-For-Type: target
+Section: debug
+Architecture: amd64 arm64 armel armhf i386 x32 kfreebsd-amd64 kfreebsd-i386
+Multi-Arch: same
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), libgphobos76 (= ${gdc:Version}), ${misc:Depends}
+Replaces: libgphobos68-dbg
+Description: Phobos D standard library (debug symbols)
+ This is the Phobos standard library that comes with the D2 compiler.
+ .
+ For more information check http://www.dlang.org/phobos/
+
+Package: lib64gphobos76
+X-DH-Build-For-Type: target
+Section: libs
+Architecture: i386 powerpc sparc s390 mips mipsel mipsn32 mipsn32el mipsr6 mipsr6el mipsn32r6 mipsn32r6el x32
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), ${shlibs:Depends}, ${misc:Depends}
+Replaces: lib64gphobos68
+Description: Phobos D standard library (runtime library)
+ This is the Phobos standard library that comes with the D2 compiler.
+ .
+ For more information check http://www.dlang.org/phobos/
+
+Package: lib64gphobos76-dbg
+X-DH-Build-For-Type: target
+Section: debug
+Architecture: i386 powerpc sparc s390 mips mipsel mipsn32 mipsn32el mipsr6 mipsr6el mipsn32r6 mipsn32r6el x32
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), lib64gphobos76 (= ${gdc:Version}), ${misc:Depends}
+Replaces: lib64gphobos68-dbg
+Description: Phobos D standard library (debug symbols)
+ This is the Phobos standard library that comes with the D2 compiler.
+ .
+ For more information check http://www.dlang.org/phobos/
+
+Package: lib32gphobos76
+X-DH-Build-For-Type: target
+Section: libs
+Architecture: amd64 ppc64 kfreebsd-amd64 s390x sparc64 x32 mipsn32 mipsn32el mips64 mips64el mipsn32r6 mipsn32r6el mips64r6 mips64r6el
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), ${shlibs:Depends}, ${misc:Depends}
+Replaces: lib32gphobos68
+Description: Phobos D standard library (runtime library)
+ This is the Phobos standard library that comes with the D2 compiler.
+ .
+ For more information check http://www.dlang.org/phobos/
+
+Package: lib32gphobos76-dbg
+X-DH-Build-For-Type: target
+Section: debug
+Architecture: amd64 ppc64 kfreebsd-amd64 s390x sparc64 x32 mipsn32 mipsn32el mips64 mips64el mipsn32r6 mipsn32r6el mips64r6 mips64r6el
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), lib32gphobos76 (= ${gdc:Version}), ${misc:Depends}
+Replaces: lib32gphobos68-dbg
+Description: Phobos D standard library (debug symbols)
+ This is the Phobos standard library that comes with the D2 compiler.
+ .
+ For more information check http://www.dlang.org/phobos/
+
+Package: libx32gphobos76
+X-DH-Build-For-Type: target
+Section: libs
+Architecture: amd64 i386
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), ${shlibs:Depends}, ${misc:Depends}
+Replaces: libx32gphobos68
+Description: Phobos D standard library (runtime library)
+ This is the Phobos standard library that comes with the D2 compiler.
+ .
+ For more information check http://www.dlang.org/phobos/
+
+Package: libx32gphobos76-dbg
+X-DH-Build-For-Type: target
+Section: debug
+Architecture: amd64 i386
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), libx32gphobos76 (= ${gdc:Version}), ${misc:Depends}
+Replaces: libx32gphobos68-dbg
+Description: Phobos D standard library (debug symbols)
+ This is the Phobos standard library that comes with the D2 compiler.
+ .
+ For more information check http://www.dlang.org/phobos/
+
+Package: gccbrig-8
+Architecture: any
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), gcc-8 (= ${gcc:Version}), ${dep:libcdev},
+  hsail-tools, 
+  ${shlibs:Depends}, libhsail-rt-8-dev (= ${gcc:Version}), ${misc:Depends}
+Suggests: ${gccbrig:multilib},
+  libhsail-rt0-dbg (>= ${gcc:Version})
+Provides: brig-compiler
+Description: GNU BRIG (HSA IL) frontend
+ This is the GNU BRIG (HSA IL) frontend.
+ The consumed format is a binary representation. The textual HSAIL
+ can be compiled to it with a separate assembler.
+
+Package: libhsail-rt-8-dev
+X-DH-Build-For-Type: target
+Architecture: any
+Section: libdevel
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), libgcc-8-dev (= ${gcc:Version}), libhsail-rt0 (>= ${gcc:Version}),
+  ${shlibs:Depends}, ${misc:Depends}
+Multi-Arch: same
+Description: HSAIL runtime library (development files)
+ This library implements the agent-side runtime functionality required
+ to run HSA finalized programs produced by the BRIG frontend.
+ .
+ The library contains both the code required to run kernels on the agent
+ and also functions implementing more complex HSAIL instructions.
+
+Package: libhsail-rt0
+X-DH-Build-For-Type: target
+Section: libs
+Architecture: any
+Provides: libhsail-rt0-armel [armel], libhsail-rt0-armhf [armhf]
+Multi-Arch: same
+Pre-Depends: ${misc:Pre-Depends}
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), ${shlibs:Depends}, ${misc:Depends}
+Description: HSAIL runtime library
+ This library implements the agent-side runtime functionality required
+ to run HSA finalized programs produced by the BRIG frontend.
+ .
+ The library contains both the code required to run kernels on the agent
+ and also functions implementing more complex HSAIL instructions.
+
+Package: libhsail-rt0-dbg
+X-DH-Build-For-Type: target
+Section: debug
+Architecture: any
+Provides: libhsail-rt0-dbg-armel [armel], libhsail-rt0-dbg-armhf [armhf]
+Multi-Arch: same
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), libhsail-rt0 (= ${gcc:Version}), libgcc1-dbg (>= ${libgcc:Version}), ${misc:Depends}
+Description: HSAIL runtime library (debug symbols)
+ This library implements the agent-side runtime functionality required
+ to run HSA finalized programs produced by the BRIG frontend.
+ .
+ The library contains both the code required to run kernels on the agent
+ and also functions implementing more complex HSAIL instructions.
+
+#Package: gcc`'PV-soft-float
+#Architecture: arm armel armhf
+#Priority: PRI(optional)
+#Depends: BASEDEP, depifenabled(`cdev',`gcc`'PV (= ${gcc:Version}),') ${shlibs:Depends}, ${misc:Depends}
+#Conflicts: gcc-4.4-soft-float, gcc-4.5-soft-float, gcc-4.6-soft-float
+#BUILT_USING`'dnl
+#Description: GCC soft-floating-point gcc libraries (ARM)
+# These are versions of basic static libraries such as libgcc.a compiled
+# with the -msoft-float option, for CPUs without a floating-point unit.
+
+Package: fixincludes
+Architecture: any
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), gcc-8 (= ${gcc:Version}), ${shlibs:Depends}, ${misc:Depends}
+Description: Fix non-ANSI header files
+ FixIncludes was created to fix non-ANSI system header files. Many
+ system manufacturers supply proprietary headers that are not ANSI compliant.
+ The GNU compilers cannot compile non-ANSI headers. Consequently, the
+ FixIncludes shell script was written to fix the header files.
+ .
+ Not all packages with header files are installed on the system, when the
+ package is built, so we make fixincludes available at build time of other
+ packages, such that checking tools like lintian can make use of it.
+
+Package: gcc-8-offload-nvptx
+Architecture: amd64
+Priority: optional
+Depends: gcc-8-base (= ${gcc:Version}), gcc-8 (= ${gcc:Version}), ${dep:libcdev},
+  nvptx-tools, libgomp-plugin-nvptx1 (>= ${gcc:Version}), 
+  ${shlibs:Depends}, ${misc:Depends}
+Description: GCC offloading compiler to NVPTX
+ The package provides offloading support for NVidia PTX.  OpenMP and OpenACC
+ programs linked with -fopenmp will by default add PTX code into the binaries,
+ which can be offloaded to NVidia PTX capable devices if available.
+
+Package: libgomp-plugin-nvptx1
+Architecture: amd64
+Multi-Arch: same
+Section: libs
+Depends: gcc-8-base (= ${gcc:Version}), libgomp1, ${shlibs:Depends}, ${misc:Depends}
+Suggests: libcuda1
+Description: GCC OpenMP v4.5 plugin for offloading to NVPTX
+ This package contains libgomp plugin for offloading to NVidia
+ PTX.  The plugin needs libcuda.so.1 shared library that has to be
+ installed separately.
+
+Package: gcc-8-source
+Multi-Arch: foreign
+Architecture: all
+Priority: optional
+Depends: make, autoconf2.64, quilt, patchutils, sharutils, gawk, lsb-release,
+  ${misc:Depends}
+Description: Source of the GNU Compiler Collection
+ This package contains the sources and patches which are needed to
+ build the GNU Compiler Collection (GCC).

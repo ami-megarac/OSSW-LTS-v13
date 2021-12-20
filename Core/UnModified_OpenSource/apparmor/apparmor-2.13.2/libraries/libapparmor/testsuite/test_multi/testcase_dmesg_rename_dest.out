@@ -1,0 +1,15 @@
+START
+File: testcase_dmesg_rename_dest.in
+Event type: AA_RECORD_ALLOWED
+Audit ID: 1282626827.320:413
+Operation: rename_dest
+Mask: wc::
+Denied Mask: wc::
+fsuid: 0
+ouid: 0
+Profile: /usr/sbin/sshd
+Name: /var/run/motd
+Parent: 650
+PID: 1881
+Epoch: 1282626827
+Audit subid: 413

@@ -1,0 +1,14 @@
+0001-Add-lgpg-error-to-.pc-to-facilitate-static-linking.patch
+0001-Do-not-expose-private-libraries-nor-link-flags-to-us.patch
+ced924b78a40126606797ef57a74066eb3b4b83f.patch
+CVE-2019-3855.patch
+CVE-2019-3856.patch
+CVE-2019-3857.patch
+CVE-2019-3858.patch
+CVE-2019-3859.patch
+CVE-2019-3860.patch
+CVE-2019-3861.patch
+CVE-2019-3862.patch
+CVE-2019-3863.patch
+Fixed-misapplied-patch-327.patch
+moved-MAX-size-declarations-330.patch

@@ -1,0 +1,20 @@
+Building cross-compiler Debian packages
+---------------------------------------
+
+The packaging for cross toolchains is now in the archive, including
+all frontends, and targeting all release and ports architectures.
+
+Cross toolchains are built from the following source packages:
+
+ - binutils
+ - cross-toolchain-base
+ - cross-toolchain-base-ports
+ - gcc-7-cross
+ - gcc-7-cross-ports
+ - gcc-8-cross
+ - gcc-8-cross-ports
+ - gcc-defaults
+ - gcc-defaults-ports
+
+Issues about the cross toolchains should be filed for one of the
+above source packages.

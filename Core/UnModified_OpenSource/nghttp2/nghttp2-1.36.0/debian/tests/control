@@ -1,0 +1,3 @@
+Tests: proxy-works
+Depends: nginx, @
+Restrictions: isolation-container

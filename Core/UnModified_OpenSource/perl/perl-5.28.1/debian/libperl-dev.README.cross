@@ -1,0 +1,23 @@
+Cross building packages that link against libperl
+
+Since version 5.22.1-7, libperl-dev no longer depends on perl of the
+same architecture.  This should make it possible to cross build packages
+build depending on libperl-dev, by replacing ExtUtils::Embed calls like
+
+ perl -MExtUtils::Embed -e ccopts
+ perl -MExtUtils::Embed -e ldopts
+
+with something like
+
+ perl -I /usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)/perl/cross-config-$(perl -MConfig -e 'print $Config{version}') -MExtUtils::Embed [...]
+
+so that Config.pm for the host (target) architecture gets loaded and
+provides the right header and linker paths.
+
+This support is currently very much experimental. Success or failure
+reports are welcome at <perl@packages.debian.org>.
+
+See https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=813384#10 for more
+information.
+
+ -- Niko Tyni <ntyni@debian.org>  Sat, 06 Feb 2016 15:00:12 +0200

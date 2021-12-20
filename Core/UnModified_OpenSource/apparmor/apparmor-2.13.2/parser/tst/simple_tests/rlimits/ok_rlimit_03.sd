@@ -1,0 +1,7 @@
+#
+#=DESCRIPTION simple file size rlimit test
+#=EXRESULT PASS
+
+profile rlimit {
+  set rlimit fsize <= 1023MB,
+}

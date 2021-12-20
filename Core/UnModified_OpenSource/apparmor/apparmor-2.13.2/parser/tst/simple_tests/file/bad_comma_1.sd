@@ -1,0 +1,7 @@
+k#
+#=DESCRIPTION comma in pathname
+#=EXRESULT FAIL
+#
+/usr/bin/foo {
+   /foobar, r,
+}

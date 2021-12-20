@@ -1,0 +1,51 @@
+#!/bin/sh
+
+# generate locales that the libstdc++ testsuite depends on
+
+LOCPATH=`pwd`/locales
+export LOCPATH
+
+[ -d $LOCPATH ] || mkdir -p $LOCPATH
+
+[ -n "$USE_CPUS" ] || USE_CPUS=1
+
+umask 022
+
+echo "Generating locales..."
+xargs -L 1 -P $USE_CPUS -I{} \
+    sh -c '
+	set {}; locale=$1; charset=$2
+	case $locale in \#*) exit;; esac
+	[ -n "$locale" -a -n "$charset" ] || exit
+	echo "  `echo $locale | sed \"s/\([^.\@]*\).*/\1/\"`.$charset`echo $locale | sed \"s/\([^\@]*\)\(\@.*\)*/\2/\"`..."
+        if [ -f $LOCPATH/$locale ]; then
+	    input=$locale
+	else
+            input=`echo $locale | sed "s/\([^.]*\)[^@]*\(.*\)/\1\2/"`
+	fi
+	localedef -i $input -c -f $charset $LOCPATH/$locale #-A /etc/locale.alias
+    ' <<EOF
+de_DE			ISO-8859-1
+de_DE@euro		ISO-8859-15
+en_HK			ISO-8859-1
+en_PH			ISO-8859-1
+en_US			ISO-8859-1
+en_US.ISO-8859-1	ISO-8859-1
+en_US.ISO-8859-15	ISO-8859-15
+en_US.UTF-8		UTF-8
+es_ES			ISO-8859-1
+es_MX			ISO-8859-1
+fr_FR			ISO-8859-1
+fr_FR@euro		ISO-8859-15
+is_IS			ISO-8859-1
+is_IS.UTF-8		UTF-8
+it_IT			ISO-8859-1
+ja_JP.eucjp		EUC-JP
+nl_NL			ISO-8859-1
+se_NO.UTF-8		UTF-8
+ta_IN			UTF-8
+zh_TW			BIG5
+zh_TW			UTF-8
+EOF
+
+echo "Generation complete."

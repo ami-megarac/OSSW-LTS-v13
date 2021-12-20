@@ -1,0 +1,168 @@
+#! /bin/sh
+#  -*- Mode: shell-script -*-
+# ----------------------------------------------------------------------
+# vendor.test ---  test the vendor-opt option
+#
+# Author:            Bruce Korb <bkorb@gnu.org>
+##
+##  This file is part of AutoOpts, a companion to AutoGen.
+##  AutoOpts is free software.
+##  AutoOpts is Copyright (C) 1992-2015 by Bruce Korb - all rights reserved
+##
+##  AutoOpts is available under any one of two licenses.  The license
+##  in use must be one of these two and the choice is under the control
+##  of the user of the license.
+##
+##   The GNU Lesser General Public License, version 3 or later
+##      See the files "COPYING.lgplv3" and "COPYING.gplv3"
+##
+##   The Modified Berkeley Software Distribution License
+##      See the file "COPYING.mbsd"
+##
+##  These files have the following sha256 sums:
+##
+##  8584710e9b04216a394078dc156b781d0b47e1729104d666658aecef8ee32e95  COPYING.gplv3
+##  4379e7444a0e2ce2b12dd6f5a52a27a4d02d39d247901d3285c88cf0d37f477b  COPYING.lgplv3
+##  13aa749a5b0a454917a944ed8fffc530b784f5ead522b1aacaf4ec8aa55a6239  COPYING.mbsd
+#
+# ----------------------------------------------------------------------
+
+. ./defs
+
+# # # # # # # # # # DEFINITIONS FILE # # # # # # # # #
+
+{
+    sedcmd='
+s/long-opts;/vendor-opt;/
+/#include "autogen.h"/d
+/^prog-name/s/=.*/= '${testname}';/
+s/AutoGen/'${testname}'/g
+/^include /s/= '${testname}'5 Temp/= AutoGen5 Temp/
+/^config-header/s/=.*/= '${testname}'-config.h;/
+/call-proc  *=/d
+/#ifndef XML/,/^#endif/ {
+  /^#else/,/^#endif/d
+  /^#/d
+}
+/flag-code =.*_EOCode_/,/_EOCode_;/d
+/flag-code *=/d
+'
+
+    ${SED} "$sedcmd" ${top_srcdir}/agen5/opts.def
+    cat <<- _EOF_
+	config-header = ${testname}-config.h;
+	help-value = h;
+	save-opts-value = S;
+	load-opts-value = P;
+	gnu-usage;
+	main = { main-type = shell-process; };
+	include = '#undef DEBUG_ENABLED';
+	_EOF_
+} > ${testname}.def
+
+{
+    sed '/^#endif.*_CONFIG_H/d' ${top_builddir}/config.h
+    sed '1,/#define  *COMPAT_H_GUARD/d
+        /^#endif .* COMPAT_H_GUARD/{
+           s/COMPAT_H_GUARD/AUTOGEN_CONFIG_H/
+           q
+        }' ${top_srcdir}/compat/compat.h
+} > ./${testname}-config.h
+
+echo ${AG_L} ${testname}.def
+${AG_L} ${testname}.def || \
+  failure AutoGen could not process
+
+sedcmd=''
+HOME=${TMPDIR} compile "-h"
+${SED} 1d ${testname}.help > ${testname}.$$
+mv -f ${testname}.$$ ${testname}.help
+
+clean_help > ${testname}.hlp <<_EOF_
+Usage:  ${testname} [ -<flag> [<val>] ]... [ <def-file> ]
+The following options select definitions, templates and scheme functions
+to use:
+   -L str     Search for templates in DIR
+		- may appear multiple times
+   -T str     Use TPL-FILE for the template
+		- may not be preset
+   -m         Do not use in-mem streams
+The following options modify how output is handled:
+   -b str     Specify NAME as the base name for output
+		- may not be preset
+The following options are often useful while debugging new templates:
+   -t num     Limit server shell operations to SECONDS
+		- it must be in the range:
+		  0 to 3600
+       --- show-defs      This option has been disabled
+   -C         Leave a core dump on a failure exit
+These options can be used to control what gets processed in the
+definitions files and template files:
+   -s str     Skip the file with this SUFFIX
+		- prohibits the option 'select-suffix'
+		- may not be preset
+		- may appear multiple times
+   -o str     specify this output suffix
+		- may not be preset
+		- may appear multiple times
+   -D str     name to add to definition list
+		- may appear multiple times
+   -U str     definition list removal pattern
+		- an alternate for 'define'
+This option is used to automate dependency tracking:
+   -M [arg]   emit make dependency file
+		- may not be preset
+		- may appear multiple times
+help, version and option handling:
+   -R str     reset an option's state
+   -v [arg]   output version information and exit
+   -h         display extended usage information and exit
+   -!         extended usage information passed thru pager
+   -u         abbreviated usage to stdout
+   -S [arg]   save the option state to a config file
+   -P str     load options from a config file
+		- disabled as '--no-load-opts'
+		- may appear multiple times
+The next option supports vendor supported extra options:
+   -W str     vendor supported additional options
+		These additional options are:
+      definitions=str  Read definitions from FILE
+			- disabled as '--no-definitions'
+			- enabled by default
+			- may not be preset
+      shell=str        name or path name of shell to use
+      equate=str       characters considered equivalent
+      source-time      set mod times to latest source
+			- disabled as '--no-source-time'
+      writable         Allow output files to be writable
+			- disabled as '--not-writable'
+      loop-limit=num   Limit on increment loops
+			- is scalable with a suffix: k/K/m/M/g/G/t/T
+			- it must lie in one of the ranges:
+			  -1 exactly, or
+			  1 to 16777216
+      trace=KWd        tracing level of detail
+      trace-out=str    tracing output file or filter
+      used-defines     Show the definitions used
+			- may not be preset
+${testname} creates text files from templates using external definitions.
+
+The following option preset mechanisms are supported:
+ - reading file \$HOME/.${testname}rc
+ - reading file ./.${testname}rc
+ - examining environment variables named VENDOR_*
+
+The valid "trace" option keywords are:
+  nothing       debug-message server-shell  templates     block-macros
+  expressions   everything
+  or an integer from 0 through 6
+
+${testname} is a tool designed for generating program files that contain
+repetitive text with varied substitutions.
+_EOF_
+
+pair="${testname}.hlp ${testname}.help"
+cmp -s ${pair} || \
+  failure "vendor help mismatch$nl`diff $pair`"
+
+cleanup

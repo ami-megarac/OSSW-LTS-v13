@@ -1,0 +1,50 @@
+# ------------------------------------------------------------------
+#
+#    Copyright (C) 2002-2006 Novell/SUSE
+#
+#    This program is free software; you can redistribute it and/or
+#    modify it under the terms of version 2 of the GNU General Public
+#    License published by the Free Software Foundation.
+#
+# ------------------------------------------------------------------
+
+  /usr/share/AbiSuite/fonts/**          r,
+
+  /usr/X11R6/lib/X11/fonts/**           r,
+  /usr/X11R6/lib/modules/fonts/**       r,
+  /usr/X11R6/lib64/X11/fonts/**         r,
+  /usr/X11R6/lib64/modules/fonts/**     r,
+
+  /usr/X11R6/include/X11/fonts/**       r,
+
+  /usr/share/fonts/**                   r,
+
+  /etc/fonts/**                         r,
+
+  /opt/kde3/share/fonts/**              r,
+
+  /usr/lib/openoffice/share/fonts/**    r,
+  /usr/lib64/openoffice/share/fonts/**  r,
+
+  /opt/OpenOffice.org/share/fonts/**    r,
+  /opt/OpenOffice.org/share/psprint/fontmetric/** r,
+  /opt/OpenOffice.org/user/psprint/fontmetric/**  r,
+
+  /opt/gnome/share/gimp/*/fonts/**      r,
+  /opt/gnome/share/fonts/**             r,
+
+  /opt/mozilla/lib/res/fonts/**         r,
+  /opt/mozilla/lib64/res/fonts/**       r,
+
+  /var/cache/fonts/**                   r,
+  /var/cache/fontconfig/**              r,
+
+  /usr/share/a2ps/fonts/**              r,
+  /usr/share/xfce/fonts/**              r,
+  /usr/share/ghostscript/fonts/**       r,
+  /usr/share/texmf/*/fonts/**           r,
+
+  #@{HOME}/.fonts/**                     r,
+
+  /usr/local/share/fonts                r,
+  /usr/local/share/fonts/**             r,

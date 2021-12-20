@@ -1,0 +1,190 @@
+-*- Outline -*-
+
+Read this file if you are a Debian Developer or would like to become
+one, or if you would like to create your own binary packages of GCC.
+
+* Overview
+
+From the GCC sources, Debian currently builds 3 source packages and
+almost 100 binary packages, using a single set of build scripts.  The
+3 source packages are:
+
+gcc-x.y: C, C++, Fortran, Objective-C and Objective-C++, plus many
+         common libraries like libssp and libgcc.
+gnat-x.y: Ada.
+
+The way we do this is quite peculiar, so listen up :)
+
+When we build from the gcc-x.y source package, we produce, among many
+others, a gcc-x.y-source binary package that contains the pristine
+upstream tarball and some Debian-specific patches.  Any user can then
+install this package on their Debian system, and will have the full
+souces in /usr/src/gcc-x.y/gcc-<timestamp>.tar.bz2, along with the
+Makefile snippets that unpack and patch them.
+
+The intended use for this package is twofold: (a) allow users to build
+their own cross-compilers, and (b) build the other packages like
+gnat-x.y.
+
+- gcc-x.y requires only a C compiler to build and produces C, C++,
+  Fortran, Go and Objective-C compilers and libraries. It also
+  produces the binary package gcc-x.y-source containing all the
+  sources and patches in a tarball.
+
+- gnat-x.y build-depends on gcc-x.y-source and an Ada compiler.  It
+  does not even have an .orig.tar.bz2 package; it is a Debian native
+  package.
+
+The benefits of this split are many:
+
+- bootstrapping a subset of languages is much faster than
+  bootstrapping all languages and libraries (which can take a full
+  week on slow architectures like mips or arm)
+
+- the language maintainers don't have to wait for each other
+
+- for new ports, the absence of a port of, say, gnat-x.y does not
+  block the porting of gcc-x.y.
+
+gcc-x.y-source is also intended for interested users to build
+cross-compiler packages.  Debian cannot provide all possible
+cross-compiler packages (i.e. all possible host, target, language and
+library combinations), so instead tries to facilitate building them.
+
+* The build sequence
+
+As for all other Debian packages, you build GCC by calling
+debian/rules.
+
+The first thing debian/rules does it to look at the top-most entry in
+debian/changelog: this tells it which source package it is building.
+For example, if the first entry in debian/changelog reads:
+
+gnat-6 (6.2.0-1) unstable; urgency=low
+
+  * Upload as gnat-6.
+
+ -- Ludovic Brenta <lbrenta@debian.org>  Tue, 26 Jun 2007 00:26:42 +0200
+
+then, debian/rules will build only the gnat binary packages.
+
+The second step is to build debian/control from debian/control.m4 and
+a complex set of rules specified in debian/rules.conf.  The resulting
+control file contains only the binary packages to be built.
+
+The third step is to select which patches to apply (this is done in
+debian/rules.defs), and then to apply the selected patches (see
+debian/rules.patch).  The result of this step is a generated
+debian/patches/series file for use by quilt.
+
+The fourth step is to unpack the GCC source tarball.  This tarball is
+either in the build directory (when building gcc-x.y), or in
+/usr/src/gcc-x.y/gcc-x.y.z.tar.xz (when building the other source
+packages).
+
+The fifth step is to apply all patches to the unpacked sources with
+quilt.
+
+The sixth step is to create a "build" directory, cd into it, call
+../src/configure, and bootstrap the compiler and libraries selected.
+This is in debian/rules2.
+
+The seventh step is to call "make install" in the build directory:
+this installs the compiler and libraries into debian/tmp
+(i.e. debian/tmp/usr/bin/gcc, etc.)
+
+The eighth step is to run the GCC test suite.  This actually takes at
+least as much time as bootstrapping, and you can disable it by setting
+WITHOUT_CHECK to "yes" in the environment.
+
+The ninth step is to build the binary packages, i.e. the .debs.  This
+is done by a set of language- and architecture-dependent Makefile
+snippets in the debian/rules.d/ directory, which move files from the
+debian/tmp tree to the debian/<package> trees.
+
+* Making your own packages
+
+In this example, we will build our own gnat-x.y package.
+
+1) Install gcc-x.y-source, which contains the real sources:
+
+# aptitude install gcc-x.y-source
+
+2) Create a build directory:
+
+$ mkdir gnat-x.y-x.y.z; cd gnat-x.y-x.y.z
+
+3) Checkout from Subversion:
+
+$ svn checkout svn://svn.debian.org/gcccvs/branches/sid/gcc-x.y/debian
+
+4) Edit the debian/changelog file, adding a new entry at the top that
+   starts with "gnat-x.y".
+
+5) Generate the debian/control file, adjusted for gnat:
+
+$ debian/rules control
+
+8) Build:
+
+$ dpkg-buildpackage
+
+* Hints
+
+You need a powerful machine to build GCC.  The larger, the better.
+The build scripts take advantage of as many CPU threads as are
+available in your box (for example: 2 threads on a dual-core amd64; 4
+threads on a dual-core POWER5; 32 threads on an 8-core UltraSPARC T1,
+etc.).
+
+If you have 2 GB or more of physical RAM, you can achieve maximum
+performance by building in a tmpfs, like this:
+
+1) as root, create the new tmpfs:
+
+# mount -t tmpfs -o size=1280m none /home/lbrenta/src/debian/ram
+
+By default, the tmpfs will be limited to half your physical RAM.  The
+beauty of it is that it only consumes as much physical RAM as
+necessary to hold the files in it; deleting files frees up RAM.
+
+2) As your regular user, create the working directory in the tmpfs
+
+$ cp --archive ~/src/debian/gcc-x.y-x.y.z ~/src/debian/ram
+
+3) Build in there.  On my dual-core, 2 GHz amd64, it takes 34 minutes
+   to build gnat, and the tmpfs takes 992 MiB of physical RAM but
+   exceeds 1 GiB during the build.
+
+Note that the build process uses a lot of temporary files.  Your $TEMP
+directory should therefore also be in a ram disk.  You can achieve
+that either by mounting it as tmpfs, or by setting TEMP to point to
+~/src/debian/ram.
+
+Also note that each thread in your processor(s) will run a compiler in
+it and use up RAM.  Therefore your physical memory should be:
+
+Physical_RAM >= 1.2 + 0.4 * Threads (in GiB)
+
+(this is an estimate; your mileage may vary).  If you have less
+physical RAM than recommended, reduce the number of threads allocated
+to the build process, or do not use a tmpfs to build.
+
+* Patching GCC
+
+Debian applies a large number of patches to GCC as part of the build
+process.  It uses quilt but the necessary debian/patches/series is not
+part of the packaging scripts; instead, "debian/rules patch" generates
+this file by looking at debian/control (which is itself generated!),
+debian/changelog and other files.  Then it applies all the patches.
+At this point, you can use quilt as usual:
+
+$ cd ~/src/debian/gcc-x.y
+$ export QUILT_PATCHES=$PWD/debian/patches
+$ quilt series
+
+If you add new patches, remember to add them to the version control
+system too.
+
+-- 
+Ludovic Brenta, 2012-04-02.

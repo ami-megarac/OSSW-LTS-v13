@@ -1,0 +1,10 @@
+#
+#=Description basic rules to test the "shared" mount option
+#=EXRESULT PASS
+/usr/bin/foo {
+  mount options=shared -> /1,
+  mount options=(shared) -> /2,
+  mount options=(rw,shared) -> /3,
+  mount options in (shared) -> /4,
+  mount options in (ro,shared) -> /5,
+}

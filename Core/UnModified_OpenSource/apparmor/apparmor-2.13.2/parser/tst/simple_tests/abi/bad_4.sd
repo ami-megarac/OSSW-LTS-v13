@@ -1,0 +1,9 @@
+#
+#=DESCRIPTION abi testing - abi abs path in quotes with space
+#=EXRESULT FAIL
+#
+
+abi "/abi/4.19 ubuntu,
+
+/does/not/exist {
+}

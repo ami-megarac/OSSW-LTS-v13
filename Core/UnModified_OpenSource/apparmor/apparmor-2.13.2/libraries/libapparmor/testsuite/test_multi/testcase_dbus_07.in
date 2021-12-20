@@ -1,0 +1,1 @@
+Jul 31 17:10:35 dbusdev-saucy-amd64 dbus[1692]: apparmor="DENIED" operation="dbus_method_call"  bus="session" name="org.freedesktop.DBus" path="/org/freedesktop/DBus" interface="org.freedesktop.DBus" member="Hello" mask="eavesdrop" pid=2922 profile="/usr/sbin/whatever" peer_profile="unconfined"

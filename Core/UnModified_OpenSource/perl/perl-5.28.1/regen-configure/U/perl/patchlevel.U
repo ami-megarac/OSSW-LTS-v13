@@ -1,0 +1,166 @@
+?RCS: $Id: patchlevel.U,v 3.0.1.1 1997/02/28 16:18:41 ram Exp $
+?RCS:
+?RCS: Copyright (c) 1991-1993, Raphael Manfredi
+?RCS:
+?RCS: This file is included with or a derivative work of a file included
+?RCS: with the metaconfig program of Raphael Manfredi's "dist" distribution.
+?RCS: In accordance with clause 7 of dist's modified Artistic License:
+?RCS:
+?RCS:     You may distribute under the terms of either the GNU General Public
+?RCS:     License or the Artistic License, as specified in the README file.
+?RCS:
+?RCS: $Log: patchlevel.U,v $
+?RCS: Revision 3.0.1.1  1997/02/28  16:18:41  ram
+?RCS: patch61: added support for src.U
+?RCS:
+?RCS: Revision 3.0  1993/08/18  12:09:31  ram
+?RCS: Baseline for dist 3.0 netwide release.
+?RCS:
+?MAKE:patchlevel revision version subversion \
+	perl_patchlevel version_patchlevel_string \
+	api_revision api_version api_subversion api_versionstring: \
+	package test rsrc echo awk osname
+?MAKE:	-pick add $@ %<
+?S:revision:
+?S:	The value of revision comes from the patchlevel.h file.
+?S:	In a version number such as 5.6.1, this is the "5".
+?S:	In patchlevel.h, this is referred to as "PERL_REVISION".
+?S:.
+?S:patchlevel:
+?S:	The patchlevel level of this package.
+?S:	The value of patchlevel comes from the patchlevel.h file.
+?S:	In a version number such as 5.6.1, this is the "6".
+?S:	In patchlevel.h, this is referred to as "PERL_VERSION".
+?S:.
+?S:subversion:
+?S:	The subversion level of this package.
+?S:	The value of subversion comes from the patchlevel.h file.
+?S:	In a version number such as 5.6.1, this is the "1".
+?S:	In patchlevel.h, this is referred to as "PERL_SUBVERSION".
+?S:	This is unique to perl.
+?S:.
+?S:version:
+?S:	The full version number of this package, such as 5.6.1 (or 5_6_1).
+?S:	This combines revision, patchlevel, and subversion to get the
+?S:	full version number, including any possible subversions.
+?S:	This is suitable for use as a directory name, and hence is
+?S:	filesystem dependent.
+?S:.
+?S:api_revision:
+?S:	The three variables, api_revision, api_version, and
+?S:	api_subversion, specify the version of the oldest perl binary
+?S:	compatible with the present perl.  In a full version string
+?S:	such as '5.6.1', api_revision is the '5'.
+?S:	Prior to 5.5.640, the format was a floating point number,
+?S:	like 5.00563.
+?S:
+?S:	perl.c:incpush() and lib/lib.pm will automatically search in
+?S:	$sitelib/.. for older directories back to the limit specified
+?S:	by these api_ variables.  This is only useful if you have a
+?S:	perl library directory tree structured like the default one.
+?S:	See INSTALL for how this works.  The versioned site_perl
+?S:	directory was introduced in 5.005, so that is the lowest
+?S:	possible value.  The version list appropriate for the current
+?S:	system is determined in inc_version_list.U.
+?S:
+?S:	XXX To do:  Since compatibility can depend on compile time
+?S:	options (such as bincompat, longlong, etc.) it should
+?S:	(perhaps) be set by Configure, but currently it isn't.
+?S:	Currently, we read a hard-wired value from patchlevel.h.
+?S:	Perhaps what we ought to do is take the hard-wired value from
+?S:	patchlevel.h but then modify it if the current Configure
+?S:	options warrant.  patchlevel.h then would use an #ifdef guard.
+?S:.
+?S:api_version:
+?S:	The three variables, api_revision, api_version, and
+?S:	api_subversion, specify the version of the oldest perl binary
+?S:	compatible with the present perl.  In a full version string
+?S:	such as '5.6.1', api_version is the '6'.  See api_revision for
+?S:	full details.  As a special case, 5.5.0 is rendered in the
+?S:	old-style as 5.005.  (In the 5.005_0x maintenance series,
+?S:	this was the only versioned directory in $sitelib.)
+?S:.
+?S:api_subversion:
+?S:	The three variables, api_revision, api_version, and
+?S:	api_subversion, specify the version of the oldest perl binary
+?S:	compatible with the present perl.  In a full version string
+?S:	such as '5.6.1', api_subversion is the '1'.  See api_revision for
+?S:	full details.
+?S:.
+?S:api_versionstring:
+?S:	This variable combines api_revision, api_version, and
+?S:	api_subversion in a format such as 5.6.1 (or 5_6_1) suitable
+?S:	for use as a directory name.  This is filesystem dependent.
+?S:.
+?S:perl_patchlevel:
+?S:	This is the Perl patch level, a numeric change identifier,
+?S:	as defined by whichever source code maintenance system
+?S:	is used to maintain the patches; currently Perforce.
+?S:	It does not correlate with the Perl version numbers or
+?S:	the maintenance versus development dichotomy except
+?S:	by also being increasing.
+?S:.
+?S:version_patchlevel_string:
+?S:	This is a string combining version, subversion and
+?S:	perl_patchlevel (if perl_patchlevel is non-zero).
+?S:	It is typically something like
+?S:	'version 7 subversion 1'  or
+?S:	'version 7 subversion 1 patchlevel 11224'
+?S:	It is computed here to avoid duplication of code in myconfig.SH
+?S:	and lib/Config.pm.
+?S:.
+?LINT:extern LC_ALL
+?LINT:extern LANGUAGE
+: get the patchlevel
+echo " "
+echo "Getting the current patchlevel..." >&4
+if $test -r $rsrc/patchlevel.h;then
+	revision=`awk '/define[ 	]+PERL_REVISION/ {print $3}' $rsrc/patchlevel.h`
+	patchlevel=`awk '/define[ 	]+PERL_VERSION/ {print $3}' $rsrc/patchlevel.h`
+	subversion=`awk '/define[ 	]+PERL_SUBVERSION/ {print $3}' $rsrc/patchlevel.h`
+	api_revision=`awk '/define[ 	]+PERL_API_REVISION/ {print $3}' $rsrc/patchlevel.h`
+	api_version=`awk '/define[ 	]+PERL_API_VERSION/ {print $3}' $rsrc/patchlevel.h`
+	api_subversion=`awk '/define[ 	]+PERL_API_SUBVERSION/ {print $3}' $rsrc/patchlevel.h`
+	perl_patchlevel=`egrep ',"(MAINT|SMOKE)[0-9][0-9]*"' $rsrc/patchlevel.h|tail -1|sed 's/[^0-9]//g'`
+else
+	revision=0
+	patchlevel=0
+	subversion=0
+	api_revision=0
+	api_version=0
+	api_subversion=0
+	perl_patchlevel=0
+	$echo "(You do not have patchlevel.h.  Eek.)"
+fi
+: Define a handy string here to avoid duplication in myconfig.SH and configpm.
+version_patchlevel_string="version $patchlevel subversion $subversion"
+case "$perl_patchlevel" in
+0|'') ;;
+*)  perl_patchlevel=`echo $perl_patchlevel | sed 's/.* //'`
+    version_patchlevel_string="$version_patchlevel_string patch $perl_patchlevel"
+    ;;
+esac
+
+$echo "(You have $package $version_patchlevel_string.)"
+
+case "$osname" in
+dos|vms)
+	: XXX Should be a Configure test for double-dots in filenames.
+	version=`echo $revision $patchlevel $subversion | \
+		 $awk '{ printf "%d_%d_%d", $1, $2, $3 }'`
+	api_versionstring=`echo $api_revision $api_version $api_subversion | \
+		 $awk '{ printf "%d_%d_%d", $1, $2, $3 }'`
+	;;
+*)
+	version=`echo $revision $patchlevel $subversion | \
+		 $awk '{ printf "%d.%d.%d", $1, $2, $3 }'`
+	api_versionstring=`echo $api_revision $api_version $api_subversion | \
+		 $awk '{ printf "%d.%d.%d", $1, $2, $3 }'`
+	;;
+esac
+: Special case the 5.005_xx maintenance series, which used 5.005
+: without any subversion label as a subdirectory in $sitelib
+if test "${api_revision}${api_version}${api_subversion}" = "550"; then
+	api_versionstring='5.005'
+fi
+

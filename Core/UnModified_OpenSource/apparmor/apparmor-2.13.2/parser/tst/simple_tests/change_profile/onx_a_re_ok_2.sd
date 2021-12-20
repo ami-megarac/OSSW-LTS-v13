@@ -1,0 +1,69 @@
+#
+#=DESCRIPTION audit change_profile /onexec to a hat
+#=EXRESULT PASS
+#
+/usr/bin/foo {
+   audit change_profile /onexec -> /bin/foo//bar,
+}
+
+/usr/bin/foo2 {
+   audit change_profile /onexec -> /bin/foo//ba*,
+}
+
+/usr/bin/foo3 {
+   audit change_profile /onexec -> /bin/foo//ba**,
+}
+
+/usr/bin/foo4 {
+   audit change_profile /onexec -> /bin/foo//ba?,
+}
+
+/usr/bin/foo5 {
+   audit change_profile /onexec -> /bin/foo//ba[ab],
+}
+
+/usr/bin/foo6 {
+   audit change_profile /onexec -> /bin/foo//ba[^ab],
+}
+
+/usr/bin/foo7 {
+   audit change_profile /onexec -> /bin/fo*//bar,
+}
+
+/usr/bin/foo8 {
+   audit change_profile /onexec -> /bin/fo**//bar,
+}
+
+/usr/bin/foo9 {
+   audit change_profile /onexec -> /bin/fo?//bar,
+}
+
+/usr/bin/foo10 {
+   audit change_profile /onexec -> /bin/fo[ab]//bar,
+}
+
+/usr/bin/foo11 {
+   audit change_profile /onexec -> /bin/fo[^ab]//bar,
+}
+
+/usr/bin/foo12 {
+   audit change_profile /onexec -> /bin/fo*//ba*,
+}
+
+/usr/bin/foo13 {
+   audit change_profile /onexec -> /bin/fo**//ba**,
+}
+
+/usr/bin/foo14 {
+   audit change_profile /onexec -> /bin/fo?//ba?,
+}
+
+/usr/bin/foo15 {
+   audit change_profile /onexec -> /bin/fo[ab]//ba[ab],
+}
+
+/usr/bin/foo16 {
+   audit change_profile /onexec -> /bin/fo[^ab]//ba[^ab],
+}
+
+

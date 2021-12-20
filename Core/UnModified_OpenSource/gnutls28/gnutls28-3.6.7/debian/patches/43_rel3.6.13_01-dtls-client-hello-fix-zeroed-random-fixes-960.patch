@@ -1,0 +1,31 @@
+From: =?UTF-8?q?Stefan=20B=C3=BChler?= <stbuehler@web.de>
+Date: Fri, 27 Mar 2020 17:17:57 +0100
+Subject: dtls client hello: fix zeroed random (fixes #960)
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+Origin: https://gitlab.com/gnutls/gnutls/-/commit/c01011c2d8533dbbbe754e49e256c109cb848d0d
+Bug: https://gitlab.com/gnutls/gnutls/-/issues/960
+Bug-Debian: https://bugs.debian.org/955556
+Bug-Debian-Security: https://security-tracker.debian.org/tracker/CVE-2020-11501
+Bug: https://www.gnutls.org/security-new.html#GNUTLS-SA-2020-03-31
+
+This broke with bcf4de03 "handshake: treat reply to HRR as a reply to
+hello verify request", which failed to "De Morgan" properly.
+
+Signed-off-by: Stefan Bühler <stbuehler@web.de>
+---
+ lib/handshake.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+--- a/lib/handshake.c
++++ b/lib/handshake.c
+@@ -2221,7 +2221,7 @@ static int send_client_hello(gnutls_sess
+ 		/* Generate random data 
+ 		 */
+ 		if (!(session->internals.hsk_flags & HSK_HRR_RECEIVED) &&
+-		    !(IS_DTLS(session) && session->internals.dtls.hsk_hello_verify_requests == 0)) {
++		    !(IS_DTLS(session) && session->internals.dtls.hsk_hello_verify_requests != 0)) {
+ 			ret = _gnutls_gen_client_random(session);
+ 			if (ret < 0) {
+ 				gnutls_assert();

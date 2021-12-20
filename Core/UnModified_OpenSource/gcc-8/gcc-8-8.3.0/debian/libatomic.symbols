@@ -1,0 +1,4 @@
+libatomic.so.1 #PACKAGE# #MINVER#
+ (symver)LIBATOMIC_1.0 4.8
+ (symver)LIBATOMIC_1.1 4.9
+ (symver)LIBATOMIC_1.2 6

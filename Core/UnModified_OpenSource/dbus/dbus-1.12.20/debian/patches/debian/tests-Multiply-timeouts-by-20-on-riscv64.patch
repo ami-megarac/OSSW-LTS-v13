@@ -1,0 +1,35 @@
+From: Simon McVittie <smcv@debian.org>
+Date: Sun, 6 May 2018 13:25:05 +0100
+Subject: tests: Multiply timeouts by 20 on riscv64
+
+Real riscv64 hardware has performance comparable to Debian's slower
+buildds such as arm and mips, but the port is currently being
+bootstrapped using qemu-system-riscv64, and that's too slow to run some
+of our tests successfully. For each test that "should" take no more than
+a minute on real hardware, allow 20 minutes instead.
+
+Forwarded: no, specific to Debian riscv64 port bootstrapping
+Bug-Debian: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=897607
+---
+ test/test-utils-glib.c | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/test/test-utils-glib.c b/test/test-utils-glib.c
+index 28a3684..832ce4d 100644
+--- a/test/test-utils-glib.c
++++ b/test/test-utils-glib.c
+@@ -497,7 +497,14 @@ set_timeout (guint factor)
+   /* Prevent tests from hanging forever. This is intended to be long enough
+    * that any reasonable regression test on any reasonable hardware would
+    * have finished. */
++#ifdef __riscv
++  /* Debian currently emulates riscv64 with qemu-system-riscv64. The real
++   * hardware is currently comparable to arm/mips buildds, but qemu is a
++   * lot slower. */
++#define TIMEOUT 1200   /* 20 minutes */
++#else
+ #define TIMEOUT 60
++#endif
+ 
+   if (timeout != 0)
+     g_source_remove (timeout);

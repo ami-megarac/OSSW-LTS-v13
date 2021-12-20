@@ -1,0 +1,61 @@
+#!/usr/bin/make -f
+
+include /usr/share/dpkg/architecture.mk
+
+%:
+	dh $@ --with systemd
+
+MAKEARGS_INDP = DESTDIR=$(CURDIR)/debian/tmp \
+		PREFIX=/usr \
+		LIBDIR=/usr/lib/$(DEB_HOST_MULTIARCH) \
+		MANDIR=/usr/share/man
+MAKEARGS_ARCH = $(MAKEARGS_INDP) \
+		MACHINE=$(DEB_HOST_GNU_CPU) \
+		CFLAGS="$(CFLAGS)" \
+		CPPFLAGS="$(CPPFLAGS)" \
+		LDFLAGS="$(LDFLAGS)" \
+		EXLDFLAGS="$(LDFLAGS)"
+
+override_dh_auto_clean:
+	dh_auto_clean -- $(MAKEARGS_ARCH)
+
+
+#
+# Architecture independent targets
+#
+override_dh_auto_build-indep:
+
+override_dh_auto_install-indep:
+	$(MAKE) install-etc install-prog-pwm $(MAKEARGS_INDP)
+
+	# Make sure /etc/sensors.d/ is not removed
+	touch $(CURDIR)/debian/tmp/etc/sensors.d/.placeholder
+
+override_dh_installinit-indep:
+	dh_installinit -pfancontrol --restart-after-upgrade
+
+
+#
+# Architecture targets
+#
+override_dh_auto_build-arch:
+	dh_auto_build -- $(MAKEARGS_ARCH)
+
+override_dh_auto_install-arch:
+	dh_auto_install -- $(MAKEARGS_ARCH)
+
+	# Install isadump only if it has been built (on x86/x86_64 archs only)
+	if [ -x prog/dump/isadump ] ; then \
+		cp -f prog/dump/isadump $(CURDIR)/debian/lm-sensors/usr/sbin ; \
+		mkdir -p $(CURDIR)/debian/lm-sensors/usr/share/man/man8 ; \
+		cp -f prog/dump/isadump.8 $(CURDIR)/debian/lm-sensors/usr/share/man/man8 ; \
+	fi
+	# Install isaset only if it has been built (on x86/x86_64 archs only)
+	if [ -x prog/dump/isaset ] ; then \
+		cp -f prog/dump/isaset $(CURDIR)/debian/lm-sensors/usr/sbin ; \
+		mkdir -p $(CURDIR)/debian/lm-sensors/usr/share/man/man8 ; \
+		cp -f prog/dump/isaset.8 $(CURDIR)/debian/lm-sensors/usr/share/man/man8 ; \
+	fi
+
+override_dh_installinit-arch:
+	dh_installinit -plm-sensors --no-start

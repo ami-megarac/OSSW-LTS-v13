@@ -1,0 +1,26 @@
+--- config.sh.static	2018-11-30 17:53:49.607532370 +0200
++++ config.sh.debug	2018-11-30 17:53:49.595532119 +0200
+@@ -17,2 +17,2 @@
+-config_args='-Dusethreads -Duselargefiles -Dcc=i686-kfreebsd-gnu-gcc -Dcpp=i686-kfreebsd-gnu-cpp -Dld=i686-kfreebsd-gnu-gcc -Dccflags=-DDEBIAN -Wdate-time -D_FORTIFY_SOURCE=2 -g -O2 -fdebug-prefix-map=/build/perl-hYqG0d/perl-5.28.0=. -fstack-protector-strong -Wformat -Werror=format-security -Dldflags= -Wl,-z,relro -Dlddlflags=-shared -Wl,-z,relro -Dcccdlflags=-fPIC -Darchname=i686-kfreebsd-gnu -Dprefix=/usr -Dprivlib=/usr/share/perl/5.28 -Darchlib=/usr/lib/i386-kfreebsd-gnu/perl/5.28 -Dvendorprefix=/usr -Dvendorlib=/usr/share/perl5 -Dvendorarch=/usr/lib/i386-kfreebsd-gnu/perl5/5.28 -Dsiteprefix=/usr/local -Dsitelib=/usr/local/share/perl/5.28.0 -Dsitearch=/usr/local/lib/i386-kfreebsd-gnu/perl/5.28.0 -Dman1dir=/usr/share/man/man1 -Dman3dir=/usr/share/man/man3 -Dsiteman1dir=/usr/local/man/man1 -Dsiteman3dir=/usr/local/man/man3 -Duse64bitint -Dman1ext=1 -Dman3ext=3perl -Dpager=/usr/bin/sensible-pager -Uafs -Ud_csh -Ud_ualarm -Uusesfio -Uusenm -Ui_libutil -Ui_xlocale -Uversiononly -DDEBUGGING=-g -Doptimize=-O2 -dEs -Uuseshrplib -Dotherlibdirs=/usr/lib/i386-kfreebsd-gnu/perl-base'
+-config_argc=40
++config_args='-Dusethreads -Duselargefiles -Dcc=i686-kfreebsd-gnu-gcc -Dcpp=i686-kfreebsd-gnu-cpp -Dld=i686-kfreebsd-gnu-gcc -Dccflags=-DDEBIAN -Wdate-time -D_FORTIFY_SOURCE=2 -g -O2 -fdebug-prefix-map=/build/perl-hYqG0d/perl-5.28.0=. -fstack-protector-strong -Wformat -Werror=format-security -Dldflags= -Wl,-z,relro -Dlddlflags=-shared -Wl,-z,relro -Dcccdlflags=-fPIC -Darchname=i686-kfreebsd-gnu -Dprefix=/usr -Dprivlib=/usr/share/perl/5.28 -Darchlib=/usr/lib/i386-kfreebsd-gnu/perl/5.28 -Dvendorprefix=/usr -Dvendorlib=/usr/share/perl5 -Dvendorarch=/usr/lib/i386-kfreebsd-gnu/perl5/5.28 -Dsiteprefix=/usr/local -Dsitelib=/usr/local/share/perl/5.28.0 -Dsitearch=/usr/local/lib/i386-kfreebsd-gnu/perl/5.28.0 -Dman1dir=/usr/share/man/man1 -Dman3dir=/usr/share/man/man3 -Dsiteman1dir=/usr/local/man/man1 -Dsiteman3dir=/usr/local/man/man3 -Duse64bitint -Dman1ext=1 -Dman3ext=3perl -Dpager=/usr/bin/sensible-pager -Uafs -Ud_csh -Ud_ualarm -Uusesfio -Uusenm -Ui_libutil -Ui_xlocale -Uversiononly -DDEBUGGING=both -Doptimize=-O2 -dEs -Uuseshrplib'
++config_argc=39
+@@ -54 +54 @@
+-config_arg36='-DDEBUGGING=-g'
++config_arg36='-DDEBUGGING=both'
+@@ -58 +57,0 @@
+-config_arg40='-Dotherlibdirs=/usr/lib/i386-kfreebsd-gnu/perl-base'
+@@ -103 +102 @@
+-ccflags='-D_REENTRANT -D_GNU_SOURCE -DDEBIAN -Wdate-time -D_FORTIFY_SOURCE=2 -g -O2 -fdebug-prefix-map=/build/perl-hYqG0d/perl-5.28.0=. -fstack-protector-strong -Wformat -Werror=format-security -fwrapv -fno-strict-aliasing -pipe -I/usr/local/include -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64'
++ccflags='-D_REENTRANT -D_GNU_SOURCE -DDEBIAN -Wdate-time -D_FORTIFY_SOURCE=2 -g -O2 -fdebug-prefix-map=/build/perl-hYqG0d/perl-5.28.0=. -fstack-protector-strong -Wformat -Werror=format-security -fwrapv -DDEBUGGING -fno-strict-aliasing -pipe -I/usr/local/include -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64'
+@@ -125 +124 @@
+-cppflags='-D_REENTRANT -D_GNU_SOURCE -DDEBIAN -Wdate-time -D_FORTIFY_SOURCE=2 -g -O2 -fdebug-prefix-map=/build/perl-hYqG0d/perl-5.28.0=. -fstack-protector-strong -Wformat -Werror=format-security -fwrapv -fno-strict-aliasing -pipe -I/usr/local/include'
++cppflags='-D_REENTRANT -D_GNU_SOURCE -DDEBIAN -Wdate-time -D_FORTIFY_SOURCE=2 -g -O2 -fdebug-prefix-map=/build/perl-hYqG0d/perl-5.28.0=. -fstack-protector-strong -Wformat -Werror=format-security -fwrapv -DDEBUGGING -fno-strict-aliasing -pipe -I/usr/local/include'
+@@ -474 +473 @@
+-d_perl_otherlibdirs='define'
++d_perl_otherlibdirs='undef'
+@@ -1003 +1002 @@
+-otherlibdirs='/usr/lib/i386-kfreebsd-gnu/perl-base'
++otherlibdirs=' '
+@@ -1254 +1252,0 @@
+-# Extracted from Debian package version 5.28.0-4

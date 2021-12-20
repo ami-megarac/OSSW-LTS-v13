@@ -1,0 +1,52 @@
+From: intrigeri <intrigeri@boum.org>
+Date: Mon, 7 Jan 2019 12:58:56 +0000
+Subject: Make tunables/share play well with aliases.
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
+
+This reverts commit aa3022208f539978f137c918ede01c80cacd8567.
+
+Space-separated list of values don't play well with aliases.
+For example, in Tails, despite this alias rule:
+
+  alias / -> /lib/live/mount/rootfs/*.squashfs/,
+
+… the Tor Browser profile denies access to
+/lib/live/mount/rootfs/filesystem.squashfs/usr/share/mime/mime.cache, which
+should be equivalent to /usr/share/mime/mime.cache. That's fixed by using
+alternations instead; too bad they're less readable.
+
+Possibly related:
+https://bugs.launchpad.net/apparmor/+bug/888077
+https://bugs.launchpad.net/apparmor/+bug/1703692
+https://bugs.launchpad.net/apparmor/+bug/1703692
+
+Cherry-picked from master branch: a91d199ab1da3004cf3744d7087a32c91097a16e.
+---
+ profiles/apparmor.d/tunables/share | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/profiles/apparmor.d/tunables/share b/profiles/apparmor.d/tunables/share
+index ad9e1d4..fca63ee 100644
+--- a/profiles/apparmor.d/tunables/share
++++ b/profiles/apparmor.d/tunables/share
+@@ -1,15 +1,15 @@
+-@{flatpak_exports_root} = flatpak/exports flatpak/{app,runtime}/*/*/*/*/export
++@{flatpak_exports_root} = {flatpak/exports,flatpak/{app,runtime}/*/*/*/*/export}
+ 
+ # System-wide directories with behaviour analogous to /usr/share
+ # in patterns like the freedesktop.org basedir spec. These are
+ # owned by root or a system user, appear in XDG_DATA_DIRS, and
+ # are the parent directory for `applications`, `themes`,
+ # `dbus-1/services`, etc.
+-@{system_share_dirs} = /usr/share /usr/local/share /var/lib/@{flatpak_exports_root}/share
++@{system_share_dirs} = /{usr,usr/local,var/lib/@{flatpak_exports_root}}/share
+ 
+ # Per-user/personal directories with behaviour analogous to
+ # ~/.local/share in patterns like the freedesktop.org basedir spec.
+ # These are owned by the user running an application, appear in
+ # XDG_DATA_DIRS or XDG_DATA_HOME, and are the parent directory
+ # for the same subdirectories as @{system_share_dirs}
+-@{user_share_dirs} = @{HOME}/.local/share @{HOME}/.local/share/@{flatpak_exports_root}/share
++@{user_share_dirs} = @{HOME}/.local/{,share/@{flatpak_exports_root}}/share

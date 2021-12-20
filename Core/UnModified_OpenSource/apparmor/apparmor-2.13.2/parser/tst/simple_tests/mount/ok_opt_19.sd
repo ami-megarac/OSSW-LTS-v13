@@ -1,0 +1,10 @@
+#
+#=Description basic rules to test the "nodiratime" mount option
+#=EXRESULT PASS
+/usr/bin/foo {
+  mount options=nodiratime /a -> /1,
+  mount options=(nodiratime) /b -> /2,
+  mount options=(rw,nodiratime) /c -> /3,
+  mount options in (nodiratime) /d -> /4,
+  mount options in (ro,nodiratime) /e -> /5,
+}

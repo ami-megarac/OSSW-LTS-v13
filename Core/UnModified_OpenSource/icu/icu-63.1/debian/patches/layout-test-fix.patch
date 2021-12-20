@@ -1,0 +1,53 @@
+Description: update tests to match new Layout Extension
+ Update glyphs, indices and positions.
+Forwarded: no
+Author: Laszlo Boszormenyi (GCS) <gcs@debian.org>
+Bug-Debian: https://bugs.debian.org/879820
+Last-Update: 2017-11-04
+
+---
+
+--- icu-60.1.orig/source/test/testdata/letest.xml
++++ icu-60.1/source/test/testdata/letest.xml
+@@ -1016,16 +1016,16 @@
+         <test-text>शङ़ु</test-text>
+ 
+         <result-glyphs>
+-            0x00000002, 0x00000001, 0x00000006, 0x0000FFFF
++            0x00000002, 0x00000001, 0x00000006, 0x0000FFFF, 0x0000FFFF
+         </result-glyphs>
+ 
+         <result-indices>
+-            0x00000000, 0x00000001, 0x00000002, 0x00000003
++            0x00000000, 0x00000001, 0x00000001, 0x00000002, 0x00000003
+         </result-indices>
+ 
+         <result-positions>
+-            0.000000, 0.000000, 7.572000, 0.000000, 15.108000, 0.000000, 15.108000, 0.000000, 
+-            15.108000, 0.000000
++            0.000000, 0.000000, 7.571777, 0.000000, 15.107666, 0.000000, 15.107666, 0.000000, 
++            15.107666, 0.000000, 15.107666, 0.000000
+         </result-positions>
+     </test-case>
+ 
+@@ -1035,16 +1035,16 @@
+         <test-text>शङ़ु</test-text>
+ 
+         <result-glyphs>
+-            0x00000005, 0x00000001, 0x00000006, 0x0000FFFF
++            0x00000005, 0x00000001, 0x00000006, 0x0000FFFF, 0x0000FFFF
+         </result-glyphs>
+ 
+         <result-indices>
+-            0x00000000, 0x00000001, 0x00000002, 0x00000003
++            0x00000000, 0x00000001, 0x00000001, 0x00000002, 0x00000003
+         </result-indices>
+ 
+         <result-positions>
+-            0.000000, 0.000000, 7.392000, 0.000000, 14.927999, 0.000000, 14.927999, 0.000000, 
+-            14.927999, 0.000000
++            0.000000, 0.000000, 7.391846, 0.000000, 14.927734, 0.000000, 14.927734, 0.000000, 
++            14.927734, 0.000000, 14.927734, 0.000000
+         </result-positions>
+     </test-case>
+ 

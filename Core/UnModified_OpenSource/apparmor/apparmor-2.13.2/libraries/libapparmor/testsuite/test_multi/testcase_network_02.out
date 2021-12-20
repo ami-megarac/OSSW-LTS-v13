@@ -1,0 +1,16 @@
+START
+File: testcase_network_02.in
+Event type: AA_RECORD_DENIED
+Audit ID: 1308766940.698:3704
+Operation: sendmsg
+Profile: /usr/bin/evince-thumbnailer
+Command: evince-thumbnai
+Parent: 24737
+PID: 24743
+Network family: inet
+Socket type: stream
+Protocol: tcp
+Local port: 765
+Foreign port: 2049
+Epoch: 1308766940
+Audit subid: 3704

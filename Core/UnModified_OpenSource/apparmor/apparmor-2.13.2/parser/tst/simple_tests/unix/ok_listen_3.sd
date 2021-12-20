@@ -1,0 +1,7 @@
+#
+#=DESCRIPTION simple unix listen w/addr acceptance test
+#=EXRESULT PASS
+
+profile a_profile {
+  unix listen addr=@foo**,
+}

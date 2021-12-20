@@ -1,0 +1,119 @@
+#! /bin/sh
+#
+# alias.test     ---  test option aliasing
+#
+# Author:            Bruce Korb <bkorb@gnu.org>
+##
+##  This file is part of AutoOpts, a companion to AutoGen.
+##  AutoOpts is free software.
+##  AutoOpts is Copyright (C) 1992-2016 by Bruce Korb - all rights reserved
+##
+##  AutoOpts is available under any one of two licenses.  The license
+##  in use must be one of these two and the choice is under the control
+##  of the user of the license.
+##
+##   The GNU Lesser General Public License, version 3 or later
+##      See the files "COPYING.lgplv3" and "COPYING.gplv3"
+##
+##   The Modified Berkeley Software Distribution License
+##      See the file "COPYING.mbsd"
+##
+##  These files have the following sha256 sums:
+##
+##  8584710e9b04216a394078dc156b781d0b47e1729104d666658aecef8ee32e95  COPYING.gplv3
+##  4379e7444a0e2ce2b12dd6f5a52a27a4d02d39d247901d3285c88cf0d37f477b  COPYING.lgplv3
+##  13aa749a5b0a454917a944ed8fffc530b784f5ead522b1aacaf4ec8aa55a6239  COPYING.mbsd
+
+. ./defs
+
+# # # # # # # # # # DEFINITIONS FILE # # # # # # # # #
+
+echo "creating ${testname}.def in `pwd`"
+testname="${testname}" test_main="YES" \
+argument="arg [...]" long_opts="YES" use_flags=true \
+${SHELLX} ${stdopts} option:'opt init' second=020 || \
+    failure "Could not run stdopts.def"
+: add defs
+cat >> ${testname}.def <<- \_EOF_
+
+	flag = {
+	  name = a-opt;
+	  value = a;
+	  aliases = option;
+	};
+
+	flag = {
+	  name = b-second;
+	  value = b;
+	  aliases = second;
+	};
+	_EOF_
+
+echo ${AG_L} ${testname}.def
+${AG_L} ${testname}.def || \
+  failure AutoGen could not process
+
+compile "-?"
+
+# # # # # # # # # # FIRST TEST # # # # # # # # #
+
+echo creating ${testname}-1.help
+clean_help > ${testname}-1.help <<'_EOF_'
+test_alias - Test AutoOpts for alias
+Usage:  alias [ -<flag> [<val>] | --<name>[{=| }<val>] ]... arg [...]
+  Flg Arg Option-Name    Description
+   -o Str option         The option option descrip
+   -s Num second         The second option descrip
+   -a Str a-opt          an alias for the 'option' option
+   -b Num b-second       an alias for the 'second' option
+   -? no  help           display extended usage information and exit
+   -! no  more-help      extended usage information passed thru pager
+
+Options are specified by doubled hyphens and their name or by a single
+hyphen and the flag character.
+_EOF_
+
+cmp -s ${testname}-1.help ${testname}.help || \
+  failure "`diff ${testname}-1.help ${testname}.help`"
+
+./${testname} -o foo -a bar && \
+    failure "both -o and -a were accepted"
+
+./${testname} -a bar fumble > ${testname}.out
+cat > ${testname}.base <<- \_EOF_
+	OPTION_CT=2
+	export OPTION_CT
+	TEST_ALIAS_OPTION='bar'
+	export TEST_ALIAS_OPTION
+	_EOF_
+
+cmp -s ${testname}.out ${testname}.base || \
+    failure "`diff ${testname}.out ${testname}.base`"
+
+run_ag als -T agtexi-cmd.tpl ${testname}.def
+test -f invoke-test_${testname}.menu || \
+    failure "no menu entry output"
+rm -f invoke-test_${testname}.menu
+test -f invoke-test_${testname}.texi || \
+    failure "no texi output"
+mv -f invoke-test_${testname}.texi ${testname}.texi
+
+run_ag als -T agmdoc-cmd.tpl ${testname}.def
+test -f test_${testname}.1 || failure "no man page output"
+mv test_${testname}.1 ${testname}.1
+lnct=`
+    ${EGREP} 'an alias for the .*(option|second).* option' \
+        ${testname}.texi ${testname}.1 | \
+        wc -l`
+test $lnct -eq 4 || \
+    failure "bad documentation output"
+
+cleanup
+
+## Local Variables:
+## mode: shell-script
+## indent-tabs-mode: nil
+## sh-indentation: 2
+## End:
+
+# end of cond.test

@@ -1,0 +1,7 @@
+#
+#=Description basic file rule w/alternations
+#=EXRESULT PASS
+#
+/usr/bin/foo {
+  file /a/b/c/**{cache,data,download,/ext,fileadmin,files,images,joomla,moodledata/sessions}/** rw,
+}

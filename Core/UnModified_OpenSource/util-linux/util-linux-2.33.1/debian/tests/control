@@ -1,0 +1,2 @@
+Tests: oversized-chunks
+Depends: bash, bsdmainutils, dpkg, grep, bc, util-linux, bsdutils, mount

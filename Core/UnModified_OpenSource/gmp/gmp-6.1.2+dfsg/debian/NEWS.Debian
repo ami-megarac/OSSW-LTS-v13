@@ -1,0 +1,13 @@
+gmp (2:5.1.2+dfsg-3) unstable; urgency=medium
+
+  * The bi-arch lib32gmp* and lib64gmp* packages are removed.  Please use 
+  the multi-arch feature to install alternate word-size packages.
+
+ -- Steve M. Robbins <smr@debian.org>  Sat, 14 Sep 2013 13:52:27 -0500
+
+gmp (2:5.1.2+dfsg-2) unstable; urgency=low
+
+  * The bi-arch lib32gmp-dev header is now found in
+    /usr/include/gmp32/$(triplet).
+
+ -- Steve M. Robbins <smr@debian.org>  Sun, 30 Jun 2013 22:38:44 -0500

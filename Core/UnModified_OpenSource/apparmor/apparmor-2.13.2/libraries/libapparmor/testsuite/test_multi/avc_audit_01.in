@@ -1,0 +1,1 @@
+type=AVC msg=audit(1279948288.415:39): apparmor="DENIED" operation="open" parent=12332 profile="/usr/sbin/cupsd" name="/home/user/.ssh/" pid=12333 comm="ls" requested_mask="r" denied_mask="r" fsuid=0 ouid=1000

@@ -1,0 +1,96 @@
+AppArmor parser development notes and tips
+==========================================
+
+Debugging the build
+-------------------
+Adding V=1 as argument to make should result in build commands that are
+normally quieter generating more verbose output. This can help diagnose
+when something is going wrong at build time.
+
+Distribution vendors may wish to enable this option all
+the time to assist debugging build failures in remote build
+environments. Generally, they should not need to enable any other
+build flags/options.
+
+Building the parser with debugging information
+----------------------------------------------
+Setting DEBUG=1 with make will enable debugging output in the parser
+(i.e. PDEBUG statements will be emitted instead of dropped). Usually,
+partial compilation between debug and non-debug will cause compilation
+problems, so it's usually best to do something like
+
+  make clean all DEBUG=1
+
+Test Coverage
+-------------
+The parser can be built to generate test coverage information, by
+setting the COVERAGE variable for make. As with debugging, partial
+compilation is usually problematic, so it's recommended to do:
+
+  make clean all COVERAGE=1
+
+and then run whatever tests. Because the unit tests are built with the
+make check target, in order to see what coverage they provide, they will
+also need to be built with the COVERAGE flag set:
+
+  make tests COVERAGE=1
+
+or, if running the unit tests with all the other parser tests:
+
+  make check COVERAGE=1
+
+Coverage information will be written out in files in the source build
+tree (*.gcno and *.gcda files). The 'gcovr' utility is useful for
+reading and summarizing the results; to do so, after running your
+tests, do something like:
+
+  gcovr -r /PATH/TO/YOUR/PARSER/BUILD/TREE
+
+Of course, having test coverage over a given line of code
+won't indicate that the code is bug free; however, not having
+coverage indicates that the tests do not exercise the given code at
+all. That said, 100% coverage is unlikely to be possible in a testing
+environment, given checks for things like error handling for failed
+memory allocations.
+
+Finding memory leaks
+--------------------
+The tst/ subdirectory has a python script for running valgrind on the
+parser over the test files in the simple_tests/ tree. This can take
+over 24 hours to complete, so it is not part of the default tests;
+however, it can be run manually or via the 'valgrind' make target.
+
+Valgrind reports some false positives for some additional checks it
+makes; the script attempts to suppress those (read the valgrind
+documentation for more details on suppressions). It can also emit the
+suppressions via the --dump-suppressions argument, to be used for manual
+valgrind runs.
+
+An example manual valgrind run could be something like:
+
+  ./tst/valgrind_simply.py --dump-suppressions > /tmp/valgrind.suppression
+  valgrind --leak-check=full --suppressions=/tmp/valgrind.suppression ./apparmor_parser -QK /path/to/profile
+
+Profiling (for performance) the parser
+--------------------------------------
+
+# Using valgrind's callgrind tool
+
+Valgrind provides the callgrind tool to give some indication where
+hot spots are in the parser. To do so, do:
+
+  valgrind --tool=callgrind ./apparmor_parser PARSER_ARGS
+
+This will generate a data file that a tool like kcachegrind can read.
+
+# Using gprof
+
+This can be enabled by adding the -pg argument as a CFLAG [1] at build
+time and then exercising the parser. A data file will be generated
+that gprof(1) can then read to show where the parser is spending the
+most time.
+
+[1] Unfortunately, only the DEBUG option in the Makefile does this,
+    which enables other debugging options that alters the parser in
+    ways that make it a less accurate representation of real world
+    performance. This needs to be fixed.

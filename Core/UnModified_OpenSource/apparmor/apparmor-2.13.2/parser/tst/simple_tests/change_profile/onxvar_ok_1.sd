@@ -1,0 +1,8 @@
+#
+#=DESCRIPTION change_profile @{var}
+#=EXRESULT PASS
+#
+@{var}=/test
+/usr/bin/foo {
+   change_profile @{var} -> /bin/foo,
+}

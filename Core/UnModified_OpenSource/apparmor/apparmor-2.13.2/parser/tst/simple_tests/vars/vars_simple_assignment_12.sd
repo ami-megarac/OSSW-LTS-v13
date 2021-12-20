@@ -1,0 +1,13 @@
+#=DESCRIPTION Test for continuation onto newline
+#=EXRESULT PASS
+
+# the continuation should mean the next line should all be assigned to
+# this one.
+@{FOO} = blah \
+@{BAR} = baz
+
+@{BAR} = notbaz
+
+/bin/true {
+  /@{FOO} r,
+}

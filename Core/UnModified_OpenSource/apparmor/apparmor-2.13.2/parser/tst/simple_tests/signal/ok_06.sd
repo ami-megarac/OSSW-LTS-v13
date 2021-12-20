@@ -1,0 +1,18 @@
+#
+#=Description basic signal write/send rules
+#=EXRESULT PASS
+#
+/usr/bin/signal-test {
+  signal w,
+
+}
+
+/usr/bin/signal-test2 {
+  signal write,
+
+}
+
+/usr/bin/signal-test3 {
+  signal send,
+
+}

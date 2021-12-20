@@ -1,0 +1,305 @@
+#
+#=DESCRIPTION validate some uses of the profile flags with hats.
+#=EXRESULT PASS
+# vim:syntax=subdomain
+# Last Modified: Sun Apr 17 19:44:44 2005
+#
+/does/not/exist flags=(complain) {
+  #include <includes/base>
+
+  /usr/X11R6/lib/lib*so* r,
+  /does/not/exist r,
+
+  ^FOO {
+    #include <includes/base>
+  }
+}
+
+/does/not/exist2 flags=(complain) {
+  #include <includes/base>
+
+  /usr/X11R6/lib/lib*so* r,
+  /does/not/exist2 r,
+
+  ^FOO flags=(complain) {
+    #include <includes/base>
+  }
+
+  ^FOO2 (complain) {
+    #include <includes/base>
+  }
+}
+
+/does/not/exist3 flags=(complain) {
+  #include <includes/base>
+
+  /usr/X11R6/lib/lib*so* r,
+  /does/not/exist3 r,
+
+  ^FOO flags=(audit) {
+    #include <includes/base>
+  }
+  ^FOO2 (audit) {
+    #include <includes/base>
+  }
+}
+
+/does/not/exist4 {
+  #include <includes/base>
+
+  /usr/X11R6/lib/lib*so* r,
+  /does/not/exist4 r,
+
+  ^FOO flags=(complain) {
+    #include <includes/base>
+  }
+  ^FOO2 (complain) {
+    #include <includes/base>
+  }
+}
+
+/does/not/exist5 flags=(audit) {
+  #include <includes/base>
+
+  /usr/X11R6/lib/lib*so* r,
+  /does/not/exist5 r,
+
+  ^FOO {
+    #include <includes/base>
+  }
+}
+
+/does/not/exist6 flags=(audit) {
+  #include <includes/base>
+
+  /usr/X11R6/lib/lib*so* r,
+  /does/not/exist6 r,
+
+  ^FOO flags=(audit) {
+    #include <includes/base>
+  }
+  ^FOO2 (audit) {
+    #include <includes/base>
+  }
+}
+
+/does/not/exist7 flags=(audit) {
+  #include <includes/base>
+
+  /usr/X11R6/lib/lib*so* r,
+  /does/not/exist7 r,
+
+  ^FOO flags=(complain) {
+    #include <includes/base>
+  }
+  ^FOO2 (complain) {
+    #include <includes/base>
+  }
+}
+
+/does/not/exist8 {
+  #include <includes/base>
+
+  /usr/X11R6/lib/lib*so* r,
+  /does/not/exist8 r,
+
+  ^FOO flags=(audit) {
+    #include <includes/base>
+  }
+  ^FOO2 (audit) {
+    #include <includes/base>
+  }
+}
+
+/does/not/exist9 {
+  #include <includes/base>
+
+  /usr/X11R6/lib/lib*so* r,
+  /does/not/exist9 r,
+
+  ^FOO flags=(audit) {
+    #include <includes/base>
+  }
+
+  ^FOO2 (audit) {
+    #include <includes/base>
+  }
+
+  ^BAR {
+    #include <includes/fonts>
+  }
+
+  ^BAZ flags=(audit) {
+    #include <includes/fonts>
+  }
+
+  ^BAZ2 (audit) {
+    #include <includes/fonts>
+  }
+
+  ^BIF flags=(complain) {
+    #include <includes/base>
+  }
+
+  ^BIF2 (complain) {
+    #include <includes/base>
+  }
+
+  ^BUZ flags=(complain,audit) {
+    /var/log/messages r,
+  }
+
+  ^BUZ2 (complain,audit) {
+    /var/log/messages r,
+  }
+}
+
+/does/not/exist11 flags=(complain) {
+  #include <includes/base>
+
+  /usr/X11R6/lib/lib*so* r,
+  /does/not/exist r,
+
+  ^FOO {
+    #include <includes/base>
+  }
+}
+
+/does/not/exist12 flags=(complain) {
+  #include <includes/base>
+
+  /usr/X11R6/lib/lib*so* r,
+  /does/not/exist2 r,
+
+  ^FOO flags=(complain) {
+    #include <includes/base>
+  }
+
+  ^FOO2 (complain) {
+    #include <includes/base>
+  }
+}
+
+/does/not/exist13 flags=(complain) {
+  #include <includes/base>
+
+  /usr/X11R6/lib/lib*so* r,
+  /does/not/exist3 r,
+
+  ^FOO flags=(audit) {
+    #include <includes/base>
+  }
+  ^FOO2 (audit) {
+    #include <includes/base>
+  }
+}
+
+/does/not/exist14 {
+  #include <includes/base>
+
+  /usr/X11R6/lib/lib*so* r,
+  /does/not/exist4 r,
+
+  ^FOO flags=(complain) {
+    #include <includes/base>
+  }
+  ^FOO2 (complain) {
+    #include <includes/base>
+  }
+}
+
+/does/not/exist15 flags=(audit) {
+  #include <includes/base>
+
+  /usr/X11R6/lib/lib*so* r,
+  /does/not/exist5 r,
+
+  ^FOO {
+    #include <includes/base>
+  }
+}
+
+/does/not/exist16 flags=(audit) {
+  #include <includes/base>
+
+  /usr/X11R6/lib/lib*so* r,
+  /does/not/exist6 r,
+
+  ^FOO flags=(audit) {
+    #include <includes/base>
+  }
+  ^FOO2 (audit) {
+    #include <includes/base>
+  }
+}
+
+/does/not/exist17 flags=(audit) {
+  #include <includes/base>
+
+  /usr/X11R6/lib/lib*so* r,
+  /does/not/exist7 r,
+
+  ^FOO flags=(complain) {
+    #include <includes/base>
+  }
+  ^FOO2 (complain) {
+    #include <includes/base>
+  }
+}
+
+/does/not/exist18 {
+  #include <includes/base>
+
+  /usr/X11R6/lib/lib*so* r,
+  /does/not/exist8 r,
+
+  ^FOO flags=(audit) {
+    #include <includes/base>
+  }
+  ^FOO2 (audit) {
+    #include <includes/base>
+  }
+}
+
+/does/not/exist19 {
+  #include <includes/base>
+
+  /usr/X11R6/lib/lib*so* r,
+  /does/not/exist9 r,
+
+  ^FOO flags=(audit) {
+    #include <includes/base>
+  }
+
+  ^FOO2 (audit) {
+    #include <includes/base>
+  }
+
+  ^BAR {
+    #include <includes/fonts>
+  }
+
+  ^BAZ flags=(audit) {
+    #include <includes/fonts>
+  }
+
+  ^BAZ2 (audit) {
+    #include <includes/fonts>
+  }
+
+  ^BIF flags=(complain) {
+    #include <includes/base>
+  }
+
+  ^BIF2 (complain) {
+    #include <includes/base>
+  }
+
+  ^BUZ flags=(complain,audit) {
+    /var/log/messages r,
+  }
+
+  ^BUZ2 (complain,audit) {
+    /var/log/messages r,
+  }
+}

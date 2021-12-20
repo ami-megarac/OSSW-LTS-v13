@@ -1,0 +1,10 @@
+#
+#=Description basic rules to test the "user" mount option
+#=EXRESULT PASS
+/usr/bin/foo {
+  mount options=user /a -> /1,
+  mount options=(user) /b -> /2,
+  mount options=(rw,user) /c -> /3,
+  mount options in (user) /d -> /4,
+  mount options in (ro,user) /e -> /5,
+}

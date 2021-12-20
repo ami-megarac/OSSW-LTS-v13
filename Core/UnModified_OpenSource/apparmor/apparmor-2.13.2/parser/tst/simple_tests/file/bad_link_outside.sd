@@ -1,0 +1,7 @@
+#
+#=DESCRIPTION link rule outside of a profile
+#=EXRESULT FAIL
+#
+
+deny link /alpha/beta -> /tmp/**,
+

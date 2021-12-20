@@ -1,0 +1,13 @@
+START
+File: testcase_dbus_07.in
+Event type: AA_RECORD_DENIED
+Operation: dbus_method_call
+Denied Mask: eavesdrop
+Profile: /usr/sbin/whatever
+Peer profile: unconfined
+Name: org.freedesktop.DBus
+PID: 2922
+DBus bus: session
+DBus path: /org/freedesktop/DBus
+DBus interface: org.freedesktop.DBus
+DBus member: Hello

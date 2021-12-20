@@ -1,0 +1,241 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+# debian/rules for Berkeley DB defaults
+# Copyright (C) 2011 Ondřej Surý
+# Published under the GNU GPL license
+# Partially based on previous work by Clint Adams
+#
+# Uncomment this to turn on verbose mode.
+export DH_VERBOSE=1
+
+export DH_ALWAYS_EXCLUDE=.arch-ids
+
+include /usr/share/dpkg/architecture.mk
+
+# Don't try to build this file if missing
+/usr/share/javahelper/java-vars.mk:
+	:
+
+-include /usr/share/javahelper/java-vars.mk
+
+JAVA_BROKEN_ARCHS =
+
+ENABLE_JAVA=no
+
+ifeq (,$(filter $(DEB_HOST_ARCH), $(JAVA_BROKEN_ARCHS)))
+  ENABLE_JAVA=yes
+endif
+
+ifneq (,$(filter nojava,$(DEB_BUILD_PROFILES)))
+  ENABLE_JAVA=no
+endif
+
+CONFIGURE_SWITCHES =    --prefix=/usr \
+			--mandir=\$${prefix}/share/man \
+			--localstatedir=/var \
+			--sysconfdir=/etc \
+			--libexecdir=/usr/lib \
+			--enable-cxx \
+			--enable-compat185 \
+			--enable-sql \
+			--enable-stl \
+			--enable-dbm
+
+ifeq (,$(filter pkg.db5.3.notcl,$(DEB_BUILD_PROFILES)))
+  ENABLE_TESTS=yes
+  CONFIGURE_SWITCHES += --enable-tcl
+ifneq (,$(wildcard /usr/lib/$(DEB_HOST_MULTIARCH)/tcl*))
+  CONFIGURE_SWITCHES += --with-tcl=/usr/lib/$(DEB_HOST_MULTIARCH)
+else
+  CONFIGURE_SWITCHES += --with-tcl=/usr/lib
+endif
+else
+  ENABLE_TESTS=no
+  CONFIGURE_SWITCHES += --disable-tcl
+  DH_OPTIONS += -Nlibdb5.1-tcl
+endif
+
+ifneq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
+  ENABLE_TESTS=no
+endif
+
+ifeq (zx86_64-linux-gnuz,z$(DEB_HOST_GNU_TYPE)z)
+CONFIGURE_SWITCHES += --with-mutex=POSIX/pthreads/library
+endif
+ifeq (zavr32-linux-gnuz,z$(DEB_HOST_GNU_TYPE)z)
+CONFIGURE_SWITCHES += --enable-posixmutexes
+endif
+
+ifeq (yes,$(ENABLE_JAVA))
+JAVACFLAGS=-source 1.7 -target 1.7
+JAVA_HOME ?= /usr/lib/jvm/default-java
+CFLAGS += -I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/linux
+CONFIGURE_SWITCHES += --enable-java
+DH_PLUGINS += --with=javahelper
+else
+CONFIGURE_SWITCHES += --disable-java
+endif
+
+ifneq (,$(filter pkg.db5.3.nosql,$(DEB_BUILD_PROFILES)))
+  CONFIGURE_SWITCHES += --disable-sql
+endif
+
+
+BROKEN_CPUS = zs390z
+VERY_BROKEN_CPUS = zhppaz
+BROKEN_SYSTEMS = zgnuz
+VERY_BROKEN_SYSTEMS =
+
+TCLSH=/usr/bin/tclsh
+
+export DH_OPTIONS
+
+package=db5.3
+bdbversion=5.3
+
+version=$(shell expr `pwd` : '.*-\([0-9.]*\)')
+version_major=$(shell expr `pwd` : '.*-\([0-9]*\).[0-9.]*')
+
+LIBTOOL_AUX_FILES=config.guess config.sub install-sh ltmain.sh
+LIBTOOL_MACROS_FILES=libtool.m4 ltoptions.m4 ltsugar.m4 ltversion.m4 lt~obsolete.m4
+
+RECONF_FILES=dist/config.hin \
+             dist/configure \
+             $(patsubst %,dist/%,$(LIBTOOL_AUX_FILES)) \
+             $(patsubst %,dist/aclocal/%,$(LIBTOOL_MACROS_FILES)) \
+             lang/sql/sqlite/aclocal.m4 \
+             lang/sql/sqlite/configure \
+             $(patsubst %,lang/sql/sqlite/%,$(LIBTOOL_AUX_FILES))
+
+%:
+	dh $@ --with=autotools-dev $(DH_PLUGINS)
+
+override_dh_auto_configure:
+	if [ ! -d $(CURDIR)/debian/s_config ]; then \
+	  mkdir -p $(CURDIR)/debian/s_config/dist/aclocal/ \
+	           $(CURDIR)/debian/s_config/lang/sql/sqlite/; \
+	fi
+	for f in $(RECONF_FILES); do \
+	  if [ ! -f $(CURDIR)/debian/s_config/$$f ]; then \
+	    mv $(CURDIR)/$$f $(CURDIR)/debian/s_config/`dirname $$f`; \
+	  fi; \
+	done
+	cd dist && libtoolize -cfi
+	cd lang/sql/sqlite && libtoolize -cfi
+	cd dist && ./s_config
+ifeq ($(ENABLE_TESTS),yes)
+	JAVACFLAGS="$(JAVACFLAGS)" dh_auto_configure -Ddist -Bbuild-test -- $(CONFIGURE_SWITCHES) --enable-test
+endif
+	JAVACFLAGS="$(JAVACFLAGS)" dh_auto_configure -Ddist -Bbuild-production -- $(CONFIGURE_SWITCHES) --disable-test
+
+override_dh_auto_clean:
+ifeq ($(ENABLE_TESTS),yes)
+	dh_auto_clean -Ddist -Bbuild-test
+endif
+	dh_auto_clean -Ddist -Bbuild-production
+	rm -f $(CURDIR)/debian/build_signature.txt
+	for f in $(RECONF_FILES); do \
+	  if [ -f $(CURDIR)/debian/s_config/$$f ]; then \
+	    mv $(CURDIR)/debian/s_config/$$f $(CURDIR)/`dirname $$f`; \
+	  fi; \
+	done
+	if [ -d $(CURDIR)/debian/s_config/ ]; then \
+	  rmdir $(CURDIR)/debian/s_config/dist/aclocal/ \
+	        $(CURDIR)/debian/s_config/dist/ \
+	        $(CURDIR)/debian/s_config/lang/sql/sqlite/ \
+	        $(CURDIR)/debian/s_config/lang/sql/ \
+	        $(CURDIR)/debian/s_config/lang/ \
+	        $(CURDIR)/debian/s_config/; \
+	fi
+
+override_dh_auto_test:
+ifeq (,$(findstring z$(DEB_BUILD_GNU_CPU)z,$(VERY_BROKEN_CPUS))$(findstring z$(DEB_BUILD_GNU_SYSTEM)z,$(VERY_BROKEN_SYSTEMS)))
+ifeq ($(ENABLE_TESTS),yes)
+	cd build-test && make cutest && ./cutest
+	echo 'source ../test/tcl/test.tcl; run_std;' | tclsh
+
+ifeq (,$(findstring z$(DEB_BUILD_GNU_CPU)z,$(BROKEN_CPUS))$(findstring z$(DEB_BUILD_GNU_SYSTEM)z,$(BROKEN_SYSTEMS)))
+	! grep ^FAIL build-test/ALL.OUT
+else
+# Testsuite failures are marked as non-fatal on $(DEB_BUILD_GNU_SYSTEM)-$(DEB_BUILD_GNU_CPU)
+	grep ^FAIL build-test/ALL.OUT || true
+endif
+else
+# Testsuite has been disabled by DEB_BUILD_OPTIONS=$(DEB_BUILD_OPTIONS)
+endif
+else
+# Testsuite has been disabled on $(DEB_BUILD_GNU_SYSTEM)-$(DEB_BUILD_GNU_CPU)
+endif
+
+override_dh_auto_install:
+	dh_auto_install -Ddist -Bbuild-production
+
+# Remove .la files
+	rm -f $(CURDIR)/debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)/*.la
+
+# Remove libdb*-5.so from all packages, we don't provide generic libdb5 packages
+	rm -f $(CURDIR)/debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)/libdb*5.so
+
+# Reduce duplication in duplicate .a files by symlinking
+	for v in "" _cxx _sql _stl _tcl; do \
+	  rm -f debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)/libdb$$v.a; \
+	  ln -s libdb$$v-$(bdbversion).a $(CURDIR)/debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)/libdb$$v.a; \
+	done
+
+# only works for the native build
+ifeq ($(DEB_HOST_ARCH),$(DEB_BUILD_ARCH))
+# Compare built-in signature and fail build if it is different
+	cc -o$(CURDIR)/debian/db_signature \
+	   -I$(CURDIR)/debian/tmp/usr/include \
+	     $(CURDIR)/debian/db_signature.c \
+	     $(CURDIR)/debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)/libdb.a
+
+	$(CURDIR)/debian/db_signature > $(CURDIR)/debian/build_signature_$(DEB_HOST_ARCH).txt
+
+	echo -n "Berkeley DB signature is:"; $(CURDIR)/debian/db_signature
+
+ifneq (,$(filter nojava pkg.db5.3.notcl,$(DEB_BUILD_PROFILES)))
+	if [ -f $(CURDIR)/debian/saved_signature_$(DEB_HOST_ARCH).txt ]; then \
+	    cmp $(CURDIR)/debian/saved_signature_$(DEB_HOST_ARCH).txt         \
+	        $(CURDIR)/debian/build_signature_$(DEB_HOST_ARCH).txt         \
+	    || ( echo "Region environment signatures differ."; exit 1; );     \
+	fi
+endif
+endif
+
+	mv $(CURDIR)/debian/tmp/usr/bin/dbsql $(CURDIR)/debian/tmp/usr/bin/db_sql
+	rm -f $(CURDIR)/debian/tmp/usr/bin/sqlite3
+
+	for i in $(CURDIR)/debian/tmp/usr/bin/db_*; do \
+	  mv $$i $$(echo $$i | sed -e 's{usr/bin/db_{usr/bin/$(package)_{'); \
+	done
+
+override_dh_install:
+	dh_install -a -Xusr/doc --list-missing
+ifeq (,$(filter pkg.db5.3.notcl,$(DEB_BUILD_PROFILES)))
+	tcltk-depends
+endif
+
+override_dh_installdocs-indep:
+	dh_installdocs -pdb5.3-doc -plibdb5.3-java
+
+override_dh_installdocs-arch:
+	dh_installdocs --link-doc=libdb5.3
+ifeq ($(DEB_HOST_ARCH),$(DEB_BUILD_ARCH))
+	# Install build_signature_$(DEB_HOST_ARCH).txt to docs
+	mkdir -p $(CURDIR)/debian/libdb5.3/usr/share/doc/libdb5.3/
+	install -m 644 debian/build_signature_$(DEB_HOST_ARCH).txt $(CURDIR)/debian/libdb5.3/usr/share/doc/libdb5.3/
+endif
+
+override_dh_strip:
+	dh_strip -s --dbg-package=libdb5.3-dbg
+
+override_dh_clean:
+	rm -rf build
+	rm -f $(CURDIR)/debian/db_signature
+	DH_OPTIONS="" dh_clean
+
+override_jh_installlibs:
+ifeq (yes,$(ENABLE_JAVA))
+	jh_installlibs
+endif

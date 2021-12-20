@@ -1,0 +1,1 @@
+type=USER_AVC msg=audit(1375323416.656:167): pid=363 uid=102 auid=4294967295 ses=4294967295  msg='apparmor="DENIED" operation="dbus_bind"  bus="system" name="org.freedesktop.nm_dhcp_client" mask="bind" pid=2838 profile="/tmp/apparmor-2.8.0/tests/regression/apparmor/dbus_service"  exe="/bin/dbus-daemon" sauid=102 hostname=? addr=? terminal=?'

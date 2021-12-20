@@ -1,0 +1,12 @@
+#! /bin/sh
+
+set -e
+
+#DEBHELPER#
+
+if [ $1 = purge ]; then
+    rm -f /var/lib/snmp/snmptrapd.conf*
+    rm -f /var/run/snmptrapd.pid
+fi
+
+exit 0

@@ -1,0 +1,39 @@
+#
+#=DESCRIPTION test for reused flag state
+#=EXRESULT PASS
+#
+
+/usr/bin/parent-profile {
+
+  /usr/bin/profile1 Cx -> profile1,
+  /usr/bin/profile2 Cx -> profile2,
+  /usr/bin/profile3 Cx -> profile3,
+  /usr/bin/profile4 Cx -> profile4,
+  /usr/bin/profile5 Cx -> profile5,
+  /usr/bin/profile6 Cx -> profile6,
+
+  profile profile1 {
+
+  }
+
+  profile profile2 {
+
+  }
+
+  profile profile3 {
+
+  }
+
+  profile profile4 {
+    /usr/bin/apt-get Ux,
+    /usr/bin/dpkg Ux,
+  }
+
+  profile profile5 {
+
+  }
+
+  profile profile6 {
+
+  }
+}

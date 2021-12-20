@@ -1,0 +1,10 @@
+#
+#=Description basic rules to test the "remount" mount option
+#=EXRESULT PASS
+/usr/bin/foo {
+  mount options=remount -> /1,
+  mount options=(remount) -> /2,
+  mount options=(rw,remount) -> /3,
+  mount options in (remount) -> /4,
+  mount options in (ro,remount) -> /5,
+}

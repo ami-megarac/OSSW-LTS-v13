@@ -1,0 +1,46 @@
+# Debconf translations for apparmor.
+# Copyright (C) 2015 THE apparmor'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the apparmor package.
+# Adriano Rafael Gomes <adrianorg@arg.eti.br>, 2015.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: apparmor 2.9.2-3\n"
+"Report-Msgid-Bugs-To: apparmor@lists.ubuntu.com\n"
+"POT-Creation-Date: 2010-01-05 17:45-0600\n"
+"PO-Revision-Date: 2015-05-18 21:38-0300\n"
+"Last-Translator: Adriano Rafael Gomes <adrianorg@arg.eti.br>\n"
+"Language-Team: Brazilian Portuguese <debian-l10n-portuguese@lists.debian."
+"org>\n"
+"Language: pt_BR\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#. Type: string
+#. Description
+#: ../templates:1001
+msgid "Additional home directory locations:"
+msgstr "Locais adicionais de diretórios de usuário:"
+
+#. Type: string
+#. Description
+#: ../templates:1001
+msgid ""
+"Please enter a space separated list of any additional locations for user "
+"home directories. These locations are in addition to those specified in /etc/"
+"apparmor.d/tunables/home and must end with a '/'."
+msgstr ""
+"Por favor, informe uma lista separada por espaços de quaisquer locais "
+"adicionais para diretórios de usuário. Esses locais são em adição aos "
+"especificados em /etc/apparmor.d/tunables/home e devem terminar com \"/\"."
+
+#. Type: string
+#. Description
+#: ../templates:1001
+msgid ""
+"Example: if user's directories are stored in /srv/nfs/home and /mnt/homes, "
+"you should enter \"/srv/nfs/home/ /mnt/homes/\"."
+msgstr ""
+"Exemplo: caso os diretórios dos usuários sejam armazenados em /srv/nfs/home "
+"e /mnt/homes, você deve informar \"/srv/nfs/home/ /mnt/homes/\"."

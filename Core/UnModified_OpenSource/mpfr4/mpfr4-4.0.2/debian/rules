@@ -1,0 +1,173 @@
+#!/usr/bin/make -f
+# Sample debian/rules that uses debhelper.
+# This file is public domain software, originally written by Joey Hess.
+#
+# This version is for a multibinary package. It also allows you to build any
+# of the binary packages independantly, via binary-<package> targets.
+
+# Uncomment this to turn on verbose mode. 
+#export DH_VERBOSE=1
+
+with_check := yes
+ifneq (,$(findstring nocheck,$(DEB_BUILD_OPTIONS)))
+        with_check := disabled through DEB_BUILD_OPTIONS
+endif
+
+NJOBS =
+# Support parallel=<n> in DEB_BUILD_OPTIONS (see #209008)
+ifneq (,$(filter parallel=%,$(subst $(COMMA), ,$(DEB_BUILD_OPTIONS))))
+  COMMA = ,
+  NJOBS := -j $(subst parallel=,,$(filter parallel=%,$(subst $(COMMA), ,$(DEB_BUILD_OPTIONS))))
+endif
+
+# This has to be exported to make some magic below work.
+export DH_OPTIONS
+
+DEB_HOST_ARCH  ?= $(shell dpkg-architecture -qDEB_HOST_ARCH)
+export DEB_HOST_GNU_TYPE  ?= $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
+export DEB_BUILD_GNU_TYPE ?= $(shell dpkg-architecture -qDEB_BUILD_GNU_TYPE)
+export DEB_HOST_MULTIARCH ?= $(shell dpkg-architecture -qDEB_HOST_MULTIARCH)
+
+ifeq ($(DEB_BUILD_GNU_TYPE), $(DEB_HOST_GNU_TYPE))
+  confflags += --build $(DEB_HOST_GNU_TYPE)
+else
+  confflags += --build $(DEB_BUILD_GNU_TYPE) --host $(DEB_HOST_GNU_TYPE)
+endif
+
+CPPFLAGS := $(shell dpkg-buildflags --get CPPFLAGS)
+CFLAGS := -g $(shell dpkg-buildflags --get CFLAGS)
+CXXFLAGS := -g $(shell dpkg-buildflags --get CXXFLAGS)
+LDFLAGS := $(shell dpkg-buildflags --get LDFLAGS) -Wl,-z,defs
+
+ifeq ($(shell dpkg-vendor --query Vendor),Debian)
+  mpfr4breaks = $(shell tr '\n' ' ' < debian/breaks.Debian)
+endif
+
+ifneq (,$(filter $(DEB_HOST_ARCH), m68k powerpcspe))
+  CFLAGS += -O0
+else ifeq (sh4,$(DEB_HOST_ARCH))
+  CFLAGS += -mieee
+else
+  CFLAGS := $(subst -O2,-O3,$(CFLAGS))
+  CXXFLAGS := $(subst -O2,-O3,$(CXXFLAGS))
+endif
+
+# Re-enable TLS on sparc.
+# ifeq (sparc,$(DEB_HOST_ARCH))
+#     confflags += --disable-thread-safe
+# endif
+
+build-doc: stamps/configure-stamp
+	$(MAKE) -C build pdf info html
+
+stamps/autoreconf-stamp:
+	dh_autoreconf
+	rm -f doc/texinfo.tex
+	ln -s /usr/share/texmf/tex/texinfo/texinfo.tex doc/texinfo.tex
+	@mkdir -p stamps
+	touch $@
+
+stamps/configure-stamp: stamps/autoreconf-stamp
+	dh_testdir
+	rm -rf build
+	mkdir -p build
+	chmod +x configure
+	cd build && \
+	    ../configure $(confflags) \
+		--prefix=/usr \
+		--enable-shared \
+		--libdir=/usr/lib/$(DEB_HOST_MULTIARCH) \
+		CPPFLAGS="$(CPPFLAGS)" \
+		CFLAGS="$(CFLAGS)" \
+		CXXFLAGS="$(CXXFLAGS)" \
+		LDFLAGS="$(LDFLAGS)"
+	@mkdir -p stamps
+	touch $@
+
+stamps/build-stamp: stamps/configure-stamp
+	dh_testdir
+	$(MAKE) $(NJOBS) -C build
+
+ifeq ($(with_check),yes)
+  ifeq ($(DEB_BUILD_GNU_TYPE), $(DEB_HOST_GNU_TYPE))
+	if GMP_CHECK_RANDOMIZE=1 $(MAKE) -C build check; then \
+	  echo "testsuite passed"; \
+	else \
+	  echo "testsuite failed"; \
+	  cat build/tests/test-suite.log; \
+	  exit 1; \
+	fi
+  endif
+endif
+	touch $@
+
+build-indep: stamps/build-stamp
+build-arch: stamps/build-stamp
+build: build-indep build-arch
+
+clean:
+	rm -f doc/texinfo.tex
+	dh_autoreconf_clean
+	rm -rf stamps
+	dh_testdir
+	dh_testroot
+	rm -rf build
+	dh_clean
+
+install: DH_OPTIONS=
+install: build
+	dh_testdir
+	dh_testroot
+	dh_prep
+	dh_clean
+	dh_installdirs
+	$(MAKE) -C build DESTDIR=$(CURDIR)/debian/tmp install
+
+	# Miscellaneous install.
+	dh_install -i
+	dh_install -plibmpfr6
+	dh_install -plibmpfr-dev
+
+binary-indep: build build-doc install
+	dh_testdir
+	dh_testroot
+	dh_installchangelogs -i ChangeLog
+	dh_installdocs -i -A BUGS NEWS README TODO AUTHORS
+	dh_installexamples -i
+	dh_installinfo -i
+	dh_link -i
+	dh_compress -i
+	dh_fixperms -i
+	dh_lintian -i
+	dh_installdeb -i
+	dh_gencontrol -i --
+	dh_md5sums -i
+	dh_builddeb -i
+
+binary-arch: build install
+	dh_testdir
+	dh_testroot
+	dh_installchangelogs -a ChangeLog
+	dh_installdocs -a -A BUGS NEWS README TODO AUTHORS
+	dh_installexamples -a
+	dh_installinfo -a
+	dh_strip -a
+	dh_link -a
+	dh_compress -a
+	for f in BUGS NEWS README TODO AUTHORS changelog; do \
+	  if [ -f debian/libmpfr6/usr/share/doc/libmpfr6/$$f.gz ]; then \
+	    f=$$f.gz; \
+	  fi; \
+	  ln -sf ../libmpfr6/$$f debian/libmpfr-dev/usr/share/doc/libmpfr-dev/$$f; \
+	done
+	dh_makeshlibs -V -plibmpfr6
+	dh_fixperms -a
+	dh_lintian -a
+	dh_installdeb -a
+	dh_shlibdeps -a
+	dh_gencontrol -a -- '-Vmpfr:Breaks=$(mpfr4breaks)'
+	dh_md5sums -a
+	dh_builddeb -a
+
+binary: binary-indep binary-arch
+.PHONY: build clean binary-indep binary-arch binary-common binary install build-arch build-indep

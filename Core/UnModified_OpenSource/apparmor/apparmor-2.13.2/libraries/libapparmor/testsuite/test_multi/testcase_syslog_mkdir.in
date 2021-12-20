@@ -1,0 +1,1 @@
+Aug 24 10:34:43 lucid-amd64 kernel: [45334.755142] type=1503 audit(1282671283.411:2199):  operation="mkdir" pid=4786 parent=4708 profile="/usr/sbin/sshd//ubuntu" requested_mask="c::" denied_mask="c::" fsuid=1000 ouid=1000 name="/tmp/ssh-gRozJw4786/"

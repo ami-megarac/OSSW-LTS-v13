@@ -1,0 +1,8 @@
+#
+#=Description peer not allowed perms list
+#=EXRESULT FAIL
+#
+/usr/bin/foo {
+  ptrace (read readby peer=/dev/null),
+
+}

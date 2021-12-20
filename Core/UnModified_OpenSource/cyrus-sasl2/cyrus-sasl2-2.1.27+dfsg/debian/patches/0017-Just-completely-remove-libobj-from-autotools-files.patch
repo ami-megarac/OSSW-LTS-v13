@@ -1,0 +1,154 @@
+From: =?utf-8?b?T25kxZllaiBTdXLDvQ==?= <ondrej@sury.org>
+Date: Tue, 2 Oct 2018 08:28:27 +0000
+Subject: Just completely remove libobj from autotools files
+
+---
+ configure.ac          | 55 +--------------------------------------------------
+ lib/Makefile.am       | 16 +--------------
+ plugins/Makefile.am   |  3 ---
+ saslauthd/Makefile.am |  6 ++----
+ 4 files changed, 4 insertions(+), 76 deletions(-)
+
+diff --git a/configure.ac b/configure.ac
+index 1882f31..687779c 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -1218,64 +1218,11 @@ AC_SUBST(SMTPTEST_PROGRAM)
+ AC_SUBST(SASL_UTIL_LIBS_EXTRA)
+ AC_SUBST(SASL_UTIL_HEADERS_EXTRA)
+ 
+-dnl check for getsubopt
+-sasl_cv_getsubopt=no
+-AC_CHECK_FUNC(getsubopt, [AC_DEFINE(HAVE_GETSUBOPT,[],
+-	[do we have getsubopt()?])], [sasl_cv_getsubopt=yes])
+-if test $sasl_cv_getsubopt = yes; then
+-	AC_LIBOBJ(getsubopt)
+-	GETSUBOPT="getsubopt.lo"
+-fi
+-AC_SUBST(GETSUBOPT)
+-
+-dnl Check for snprintf
+-sasl_cv_snprintf=no
+-SNPRINTFOBJS=""
+-LTSNPRINTFOBJS=""
+-AC_CHECK_FUNC(snprintf, [AC_DEFINE(HAVE_SNPRINTF,[],[Does the system have snprintf()?])], [sasl_cv_snprintf=yes])
+-AC_CHECK_FUNC(vsnprintf, [AC_DEFINE(HAVE_VSNPRINTF,[],[Does the system have vsnprintf()?])], [sasl_cv_snprintf=yes])
+-if test $sasl_cv_snprintf = yes; then
+-       AC_LIBOBJ(snprintf)
+-       SNPRINTFOBJS="snprintf.o"
+-       LTSNPRINTFOBJS="snprintf.lo"
+-fi
+-AC_SUBST(SNPRINTFOBJS)
+-AC_SUBST(LTSNPRINTFOBJS)
++AC_CHECK_FUNCS([getsubopt snprintf vsnprintf getaddrinfo getnameinfo])
+ 
+ dnl do we need to link in -lresolv?
+ AC_CHECK_LIB(resolv, inet_aton)
+ 
+-dnl Check for getaddrinfo
+-GETADDRINFOOBJS=""
+-sasl_cv_getaddrinfo=yes
+-IPv6_CHECK_FUNC(getaddrinfo, [IPv6_CHECK_FUNC(gai_strerror,
+-                [AC_DEFINE(HAVE_GETADDRINFO,[],[Do we have a getaddrinfo() function?])
+-                sasl_cv_getaddrinfo=no])])
+-if test $sasl_cv_getaddrinfo = yes; then
+-    AC_LIBOBJ(getaddrinfo)
+-    GETADDRINFOOBJS="getaddrinfo.o"
+-    LTGETADDRINFOOBJS="getaddrinfo.lo"
+-fi
+-AC_SUBST(GETADDRINFOOBJS)
+-AC_SUBST(LTGETADDRINFOOBJS)
+-
+-dnl Check for getnameinfo
+-GETNAMEINFOOBJS=""
+-sasl_cv_getnameinfo=no
+-IPv6_CHECK_FUNC(getnameinfo,
+-		[AC_DEFINE(HAVE_GETNAMEINFO,[],[Do we have a getnameinfo() function?])], [sasl_cv_getnameinfo=yes])
+-if test $sasl_cv_getnameinfo = yes; then
+-	AC_LIBOBJ(getnameinfo)
+-        GETNAMEINFOOBJS="getnameinfo.o"
+-        LTGETNAMEINFOOBJS="getnameinfo.lo"
+-fi
+-AC_SUBST(GETNAMEINFOOBJS)
+-AC_SUBST(LTGETNAMEINFOOBJS)
+-
+-LTLIBOBJS=`echo "$LIB@&t@OBJS" | sed 's,\.[[^.]]* ,.lo ,g;s,\.[[^.]]*$,.lo,'`
+-AM_CONDITIONAL(BUILD_LIBOBJ, test "$LTLIBOBJS" != "")
+-AC_SUBST(LTLIBOBJS)
+-
+ AC_C_CONST
+ AC_C_INLINE
+ AC_TYPE_MODE_T
+diff --git a/lib/Makefile.am b/lib/Makefile.am
+index 510c139..520676c 100644
+--- a/lib/Makefile.am
++++ b/lib/Makefile.am
+@@ -65,27 +65,13 @@ endif
+ common_headers = saslint.h
+ common_sources = auxprop.c canonusr.c checkpw.c client.c common.c config.c external.c md5.c saslutil.c server.c seterror.c $(DLOPEN_C)
+ 
+-LTLIBOBJS = @LTLIBOBJS@
+-LIB_DOOR= @LIB_DOOR@
+-
+ lib_LTLIBRARIES = libsasl2.la
+-if BUILD_LIBOBJ
+-noinst_LTLIBRARIES = libobj.la
+-else
+-noinst_LTLIBRARIES =
+-endif
+-
+-libobj_la_SOURCES =
+-libobj_la_LIBADD = $(LTLIBOBJS)
+ 
+ libsasl2_la_SOURCES = $(common_sources) $(common_headers)
+ libsasl2_la_LDFLAGS = -version-info $(sasl_version) -no-undefined -Wl,--version-script=$(top_srcdir)/Versions
+-libsasl2_la_DEPENDENCIES = $(LTLIBOBJS) $(top_srcdir)/Versions
++libsasl2_la_DEPENDENCIES = $(top_srcdir)/Versions
+ 
+ libsasl2_la_LIBADD = $(SASL_DL_LIB) $(LIB_SOCKET) $(LIB_DOOR) $(PLUGIN_COMMON_OBJS)
+-if BUILD_LIBOBJ
+-libsasl2_la_LIBADD += libobj.la
+-endif
+ 
+ if MACOSX
+ framedir = /Library/Frameworks/SASL2.framework
+diff --git a/plugins/Makefile.am b/plugins/Makefile.am
+index 5e84b3b..65eeeec 100644
+--- a/plugins/Makefile.am
++++ b/plugins/Makefile.am
+@@ -52,9 +52,6 @@ plugin_version = 2:25:0
+ AM_CPPFLAGS=-I$(top_srcdir)/include -I$(top_srcdir)/lib -I$(top_srcdir)/sasldb -I$(top_srcdir)/common -I$(top_builddir)/include
+ AM_LDFLAGS = -module -export-dynamic -rpath $(plugindir) -version-info $(plugin_version) -no-undefined
+ 
+-if BUILD_LIBOBJ
+-COMPAT_OBJS = $(top_builddir)/lib/libobj.la
+-endif
+ PLUGIN_COMMON_OBJS = $(top_builddir)/common/libplugin_common.la
+ CRYPTO_COMPAT_OBJS = $(top_builddir)/common/libcrypto_compat.la
+ 
+diff --git a/saslauthd/Makefile.am b/saslauthd/Makefile.am
+index 4cf3a3d..af1c7ca 100644
+--- a/saslauthd/Makefile.am
++++ b/saslauthd/Makefile.am
+@@ -2,8 +2,6 @@ AUTOMAKE_OPTIONS = 1.7
+ sbin_PROGRAMS	= saslauthd testsaslauthd
+ EXTRA_PROGRAMS  = saslcache
+ 
+-LTLIBOBJS = @LTLIBOBJS@
+-LTLIBOBJS_FULL = $(addprefix ${top_srcdir}/lib/,${LTLIBOBJS})
+ CRYPTO_COMPAT_OBJS = $(top_builddir)/common/libcrypto_compat.la
+ if AUTH_SASLDB
+ LIBSASLDB_OBJS = $(top_builddir)/sasldb/libsasldb.la
+@@ -22,10 +20,10 @@ saslauthd_SOURCES = mechanisms.c globals.h \
+                     ipc_unix.c ipc_doors.c saslauthd-main.c saslauthd-main.h \
+ 		    md5.c saslauthd_md5.h
+ EXTRA_saslauthd_sources = getaddrinfo.c getnameinfo.c
+-saslauthd_DEPENDENCIES = saslauthd-main.o $(LTLIBOBJS_FULL)
++saslauthd_DEPENDENCIES = saslauthd-main.o
+ saslauthd_LDADD	= @SASL_KRB_LIB@ \
+ 		  @GSSAPIBASE_LIBS@ @LIB_CRYPT@ @LIB_SIA@ \
+-		  @LIB_SOCKET@ ../sasldb/libsasldb.la @LIB_PAM@ @LDAP_LIBS@ $(LTLIBOBJS_FULL) $(CRYPTO_COMPAT_OBJS) $(LIBSASLDB_OBJS)
++		  @LIB_SOCKET@ ../sasldb/libsasldb.la @LIB_PAM@ @LDAP_LIBS@ $(CRYPTO_COMPAT_OBJS) $(LIBSASLDB_OBJS)
+ 
+ testsaslauthd_SOURCES = testsaslauthd.c utils.c
+ testsaslauthd_LDADD = @LIB_SOCKET@

@@ -1,0 +1,70 @@
+?RCS: $Id$
+?RCS:
+?RCS: Copyright (c) 1998 Andy Dougherty
+?RCS:
+?RCS: You may distribute under the terms of either the GNU General Public
+?RCS: License or the Artistic License, as specified in the README file.
+?RCS:
+?MAKE:uselongdouble: Myread Oldconfig Setvar cat test usemorebits
+?MAKE:	-pick add $@ %<
+?Y:TOP
+?S:uselongdouble:
+?S:	This variable conditionally defines the USE_LONG_DOUBLE symbol,
+?S:	and indicates that long doubles should be used when available.
+?S:.
+?C:USE_LONG_DOUBLE:
+?C:	This symbol, if defined, indicates that long doubles should
+?C:	be used when available.
+?C:.
+?H:?%<:#ifndef USE_LONG_DOUBLE
+?H:?%<:#$uselongdouble	USE_LONG_DOUBLE		/**/
+?H:?%<:#endif
+?H:.
+?LINT:extern ccflags
+?LINT:use usemorebits
+?F:!uselongdouble.cbu
+: Check for uselongdouble support
+case "$ccflags" in
+*-DUSE_LONG_DOUBLE*|*-DUSE_MORE_BITS*) uselongdouble="$define" ;;
+esac
+
+case "$uselongdouble" in
+$define|true|[yY]*)	dflt='y';;
+*) dflt='n';;
+esac
+cat <<EOM
+
+Perl can be built to take advantage of long doubles which
+(if available) may give more accuracy and range for floating point numbers.
+
+If this doesn't make any sense to you, just accept the default '$dflt'.
+EOM
+rp='Try to use long doubles if available?'
+. ./myread
+case "$ans" in
+y|Y)	val="$define"	;;
+*)      val="$undef"	;;
+esac
+set uselongdouble
+eval $setvar
+
+case "$uselongdouble" in
+true|[yY]*) uselongdouble="$define" ;;
+esac
+
+: Look for a hint-file generated 'call-back-unit'.  If the
+: user has specified that long doubles should be used,
+: we may need to set or change some other defaults.
+if $test -f uselongdouble.cbu; then
+    echo "Your platform has some specific hints regarding long doubles, using them..."
+    . ./uselongdouble.cbu
+else
+    case "$uselongdouble" in
+	$define)
+		$cat <<EOM
+(Your platform does not have any specific hints for long doubles.)
+EOM
+	;;
+    esac
+fi
+

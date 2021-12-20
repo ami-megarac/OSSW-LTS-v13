@@ -1,0 +1,16 @@
+#!/bin/sh
+set -e
+
+case "$1" in
+	remove)
+		;;
+
+	purge)
+		rm -f /etc/adjtime
+		;;
+
+	*)
+		;;
+esac
+
+#DEBHELPER#

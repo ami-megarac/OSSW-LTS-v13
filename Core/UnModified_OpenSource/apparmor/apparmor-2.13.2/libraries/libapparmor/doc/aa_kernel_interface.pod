@@ -1,0 +1,165 @@
+# This publication is intellectual property of Canonical Ltd. Its contents
+# can be duplicated, either in part or in whole, provided that a copyright
+# label is visibly located on each copy.
+#
+# All information found in this book has been compiled with utmost
+# attention to detail. However, this does not guarantee complete accuracy.
+# Neither Canonical Ltd, the authors, nor the translators shall be held
+# liable for possible errors or the consequences thereof.
+#
+# Many of the software and hardware descriptions cited in this book
+# are registered trademarks. All trade names are subject to copyright
+# restrictions and may be registered trade marks. Canonical Ltd.
+# essentially adhere to the manufacturer's spelling.
+#
+# Names of products and trademarks appearing in this book (with or without
+# specific notation) are likewise subject to trademark and trade protection
+# laws and may thus fall under copyright restrictions.
+#
+
+
+=pod
+
+=head1 NAME
+
+aa_kernel_interface - an opaque object representing the AppArmor kernel interface for policy loading, replacing, and removing
+
+aa_kernel_interface_new - create a new aa_kernel_interface object from an optional path
+
+aa_kernel_interface_ref - increments the ref count of an aa_kernel_interface object
+
+aa_kernel_interface_unref - decrements the ref count and frees the aa_kernel_interface object when 0
+
+aa_kernel_interface_load_policy - load a policy from a buffer into the kernel
+
+aa_kernel_interface_load_policy_from_file - load a policy from a file into the kernel
+
+aa_kernel_interface_load_policy_from_fd - load a policy from a file descriptor into the kernel
+
+aa_kernel_interface_replace_policy - replace a policy in the kernel with a policy from a buffer
+
+aa_kernel_interface_replace_policy_from_file - replace a policy in the kernel with a policy from a file
+
+aa_kernel_interface_replace_policy_from_fd - replace a policy in the kernel with a policy from a file descriptor
+
+aa_kernel_interface_remove_policy - remove a policy from the kernel
+
+aa_kernel_interface_write_policy - write a policy to a file descriptor
+
+=head1 SYNOPSIS
+
+B<#include E<lt>sys/apparmor.hE<gt>>
+
+B<typedef struct aa_kernel_interface aa_kernel_interface;>
+
+B<int aa_kernel_interface_new(aa_kernel_interface **kernel_interface, aa_features *kernel_features, const char *apparmorfs);>
+
+B<aa_kernel_interface *aa_kernel_interface_ref(aa_kernel_interface *kernel_interface);>
+
+B<void aa_kernel_interface_unref(aa_kernel_interface *kernel_interface);>
+
+B<int aa_kernel_interface_load_policy(aa_kernel_interface *kernel_interface, const char *buffer, size_t size);>
+
+B<int aa_kernel_interface_load_policy_from_file(aa_kernel_interface *kernel_interface, int dirfd, const char *path);>
+
+B<int aa_kernel_interface_load_policy_from_fd(aa_kernel_interface *kernel_interface, int fd);>
+
+B<int aa_kernel_interface_replace_policy(aa_kernel_interface *kernel_interface, const char *buffer, size_t size);>
+
+B<int aa_kernel_interface_replace_policy_from_file(aa_kernel_interface *kernel_interface, int dirfd, const char *path);>
+
+B<int aa_kernel_interface_replace_policy_from_fd(aa_kernel_interface *kernel_interface, int fd);>
+
+B<int aa_kernel_interface_remove_policy(aa_kernel_interface *kernel_interface, const char *fqname);>
+
+B<int aa_kernel_interface_write_policy(int fd, const char *buffer, size_t size);>
+
+Link with B<-lapparmor> when compiling.
+
+=head1 DESCRIPTION
+
+The I<aa_kernel_interface> object contains information about the AppArmor
+kernel interface for policy loading, replacing, and removing.
+
+The aa_kernel_interface_new() function creates an I<aa_kernel_interface> object
+based on an optional I<aa_features> object and an optional path to the apparmor
+directory of securityfs, which is typically found at
+"/sys/kernel/security/apparmor/". If I<kernel_features> is NULL, then the
+features of the current kernel are used. When specifying a valid
+I<kernel_features> object, it must be compatible with the features of the
+currently running kernel. If I<apparmorfs> is NULL, then the default location
+is used. The allocated I<kernel_interface> object must be freed using
+aa_kernel_interface_unref().
+
+aa_kernel_interface_ref() increments the reference count on the
+I<kernel_interface> object.
+
+aa_kernel_interface_unref() decrements the reference count on the
+I<kernel_interface> object and releases all corresponding resources when the
+reference count reaches zero.
+
+The aa_kernel_interface_load() family of functions load a policy into the
+kernel. The operation will fail if a policy of the same name is already loaded.
+Use the aa_kernel_interface_replace() family of functions if you wish to
+replace a previously loaded policy with a new policy of the same name. The
+aa_kernel_interface_replace() functions can also be used to load a policy that
+does not correspond to a previously loaded policy.
+
+When loading or replacing from a buffer, the I<buffer> will contain binary
+data. The I<size> argument must specify the size of the I<buffer> argument.
+
+When loading or replacing from a file, the I<dirfd> and I<path> combination are
+used to specify the location of the file. See the openat(2) man page for
+examples of I<dirfd> and I<path>.
+
+It is also possible to load or replace from a file descriptor specified by the
+I<fd> argument. The file must be open for reading and the file offset must be
+set appropriately.
+
+The aa_kernel_interface_remove_policy() function can be used to unload a
+previously loaded policy. The fully qualified policy name must be specified
+with the I<fqname> argument. The operation will fail if a policy matching
+I<fqname> is not found.
+
+The aa_kernel_interface_write_policy() function allows for a policy, which is
+stored in I<buffer> and consists of I<size> bytes, to be written to a file
+descriptor. The I<fd> must be open for writing and the file offset must be set
+appropriately.
+
+=head1 RETURN VALUE
+
+The aa_kernel_interface_new() function returns 0 on success and
+I<*kernel_interface> will point to an I<aa_kernel_interface> object that must
+be freed by aa_kernel_interface_unref(). -1 is returned on error, with errno
+set appropriately, and I<*kernel_interface> will be set to NULL.
+
+aa_kernel_interface_ref() returns the value of I<kernel_interface>.
+
+The aa_kernel_interface_load() family of functions, the
+aa_kernel_interface_replace() family of functions,
+aa_kernel_interface_remove(), and aa_kernel_interface_write_policy()
+return 0 on success. -1 is returned on error, with errno set appropriately.
+
+=head1 ERRORS
+
+The errno value will be set according to the underlying error in the
+I<aa_kernel_interface> family of functions that return -1 on error.
+
+=head1 NOTES
+
+All aa_kernel_interface functions described above are present in libapparmor
+version 2.10 and newer.
+
+aa_kernel_interface_unref() saves the value of errno when called and restores
+errno before exiting in libapparmor version 2.12 and newer.
+
+=head1 BUGS
+
+None known. If you find any, please report them at
+L<https://bugs.launchpad.net/apparmor/+filebug>.
+
+=head1 SEE ALSO
+
+aa_features(3), openat(2) and L<https://wiki.apparmor.net>.
+
+=cut

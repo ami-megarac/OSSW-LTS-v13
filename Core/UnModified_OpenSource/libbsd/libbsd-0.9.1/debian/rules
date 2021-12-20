@@ -1,0 +1,95 @@
+#!/usr/bin/make -f
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+DEB_BUILD_MAINT_OPTIONS = hardening=+bindnow
+DEB_CFLAGS_MAINT_PREPEND = -Wall
+
+include /usr/share/dpkg/default.mk
+
+ifeq ($(DEB_BUILD_GNU_TYPE), $(DEB_HOST_GNU_TYPE))
+	confflags += --build=$(DEB_HOST_GNU_TYPE)
+else
+	confflags += --build=$(DEB_BUILD_GNU_TYPE) --host=$(DEB_HOST_GNU_TYPE)
+endif
+
+lib := libbsd0
+libdbg := $(lib)-dbg
+libudeb := $(lib)-udeb
+libdev := libbsd-dev
+
+D := $(CURDIR)/debian
+
+config.status: configure
+	dh_testdir
+	dh_update_autotools_config
+
+	./configure \
+		CPPFLAGS="$(CPPFLAGS)" \
+		CFLAGS="$(CFLAGS)" \
+		LDFLAGS="$(LDFLAGS)" \
+		$(confflags) \
+		--disable-silent-rules \
+		--prefix=/usr \
+		--libdir=\$${prefix}/lib/$(DEB_HOST_MULTIARCH)
+
+build-indep:
+
+build-arch: config.status
+	dh_testdir
+
+	$(MAKE)
+
+build: build-indep build-arch
+
+# Run the test suites
+check-arch: build-arch
+	dh_testdir
+
+ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
+	$(MAKE) VERBOSE=1 check
+endif
+
+clean:
+	dh_testdir
+	dh_testroot
+
+	[ ! -f Makefile ] || $(MAKE) distclean
+
+	dh_clean
+
+install-arch: check-arch
+	dh_testdir
+	dh_testroot
+	dh_prep
+	dh_installdirs
+
+	$(MAKE) install DESTDIR=$(D)/tmp
+
+binary-indep:
+# Nothing to do.
+
+binary-arch: install-arch
+	dh_testdir
+	dh_testroot
+	dh_install
+	dh_installchangelogs ChangeLog
+	dh_installdocs
+	dh_installman
+	dh_installexamples
+	dh_link
+	dh_strip
+	dh_compress
+	dh_fixperms
+	dh_makeshlibs --add-udeb=$(libudeb)
+	dh_installdeb
+	dh_shlibdeps
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+
+binary: binary-indep binary-arch
+
+.PHONY: install-arch
+.PHONY: clean build-indep build-arch build binary-indep binary-arch binary

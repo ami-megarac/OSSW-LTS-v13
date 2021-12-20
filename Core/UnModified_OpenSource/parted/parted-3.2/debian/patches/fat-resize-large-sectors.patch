@@ -1,0 +1,38 @@
+From bb27b59fc29c8748f4834edb4ca678c65bee8870 Mon Sep 17 00:00:00 2001
+From: Colin Watson <cjwatson@ubuntu.com>
+Date: Wed, 30 Jul 2014 12:18:55 +0100
+Subject: Remove stray non-512-byte-logical-sector assertion for FAT resizing
+
+This was removed from one copy of fat_boot_sector_analyse in 3.2, but
+not from the other.
+
+Last-Update: 2014-07-30
+
+Patch-Name: fat-resize-large-sectors.patch
+---
+ libparted/fs/r/fat/bootsector.c | 12 ------------
+ 1 file changed, 12 deletions(-)
+
+diff --git a/libparted/fs/r/fat/bootsector.c b/libparted/fs/r/fat/bootsector.c
+index 1d2b601e..683b986d 100644
+--- a/libparted/fs/r/fat/bootsector.c
++++ b/libparted/fs/r/fat/bootsector.c
+@@ -125,18 +125,6 @@ fat_boot_sector_analyse (FatBootSector* bs, PedFileSystem* fs)
+ 
+ 	PED_ASSERT (bs != NULL);
+ 
+-	if (PED_LE16_TO_CPU (bs->sector_size) != 512) {
+-		if (ped_exception_throw (
+-			PED_EXCEPTION_BUG,
+-			PED_EXCEPTION_IGNORE_CANCEL,
+-			_("This file system has a logical sector size of %d.  "
+-			"GNU Parted is known not to work properly with sector "
+-			"sizes other than 512 bytes."),
+-			(int) PED_LE16_TO_CPU (bs->sector_size))
+-				!= PED_EXCEPTION_IGNORE)
+-			return 0;
+-	}
+-
+ 	fs_info->logical_sector_size = PED_LE16_TO_CPU (bs->sector_size) / 512;
+ 
+ 	fs_info->sectors_per_track = PED_LE16_TO_CPU (bs->secs_track);

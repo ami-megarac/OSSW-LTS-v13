@@ -1,0 +1,1 @@
+type=APPARMOR_DENIED msg=audit(1190503664.863:27763):  type=1503 operation="inode_link" requested_mask="mrwIxl" denied_mask="l" name="/tmp/sdtest.8236-29816-IN8243/target" name2="/tmp/sdtest.8236-29816-IN8243/src" pid=8390 profile="/home/steve/aa-regression-tests/link"

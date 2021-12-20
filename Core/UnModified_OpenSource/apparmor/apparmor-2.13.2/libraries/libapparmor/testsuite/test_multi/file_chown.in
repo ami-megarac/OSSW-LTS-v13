@@ -1,0 +1,1 @@
+type=AVC msg=audit(1465133533.431:728): apparmor="DENIED" operation="chown" profile="/usr/sbin/cupsd" name="/run/cups/certs/" pid=8515 comm="cupsd" requested_mask="w" denied_mask="w" fsuid=0 ouid=4

@@ -1,0 +1,7 @@
+#
+#=DESCRIPTION carat in pathname
+#=EXRESULT PASS
+#
+/usr/bin/foo {
+   /foo[^me]bar r,
+}

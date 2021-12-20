@@ -1,0 +1,10 @@
+#
+#=DESCRIPTION missing reference variable in dbus interface modifier
+#=EXRESULT FAIL
+#
+
+/does/not/exist {
+  dbus (send)
+       interface=@{MISSING_VAR}
+       path="/com/canonical/hud/applications/BAR",
+}

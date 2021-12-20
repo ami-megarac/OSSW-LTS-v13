@@ -1,0 +1,12 @@
+BASE/child {
+/lib/libc-*.so				rm,
+/lib/libc-*.so.*			rm,
+/lib/ld-*.so				rix,
+/lib/ld-*.so.*				rix,
+/{usr/,}lib/libAA*			rm,
+/etc/ld.so.*				r,
+BASE/child				r,
+/bin/ls					r,
+/dev/pts/*				rw,
+/dev/tty*				rw,
+}

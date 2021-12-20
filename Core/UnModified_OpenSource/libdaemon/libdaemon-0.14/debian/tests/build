@@ -1,0 +1,22 @@
+#!/bin/sh
+
+set -e
+set -u
+
+cd "${AUTOPKGTEST_TMP:-"${ADTTMP}"}"
+
+cat > trivial.c <<'EOF'
+#include <stdio.h>
+
+#include <libdaemon/daemon.h>
+
+int main (int argc, char **argv)
+{
+    printf("%s\n", daemon_ident_from_argv0(argv[0]));
+}
+EOF
+
+gcc -o trivial trivial.c $(pkg-config --cflags --libs libdaemon)
+test -x trivial
+./trivial
+echo "# everything seems OK"

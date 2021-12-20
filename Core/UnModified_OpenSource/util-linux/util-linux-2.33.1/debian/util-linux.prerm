@@ -1,0 +1,14 @@
+#!/bin/sh
+set -e
+
+case "$1" in
+	remove)
+		update-alternatives --remove pager /bin/more
+		;;
+
+	upgrade|failed-upgrade|deconfigure)
+		;;
+
+esac
+
+#DEBHELPER#

@@ -1,0 +1,16 @@
+318833-incorrect-handling-of-leftovers-with-poptStuffArgs.patch
+278402-manpage-typos.patch
+217602-remove-useless-alignment-checks.patch
+356669-add-catalan-translation.patch
+728596-secure-getenv.patch
+757935-autoreconf-remove-am-c-prototypes.patch
+autoreconf-libtool.patch
+autoreconf-gettext.patch
+popt-1.16-pkgconfig.patch
+popt-1.16-execfail.patch
+popt-1.16-man-page.patch
+popt-1.16-help.patch
+popt-1.16-nextarg-memleak.patch
+popt-1.16-glob-error.patch
+fix-test1-lt.patch
+fix-test-api-checker.patch

@@ -1,0 +1,20 @@
+#!/bin/sh
+
+set -e
+
+if [ "$1" = "purge" ] ; then
+	rmdir /var/run/dbus || true
+
+	rm -f /var/lib/dbus/machine-id
+	rmdir /var/lib/dbus || true
+
+	LAUNCHER=/usr/lib/dbus-1.0/dbus-daemon-launch-helper
+
+	if dpkg-statoverride --list "$LAUNCHER" >/dev/null 2>&1 ; then
+		dpkg-statoverride --remove "$LAUNCHER"
+	fi
+fi
+
+#DEBHELPER#
+
+exit 0

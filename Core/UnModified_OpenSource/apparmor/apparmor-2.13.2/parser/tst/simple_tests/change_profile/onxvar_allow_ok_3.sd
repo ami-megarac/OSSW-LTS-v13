@@ -1,0 +1,8 @@
+#
+#=DESCRIPTION allow change_profile @{var} with name space
+#=EXRESULT PASS
+#
+@{var}=/test
+/usr/bin/foo {
+   allow change_profile @{var} -> :foo:/bin/foo,
+}

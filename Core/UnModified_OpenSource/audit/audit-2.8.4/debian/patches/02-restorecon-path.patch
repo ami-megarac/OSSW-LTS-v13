@@ -1,0 +1,17 @@
+Description: Fix path of restorecon executable
+Author: Laurent Bigonville <bigon@debian.org>
+Forwarded: not-needed
+
+--- audit.orig/init.d/augenrules
++++ audit/init.d/augenrules
+@@ -127,8 +127,8 @@ fi
+ cp ${TmpRules} ${DestinationFile}
+ chmod 0640 ${DestinationFile}
+ # Restore context on MLS system. /tmp is SystemLow & audit.rules is SystemHigh
+-if [ -x /usr/sbin/restorecon ] ; then
+-	/usr/sbin/restorecon -F ${DestinationFile}
++if [ -x /sbin/restorecon ] ; then
++	/sbin/restorecon -F ${DestinationFile}
+ fi
+ rm -f ${TmpRules}
+ 

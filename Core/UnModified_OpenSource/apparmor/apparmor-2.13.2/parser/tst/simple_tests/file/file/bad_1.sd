@@ -1,0 +1,7 @@
+#
+#=Description basic file rule
+#=EXRESULT FAIL
+#
+/usr/bin/foo {
+  file rw,
+}

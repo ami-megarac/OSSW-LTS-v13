@@ -1,0 +1,13 @@
+Description: Use perl path directly
+ Original script used /usr/bin/env perl to find the interpreter. This is
+ against Debian policy 10.4
+Author: Craig Small <csmall@debian.org>
+Last-Update: 2019-01-05
+--- a/perl/SNMP/examples/pingmib.pl
++++ b/perl/SNMP/examples/pingmib.pl
+@@ -1,4 +1,4 @@
+-#!/usr/bin/env perl
++#!/usr/bin/perl
+ 
+ # Ping a host via the CISCO-PING-MIB. For more information about the
+ # CISCO-PING-MIB, see also

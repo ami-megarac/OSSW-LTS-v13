@@ -1,0 +1,9 @@
+usr/include/
+usr/lib/${DEB_HOST_MULTIARCH}/*.so
+usr/lib/${DEB_HOST_MULTIARCH}/*.a
+usr/lib/${DEB_HOST_MULTIARCH}/pkgconfig/
+usr/bin/ncurses6-config
+usr/bin/ncursesw6-config
+usr/share/man/man1/ncursesw6-config.1
+debian/libtermcap.so  usr/lib/${DEB_HOST_MULTIARCH}
+misc/ncurses.supp  usr/lib/valgrind/

@@ -1,0 +1,23 @@
+# taken from codn54.sd
+#=DESCRIPTION conditional within hat scope
+#=EXRESULT PASS
+
+$FOO=true
+
+/bin/true {
+  ^TRUE {
+    if $FOO {
+      /bin/true rix,
+    } else {
+      /bin/false rix,
+    }
+  }
+
+  ^FALSE {
+    if not $FOO {
+      /bin/true rix,
+    } else {
+      /bin/false rix,
+    }
+  }
+}

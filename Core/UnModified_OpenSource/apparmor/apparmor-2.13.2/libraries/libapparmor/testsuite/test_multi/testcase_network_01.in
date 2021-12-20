@@ -1,0 +1,1 @@
+Apr  5 19:30:56 precise-amd64 kernel: [153073.826757] type=1400 audit(1308766940.698:3704): apparmor="DENIED" operation="sendmsg" parent=24737 profile="/usr/bin/evince-thumbnailer" pid=24743 comm="evince-thumbnai" laddr=192.168.66.150 lport=765 faddr=192.168.66.200 fport=2049 family="inet" sock_type="stream" protocol=6

@@ -1,0 +1,8 @@
+#!/bin/sh
+
+set -e
+
+if dpkg-maintscript-helper supports symlink_to_dir; then
+    dpkg-maintscript-helper symlink_to_dir \
+        /usr/share/doc/libperl-dev perl 5.22.1-7~ -- "$@"
+fi

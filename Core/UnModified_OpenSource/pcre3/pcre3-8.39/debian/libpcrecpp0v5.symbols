@@ -1,0 +1,93 @@
+libpcrecpp.so.0 libpcrecpp0v5 #MINVER#
+ (c++|optional=STL)"void std::vector<pcrecpp::StringPiece, std::allocator<pcrecpp::StringPiece> >::_M_realloc_insert<pcrecpp::StringPiece>(__gnu_cxx::__normal_iterator<pcrecpp::StringPiece*, std::vector<pcrecpp::StringPiece, std::allocator<pcrecpp::StringPiece> > >, pcrecpp::StringPiece&&)@Base" 2:8.39-9
+ (c++|optional=STL)"void std::vector<pcrecpp::StringPiece, std::allocator<pcrecpp::StringPiece> >::emplace_back<pcrecpp::StringPiece>(pcrecpp::StringPiece&&)@Base" 2:8.39-10
+ (c++|optional=STL)"void std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::_M_construct<char const*>(char const*, char const*, std::forward_iterator_tag)@Base" 2:8.39-10
+ (c++)"operator<<(std::basic_ostream<char, std::char_traits<char> >&, pcrecpp::StringPiece const&)@Base" 8.38
+ (c++)"pcrecpp::Arg::parse_char(char const*, int, void*)@Base" 7.7
+ (c++)"pcrecpp::Arg::parse_double(char const*, int, void*)@Base" 7.7
+ (c++)"pcrecpp::Arg::parse_float(char const*, int, void*)@Base" 7.7
+ (c++)"pcrecpp::Arg::parse_int(char const*, int, void*)@Base" 7.7
+ (c++)"pcrecpp::Arg::parse_int_cradix(char const*, int, void*)@Base" 7.7
+ (c++)"pcrecpp::Arg::parse_int_hex(char const*, int, void*)@Base" 7.7
+ (c++)"pcrecpp::Arg::parse_int_octal(char const*, int, void*)@Base" 7.7
+ (c++)"pcrecpp::Arg::parse_int_radix(char const*, int, void*, int)@Base" 7.7
+ (c++)"pcrecpp::Arg::parse_long(char const*, int, void*)@Base" 7.7
+ (c++)"pcrecpp::Arg::parse_long_cradix(char const*, int, void*)@Base" 7.7
+ (c++)"pcrecpp::Arg::parse_long_hex(char const*, int, void*)@Base" 7.7
+ (c++)"pcrecpp::Arg::parse_longlong(char const*, int, void*)@Base" 7.7
+ (c++)"pcrecpp::Arg::parse_longlong_cradix(char const*, int, void*)@Base" 7.7
+ (c++)"pcrecpp::Arg::parse_longlong_hex(char const*, int, void*)@Base" 7.7
+ (c++)"pcrecpp::Arg::parse_longlong_octal(char const*, int, void*)@Base" 7.7
+ (c++)"pcrecpp::Arg::parse_longlong_radix(char const*, int, void*, int)@Base" 7.7
+ (c++)"pcrecpp::Arg::parse_long_octal(char const*, int, void*)@Base" 7.7
+ (c++)"pcrecpp::Arg::parse_long_radix(char const*, int, void*, int)@Base" 7.7
+ (c++)"pcrecpp::Arg::parse_null(char const*, int, void*)@Base" 7.7
+ (c++)"pcrecpp::Arg::parse_short(char const*, int, void*)@Base" 7.7
+ (c++)"pcrecpp::Arg::parse_short_cradix(char const*, int, void*)@Base" 7.7
+ (c++)"pcrecpp::Arg::parse_short_hex(char const*, int, void*)@Base" 7.7
+ (c++)"pcrecpp::Arg::parse_short_octal(char const*, int, void*)@Base" 7.7
+ (c++)"pcrecpp::Arg::parse_short_radix(char const*, int, void*, int)@Base" 7.7
+ (c++)"pcrecpp::Arg::parse_string(char const*, int, void*)@Base" 7.7
+ (c++)"pcrecpp::Arg::parse_stringpiece(char const*, int, void*)@Base" 7.7
+ (c++)"pcrecpp::Arg::parse_uchar(char const*, int, void*)@Base" 7.7
+ (c++)"pcrecpp::Arg::parse_uint(char const*, int, void*)@Base" 7.7
+ (c++)"pcrecpp::Arg::parse_uint_cradix(char const*, int, void*)@Base" 7.7
+ (c++)"pcrecpp::Arg::parse_uint_hex(char const*, int, void*)@Base" 7.7
+ (c++)"pcrecpp::Arg::parse_uint_octal(char const*, int, void*)@Base" 7.7
+ (c++)"pcrecpp::Arg::parse_uint_radix(char const*, int, void*, int)@Base" 7.7
+ (c++)"pcrecpp::Arg::parse_ulong(char const*, int, void*)@Base" 7.7
+ (c++)"pcrecpp::Arg::parse_ulong_cradix(char const*, int, void*)@Base" 7.7
+ (c++)"pcrecpp::Arg::parse_ulong_hex(char const*, int, void*)@Base" 7.7
+ (c++)"pcrecpp::Arg::parse_ulonglong(char const*, int, void*)@Base" 7.7
+ (c++)"pcrecpp::Arg::parse_ulonglong_cradix(char const*, int, void*)@Base" 7.7
+ (c++)"pcrecpp::Arg::parse_ulonglong_hex(char const*, int, void*)@Base" 7.7
+ (c++)"pcrecpp::Arg::parse_ulonglong_octal(char const*, int, void*)@Base" 7.7
+ (c++)"pcrecpp::Arg::parse_ulonglong_radix(char const*, int, void*, int)@Base" 7.7
+ (c++)"pcrecpp::Arg::parse_ulong_octal(char const*, int, void*)@Base" 7.7
+ (c++)"pcrecpp::Arg::parse_ulong_radix(char const*, int, void*, int)@Base" 7.7
+ (c++)"pcrecpp::Arg::parse_ushort(char const*, int, void*)@Base" 7.7
+ (c++)"pcrecpp::Arg::parse_ushort_cradix(char const*, int, void*)@Base" 7.7
+ (c++)"pcrecpp::Arg::parse_ushort_hex(char const*, int, void*)@Base" 7.7
+ (c++)"pcrecpp::Arg::parse_ushort_octal(char const*, int, void*)@Base" 7.7
+ (c++)"pcrecpp::Arg::parse_ushort_radix(char const*, int, void*, int)@Base" 7.7
+ (c++)"pcrecpp::RE::Cleanup()@Base" 7.7
+ (c++)"pcrecpp::RE::Compile(pcrecpp::RE::Anchor)@Base" 7.7
+ (c++)"pcrecpp::RE::Consume(pcrecpp::StringPiece*, pcrecpp::Arg const&, pcrecpp::Arg const&, pcrecpp::Arg const&, pcrecpp::Arg const&, pcrecpp::Arg const&, pcrecpp::Arg const&, pcrecpp::Arg const&, pcrecpp::Arg const&, pcrecpp::Arg const&, pcrecpp::Arg const&, pcrecpp::Arg const&, pcrecpp::Arg const&, pcrecpp::Arg const&, pcrecpp::Arg const&, pcrecpp::Arg const&, pcrecpp::Arg const&) const@Base" 7.7
+ (c++)"pcrecpp::Scanner::Consume(pcrecpp::RE const&, pcrecpp::Arg const&, pcrecpp::Arg const&, pcrecpp::Arg const&)@Base" 7.7
+ (c++)"pcrecpp::RE::DoMatchImpl(pcrecpp::StringPiece const&, pcrecpp::RE::Anchor, int*, pcrecpp::Arg const* const*, int, int*, int) const@Base" 7.7
+ (c++)"pcrecpp::RE::DoMatch(pcrecpp::StringPiece const&, pcrecpp::RE::Anchor, int*, pcrecpp::Arg const* const*, int) const@Base" 7.7
+ (c++)"pcrecpp::RE::Extract(pcrecpp::StringPiece const&, pcrecpp::StringPiece const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >*) const@Base" 7.7
+ (c++)"pcrecpp::RE::FindAndConsume(pcrecpp::StringPiece*, pcrecpp::Arg const&, pcrecpp::Arg const&, pcrecpp::Arg const&, pcrecpp::Arg const&, pcrecpp::Arg const&, pcrecpp::Arg const&, pcrecpp::Arg const&, pcrecpp::Arg const&, pcrecpp::Arg const&, pcrecpp::Arg const&, pcrecpp::Arg const&, pcrecpp::Arg const&, pcrecpp::Arg const&, pcrecpp::Arg const&, pcrecpp::Arg const&, pcrecpp::Arg const&) const@Base" 7.7
+ (c++)"pcrecpp::RE::FullMatch(pcrecpp::StringPiece const&, pcrecpp::Arg const&, pcrecpp::Arg const&, pcrecpp::Arg const&, pcrecpp::Arg const&, pcrecpp::Arg const&, pcrecpp::Arg const&, pcrecpp::Arg const&, pcrecpp::Arg const&, pcrecpp::Arg const&, pcrecpp::Arg const&, pcrecpp::Arg const&, pcrecpp::Arg const&, pcrecpp::Arg const&, pcrecpp::Arg const&, pcrecpp::Arg const&, pcrecpp::Arg const&) const@Base" 7.7
+ (c++)"pcrecpp::RE::GlobalReplace(pcrecpp::StringPiece const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >*) const@Base" 7.7
+ (c++)"pcrecpp::RE::Init(char const*, pcrecpp::RE_Options const*)@Base" 7.7
+ (c++)"pcrecpp::RE::Init(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, pcrecpp::RE_Options const*)@Base" 7.7
+ (c++)"pcrecpp::RE::no_arg@Base" 7.7
+ (c++)"pcrecpp::RE::NumberOfCapturingGroups() const@Base" 7.7
+ (c++)"pcrecpp::RE::PartialMatch(pcrecpp::StringPiece const&, pcrecpp::Arg const&, pcrecpp::Arg const&, pcrecpp::Arg const&, pcrecpp::Arg const&, pcrecpp::Arg const&, pcrecpp::Arg const&, pcrecpp::Arg const&, pcrecpp::Arg const&, pcrecpp::Arg const&, pcrecpp::Arg const&, pcrecpp::Arg const&, pcrecpp::Arg const&, pcrecpp::Arg const&, pcrecpp::Arg const&, pcrecpp::Arg const&, pcrecpp::Arg const&) const@Base" 7.7
+ (c++)"pcrecpp::RE::QuoteMeta[abi:cxx11](pcrecpp::StringPiece const&)@Base" 7.7
+ (c++)"pcrecpp::RE::~RE()@Base" 7.7
+ (c++)"pcrecpp::RE::~RE()@Base" 7.7
+ (c++)"pcrecpp::RE::Replace(pcrecpp::StringPiece const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >*) const@Base" 7.7
+ (c++)"pcrecpp::RE::Rewrite(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >*, pcrecpp::StringPiece const&, pcrecpp::StringPiece const&, int*, int) const@Base" 7.7
+ (c++)"pcrecpp::RE::TryMatch(pcrecpp::StringPiece const&, int, pcrecpp::RE::Anchor, bool, int*, int) const@Base" 7.7
+ (c++)"pcrecpp::Scanner::ConsumeSkip()@Base" 7.7
+ (c++)"pcrecpp::Scanner::DisableSkip()@Base" 7.7
+ (c++)"pcrecpp::Scanner::EnableSkip()@Base" 7.7
+ (c++)"pcrecpp::Scanner::GetComments(int, int, std::vector<pcrecpp::StringPiece, std::allocator<pcrecpp::StringPiece> >*)@Base" 7.7
+ (c++)"pcrecpp::Scanner::GetNextComments(std::vector<pcrecpp::StringPiece, std::allocator<pcrecpp::StringPiece> >*)@Base" 7.7
+ (c++)"pcrecpp::Scanner::LineNumber() const@Base" 7.7
+ (c++)"pcrecpp::Scanner::LookingAt(pcrecpp::RE const&) const@Base" 7.7
+ (c++)"pcrecpp::Scanner::Offset() const@Base" 7.7
+ (c++)"pcrecpp::Scanner::~Scanner()@Base" 7.7
+ (c++)"pcrecpp::Scanner::~Scanner()@Base" 7.7
+ (c++)"pcrecpp::Scanner::Scanner()@Base" 7.7
+ (c++)"pcrecpp::Scanner::Scanner()@Base" 7.7
+ (c++)"pcrecpp::Scanner::Scanner(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&)@Base" 7.7
+ (c++)"pcrecpp::Scanner::Scanner(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&)@Base" 7.7
+ (c++)"pcrecpp::Scanner::SetSkipExpression(char const*)@Base" 7.7
+ (c++)"pcrecpp::Scanner::Skip(char const*)@Base" 7.7
+#MISSING: 2:8.39-9# (c++|optional=STL)"std::vector<pcrecpp::StringPiece, std::allocator<pcrecpp::StringPiece> >::_M_insert_aux(__gnu_cxx::__normal_iterator<pcrecpp::StringPiece*, std::vector<pcrecpp::StringPiece, std::allocator<pcrecpp::StringPiece> > >, pcrecpp::StringPiece const&)@Base" 7.7
+#MISSING: 2:8.39-9# (c++|optional=STL)"void std::vector<pcrecpp::StringPiece, std::allocator<pcrecpp::StringPiece> >::_M_emplace_back_aux<pcrecpp::StringPiece>(pcrecpp::StringPiece&&)@Base" 2:8.39-2
+ (c++|optional=STL)"void std::vector<pcrecpp::StringPiece, std::allocator<pcrecpp::StringPiece> >::_M_realloc_insert<pcrecpp::StringPiece const&>(__gnu_cxx::__normal_iterator<pcrecpp::StringPiece*, std::vector<pcrecpp::StringPiece, std::allocator<pcrecpp::StringPiece> > >, pcrecpp::StringPiece const&)@Base" 2:8.39-4
+

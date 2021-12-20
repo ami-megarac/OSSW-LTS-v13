@@ -1,0 +1,59 @@
+# A simple test comment which will persist
+#include <tunables/global>
+
+		alias /foo    ->    /bar	,
+  abi  <abi/4.19>    ,
+
+/usr/bin/a/simple/cleanprof/test/profile {
+	# Just for the heck of it, this comment wont see the day of light
+	#include <abstractions/base>
+
+    capability sys_admin,
+    audit capability,
+
+    change_profile -> /bin/foo,
+    change_profile,
+
+    network inet stream,
+               abi  "abi/4.20"    ,
+    network stream,
+
+	#Below rule comes from abstractions/base
+	allow /usr/share/X11/locale/**  r,
+	allow /home/*/** r,
+
+    ptrace tracedby peer=/bin/strace,
+    ptrace tracedby,
+    unix (receive) type=dgram,
+
+    dbus send bus=session,
+    dbus send bus=session peer=(label=foo),
+
+    set rlimit nofile <= 256,
+    set rlimit nofile <= 64,
+
+    signal set=(hup int quit ill trap abrt)
+             set=(bus,fpe,,,kill,usr1)
+                      set=segv set=usr2 set=pipe set=alrm set=term set=stkflt set=chld,
+    signal set=(hup int quit),
+
+    ^foo {
+            /etc/fstab r,
+        capability dac_override,
+        }
+
+    ^foo, # hat declarations are obsolete and will be removed when aa-cleanprof or aa-logprof writes the profile
+
+
+	link subset /alpha/beta -> /tmp/**,
+
+	allow /home/foo/bar r,
+	allow /home/foo/** w,
+}
+
+/usr/bin/other/cleanprof/test/profile {
+	# This one shouldn't be affected by the processing
+	# However this comment will be wiped, need to change that
+	allow /home/*/** rw,
+	allow /home/foo/bar r,
+}

@@ -1,0 +1,85 @@
+Description: Add a couple of optional flags to the "extend" config
+ directive, enabling non-volatile configuration of a couple of aspects that so
+ far have been configurable only temporarily via SETs:
+ -cacheTime specifies the cache timeout
+Author: Jeff Gehlbach <jeffg@opennms.org>
+Origin: upstream, https://github.com/net-snmp/net-snmp/commit/d8b12900629ed73a78b27535f08c4f0a721a93be
+Bug-Debian: https://bugs.debian.org/969508
+Applied-Upstream: 5.8
+Reviewed-by: Craig Small <csmall@debian.org>
+Last-Update: 2020-09-05
+--- a/agent/mibgroup/agent/extend.c
++++ b/agent/mibgroup/agent/extend.c
+@@ -528,8 +528,27 @@
+     size_t oid_len;
+     extend_registration_block *eptr;
+     int  flags;
++    char cache_timeout_str[STRMAX];
++    int cache_timeout = 0;
++    char exec_type_str[STRMAX];
++    int exec_type = NS_EXTEND_ETYPE_EXEC;
+ 
+     cptr = copy_nword(cptr, exec_name,    sizeof(exec_name));
++    if ( !strcmp( exec_name, "-cacheTime") ) {
++        cptr = copy_nword(cptr, cache_timeout_str, sizeof(cache_timeout_str));
++        /* If atoi can't do the conversion, it returns 0 */
++        cache_timeout = atoi(cache_timeout_str);
++        cptr = copy_nword(cptr, exec_name,    sizeof(exec_name));
++    }
++    if ( !strcmp( exec_name, "-execType") ) {
++        cptr = copy_nword(cptr, exec_type_str, sizeof(exec_type_str));
++        if ( !strcmp( exec_type_str, "sh" ) ) {
++            exec_type = NS_EXTEND_ETYPE_SHELL;
++        } else {
++            exec_type = NS_EXTEND_ETYPE_EXEC;
++        }
++        cptr = copy_nword(cptr, exec_name,    sizeof(exec_name));
++    }
+     if ( *exec_name == '.' ) {
+         oid_len = MAX_OID_LEN - 2;
+         if (0 == read_objid( exec_name, oid_buf, &oid_len )) {
+@@ -551,7 +570,8 @@
+     flags = (NS_EXTEND_FLAGS_ACTIVE | NS_EXTEND_FLAGS_CONFIG);
+     if (!strcmp( token, "sh"        ) ||
+         !strcmp( token, "extend-sh" ) ||
+-        !strcmp( token, "sh2" ))
++        !strcmp( token, "sh2" ) ||
++        exec_type == NS_EXTEND_ETYPE_SHELL)
+         flags |= NS_EXTEND_FLAGS_SHELL;
+     if (!strcmp( token, "execFix"   ) ||
+         !strcmp( token, "extendfix" ) ||
+@@ -572,6 +592,8 @@
+         extension->command  = strdup( exec_command );
+         if (cptr)
+             extension->args = strdup( cptr );
++        if (cache_timeout != 0)
++            extension->cache->timeout = cache_timeout;
+     } else {
+         snmp_log(LOG_ERR, "Failed to register extend entry '%s' - possibly duplicate name.\n", exec_name );
+         return;
+--- a/man/snmpd.conf.5.def
++++ b/man/snmpd.conf.5.def
+@@ -1284,7 +1284,7 @@
+ .PP
+ \fIexec\fR and \fIsh\fR extensions can only be configured via the
+ snmpd.conf file.  They cannot be set up via SNMP SET requests.
+-.IP "extend [MIBOID] NAME PROG ARGS"
++.IP "extend [-cacheTime TIME] [-execType TYPE] [MIBOID] NAME PROG ARGS"
+ works in a similar manner to the \fIexec\fR directive, but with a number
+ of improvements.  The MIB tables (\fInsExtendConfigTable\fR
+ etc) are indexed by the NAME token, so are unaffected by the order in
+@@ -1294,6 +1294,14 @@
+ for each \fIextend\fR entry, and the other (\fInsExtendOutput2Table\fR)
+ containing the complete output as a series of separate lines.
+ .IP
++If -cacheTime is specified, then its argument is used as the cache timeout
++(in whole seconds) for this \fIextend\fR entry. This mechanism provides a
++non-volatile way to specify the cache timeout.
++.IP
++If -execType is specified and has a value of \fIsh\fR, then this \fIextend\fR
++entry will be run in a shell. Otherwise it will be run in the default \fIexec\fR
++fashion. This mechanism provides a non-volatile way to specify the exec type.
++.IP
+ If MIBOID is specified, then the configuration and result tables will be rooted
+ at this point in the OID tree, but are otherwise structured in exactly
+ the same way. This means that several separate \fIextend\fR

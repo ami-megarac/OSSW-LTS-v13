@@ -1,0 +1,6 @@
+usr/lib/*/libicudata.so.*
+usr/lib/*/libicui18n.so.*
+usr/lib/*/libicuio.so.*
+usr/lib/*/libicutest.so.*
+usr/lib/*/libicutu.so.*
+usr/lib/*/libicuuc.so.*

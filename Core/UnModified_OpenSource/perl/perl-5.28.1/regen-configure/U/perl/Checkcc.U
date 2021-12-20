@@ -1,0 +1,138 @@
+?RCS:
+?RCS: $Id$
+?RCS:
+?RCS: Copyright (c) 2000, Jarkko Hietaniemi
+?RCS:
+?X:
+?X: This unit produces a bit of shell code that must be dotted in order
+?X: to make quick check on whether the current C compiler is working.
+?X:
+?MAKE:Checkcc ccname ccversion: rm cat test Myread startsh
+?MAKE:	-pick add $@ %<
+?S:ccname:
+?S:	This can set either by hints files or by Configure.  If using
+?S:	gcc, this is gcc, and if not, usually equal to cc, unimpressive, no?
+?S:	Some platforms, however, make good use of this by storing the
+?S:	flavor of the C compiler being used here.  For example if using
+?S:	the Sun WorkShop suite, ccname will be 'workshop'.
+?S:.
+?S:ccversion:
+?S:	This can set either by hints files or by Configure.  If using
+?S:	a (non-gcc) vendor cc, this variable may contain a version for
+?S:	the compiler.
+?S:.
+?T: trygcc despair
+?F:./checkcc
+?F:./trygcc
+?INIT:ccname=''
+?INIT:ccversion=''
+?LINT:extern cc
+?LINT:change cc
+?LINT:extern ccflags
+?LINT:change ccflags
+?LINT:extern ccflags
+?LINT:extern ldflags
+: Check what type of C compiler we use
+cat <<EOS >trygcc
+$startsh
+EOS
+cat <<'EOSC' >>trygcc
+case "$cc" in
+'') ;;
+*)  $rm -f try try.*
+    $cat >try.c <<EOM
+int main(int argc, char *argv[]) {
+  return 0;
+}
+EOM
+    if $cc -o try $ccflags $ldflags try.c; then
+       :
+    else
+        echo "Uh-oh, the C compiler '$cc' doesn't seem to be working." >&4
+        despair=yes
+        trygcc=yes
+        case "$cc" in
+        *gcc*) trygcc=no ;;
+        esac
+	# Skip this test because it gives a false match on output like:
+	#    ./trygcc: line 23: cc: command not found
+        # case "`$cc -v -c try.c 2>&1`" in
+        # *gcc*) trygcc=no ;;
+        # esac
+        if $test X"$trygcc" = Xyes; then
+            if gcc -o try -c try.c; then
+                echo " "
+                echo "You seem to have a working gcc, though." >&4
+		# Switching compilers may undo the work of hints files.
+		# The most common problem is -D_REENTRANT for threads.
+		# This heuristic catches that case, but gets false positives
+		# if -Dusethreads was not actually specified.  Better to
+		# bail out here with a useful message than fail
+		# mysteriously later. Should we perhaps just try to
+		# re-invoke Configure -Dcc=gcc config_args ?
+		if $test -f usethreads.cbu; then
+			$cat >&4 <<EOM
+
+*** However, any setting of the C compiler flags (e.g. for thread support)
+*** will be lost.  It may be necessary for you to restart Configure and
+*** add -Dcc=gcc to your Configure command line.
+
+EOM
+			rp="Would you like to go ahead and try gcc anyway?"
+			dflt=n
+		else
+			rp="Would you like to use it?"
+			dflt=y
+		fi
+                if $test -f myread; then
+                    . ./myread
+                else
+                    if $test -f UU/myread; then
+                        . ./UU/myread
+                    else
+                        echo "Cannot find myread, sorry.  Aborting." >&2
+                        exit 1
+                    fi
+                fi
+                case "$ans" in
+                [yY]*) cc=gcc; ccname=gcc; ccflags=''; despair=no;
+                esac
+            fi
+        fi
+    fi
+    $rm -f try try.*
+    ;;
+esac
+EOSC
+
+cat <<EOS >checkcc
+$startsh
+EOS
+cat <<'EOSC' >>checkcc
+case "$cc" in
+'') ;;
+*)  $rm -f try try.*
+    $cat >try.c <<EOM
+int main(int argc, char *argv[]) {
+  return 0;
+}
+EOM
+    if $cc -o try $ccflags $ldflags try.c; then
+       :
+    else
+        if $test X"$despair" = Xyes; then
+           echo "Uh-oh, the C compiler '$cc' doesn't seem to be working." >&4
+        fi
+        $cat >&4 <<EOM
+You need to find a working C compiler.
+Either (purchase and) install the C compiler supplied by your OS vendor,
+or for a free C compiler try http://gcc.gnu.org/
+I cannot continue any further, aborting.
+EOM
+        exit 1
+    fi
+    $rm -f try try.*
+    ;;
+esac
+EOSC
+

@@ -1,0 +1,15 @@
+START
+File: change_onexec_lp1648143.in
+Event type: AA_RECORD_DENIED
+Audit ID: 1481284511.494:2807
+Operation: change_onexec
+Profile: unconfined
+Name: system_tor
+Command: (tor)
+Name2: system_tor
+Namespace: root//lxd-tor_<var-lib-lxd>
+Info: no new privs
+ErrorCode: 1
+PID: 18593
+Epoch: 1481284511
+Audit subid: 2807

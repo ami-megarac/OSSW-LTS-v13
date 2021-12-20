@@ -1,0 +1,1 @@
+[ 1597.774866] audit: type=1400 audit(1284061896.005:28): apparmor="DENIED" operation="change_hat" info="unconfined" error=-1 pid=2698 comm="syscall_ptrace"

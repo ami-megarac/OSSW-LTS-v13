@@ -1,0 +1,57 @@
+Author: Guillem Jover <guillem@debian.org>
+Description: Reintroduce removed xattr.h header for backwards compatibility.
+ There are too many packages still using this header, we cannot just remove
+ it w/o breaking tons of stuff. Let's create a proper transition.
+ .
+ We will later introduce a warning so that programs transition to the header
+ provided by glibc.
+
+---
+ include/Makemodule.am |    3 +++
+ include/xattr.h       |   29 +++++++++++++++++++++++++++++
+ 2 files changed, 32 insertions(+)
+
+--- a/include/Makemodule.am
++++ b/include/Makemodule.am
+@@ -6,6 +6,9 @@ noinst_HEADERS += \
+ 	include/nls.h \
+ 	include/walk_tree.h
+ 
++pkginclude_HEADERS += \
++	include/xattr.h
++
+ 
+ SUBST_INSTALL_HEADER = \
+ 	subst_install_header() { \
+--- /dev/null
++++ b/include/xattr.h
+@@ -0,0 +1,29 @@
++/*
++ * Copyright (c) 2001-2002 Silicon Graphics, Inc.
++ * All Rights Reserved.
++ *
++ * This program is free software; you can redistribute it and/or modify it
++ * under the terms of the GNU Lesser General Public License as published by
++ * the Free Software Foundation; either version 2.1 of the License, or (at
++ * your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU Lesser General Public License for more details.
++ *
++ * You should have received a copy of the GNU Lesser General Public License
++ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
++ */
++
++#ifndef LIBATTR_XATTR_H
++#define LIBATTR_XATTR_H
++
++#include <errno.h>
++#ifndef ENOATTR
++# define ENOATTR ENODATA        /* No such attribute */
++#endif
++
++#include <sys/xattr.h>
++
++#endif	/* LIBATTR_XATTR_H */

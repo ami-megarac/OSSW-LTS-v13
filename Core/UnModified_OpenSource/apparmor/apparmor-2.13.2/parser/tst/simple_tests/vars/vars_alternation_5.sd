@@ -1,0 +1,8 @@
+#=DESCRIPTION variable w/part of an alternation included
+#=EXRESULT PASS
+
+@{BAR}=bar,baz,blort
+
+/does/not/exist {
+  /does/not/{exist@{BAR}notexist}/meep r,
+}

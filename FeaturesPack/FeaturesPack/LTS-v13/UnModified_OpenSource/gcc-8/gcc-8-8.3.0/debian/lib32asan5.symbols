@@ -1,0 +1,7 @@
+libasan.so.5 lib32asan5 #MINVER#
+#include "libasan.symbols.common"
+#include "libasan.symbols.32"
+ (arch=s390x)__interceptor___tls_get_addr_internal@Base 7
+ (arch=s390x)__interceptor___tls_get_offset@Base 7
+ (arch=s390x)__tls_get_addr_internal@Base 7
+ (arch=s390x)__tls_get_offset@Base 7

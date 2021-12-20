@@ -1,0 +1,65 @@
+From 0bdca5d51f203cf414d645e75ac197e3fadfadc8 Mon Sep 17 00:00:00 2001
+From: Nikos Mavrogiannopoulos <nmav@gnutls.org>
+Date: Fri, 10 May 2019 06:30:12 +0200
+Subject: [PATCH] _gnutls_srp_entry_free: follow consistent behavior in freeing
+ data
+
+_gnutls_srp_entry_free would previously not free any parameters that
+were known to gnutls to account for documented behavior of
+gnutls_srp_set_server_credentials_function(). This was not updated
+when the newly added 8192 parameter was added to the library.
+
+This introduces a safety check for generator parameters, even though
+in practice they are the same pointer.
+
+Resolves: #761
+
+Signed-off-by: Nikos Mavrogiannopoulos <nmav@gnutls.org>
+---
+ NEWS                  |  3 +++
+ lib/auth/srp_passwd.c | 12 ++++++++----
+ 2 files changed, 11 insertions(+), 4 deletions(-)
+
+--- a/NEWS
++++ b/NEWS
+@@ -47,6 +47,9 @@ See the end for copying conditions.
+ 
+ ** gnutls-cli: Added option --logfile to redirect informational messages output.
+ 
++** libgnutls: the gnutls_srp_set_server_credentials_function can be used
++   with the 8192 parameters as well (#995).
++
+ ** API and ABI modifications:
+ No changes since last version.
+ 
+--- a/lib/auth/srp_passwd.c
++++ b/lib/auth/srp_passwd.c
+@@ -447,20 +447,24 @@ void _gnutls_srp_entry_free(SRP_PWD_ENTR
+ 	_gnutls_free_key_datum(&entry->v);
+ 	_gnutls_free_datum(&entry->salt);
+ 
+-	if ((entry->g.data != gnutls_srp_1024_group_generator.data)
+-	    && (entry->g.data != gnutls_srp_3072_group_generator.data))
++	if ((entry->g.data != gnutls_srp_1024_group_generator.data) &&
++	    (entry->g.data != gnutls_srp_1536_group_generator.data) &&
++	    (entry->g.data != gnutls_srp_2048_group_generator.data) &&
++	    (entry->g.data != gnutls_srp_3072_group_generator.data) &&
++	    (entry->g.data != gnutls_srp_4096_group_generator.data) &&
++	    (entry->g.data != gnutls_srp_8192_group_generator.data))
+ 		_gnutls_free_datum(&entry->g);
+ 
+ 	if (entry->n.data != gnutls_srp_1024_group_prime.data &&
+ 	    entry->n.data != gnutls_srp_1536_group_prime.data &&
+ 	    entry->n.data != gnutls_srp_2048_group_prime.data &&
+ 	    entry->n.data != gnutls_srp_3072_group_prime.data &&
+-	    entry->n.data != gnutls_srp_4096_group_prime.data)
++	    entry->n.data != gnutls_srp_4096_group_prime.data &&
++	    entry->n.data != gnutls_srp_8192_group_prime.data)
+ 		_gnutls_free_datum(&entry->n);
+ 
+ 	gnutls_free(entry->username);
+ 	gnutls_free(entry);
+ }
+ 
+-
+ #endif				/* ENABLE SRP */

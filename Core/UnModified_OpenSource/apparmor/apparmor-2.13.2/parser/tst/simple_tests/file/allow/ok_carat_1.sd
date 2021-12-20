@@ -1,0 +1,8 @@
+#
+#=DESCRIPTION carat in pathname
+#=EXRESULT PASS
+# vim:syntax=apparmor
+#
+/usr/bin/foo {
+  allow /foo^bar r,
+}

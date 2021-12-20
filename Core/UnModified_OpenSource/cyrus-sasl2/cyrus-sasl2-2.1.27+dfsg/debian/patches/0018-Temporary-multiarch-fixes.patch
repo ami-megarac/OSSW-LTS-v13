@@ -1,0 +1,22 @@
+From: Debian Cyrus SASL Team
+ <pkg-cyrus-sasl2-debian-devel@lists.alioth.debian.org>
+Date: Thu, 24 Mar 2016 11:35:04 +0100
+Subject: Temporary multiarch fixes
+
+---
+ configure.ac | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/configure.ac b/configure.ac
+index b3db52c..17b3f99 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -606,7 +606,7 @@ AC_ARG_WITH(pam, AC_HELP_STRING([--with-pam=DIR], [use PAM (rooted in DIR) [yes]
+ if test "$with_pam" != no; then
+   if test -d $with_pam; then
+     CPPFLAGS="$CPPFLAGS -I${with_pam}/include"
+-    LDFLAGS="$LDFLAGS -L${with_pam}/lib"
++    LDFLAGS="$LDFLAGS -L${with_pam}/$DEB_HOST_MULTIARCH/lib"
+   fi
+   cmu_save_LIBS="$LIBS"
+   AC_CHECK_LIB(pam, pam_start, [

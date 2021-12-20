@@ -1,0 +1,72 @@
+#! /bin/sh
+#  -*- Mode: Shell-script -*-
+# for.test --- test functionality of `for' function
+#
+# Author:            Bruce Korb <bkorb@gnu.org>
+##
+## This file is part of AutoGen.
+## AutoGen Copyright (C) 1992-2016 by Bruce Korb - all rights reserved
+##
+## AutoGen is free software: you can redistribute it and/or modify it
+## under the terms of the GNU General Public License as published by the
+## Free Software Foundation, either version 3 of the License, or
+## (at your option) any later version.
+##
+## AutoGen is distributed in the hope that it will be useful, but
+## WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+## See the GNU General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License along
+## with this program.  If not, see <http://www.gnu.org/licenses/>.
+##
+#
+# ----------------------------------------------------------------------
+
+. ./defs
+
+# # # # # # # # # # TEMPLATE FILE # # # # # # # # #
+
+echo creating $testname.tpl
+cat > $testname.tpl <<_EOF_
+[= AutoGen5 template test =]
+[= INVOKE my-mac                \=]
+[= (if (exist? "list") (emit "ok")) =]
+Done.
+[= DEFINE my-mac                \=]
+[=   FOR list                   \=]
+[=     IF (exist? "leave")      \=]
+[=        RETURN                \=]
+[=     ENDIF                    \=]
+[=   ENDFOR list                \=]
+[= ENDDEF my-mac                \=]
+_EOF_
+
+
+# Create the files we need in the test environment
+cat > $testname.def <<_EOF_
+AutoGen definitions $testname;
+list = { elt = one; };
+list = { leave; };
+_EOF_
+
+# this is the output we should expect to see
+cat > $testname.sample <<_EOF_
+ok
+Done.
+_EOF_
+
+run_ag x $testname.def || failure AutoGen failed
+cmp -s $testname.test $testname.sample || \
+    failure "`diff -c $testname.test $testname.sample`"
+
+cleanup
+
+## Local Variables:
+## mode: shell-script
+## indent-tabs-mode: nil
+## sh-indentation: 2
+## sh-basic-offset: 2
+## End:
+
+# end of for.test

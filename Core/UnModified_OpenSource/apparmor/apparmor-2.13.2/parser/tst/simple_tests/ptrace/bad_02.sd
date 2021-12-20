@@ -1,0 +1,8 @@
+#
+#=Description basic ptrace bad peer rule
+#=EXRESULT FAIL
+#
+/usr/bin/foo {
+  ptrace /bin/true ,
+
+  }

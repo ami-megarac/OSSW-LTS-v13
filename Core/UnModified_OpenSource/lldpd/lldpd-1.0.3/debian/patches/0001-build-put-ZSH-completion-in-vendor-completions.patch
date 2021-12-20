@@ -1,0 +1,26 @@
+From 335f86aece1bbca456b49c644b5d6e651822a58d Mon Sep 17 00:00:00 2001
+From: Vincent Bernat <vincent@bernat.im>
+Date: Mon, 21 Aug 2017 09:10:52 +0200
+Subject: [PATCH] build: put ZSH completion in vendor-completions
+
+This is Debian-specific.
+---
+ src/client/Makefile.am | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/client/Makefile.am b/src/client/Makefile.am
+index 3877f1c37b67..6f7ccd4ecd7e 100644
+--- a/src/client/Makefile.am
++++ b/src/client/Makefile.am
+@@ -35,7 +35,7 @@ endif
+ # Completions
+ bashcompletiondir = $(datadir)/bash-completion/completions
+ dist_bashcompletion_DATA = completion/lldpcli
+-zshcompletiondir = $(datadir)/zsh/site-functions
++zshcompletiondir = $(datadir)/zsh/vendor-completions
+ dist_zshcompletion_DATA = completion/_lldpcli
+ 
+ # Default configuration
+-- 
+2.14.1
+

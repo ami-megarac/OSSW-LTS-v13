@@ -1,0 +1,99 @@
+From 0aa6de7a7db40da75a49c2320fd77b1ef6a111d9 Mon Sep 17 00:00:00 2001
+From: Niko Tyni <ntyni@debian.org>
+Date: Mon, 21 Dec 2015 19:20:12 +0200
+Subject: Fix a scoping issue with "no autodie" and the "system" sub
+
+Don't queue nonexisting subs for reinstalling later when
+exiting the 'no autodie' scope.
+
+FIXME: if the original sub 'can be undef for "CORE::" subs', does this
+break for those? Is that the case when $symbol =~ /::/, as guarded for
+on L566?
+
+Bug: https://github.com/pjf/autodie/issues/69
+Bug-Debian: https://bugs.debian.org/798096
+Origin: upstream, https://github.com/pjf/autodie/commit/c1b4fc4a319f8139d1cd6770bfb7b72a59ae232d
+Patch-Name: fixes/autodie-scope.diff
+---
+ cpan/autodie/lib/Fatal.pm   |  7 ++++++-
+ cpan/autodie/t/no-all.t     | 22 ++++++++++++++++++++++
+ cpan/autodie/t/no-default.t | 23 +++++++++++++++++++++++
+ 3 files changed, 51 insertions(+), 1 deletion(-)
+ create mode 100755 cpan/autodie/t/no-all.t
+ create mode 100755 cpan/autodie/t/no-default.t
+
+diff --git a/cpan/autodie/lib/Fatal.pm b/cpan/autodie/lib/Fatal.pm
+index 16e1743474..2058abdab0 100644
+--- a/cpan/autodie/lib/Fatal.pm
++++ b/cpan/autodie/lib/Fatal.pm
+@@ -580,7 +580,12 @@ sub unimport {
+         # Record the current sub to be reinstalled at end of scope
+         # and then restore the original (can be undef for "CORE::"
+         # subs)
+-        $reinstall_subs{$symbol} = \&$sub;
++
++        {
++            no strict 'refs';
++            $reinstall_subs{$symbol} = \&$sub
++                if exists ${"${pkg}::"}{$symbol};
++        }
+         $uninstall_subs{$symbol} = $Original_user_sub{$sub};
+ 
+     }
+diff --git a/cpan/autodie/t/no-all.t b/cpan/autodie/t/no-all.t
+new file mode 100755
+index 0000000000..1a503f68be
+--- /dev/null
++++ b/cpan/autodie/t/no-all.t
+@@ -0,0 +1,22 @@
++#!/usr/bin/perl
++
++package foo;
++use warnings;
++use strict;
++use Test::More tests => 1;
++use autodie qw(:all);
++
++use_system();
++ok("system() works with a lexical 'no autodie' block (github issue #69");
++
++sub break_system {
++    no autodie;
++    open(my $fh, "<", 'NONEXISTENT');
++    ok("survived failing open");
++}
++
++sub use_system {
++    system($^X, '-e' , 1);
++}
++
++1;
+diff --git a/cpan/autodie/t/no-default.t b/cpan/autodie/t/no-default.t
+new file mode 100755
+index 0000000000..44d2acf27a
+--- /dev/null
++++ b/cpan/autodie/t/no-default.t
+@@ -0,0 +1,23 @@
++#!/usr/bin/perl
++
++package foo;
++use warnings;
++use strict;
++use Test::More tests => 2;
++use autodie;
++
++
++use_system();
++ok("system() works with a lexical 'no autodie' block (github issue #69");
++break_system();
++
++sub break_system {
++    no autodie;
++    open(my $fh, "<", 'NONEXISTENT');
++    ok("survived failing open");
++}
++
++sub use_system {
++    system($^X, '-e' , 1);
++}
++1;

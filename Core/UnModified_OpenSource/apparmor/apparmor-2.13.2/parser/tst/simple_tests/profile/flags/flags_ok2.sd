@@ -1,0 +1,40 @@
+#
+#=DESCRIPTION validate some uses of the profile flags.
+#=EXRESULT PASS
+# vim:syntax=subdomain
+# Last Modified: Sun Apr 17 19:44:44 2005
+#
+/does/not/exist flags=(namespace_relative) {
+  #include <includes/base>
+
+  /usr/X11R6/lib/lib*so* r,
+  /does/not/exist r,
+}
+
+/does/not/exist1 flags=(audit, namespace_relative) {
+  #include <includes/base>
+
+  /usr/X11R6/lib/lib*so* r,
+  /does/not/exist r,
+}
+
+/does/not/exist2 flags=(namespace_relative, audit) {
+  #include <includes/base>
+
+  /usr/X11R6/lib/lib*so* r,
+  /does/not/exist r,
+}
+
+/does/not/exist3 flags=(complain, namespace_relative) {
+  #include <includes/base>
+
+  /usr/X11R6/lib/lib*so* r,
+  /does/not/exist r,
+}
+
+/does/not/exist4 flags=(namespace_relative, complain) {
+  #include <includes/base>
+
+  /usr/X11R6/lib/lib*so* r,
+  /does/not/exist r,
+}

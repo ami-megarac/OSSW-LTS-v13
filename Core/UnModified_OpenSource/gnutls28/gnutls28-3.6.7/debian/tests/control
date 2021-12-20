@@ -1,0 +1,6 @@
+Tests: run-upstream-testsuite
+Depends: ca-certificates, datefudge,
+ freebsd-net-tools [kfreebsd-i386 kfreebsd-amd64],
+ net-tools [!kfreebsd-i386 !kfreebsd-amd64],
+ openssl, softhsm2, @
+Restrictions: rw-build-tree, allow-stderr

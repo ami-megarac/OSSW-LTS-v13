@@ -1,0 +1,15 @@
+START
+File: syslog_audit_01.in
+Event type: AA_RECORD_DENIED
+Audit ID: 1409684003.960:273342
+Operation: mkdir
+Mask: c
+Denied Mask: c
+fsuid: 0
+ouid: 0
+Profile: /home/ubuntu/bzr/apparmor/tests/regression/apparmor/mkdir
+Name: /tmp/sdtest.7283-14445-r31VAP/tmpdir/
+Command: mkdir
+PID: 7314
+Epoch: 1409684003
+Audit subid: 273342

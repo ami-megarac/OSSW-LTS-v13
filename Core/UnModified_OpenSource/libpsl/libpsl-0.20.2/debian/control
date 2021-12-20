@@ -1,0 +1,98 @@
+Source: libpsl
+Priority: optional
+Maintainer: Tim Rühsen <tim.ruehsen@gmx.de>
+Uploaders:
+ Daniel Kahn Gillmor <dkg@fifthhorseman.net>,
+Build-Depends:
+ debhelper (>= 11~),
+Build-Depends-Arch:
+ autoconf-archive,
+ automake,
+ gtk-doc-tools,
+ libidn2-0-dev (>=0.16),
+ libunistring-dev,
+ pkg-config,
+ publicsuffix (>= 20150507),
+ python3:any,
+Standards-Version: 4.2.1
+Section: libs
+Homepage: https://github.com/rockdaboot/libpsl
+Vcs-Git: https://salsa.debian.org/debian/libpsl.git
+Vcs-Browser: https://salsa.debian.org/debian/libpsl
+Rules-Requires-Root: no
+
+Package: libpsl-dev
+Section: libdevel
+Architecture: any
+Multi-Arch: same
+Depends:
+ libpsl5 (= ${binary:Version}),
+ ${misc:Depends},
+Description: Library for Public Suffix List (development headers)
+ Libpsl allows checking domains against the Public Suffix List.
+ It can be used to avoid privacy-leaking 'super-cookies',
+ 'super domain' certificates, for domain highlighting purposes
+ sorting domain lists by site and more.
+ .
+ Please see https://publicsuffix.org for more detailed information.
+ .
+ This package contains development header files and documentation for
+ developers.
+
+Package: libpsl5
+Architecture: any
+Depends:
+ libidn2-0 (>= 0.16),
+ ${misc:Depends},
+ ${shlibs:Depends},
+Recommends:
+ publicsuffix (>= 20150507),
+Multi-Arch: same
+Description: Library for Public Suffix List (shared libraries)
+ Libpsl allows checking domains against the Public Suffix List.
+ It can be used to avoid privacy-leaking 'super-cookies',
+ 'super domain' certificates, for domain highlighting purposes
+ sorting domain lists by site and more.
+ .
+ Please see https://publicsuffix.org for more detailed information.
+ .
+ This package contains runtime libraries.
+
+Package: psl
+Section: net
+Architecture: any
+Depends:
+ ${misc:Depends},
+ ${shlibs:Depends},
+Multi-Arch: foreign
+Description: Explore the Public Suffix List
+ Libpsl allows checking domains against the Public Suffix List.
+ It can be used to avoid privacy-leaking 'super-cookies',
+ 'super domain' certificates, for domain highlighting purposes
+ sorting domain lists by site and more.
+ .
+ Please see https://publicsuffix.org for more detailed information.
+ .
+ This package contains a commandline tool to explore the Public Suffix
+ List.
+
+Package: psl-make-dafsa
+Section: net
+Architecture: all
+Multi-Arch: foreign
+Depends:
+ python3:any,
+ ${misc:Depends},
+ ${shlibs:Depends},
+Description: Create a binary DAFSA from a Public Suffix List
+ libpsl permits the use of an optimized binary representation of the
+ Public Suffix List (PSL).  This format is a deterministic acyclic
+ finite state automaton, or DAFSA.
+ .
+ It is primarily used for building a new version of the publicsuffix
+ package, but could also be used by anyone else looking to match
+ printable US ASCII strings.
+ .
+ This package contains a Python script to convert a standard PSL into
+ a DAFSA, either in C source code form, or in a specialized mmap-able
+ binary format.

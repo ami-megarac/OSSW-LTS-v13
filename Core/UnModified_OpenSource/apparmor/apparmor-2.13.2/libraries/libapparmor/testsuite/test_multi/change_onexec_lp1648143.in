@@ -1,0 +1,1 @@
+[103975.623545] audit: type=1400 audit(1481284511.494:2807): apparmor="DENIED" operation="change_onexec" info="no new privs" error=-1 namespace="root//lxd-tor_<var-lib-lxd>" profile="unconfined" name="system_tor" pid=18593 comm="(tor)" target="system_tor"

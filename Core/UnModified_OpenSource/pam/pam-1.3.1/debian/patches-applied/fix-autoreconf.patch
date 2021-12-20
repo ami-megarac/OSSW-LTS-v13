@@ -1,0 +1,27 @@
+From: Andreas Henriksson <andreas@fatal.se>
+Date: Thu, 8 Nov 2018 19:09:21 +0100
+Subject: fix-autoreconf.patch
+
+Do not override user variables in Makefile.am, see the
+"Flag Variables Ordering" section of the automake manual.
+---
+ doc/specs/Makefile.am | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/doc/specs/Makefile.am b/doc/specs/Makefile.am
+index 99ecc70..b94e5ef 100644
+--- a/doc/specs/Makefile.am
++++ b/doc/specs/Makefile.am
+@@ -12,9 +12,9 @@ draft-morgan-pam-current.txt: padout draft-morgan-pam.raw
+ AM_YFLAGS = -d
+ 
+ CC = @CC_FOR_BUILD@
+-CPPFLAGS = @BUILD_CPPFLAGS@
+-CFLAGS = @BUILD_CFLAGS@
+-LDFLAGS = @BUILD_LDFLAGS@
++AM_CPPFLAGS = @BUILD_CPPFLAGS@
++AM_CFLAGS = @BUILD_CFLAGS@
++AM_LDFLAGS = @BUILD_LDFLAGS@
+ 
+ BUILT_SOURCES = parse_y.h
+ 

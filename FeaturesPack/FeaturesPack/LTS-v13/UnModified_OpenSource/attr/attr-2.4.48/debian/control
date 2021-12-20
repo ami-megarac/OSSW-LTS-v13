@@ -1,0 +1,84 @@
+Source: attr
+Section: utils
+Priority: optional
+Maintainer: Guillem Jover <guillem@debian.org>
+Rules-Requires-Root: no
+Build-Depends:
+ debhelper (>= 11),
+ autoconf,
+ automake,
+ gettext,
+ libtool,
+Standards-Version: 4.3.0
+Homepage: https://savannah.nongnu.org/projects/attr/
+Vcs-Browser: https://git.hadrons.org/cgit/debian/pkgs/attr.git
+Vcs-Git: https://git.hadrons.org/git/debian/pkgs/attr.git
+
+Package: attr
+Architecture: any
+Multi-Arch: foreign
+Depends:
+ ${shlibs:Depends},
+ ${misc:Depends},
+ libattr1 (= ${binary:Version}),
+Description: utilities for manipulating filesystem extended attributes
+ A set of tools for manipulating extended attributes on filesystem
+ objects, in particular getfattr(1) and setfattr(1).
+ An attr(1) command is also provided which is largely compatible
+ with the SGI IRIX tool of the same name.
+
+Package: libattr1-dev
+Section: libdevel
+Architecture: any
+Multi-Arch: same
+Depends:
+ ${misc:Depends},
+ libc6-dev | libc-dev,
+ libattr1 (= ${binary:Version}),
+Provides:
+ attr-dev,
+Replaces:
+ attr-dev,
+Conflicts:
+ attr-dev,
+Description: extended attributes handling - static libraries and headers
+ This package contains the libraries and header files needed to develop
+ programs which make use of extended attributes.  For Linux programs,
+ the documented system call API is the recommended interface, but an
+ SGI IRIX compatibility interface is also provided.
+ .
+ Currently most filesystems support extended attributes.
+ The SGI IRIX compatibility API built above the Linux system calls is
+ used by programs such as xfsdump(8), xfsrestore(8) and xfs_fsr(8).
+
+Package: libattr1
+Section: libs
+Architecture: any
+Multi-Arch: same
+Pre-Depends:
+ ${misc:Pre-Depends},
+Depends:
+ ${shlibs:Depends},
+ ${misc:Depends},
+Description: extended attribute handling - shared library
+ Contains the runtime environment required by programs that make use
+ of extended attributes.
+
+Package: attr-udeb
+Package-Type: udeb
+Section: debian-installer
+Architecture: any
+Depends:
+ ${shlibs:Depends},
+ ${misc:Depends},
+ libattr1-udeb (= ${binary:Version}),
+Description: utilities for manipulating filesystem extended attributes
+
+Package: libattr1-udeb
+Package-Type: udeb
+Section: debian-installer
+Architecture: any
+Depends:
+ ${shlibs:Depends},
+ ${misc:Depends},
+Description: extended attribute handling - shared library

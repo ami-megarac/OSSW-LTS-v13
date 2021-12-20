@@ -1,0 +1,20 @@
+util-linux (2.29.2-3) experimental; urgency=medium
+
+  * The mount package is no longer Essential: yes. Any packages which
+    strictly needs a utility from the mount package should add a
+    dependency! The mount package has been made 'hard to mistakenly
+    uninstall' by adding the Important: yes field.
+    If you really want to uninstall the mount package (eg. for your
+    minimal container) you can, assuming no other package depends on it,
+    use: dpkg --purge mount
+
+ -- Andreas Henriksson <andreas@fatal.se>  Sun, 06 Aug 2017 14:59:02 +0200
+
+util-linux (2.24.2-1) experimental; urgency=low
+
+  The support for encryption in losetup has been dropped.
+  (And the patch for supporting hashed passphrases in debian with it.)
+
+  The recommendation is to use cryptsetup instead.
+
+ -- Andreas Henriksson <andreas@fatal.se>  Mon, 16 Jun 2014 18:00:16 +0200

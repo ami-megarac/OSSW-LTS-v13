@@ -1,0 +1,103 @@
+#!/usr/bin/perl -w
+# ----------------------------------------------------------------------
+#    Copyright (c) 2004, 2005 NOVELL (All rights reserved)
+#
+#    This program is free software; you can redistribute it and/or
+#    modify it under the terms of version 2 of the GNU General Public
+#    License published by the Free Software Foundation.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program; if not, contact Novell, Inc.
+# ----------------------------------------------------------------------
+
+use Getopt::Long;
+use File::Temp qw/ :mktemp  /;
+use File::stat;
+
+sub usage {
+	print "$0\t(--init|--shutdown) \tmodify startup or shutdown script\n";
+	print "\t\t\t--file=<file> \tmodify <file>\n";
+	print "\t\t\t--remove \tremove option from config file\n";
+	print "\t\t\t--help \t\tthis help\n";
+	print '$Revision: 1.1 $', "\n";
+	exit(0);
+}
+
+my ($conffile,$help,$remove,$init,$shutdown);
+GetOptions(
+	"file=s" => \$conffile,
+	"init" => \$init,
+	"shutdown" => \$shutdown,
+	"remove" => \$remove,
+	"help!" => \$help
+) or usage();
+
+usage() if ($help);
+
+my ($my_regexp, $my_command);
+if (defined $init) {
+	$my_regexp = '^echo "Going multiuser..."$';
+	$my_command = "start";
+} elsif (defined $shutdown) {
+	$my_regexp = '^# Kill all processes.$';
+	$my_command = "kill";
+} else {
+	usage();
+}
+
+if (defined $conffile) {
+	$old = $conffile;
+	chomp($old);
+} elsif (defined $init) {
+	$old="/etc/rc.d/rc.M";
+} elsif (defined $shutdown) {
+	$old="/etc/rc.d/rc.K";
+}
+
+open(MENU,"<$old") or die "Fatal: can't open $old: $!";
+($fh, $file) = mkstemp($old . "XXXXXX" );
+
+my $skip = FALSE;
+while (<MENU>) {
+# ok, we rely on the '="' to site the changes ;
+	if (! defined $remove) {
+		if ( /$my_regexp/ ) {
+			print $fh $_;
+			print $fh "# BEGIN rc.apparmor INSERTION\n";
+			print $fh "if [ -x /etc/rc.d/rc.apparmor ] ; then\n";
+			print $fh "  /etc/rc.d/rc.apparmor $my_command\n";
+			print $fh "fi\n";
+			print $fh "# END rc.apparmor INSERTION\n";
+		} elsif ( /^# BEGIN rc.subdomain INSERTION$/ ) {
+			$skip = TRUE;
+		} elsif ( $skip eq TRUE ) {
+			if ( /^# END rc.subdomain INSERTION$/ ) {
+				$skip = FALSE;
+			}
+		} else {
+			print $fh $_;
+		}
+	} elsif ( /^# BEGIN rc.(apparmor\|subdomain) INSERTION$/ ) {
+		$skip = TRUE;
+	} elsif ( $skip eq TRUE ) {
+		if ( /^# END rc.(apparmor\|subdomain) INSERTION$/ ) {
+			$skip = FALSE;
+		}
+	} else {
+		print $fh $_;
+	}
+}
+
+my $sb = stat($old) || die "Could not get permission bits from $old";
+my $oldmode = $sb->mode & 07777;
+
+rename $old, "$old.orig" || system("/bin/mv", $old, "$old.orig") &&
+	die "$old could not be renamed to $old.orig ($!); see $file for modifications";
+rename $file, "$old" || system("/bin/mv", $file, "$old") &&
+	die "$file could not be renamed to $old ($!); see $file for modifications";
+chmod $oldmode, $old || die "COuld not restore permission bits on $old";

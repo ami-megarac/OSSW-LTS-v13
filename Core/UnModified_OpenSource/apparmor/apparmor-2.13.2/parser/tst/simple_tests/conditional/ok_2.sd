@@ -1,0 +1,12 @@
+# taken from cond48.sd
+#=DESCRIPTION redundant rule selected by conditional
+#=EXRESULT PASS
+
+$FOO=true
+
+/bin/true {
+  if $FOO {
+      /bin/true rix,
+  }
+  /bin/true rix,
+}

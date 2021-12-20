@@ -1,0 +1,38 @@
+From ad3d2d828f440d4b02b5db0824c8574781bd5132 Mon Sep 17 00:00:00 2001
+From: Robert Millan <rmh@debian.org>
+Date: Fri, 28 Mar 2014 17:09:51 +0000
+Subject: Detection of GEOM encryption devices (GELI)
+
+Bug-Debian: http://bugs.debian.org/635393
+Forwarded: no
+Last-Update: 2011-07-30
+
+Patch-Name: freebsd-geli.patch
+---
+ libparted/arch/freebsd.c | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/libparted/arch/freebsd.c b/libparted/arch/freebsd.c
+index a60b43f8..b78d2bb0 100644
+--- a/libparted/arch/freebsd.c
++++ b/libparted/arch/freebsd.c
+@@ -1096,6 +1096,8 @@ _probe_kern_disks ()
+ {
+ 	size_t listsize;
+ 	char *disklist, *pdisklist, *psave;
++	char buf[PATH_MAX];
++	struct stat st;
+ 
+ 	if (sysctlbyname("kern.disks", NULL, &listsize, NULL, 0) != 0) {
+ 		ped_exception_throw (
+@@ -1129,6 +1131,10 @@ _probe_kern_disks ()
+ 		strncat (dev_name, token, sizeof(dev_name) - strlen(_PATH_DEV) - 1);
+ 		dev_name[sizeof(dev_name) - 1] = '\0';
+ 		_ped_device_probe (dev_name);
++
++		snprintf (buf, sizeof (buf), "%s.eli", dev_name);
++		if (stat (buf, &st) == 0)
++			_ped_device_probe (buf);
+ 	}
+ 
+ 	free(disklist);

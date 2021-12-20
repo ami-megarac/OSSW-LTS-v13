@@ -1,0 +1,10 @@
+#
+#=Description basic rules to test the "noexec" mount option
+#=EXRESULT PASS
+/usr/bin/foo {
+  mount options=noexec /a -> /1,
+  mount options=(noexec) /b -> /2,
+  mount options=(rw,noexec) /c -> /3,
+  mount options in (noexec) /d -> /4,
+  mount options in (ro,noexec) /e -> /5,
+}

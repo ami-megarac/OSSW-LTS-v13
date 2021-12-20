@@ -1,0 +1,356 @@
+# Automated Option parsing usage text.
+# Copyright (C) 1999-2016 by Bruce Korb - all rights reserved
+# This file is distributed under the same licenses as the AutoOpts package.
+# Bruce Korb <bkorb@gnu.org>
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: autogen \n"
+"Report-Msgid-Bugs-To: autogen-users@lists.sourceforge.net\n"
+"POT-Creation-Date: 2016-08-29 14:35-0700\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: ../autoopts.c:67 ../autoopts.c:93
+msgid "allocation of %d bytes failed\n"
+
+#: ../init.c:53
+msgid "AutoOpts function called without option descriptor\n"
+
+#: ../init.c:86
+msgid "\tThis exceeds the compiled library version:  "
+
+#: ../init.c:84
+msgid "Automated Options Processing Error!\n"
+       "\t%s called AutoOpts function with structure version %d:%d:%d.\n"
+
+#: ../autoopts.c:80
+msgid "realloc of %d bytes at 0x%p failed\n"
+
+#: ../init.c:88
+msgid "\tThis is less than the minimum library version:  "
+
+#: ../version.c:121
+msgid "Automated Options version %s\n"
+       "\tCopyright (C) 1999-2014 by Bruce Korb - all rights reserved\n"
+
+#: ../makeshell.c:87
+msgid "(AutoOpts bug):  %s.\n"
+
+#: ../reset.c:90
+msgid "optionResetOpt() called, but reset-option not configured"
+
+#: ../usage.c:295
+msgid "could not locate the 'help' option"
+
+#: ../autoopts.c:336
+msgid "optionProcess() was called with invalid data"
+
+#: ../usage.c:751
+msgid "invalid argument type specified"
+
+#: ../find.c:598
+msgid "defaulted to option with optional arg"
+
+#: ../alias.c:76
+msgid "aliasing option is out of range."
+
+#: ../enum.c:235
+msgid "%s error:  the keyword '%s' is ambiguous for %s\n"
+
+#: ../find.c:108
+msgid "  The following options match:\n"
+
+#: ../find.c:293
+msgid "%s: ambiguous option name: %s (matches %d options)\n"
+
+#: ../check.c:161
+msgid "%s: Command line arguments required\n"
+
+#: ../alias.c:43
+msgid "%d %s%s options allowed\n"
+
+#: ../makeshell.c:94
+msgid "%s error %d (%s) calling %s for '%s'\n"
+
+#: ../makeshell.c:306
+msgid "interprocess pipe"
+
+#: ../version.c:168
+msgid "error: version option argument '%c' invalid.  Use:\n"
+       "\t'v' - version only\n"
+       "\t'c' - version and copyright\n"
+       "\t'n' - version and full copyright notice\n"
+
+#: ../check.c:58
+msgid "%s error:  the '%s' and '%s' options conflict\n"
+
+#: ../find.c:217 ../find.c:430
+msgid "%s: The '%s' option has been disabled."
+
+#: ../alias.c:38
+msgid "-equivalence"
+
+#: ../usage.c:1257 ../usage.c:1271
+msgid "=T/F"
+
+#: ../usage.c:1253 ../usage.c:1271
+msgid "=KWd"
+
+#: ../usage.c:1252 ../usage.c:1271
+msgid "=num"
+
+#: ../usage.c:1250 ../usage.c:1271
+msgid "=str"
+
+#: ../find.c:469 ../reset.c:110
+msgid "%s: illegal option -- %c\n"
+
+#: ../find.c:271 ../find.c:755 ../reset.c:118
+msgid "%s: illegal option -- %s\n"
+
+#: ../find.c:335
+msgid "%s: unknown vendor extension option -- %s\n"
+
+#: ../enum.c:160 ../enum.c:170
+msgid "  or an integer from %d through %d\n"
+
+#: ../usage.c:750 ../usage.c:1084
+msgid "%s error:  invalid option descriptor for %s\n"
+
+#: ../find.c:385
+msgid "%s: invalid option name: %s\n"
+
+#: ../find.c:527
+msgid "%s: The '%s' option requires an argument.\n"
+
+#: ../autoopts.c:156
+msgid "(AutoOpts bug):  Equivalenced option '%s' was equivalenced to both\n"
+       "\t'%s' and '%s'."
+
+#: ../check.c:94
+msgid "%s error:  The %s option is required\n"
+
+#: ../find.c:632
+msgid "%s: The '%s' option cannot have an argument.\n"
+
+#: ../check.c:151
+msgid "%s: Command line arguments are not allowed.\n"
+
+#: ../save.c:536
+msgid "error %d (%s) creating %s\n"
+
+#: ../enum.c:235
+msgid "%s error:  '%s' does not match any %s keywords.\n"
+
+#: ../reset.c:93
+msgid "%s error: The '%s' option requires an argument.\n"
+
+#: ../save.c:186 ../save.c:239
+msgid "error %d (%s) stat-ing %s\n"
+
+#: ../restore.c:143
+msgid "%s error: no saved option state\n"
+
+#: ../autoopts.c:231
+msgid "'%s' is not a command line option.\n"
+
+#: ../time.c:113
+msgid "%s error:  '%s' is not a recognizable date/time.\n"
+
+#: ../save.c:131
+msgid "'%s' not defined\n"
+
+#: ../time.c:50
+msgid "%s error:  '%s' is not a recognizable time duration.\n"
+
+#: ../check.c:92
+msgid "%s error:  The %s option must appear %d times.\n"
+
+#: ../numeric.c:165
+msgid "%s error:  '%s' is not a recognizable number.\n"
+
+#: ../enum.c:201
+msgid "%s error:  %s exceeds %s keyword count\n"
+
+#: ../usage.c:333
+msgid "Try '%s %s' for more information.\n"
+
+#: ../alias.c:45
+msgid "one %s%s option allowed\n"
+
+#: ../makeshell.c:208 ../makeshell.c:943 ../usage.c:277 ../usage.c:418 ../usage.c:628 ../version.c:175
+msgid "standard output"
+
+#: ../usage.c:277 ../usage.c:418 ../usage.c:628 ../version.c:175
+msgid "standard error"
+
+#: ../makeshell.c:208 ../makeshell.c:943 ../usage.c:276 ../usage.c:417 ../usage.c:627 ../version.c:174
+msgid "write"
+
+#: ../numeric.c:60
+msgid "%s error:  %s option value %ld is out of range.\n"
+
+#: ../check.c:44
+msgid "%s error:  %s option requires the %s option\n"
+
+#: ../save.c:130 ../save.c:185 ../save.c:238 ../save.c:257 ../save.c:535
+msgid "%s warning:  cannot save options - %s not regular file\n"
+
+#: ../usage.c:876
+msgid "\t\t\t\t- an alternate for '%s'\n"
+
+#: ../usage.c:1151
+msgid "Version, usage and configuration options:"
+
+#: ../usage.c:927
+msgid "\t\t\t\t- default option for unnamed options\n"
+
+#: ../usage.c:840
+msgid "\t\t\t\t- disabled as '--%s'\n"
+
+#: ../usage.c:1120
+msgid " --- %-14s %s\n"
+
+#: ../usage.c:1118
+msgid "This option has been disabled"
+
+#: ../usage.c:867
+msgid "\t\t\t\t- enabled by default\n"
+
+#: ../alias.c:40
+msgid "%s error:  only "
+
+#: ../usage.c:1197
+msgid " - examining environment variables named %s_*\n"
+
+#: ../file.c:168
+msgid "\t\t\t\t- file must not pre-exist\n"
+
+#: ../file.c:172
+msgid "\t\t\t\t- file must pre-exist\n"
+
+#: ../usage.c:383
+msgid "Options are specified by doubled hyphens and their name or by a single\n"
+       "hyphen and the flag character.\n"
+
+#: ../makeshell.c:921
+msgid "\n"
+       "= = = = = = = =\n\n"
+       "This incarnation of genshell will produce\n"
+       "a shell script to parse the options for %s:\n\n"
+
+#: ../enum.c:167
+msgid "  or an integer mask with any of the lower %d bits set\n"
+
+#: ../usage.c:900
+msgid "\t\t\t\t- is a set membership option\n"
+
+#: ../usage.c:921
+msgid "\t\t\t\t- must appear between %d and %d times\n"
+
+#: ../usage.c:385
+msgid "Options are specified by single or double hyphens and their name.\n"
+
+#: ../usage.c:907
+msgid "\t\t\t\t- may appear multiple times\n"
+
+#: ../usage.c:894
+msgid "\t\t\t\t- may not be preset\n"
+
+#: ../usage.c:1312
+msgid "   Arg Option-Name    Description\n"
+
+#: ../usage.c:1248 ../usage.c:1306
+msgid "  Flg Arg Option-Name    Description\n"
+
+#: ../usage.c:1307 ../usage.c:1313
+msgid " %3s %s"
+
+#: ../usage.c:390
+msgid "The '-#<number>' option may omit the hash char\n"
+
+#: ../usage.c:386
+msgid "All arguments are named options.\n"
+
+#: ../usage.c:974
+msgid " - reading file %s"
+
+#: ../usage.c:412 ../version.c:100 ../version.c:129
+msgid "\n"
+       "Please send bug reports to:  <%s>\n"
+
+#: ../usage.c:906
+msgid "\t\t\t\t- may NOT appear - preset only\n"
+
+#: ../usage.c:947 ../usage.c:1195
+msgid "\n"
+       "The following option preset mechanisms are supported:\n"
+
+#: ../usage.c:685
+msgid "prohibits these options:\n"
+
+#: ../usage.c:680
+msgid "prohibits the option '%s'\n"
+
+#: ../numeric.c:81
+msgid "%s%ld to %ld"
+
+#: ../numeric.c:79
+msgid "%sgreater than or equal to %ld"
+
+#: ../numeric.c:75
+msgid "%s%ld exactly"
+
+#: ../numeric.c:68
+msgid "%sit must lie in one of the ranges:\n"
+
+#: ../numeric.c:68
+msgid "%sit must be in the range:\n"
+
+#: ../numeric.c:88
+msgid ", or\n"
+
+#: ../numeric.c:66
+msgid "%sis scalable with a suffix: k/K/m/M/g/G/t/T\n"
+
+#: ../numeric.c:77
+msgid "%sless than or equal to %ld"
+
+#: ../usage.c:393
+msgid "Operands and options may be intermixed.  They will be reordered.\n"
+
+#: ../usage.c:655
+msgid "requires the option '%s'\n"
+
+#: ../usage.c:658
+msgid "requires these options:\n"
+
+#: ../usage.c:1324
+msgid "   Arg Option-Name   Req?  Description\n"
+
+#: ../usage.c:1318
+msgid "  Flg Arg Option-Name   Req?  Description\n"
+
+#: ../enum.c:168
+msgid "or you may use a numeric representation.  Preceding these with a '!'\n"
+       "will clear the bits, specifying 'none' will clear all bits, and 'all'\n"
+       "will set them all.  Multiple entries may be passed as an option\n"
+       "argument list.\n"
+
+#: ../usage.c:913
+msgid "\t\t\t\t- may appear up to %d times\n"
+
+#: ../enum.c:77
+msgid "The valid \"%s\" option keywords are:\n"
+
+#: ../usage.c:1155
+msgid "The next option supports vendor supported extra options:"
+
+#: ../usage.c:776
+msgid "These additional options are:"

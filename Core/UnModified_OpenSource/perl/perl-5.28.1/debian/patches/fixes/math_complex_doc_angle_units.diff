@@ -1,0 +1,28 @@
+From 7e38b1a81e49bf8b3985136b5ba0bf1575333057 Mon Sep 17 00:00:00 2001
+From: Dominic Hargreaves <dom@earth.li>
+Date: Sat, 30 Apr 2016 22:56:56 +0100
+Subject: Math::Trig: document angle units
+
+Bug: https://rt.cpan.org/Ticket/Display.html?id=114106
+Bug-Debian: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=731505
+Patch-Name: fixes/math_complex_doc_angle_units.diff
+---
+ cpan/Math-Complex/lib/Math/Trig.pm | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/cpan/Math-Complex/lib/Math/Trig.pm b/cpan/Math-Complex/lib/Math/Trig.pm
+index acad31ff49..bc7ac780e9 100644
+--- a/cpan/Math-Complex/lib/Math/Trig.pm
++++ b/cpan/Math-Complex/lib/Math/Trig.pm
+@@ -263,6 +263,11 @@ core Perl which defines only the C<sin()> and C<cos()>.  The constant
+ B<pi> is also defined as are a few convenience functions for angle
+ conversions, and I<great circle formulas> for spherical movement.
+ 
++=head1 ANGLES
++
++All angles are defined in radians, except where otherwise specified
++(for example in the deg/rad conversion functions).
++
+ =head1 TRIGONOMETRIC FUNCTIONS
+ 
+ The tangent

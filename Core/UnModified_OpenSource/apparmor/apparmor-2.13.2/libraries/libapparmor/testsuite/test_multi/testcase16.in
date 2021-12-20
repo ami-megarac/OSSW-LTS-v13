@@ -1,0 +1,1 @@
+Sep  7 17:47:53 rix kernel: audit(1189201672.746:537): type=1503 operation="file_lock" requested_mask="k" denied_mask="k" name="/var/run/samba/unexpected.tdb" pid=4316 profile="/usr/sbin/nmbd"

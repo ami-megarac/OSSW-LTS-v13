@@ -1,0 +1,10 @@
+#
+#=Description basic rules to test the "noacl" mount option
+#=EXRESULT PASS
+/usr/bin/foo {
+  mount options=noacl /a -> /1,
+  mount options=(noacl) /b -> /2,
+  mount options=(rw,noacl) /c -> /3,
+  mount options in (noacl) /d -> /4,
+  mount options in (ro,noacl) /e -> /5,
+}

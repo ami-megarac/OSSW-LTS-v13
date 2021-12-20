@@ -1,0 +1,7 @@
+#
+#=DESCRIPTION simple unix listen acceptance test
+#=EXRESULT PASS
+
+profile a_profile {
+  unix listen,
+}

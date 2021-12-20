@@ -1,0 +1,138 @@
+From: Net-SNMP Packaging Team <pkg-net-snmp-devel@lists.alioth.debian.org>
+Date: Mon, 5 Mar 2018 21:13:51 +1100
+Subject: do_not_callback_for_failed_reports
+
+===================================================================
+---
+ snmplib/snmp_api.c | 106 ++++++++++++++++++++++++++---------------------------
+ 1 file changed, 53 insertions(+), 53 deletions(-)
+
+diff --git a/snmplib/snmp_api.c b/snmplib/snmp_api.c
+index 85cc720..d155c99 100644
+--- a/snmplib/snmp_api.c
++++ b/snmplib/snmp_api.c
+@@ -5347,71 +5347,71 @@ _sess_process_packet(void *sessp, netsnmp_session * sp,
+        * should be per session ! 
+        */
+ 
+-      if (callback == NULL
+-	  || callback(NETSNMP_CALLBACK_OP_RECEIVED_MESSAGE, sp,
+-		      pdu->reqid, pdu, magic) == 1) {
+-	if (pdu->command == SNMP_MSG_REPORT) {
+-	  if (sp->s_snmp_errno == SNMPERR_NOT_IN_TIME_WINDOW ||
+-	      snmpv3_get_report_type(pdu) ==
+-	      SNMPERR_NOT_IN_TIME_WINDOW) {
+-	    /*
+-	     * trigger immediate retry on recoverable Reports 
+-	     * * (notInTimeWindow), incr_retries == TRUE to prevent
+-	     * * inifinite resend                      
+-	     */
+-	    if (rp->retries <= sp->retries) {
+-	      snmp_resend_request(slp, rp, TRUE);
+-	      break;
+-	    } else {
+-	      /* We're done with retries, so no longer waiting for a response */
+-	      if (magic) {
+-		((struct synch_state*)magic)->waiting = 0;
+-	      }
+-	    }
++      if (pdu->command == SNMP_MSG_REPORT) {
++	if (sp->s_snmp_errno == SNMPERR_NOT_IN_TIME_WINDOW ||
++	    snmpv3_get_report_type(pdu) ==
++	    SNMPERR_NOT_IN_TIME_WINDOW) {
++	  /*
++	   * trigger immediate retry on recoverable Reports 
++	   * * (notInTimeWindow), incr_retries == TRUE to prevent
++	   * * inifinite resend		      
++	   */
++	  if (rp->retries <= sp->retries) {
++	    snmp_resend_request(slp, rp, TRUE);
++	    break;
+ 	  } else {
+-	    if (SNMPV3_IGNORE_UNAUTH_REPORTS) {
+-	      break;
+-	    } else { /* Set the state to no longer be waiting, since we're done with retries */
+-	      if (magic) {
+-		((struct synch_state*)magic)->waiting = 0;
+-	      }
++	    /* We're done with retries, so no longer waiting for a response */
++	    if (magic) {
++	      ((struct synch_state*)magic)->waiting = 0;
+ 	    }
+ 	  }
++	} else {
++	  if (SNMPV3_IGNORE_UNAUTH_REPORTS) {
++	    break;
++	  } else { /* Set the state to no longer be waiting, since we're done with retries */
++	    if (magic) {
++	      ((struct synch_state*)magic)->waiting = 0;
++	    }
++	  }
++	}
+ 
+-	  /*
+-	   * Handle engineID discovery.  
+-	   */
+-	  if (!sp->securityEngineIDLen && pdu->securityEngineIDLen) {
+-	    sp->securityEngineID =
+-	      (u_char *) malloc(pdu->securityEngineIDLen);
+-	    if (sp->securityEngineID == NULL) {
++	/*
++	 * Handle engineID discovery.  
++	 */
++	if (!sp->securityEngineIDLen && pdu->securityEngineIDLen) {
++	  sp->securityEngineID =
++	    (u_char *) malloc(pdu->securityEngineIDLen);
++	  if (sp->securityEngineID == NULL) {
++	    /*
++	     * TODO FIX: recover after message callback *?
++	     */
++	    return -1;
++	  }
++	  memcpy(sp->securityEngineID, pdu->securityEngineID,
++		 pdu->securityEngineIDLen);
++	  sp->securityEngineIDLen = pdu->securityEngineIDLen;
++	  if (!sp->contextEngineIDLen) {
++	    sp->contextEngineID =
++	      (u_char *) malloc(pdu->
++				securityEngineIDLen);
++	    if (sp->contextEngineID == NULL) {
+ 	      /*
+ 	       * TODO FIX: recover after message callback *?
+-               */
++	       */
+ 	      return -1;
+ 	    }
+-	    memcpy(sp->securityEngineID, pdu->securityEngineID,
++	    memcpy(sp->contextEngineID,
++		   pdu->securityEngineID,
+ 		   pdu->securityEngineIDLen);
+-	    sp->securityEngineIDLen = pdu->securityEngineIDLen;
+-	    if (!sp->contextEngineIDLen) {
+-	      sp->contextEngineID =
+-		(u_char *) malloc(pdu->
+-				  securityEngineIDLen);
+-	      if (sp->contextEngineID == NULL) {
+-		/*
+-		 * TODO FIX: recover after message callback *?
+-		 */
+-                return -1;
+-	      }
+-	      memcpy(sp->contextEngineID,
+-		     pdu->securityEngineID,
+-		     pdu->securityEngineIDLen);
+-	      sp->contextEngineIDLen =
+-		pdu->securityEngineIDLen;
+-	    }
++	    sp->contextEngineIDLen =
++	      pdu->securityEngineIDLen;
+ 	  }
+ 	}
++      }
+ 
++      if (callback == NULL || 
++	 callback(NETSNMP_CALLBACK_OP_RECEIVED_MESSAGE, sp,
++		  pdu->reqid, pdu, magic) == 1) {
+ 	/*
+ 	 * Successful, so delete request.  
+ 	 */

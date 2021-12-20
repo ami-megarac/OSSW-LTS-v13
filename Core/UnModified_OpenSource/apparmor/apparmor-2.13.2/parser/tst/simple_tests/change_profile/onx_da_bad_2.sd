@@ -1,0 +1,7 @@
+#
+#=DESCRIPTION deny audit is wrong order for prefixes
+#=EXRESULT FAIL
+#
+/usr/bin/foo {
+   deny audit change_profile /onexec -> /bin/foo//bar,
+}

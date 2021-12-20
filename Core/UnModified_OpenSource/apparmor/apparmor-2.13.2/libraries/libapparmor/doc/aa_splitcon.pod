@@ -1,0 +1,72 @@
+# This publication is intellectual property of Canonical Ltd. Its contents
+# can be duplicated, either in part or in whole, provided that a copyright
+# label is visibly located on each copy.
+#
+# All information found in this book has been compiled with utmost
+# attention to detail. However, this does not guarantee complete accuracy.
+# Neither Canonical Ltd, the authors, nor the translators shall be held
+# liable for possible errors or the consequences thereof.
+#
+# Many of the software and hardware descriptions cited in this book
+# are registered trademarks. All trade names are subject to copyright
+# restrictions and may be registered trade marks. Canonical Ltd.
+# essentially adhere to the manufacturer's spelling.
+#
+# Names of products and trademarks appearing in this book (with or without
+# specific notation) are likewise subject to trademark and trade protection
+# laws and may thus fall under copyright restrictions.
+#
+
+
+=pod
+
+=head1 NAME
+
+aa_splitcon - split the confinement context into a label and mode
+
+=head1 SYNOPSIS
+
+B<#include E<lt>sys/apparmor.hE<gt>>
+
+B<char *aa_splitcon(char *con, char **mode);>
+
+Link with B<-lapparmor> when compiling.
+
+=head1 DESCRIPTION
+
+The aa_splitcon() function splits a confinement context into separate label
+and mode strings. The @con string is modified so that the label portion is NUL
+terminated. The enforcement mode is also NUL terminated and the parenthesis
+surrounding the mode are removed. If @mode is non-NULL, it will point to the
+first character in the enforcement mode string on success.
+
+The Linux kernel's /proc/E<lt>PIDE<gt>/attr/current interface appends a
+trailing newline character to AppArmor contexts that are read from that file.
+If @con contains a single trailing newline character, it will be stripped by
+aa_splitcon() prior to all other processing.
+
+=head1 RETURN VALUE
+
+Returns a pointer to the first character in the label string. NULL is returned
+on error.
+
+=head1 EXAMPLE
+
+ Context                        Label               Mode 
+ -----------------------------  ------------------  -------
+ unconfined                     unconfined          NULL
+ unconfined\n                   unconfined          NULL
+ /bin/ping (enforce)            /bin/ping           enforce
+ /bin/ping (enforce)\n          /bin/ping           enforce
+ /usr/sbin/rsyslogd (complain)  /usr/sbin/rsyslogd  complain
+
+=head1 BUGS
+
+None known. If you find any, please report them at
+L<https://bugs.launchpad.net/apparmor/+filebug>.
+
+=head1 SEE ALSO
+
+aa_getcon(2) and L<https://wiki.apparmor.net>.
+
+=cut

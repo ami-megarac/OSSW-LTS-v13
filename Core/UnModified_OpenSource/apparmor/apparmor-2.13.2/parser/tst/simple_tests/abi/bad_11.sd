@@ -1,0 +1,9 @@
+#
+#=DESCRIPTION abi testing - abi path quotes in <> with spaces
+#=EXRESULT FAIL
+#
+
+abi <"abi/4.19" >,
+
+/does/not/exist {
+}

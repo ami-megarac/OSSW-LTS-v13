@@ -1,0 +1,8 @@
+# needs Tk, not worth even a suggestion
+Pod/Perldoc/ToTk
+# please load Net::FTP first
+Net/FTP/
+# needs Math::BigInt loaded
+Math/BigInt/CalcEmu
+# obviously not for us
+File/Spec/VMS

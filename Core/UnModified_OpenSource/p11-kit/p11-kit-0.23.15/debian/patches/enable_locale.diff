@@ -1,0 +1,15 @@
+Description: enable building of gettext translations.
+Author: Andreas Metzler <ametzler@debian.org>
+Last-Update: 2018-08-28
+Origin: vendor
+
+--- a/configure.ac
++++ b/configure.ac
+@@ -40,7 +40,6 @@ AC_PROG_CPP
+ AM_PROG_CC_C_O
+ PKG_PROG_PKG_CONFIG
+ 
+-LINGUAS=""
+ AM_GNU_GETTEXT([external], [need-ngettext])
+ 
+ if test "$enable_static" = "yes"; then

@@ -1,0 +1,5 @@
+fix-manpage-install-conditions.patch
+man-add-missing-bshell.1-symlink.patch
+man-fix-reference-to-avahi-autoipd.action-8-in-avahi-auto.patch
+no-systemd-also.patch
+Remove-empty-avahi_discover-Python-module.patch

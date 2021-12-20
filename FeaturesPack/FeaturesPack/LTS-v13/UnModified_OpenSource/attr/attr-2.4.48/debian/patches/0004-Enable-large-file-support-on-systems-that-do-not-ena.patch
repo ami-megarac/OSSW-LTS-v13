@@ -1,0 +1,51 @@
+From fd1d8ee21df8d11460baa858ae5c5d20e38fb70e Mon Sep 17 00:00:00 2001
+From: "Dmitry V. Levin" <ldv@altlinux.org>
+Date: Tue, 28 Nov 2017 02:55:48 +0300
+Subject: [PATCH 4/9] Enable large-file support on systems that do not enable
+ it by default
+
+Invoke AC_SYS_LARGEFILE to enable large-file support.
+
+This fix doesn't change the library as much as the tools because
+the only affected function in libattr is attr_copy_action that calls
+attr_parse_attr_conf that in turn calls fopen(ATTR_CONF, "r").
+
+What is the most affected is getfattr, without the fix it just cannot
+process large files, e.g.
+
+$ truncate -s2G large-file && getfattr large-file
+getfattr: large-file: Value too large for defined data type
+---
+ configure.ac   | 1 +
+ test/attr.test | 6 ++++++
+ 2 files changed, 7 insertions(+)
+
+diff --git a/configure.ac b/configure.ac
+index 7260ce3..b46afce 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -30,6 +30,7 @@ AC_C_CONST
+ AC_TYPE_MODE_T
+ AC_FUNC_ALLOCA
+ AC_FUNC_GCC_VISIBILITY
++AC_SYS_LARGEFILE
+ 
+ AM_PROG_AR
+ LT_INIT
+diff --git a/test/attr.test b/test/attr.test
+index 9f750b0..6ce2f9b 100644
+--- a/test/attr.test
++++ b/test/attr.test
+@@ -391,3 +391,9 @@ Test for proper recursion of directory structures with -L -P -R
+ 	>
+ 
+ 	$ rm -R 1
++
++Test for large-file support
++
++	$ dd bs=65536 seek=32768 if=/dev/null of=large-file 2>/dev/null ||:
++	$ sh -c 'if test -f large-file; then getfattr large-file; fi'
++	$ rm large-file
+-- 
+2.21.0.rc2.261.ga7da99ff1b
+

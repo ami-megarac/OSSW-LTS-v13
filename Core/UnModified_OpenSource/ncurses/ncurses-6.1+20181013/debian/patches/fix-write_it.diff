@@ -1,0 +1,23 @@
+Author: Sven Joachim <svenjoac@gmx.de>
+Description: Check for missing character after backslash in write_it
+ Fix cherry-picked from upstream patchlevel 20191015.
+Bug: https://lists.gnu.org/archive/html/bug-ncurses/2019-10/msg00046.html
+Forwarded: not-needed
+Last-Update: 2019-11-02
+
+---
+ progs/tic.c |    3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+--- a/progs/tic.c
++++ b/progs/tic.c
+@@ -217,7 +217,8 @@ write_it(ENTRY * ep)
+ 	    while ((ch = *t++) != 0) {
+ 		*d++ = (char) ch;
+ 		if (ch == '\\') {
+-		    *d++ = *t++;
++		    if ((*d++ = *t++) == '\0')
++			break;
+ 		} else if ((ch == '%')
+ 			   && (*t == L_BRACE)) {
+ 		    char *v = 0;

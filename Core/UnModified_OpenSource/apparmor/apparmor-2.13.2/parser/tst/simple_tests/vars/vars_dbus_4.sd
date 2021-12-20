@@ -1,0 +1,13 @@
+#=DESCRIPTION reference variables in dbus rules, members
+#=EXRESULT PASS
+
+@{MEMBERS}=blurt blirt @{BAR}
+@{BAR}=@{FOO} blort
+@{FOO}=bink bank bonk blurry*
+
+/does/not/exist {
+  dbus (send)
+       bus=session
+       member=@{MEMBERS}
+       path="/com/canonical/hud/applications/biff",
+}

@@ -1,0 +1,547 @@
+nghttp2 (1.36.0-2+deb10u1) buster-security; urgency=high
+
+  * Fix CVE-2019-9511 and CVE-2019-9513.
+
+ -- Tomasz Buchert <tomasz@debian.org>  Fri, 23 Aug 2019 17:52:43 +0200
+
+nghttp2 (1.36.0-2) unstable; urgency=medium
+
+  * d/*: drop support for spdy (Closes: #920988)
+
+ -- Tomasz Buchert <tomasz@debian.org>  Sun, 03 Feb 2019 10:53:17 -0800
+
+nghttp2 (1.36.0-1) unstable; urgency=medium
+
+  * Packaging refresh (debhelper 12, std-ver 4.3.0)
+  * New upstream release 1.36.0
+
+ -- Tomasz Buchert <tomasz@debian.org>  Wed, 23 Jan 2019 09:32:13 +0100
+
+nghttp2 (1.35.1-1) unstable; urgency=medium
+
+  * New upstream version 1.35.1
+
+ -- Tomasz Buchert <tomasz@debian.org>  Fri, 14 Dec 2018 10:03:56 +0100
+
+nghttp2 (1.35.0-1) unstable; urgency=medium
+
+  * New upstream version 1.35.0
+
+ -- Tomasz Buchert <tomasz@debian.org>  Mon, 26 Nov 2018 00:35:43 +0100
+
+nghttp2 (1.34.0-1) unstable; urgency=medium
+
+  * Imported upstream version 1.34.0
+
+ -- Tomasz Buchert <tomasz@debian.org>  Thu, 11 Oct 2018 08:04:01 +0200
+
+nghttp2 (1.33.0-1) unstable; urgency=medium
+
+  * Imported upstream version 1.33.0
+
+ -- Tomasz Buchert <tomasz@debian.org>  Fri, 07 Sep 2018 00:49:22 +0200
+
+nghttp2 (1.32.1-1) unstable; urgency=medium
+
+  * Imported upstream version 1.32.1
+  * Update debian control with "cme fix dpkg-control"
+
+ -- Tomasz Buchert <tomasz@debian.org>  Sat, 01 Sep 2018 12:02:10 +0200
+
+nghttp2 (1.32.0-1) unstable; urgency=medium
+
+  * Imported upstream version 1.32.0
+
+ -- Tomasz Buchert <tomasz@debian.org>  Sat, 19 May 2018 15:01:25 +0200
+
+nghttp2 (1.31.1-1) unstable; urgency=medium
+
+  * Imported upstream version 1.31.1 (fixes CVE-2018-1000168)
+
+ -- Tomasz Buchert <tomasz@debian.org>  Sat, 21 Apr 2018 19:35:33 +0200
+
+nghttp2 (1.31.0-1) unstable; urgency=medium
+
+  * Imported upstream version 1.31.0
+  * Update symbols of libnghttp2
+
+ -- Tomasz Buchert <tomasz@debian.org>  Tue, 06 Mar 2018 00:06:34 +0100
+
+nghttp2 (1.30.0-1) unstable; urgency=medium
+
+  * Imported upstream version 1.30.0
+
+ -- Tomasz Buchert <tomasz@debian.org>  Mon, 12 Feb 2018 13:44:16 +0100
+
+nghttp2 (1.29.0-1) unstable; urgency=medium
+
+  * Imported upstream version 1.29.0
+  * Bumped Standards-Version to 4.1.2 (no changes needed)
+  * Updated debhelper compat to 11
+  * d/patches: use python3 for fetch-ocsp-response
+
+ -- Tomasz Buchert <tomasz@debian.org>  Tue, 02 Jan 2018 12:43:09 +0100
+
+nghttp2 (1.28.0-1) unstable; urgency=medium
+
+  * Imported upstream version 1.28.0
+  * Bumped Standards-Version to 4.1.1 (no changes needed)
+
+ -- Tomasz Buchert <tomasz@debian.org>  Sun, 03 Dec 2017 13:34:25 +0100
+
+nghttp2 (1.27.0-1) unstable; urgency=medium
+
+  * Imported upstream version 1.27.0
+  * Bumped Standards-Version to 4.1.0 (no changes needed)
+
+ -- Tomasz Buchert <tomasz@debian.org>  Fri, 27 Oct 2017 22:12:09 +0200
+
+nghttp2 (1.26.0-1) unstable; urgency=medium
+
+  * Imported upstream version 1.26.0
+
+ -- Tomasz Buchert <tomasz@debian.org>  Thu, 21 Sep 2017 09:34:29 +0200
+
+nghttp2 (1.25.0-1) unstable; urgency=medium
+
+  * Imported upstream version 1.25.0
+
+ -- Tomasz Buchert <tomasz@debian.org>  Wed, 23 Aug 2017 23:21:44 +0200
+
+nghttp2 (1.24.0-1) unstable; urgency=medium
+
+  * Imported upstream version 1.24.0
+  * Bumped Standards-Version to 4.0.0 (no changes needed)
+
+ -- Tomasz Buchert <tomasz@debian.org>  Wed, 05 Jul 2017 08:31:03 +0200
+
+nghttp2 (1.23.1-1) unstable; urgency=medium
+
+  * Imported upstream version 1.23.1
+
+ -- Tomasz Buchert <tomasz@debian.org>  Sat, 03 Jun 2017 10:32:36 +0200
+
+nghttp2 (1.23.0-1) unstable; urgency=medium
+
+  * Imported upstream version 1.23.0
+
+ -- Tomasz Buchert <tomasz@debian.org>  Tue, 30 May 2017 08:49:22 +0200
+
+nghttp2 (1.22.0-1) unstable; urgency=medium
+
+  * Import upstream version 1.22.0
+
+ -- Tomasz Buchert <tomasz@debian.org>  Mon, 01 May 2017 12:55:59 +0200
+
+nghttp2 (1.21.1-1) unstable; urgency=medium
+
+  * Import upstream version 1.21.1
+
+ -- Tomasz Buchert <tomasz@debian.org>  Fri, 14 Apr 2017 09:19:37 +0200
+
+nghttp2 (1.21.0-1) unstable; urgency=medium
+
+  * Import upstream version 1.21.0 (Closes: #858744)
+
+ -- Tomasz Buchert <tomasz@debian.org>  Sun, 02 Apr 2017 11:22:17 +0200
+
+nghttp2 (1.20.0-1) unstable; urgency=medium
+
+  * Import upstream version 1.20.0
+  * Revamp the systemd service
+  * Make sure spdylay is used
+
+ -- Tomasz Buchert <tomasz@debian.org>  Sun, 19 Mar 2017 14:32:34 +0100
+
+nghttp2 (1.19.0-2) unstable; urgency=medium
+
+  * Add h2load to nghttp2-client (Closes: #853860)
+
+ -- Tomasz Buchert <tomasz@debian.org>  Sat, 04 Feb 2017 11:39:34 +0100
+
+nghttp2 (1.19.0-1) unstable; urgency=medium
+
+  * Imported upstream version 1.19.0
+
+ -- Tomasz Buchert <tomasz@debian.org>  Mon, 30 Jan 2017 22:00:27 +0100
+
+nghttp2 (1.18.1-1) unstable; urgency=medium
+
+  * Imported upstream version 1.18.1
+
+ -- Tomasz Buchert <tomasz@debian.org>  Sun, 08 Jan 2017 12:26:25 +0100
+
+nghttp2 (1.18.0-1) unstable; urgency=medium
+
+  * Imported upstream version 1.18.0
+  * debian/*: use debhelper v10 and watch v4
+  * Add build dependency on libc-ares-dev
+
+ -- Tomasz Buchert <tomasz@debian.org>  Thu, 29 Dec 2016 09:34:38 +0100
+
+nghttp2 (1.17.0-1) unstable; urgency=medium
+
+  * Imported upstream version 1.17.0
+
+ -- Tomasz Buchert <tomasz@debian.org>  Sun, 27 Nov 2016 15:55:57 +0100
+
+nghttp2 (1.16.0-1) unstable; urgency=medium
+
+  * Imported upstream version 1.16.0
+
+ -- Tomasz Buchert <tomasz@debian.org>  Tue, 25 Oct 2016 20:45:10 +0200
+
+nghttp2 (1.15.0-1) unstable; urgency=medium
+
+  * Imported upstream version 1.15.0
+
+ -- Tomasz Buchert <tomasz@debian.org>  Thu, 29 Sep 2016 08:21:30 +0200
+
+nghttp2 (1.14.1-1) unstable; urgency=medium
+
+  * Imported upstream version 1.14.1
+
+ -- Tomasz Buchert <tomasz@debian.org>  Sun, 11 Sep 2016 08:34:01 +0200
+
+nghttp2 (1.14.0-1) unstable; urgency=medium
+
+  * Imported upstream version 1.14.0
+
+ -- Tomasz Buchert <tomasz@debian.org>  Mon, 29 Aug 2016 20:42:10 +0200
+
+nghttp2 (1.13.0-1) unstable; urgency=medium
+
+  * Imported upstream version 1.13.0
+  * Drop merged upstream patches
+  * Update URLs
+
+ -- Tomasz Buchert <tomasz@debian.org>  Sun, 24 Jul 2016 09:06:27 +0200
+
+nghttp2 (1.12.0-2) unstable; urgency=medium
+
+  * d/patches: fix FTBFS on armel
+
+ -- Tomasz Buchert <tomasz@debian.org>  Sun, 03 Jul 2016 23:18:42 +0200
+
+nghttp2 (1.12.0-1) unstable; urgency=medium
+
+  * Imported upstream version 1.12.0
+
+ -- Tomasz Buchert <tomasz@debian.org>  Sat, 02 Jul 2016 10:59:57 +0200
+
+nghttp2 (1.11.1-1) unstable; urgency=medium
+
+  * Imported upstream version 1.11.1
+
+ -- Tomasz Buchert <tomasz@debian.org>  Tue, 31 May 2016 23:28:27 +0200
+
+nghttp2 (1.11.0-1) unstable; urgency=medium
+
+  * Imported upstream version 1.11.0
+  * d/control: bump std-ver to 3.9.8 (no changes needed)
+  * d/symbols: update symbol list
+
+ -- Tomasz Buchert <tomasz@debian.org>  Sun, 29 May 2016 14:49:29 +0200
+
+nghttp2 (1.10.0-1) unstable; urgency=medium
+
+  * Imported upstream version 1.10.0
+  * Fix broken default config for nghttp2-proxy
+  * d/symbols: update the list of symbols
+
+ -- Tomasz Buchert <tomasz@debian.org>  Tue, 26 Apr 2016 23:29:25 +0200
+
+nghttp2 (1.9.2-1) unstable; urgency=medium
+
+  * Imported upstream version 1.9.2
+
+ -- Tomasz Buchert <tomasz@debian.org>  Tue, 05 Apr 2016 07:33:05 +0200
+
+nghttp2 (1.9.1-1) unstable; urgency=medium
+
+  * Imported upstream version 1.9.1
+
+ -- Tomasz Buchert <tomasz@debian.org>  Mon, 28 Mar 2016 11:17:23 +0200
+
+nghttp2 (1.8.0-1) unstable; urgency=medium
+
+  * Imported upstream version 1.8.0 (Closes: #811995)
+  * d/symbols: update symbol list
+  * d/control: bump std-ver to 3.9.7 (no changes needed)
+
+ -- Tomasz Buchert <tomasz@debian.org>  Mon, 29 Feb 2016 13:28:57 +0100
+
+nghttp2 (1.7.1-2) unstable; urgency=medium
+
+  * Add missing script for OCSP stapling (Closes: #815226)
+
+ -- Tomasz Buchert <tomasz@debian.org>  Sun, 21 Feb 2016 21:22:54 +0100
+
+nghttp2 (1.7.1-1) unstable; urgency=high
+
+  * Imported upstream version 1.7.1 (fixes CVE-2016-1544)
+
+ -- Tomasz Buchert <tomasz@debian.org>  Sat, 13 Feb 2016 10:17:19 +0100
+
+nghttp2 (1.7.0-1) unstable; urgency=medium
+
+  * Imported upstream version 1.7.0
+
+ -- Tomasz Buchert <tomasz@debian.org>  Wed, 27 Jan 2016 18:10:34 +0100
+
+nghttp2 (1.6.0-1) unstable; urgency=medium
+
+  * Imported upstream version 1.6.0
+
+ -- Tomasz Buchert <tomasz@debian.org>  Sat, 26 Dec 2015 11:15:01 +0100
+
+nghttp2 (1.5.0-2) unstable; urgency=medium
+
+  * Update Build-Depends for cross compilation (Closes: #807849)
+    Patch provided by Helmut Grohne (with some minor changes)
+  * Split build into -arch and -indep packages
+  * Fix two Lintian warnings
+
+ -- Tomasz Buchert <tomasz@debian.org>  Tue, 15 Dec 2015 11:39:36 +0100
+
+nghttp2 (1.5.0-1) unstable; urgency=medium
+
+  * Imported upstream version 1.5.0
+
+ -- Tomasz Buchert <tomasz@debian.org>  Sat, 05 Dec 2015 09:00:48 +0100
+
+nghttp2 (1.4.0-2) unstable; urgency=medium
+
+  * Fix systemd service
+
+ -- Tomasz Buchert <tomasz@debian.org>  Sat, 07 Nov 2015 14:17:48 +0100
+
+nghttp2 (1.4.0-1) unstable; urgency=medium
+
+  * Imported Upstream version 1.4.0
+
+ -- Tomasz Buchert <tomasz@debian.org>  Sat, 31 Oct 2015 18:41:18 +0100
+
+nghttp2 (1.3.4-2) unstable; urgency=medium
+
+  * Split into subpackages: nghttp2-{client,proxy,server} (Closes: #802206)
+
+ -- Tomasz Buchert <tomasz@debian.org>  Fri, 23 Oct 2015 17:39:22 +0200
+
+nghttp2 (1.3.4-1) unstable; urgency=medium
+
+  * Imported Upstream version 1.3.4 (Closes: #801957)
+  * Adding myself as Uploader
+
+ -- Tomasz Buchert <tomasz@debian.org>  Thu, 01 Oct 2015 10:47:15 +0200
+
+nghttp2 (1.3.2-0.1) unstable; urgency=medium
+
+  * Non-maintainer upload.
+  * Imported Upstream version 1.3.2
+  * d/patches: drop patches
+
+ -- Tomasz Buchert <tomasz@debian.org>  Sat, 19 Sep 2015 21:39:17 +0200
+
+nghttp2 (1.3.1-0.4) unstable; urgency=medium
+
+  * Non-maintainer upload.
+  * Fix build problem on armel
+
+ -- Tomasz Buchert <tomasz@debian.org>  Sun, 13 Sep 2015 09:37:02 +0200
+
+nghttp2 (1.3.1-0.3) unstable; urgency=medium
+
+  * Non-maintainer upload.
+  * Imported Upstream version 1.3.1 (Closes: #798598)
+  * d/copyright: add license for mruby
+  * d/conf: send errorlog to syslog
+
+ -- Tomasz Buchert <tomasz@debian.org>  Sat, 12 Sep 2015 22:34:22 +0200
+
+nghttp2 (1.3.0-0.2) unstable; urgency=medium
+
+  * Non-maintainer upload.
+  * Upload to unstable (Closes: #784666, #793571)
+  * d/*: dropping dbg package (ddebs are coming)
+
+ -- Tomasz Buchert <tomasz@debian.org>  Tue, 08 Sep 2015 12:38:55 +0200
+
+nghttp2 (1.3.0-0.1) experimental; urgency=medium
+
+  * Non-maintainer upload
+  * Imported Upstream version 1.3.0
+  * Switch to dh
+
+ -- Tomasz Buchert <tomasz@debian.org>  Wed, 02 Sep 2015 18:22:19 +0200
+
+nghttp2 (0.6.7-1) unstable; urgency=medium
+
+  * New upstream release
+
+ -- Dave Beckett <dajobe@debian.org>  Sun, 30 Nov 2014 13:45:03 -0800
+
+nghttp2 (0.6.6-1) unstable; urgency=medium
+
+  * New upstream release
+
+ -- Dave Beckett <dajobe@debian.org>  Sat, 08 Nov 2014 14:02:38 -0800
+
+nghttp2 (0.6.5-2) unstable; urgency=medium
+
+  * Fix nghttpx init script path.
+
+ -- Dave Beckett <dajobe@debian.org>  Fri, 31 Oct 2014 11:44:14 -0700
+
+nghttp2 (0.6.5-1) unstable; urgency=medium
+
+  * New upstream release
+  * Install init file and logrotate files for nghttpx daemon into
+    the nghttp2 package.  Add sample config file.
+
+ -- Dave Beckett <dajobe@debian.org>  Thu, 30 Oct 2014 11:57:27 -0700
+
+nghttp2 (0.6.4-2) unstable; urgency=medium
+
+  * debian/rules: Fix test for jemalloc configure arg so hurd may build
+
+ -- Dave Beckett <dajobe@debian.org>  Sun, 19 Oct 2014 08:36:26 -0700
+
+nghttp2 (0.6.4-1) unstable; urgency=medium
+
+  * New upstream release
+
+ -- Dave Beckett <dajobe@debian.org>  Tue, 14 Oct 2014 10:55:00 -0700
+
+nghttp2 (0.6.3-2) unstable; urgency=medium
+
+  * Standards-Version: 3.9.6
+  * Disable dependency and use of jemalloc on hurd since it's broken
+    there, and an upstream recommendation not requirement.
+
+ -- Dave Beckett <dajobe@debian.org>  Sun, 12 Oct 2014 13:21:05 -0700
+
+nghttp2 (0.6.3-1) unstable; urgency=medium
+
+  * New upstream release (Closes: #763906, #750616)
+  * Removed debian/patches/path_max.patch applied upstream
+
+ -- Dave Beckett <dajobe@debian.org>  Fri, 10 Oct 2014 09:12:15 -0700
+
+nghttp2 (0.6.2-2) unstable; urgency=medium
+
+  * debian/rules: Add quilt for patching
+  * debian/patches/path_max.patch Added to remove use of PATH_MAX;
+    also applied upstream (Closes: #762696)
+
+ -- Dave Beckett <dajobe@debian.org>  Fri, 03 Oct 2014 07:00:49 -0700
+
+nghttp2 (0.6.2-1) unstable; urgency=medium
+
+  * New upstream release
+  * Add the recommended jemalloc
+
+ -- Dave Beckett <dajobe@debian.org>  Sun, 28 Sep 2014 08:41:32 -0700
+
+nghttp2 (0.6.1-1) unstable; urgency=medium
+
+  * New upstream release
+  * debian/copyright: Fix some lintian deb5 warnings
+
+ -- Dave Beckett <dajobe@debian.org>  Wed, 10 Sep 2014 13:30:14 -0700
+
+nghttp2 (0.6.0-1) unstable; urgency=medium
+
+  * New upstream release
+  * Major soname bumped so rename packages to libnghttp2-5*
+  * Switch dev package to libnghttp2-dev from ftpmaster suggestion
+
+ -- Dave Beckett <dajobe@debian.org>  Sat, 30 Aug 2014 11:34:33 -0700
+
+nghttp2 (0.5.1-1) unstable; urgency=medium
+
+  * New upstream release
+
+ -- Dave Beckett <dajobe@debian.org>  Wed, 23 Jul 2014 13:51:09 -0700
+
+nghttp2 (0.5.0-1) unstable; urgency=medium
+
+  * New upstream release
+  * Major soname bumped so rename packages to libnghttp2-4*
+
+ -- Dave Beckett <dajobe@debian.org>  Fri, 18 Jul 2014 12:34:34 -0700
+
+nghttp2 (0.4.1-1) unstable; urgency=medium
+
+  * New upstream release
+
+ -- Dave Beckett <dajobe@debian.org>  Tue, 03 Jun 2014 20:50:26 -0700
+
+nghttp2 (0.4.0-1) unstable; urgency=medium
+
+  * New upstream release
+  * Major soname bumped so rename packages to libnghttp2-3*
+
+ -- Dave Beckett <dajobe@debian.org>  Sat, 17 May 2014 09:35:36 -0700
+
+nghttp2 (0.3.2-3) experimental; urgency=medium
+
+  * Add symbols
+
+ -- Dave Beckett <dajobe@debian.org>  Sat, 08 Mar 2014 15:35:32 -0800
+
+nghttp2 (0.3.2-2) experimental; urgency=medium
+
+  * Explicitly set to install AUTHORS and README.rst (not README
+    which is a pointer).  (Closes: #741102)
+  * Remove useless objects.inv from libnghttp2-doc
+
+ -- Dave Beckett <dajobe@debian.org>  Sat, 08 Mar 2014 10:36:48 -0800
+
+nghttp2 (0.3.2-1) experimental; urgency=medium
+
+  * New upstream release
+  * Added doc-base file for libnghttp2-doc
+  * Mark libnghttp2-2-dbg as Multi-Arch: same
+
+ -- Dave Beckett <dajobe@debian.org>  Sun, 02 Mar 2014 10:24:19 -0800
+
+nghttp2 (0.3.1-1) experimental; urgency=medium
+
+  * New upstream release
+  * Use the new upstream manpages
+  * Remove debian/sphinx.tar.bz2 now upstream ships it
+  * debian/README.source: removed since upstream source is good
+
+ -- Dave Beckett <dajobe@debian.org>  Mon, 17 Feb 2014 13:14:09 -0800
+
+nghttp2 (0.3.0-3) experimental; urgency=medium
+
+  * Update debian/sphinx.tar.bz2 from latest git upstream
+  * debian/copyright: Updated to describe above
+
+ -- Dave Beckett <dajobe@debian.org>  Fri, 14 Feb 2014 09:53:50 -0800
+
+nghttp2 (0.3.0-2) experimental; urgency=medium
+
+  * Build-Depends: pkg-config, libpython-dev
+
+ -- Dave Beckett <dajobe@debian.org>  Mon, 10 Feb 2014 19:09:47 -0800
+
+nghttp2 (0.3.0-1) experimental; urgency=medium
+
+  * New upstream release
+  * Major soname bumped so rename packages to libnghttp2-2*
+  * Added libnghttp2-2-dbg package
+  * Added libnghttp2-2.shlibs to manage changing ABI
+  * debian/copyright: updated for new files
+  * debian/watch: added debian and uupdate
+  * Added debian/sphinx.tar.bz2 from upstream so 'make html' works.
+
+ -- Dave Beckett <dajobe@debian.org>  Fri, 07 Feb 2014 14:45:39 -0800
+
+nghttp2 (0.2.0-1) experimental; urgency=low
+
+  * Initial release. (Closes: #737261)
+
+ -- Dave Beckett <dajobe@debian.org>  Fri, 31 Jan 2014 23:18:41 -0800

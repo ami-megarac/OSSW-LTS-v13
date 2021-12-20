@@ -1,0 +1,728 @@
+# Copyright (C) 2006 SuSE Linux Products GmbH, Nuernberg
+# This file is distributed under the same license as the package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: apparmor-parser\n"
+"Report-Msgid-Bugs-To: <apparmor@lists.ubuntu.com>\n"
+"POT-Creation-Date: 2014-09-13 00:11-0700\n"
+"PO-Revision-Date: 2013-11-15 02:42+0000\n"
+"Last-Translator: Novell Language <Unknown>\n"
+"Language-Team: Novell Language <language@novell.com>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Launchpad-Export-Date: 2016-06-01 05:15+0000\n"
+"X-Generator: Launchpad (build 18053)\n"
+"Language: zh_TW\n"
+
+#: ../parser_include.c:113
+msgid "Error: Out of memory.\n"
+msgstr "錯誤：記憶體不足。\n"
+
+#: ../parser_include.c:123
+#, c-format
+msgid "Error: basedir %s is not a directory, skipping.\n"
+msgstr "錯誤︰基本目錄 %s 不是目錄，正在跳過。\n"
+
+#: ../parser_include.c:137
+#, c-format
+msgid "Error: Could not add directory %s to search path.\n"
+msgstr "錯誤︰無法將目錄 %s 新增至搜尋路徑。\n"
+
+#: ../parser_include.c:147
+msgid "Error: Could not allocate memory.\n"
+msgstr "錯誤：無法配置記憶體。\n"
+
+#: ../parser_interface.c:69 ../parser_interface.c:72
+msgid "Bad write position\n"
+msgstr "不良的寫入位置\n"
+
+#: ../parser_interface.c:72 ../parser_interface.c:75
+msgid "Permission denied\n"
+msgstr "許可權被拒絕\n"
+
+#: ../parser_interface.c:75 ../parser_interface.c:78
+msgid "Out of memory\n"
+msgstr "記憶體不足\n"
+
+#: ../parser_interface.c:78 ../parser_interface.c:81
+msgid "Couldn't copy profile: Bad memory address\n"
+msgstr ""
+
+#: ../parser_interface.c:81 ../parser_interface.c:84
+msgid "Profile doesn't conform to protocol\n"
+msgstr "設定檔不符合通訊協定\n"
+
+#: ../parser_interface.c:84 ../parser_interface.c:87
+msgid "Profile does not match signature\n"
+msgstr "設定檔不符合簽名\n"
+
+#: ../parser_interface.c:87 ../parser_interface.c:90
+msgid "Profile version not supported by Apparmor module\n"
+msgstr "Apparmor 模組不支援該設定檔版本\n"
+
+#: ../parser_interface.c:90 ../parser_interface.c:93
+msgid "Profile already exists\n"
+msgstr "設定檔已存在\n"
+
+#: ../parser_interface.c:93 ../parser_interface.c:96
+msgid "Profile doesn't exist\n"
+msgstr "設定檔不存在\n"
+
+#: ../parser_interface.c:96 ../parser_interface.c:99
+msgid "Permission denied; attempted to load a profile while confined?\n"
+msgstr ""
+
+#: ../parser_interface.c:99 ../parser_interface.c:102
+#, c-format
+msgid "Unknown error (%d): %s\n"
+msgstr ""
+
+#: ../parser_interface.c:116 ../parser_interface.c:119
+#, c-format
+msgid "%s: Unable to add \"%s\".  "
+msgstr "%s: 無法新增 \"%s\"。  "
+
+#: ../parser_interface.c:121 ../parser_interface.c:124
+#, c-format
+msgid "%s: Unable to replace \"%s\".  "
+msgstr "%s: 無法取代 \"%s\"。  "
+
+#: ../parser_interface.c:126 ../parser_interface.c:129
+#, c-format
+msgid "%s: Unable to remove \"%s\".  "
+msgstr "%s: 無法移除 \"%s\"。  "
+
+#: ../parser_interface.c:131 ../parser_interface.c:134
+#, c-format
+msgid "%s: Unable to write to stdout\n"
+msgstr "%s: 無法寫入至 stdout\n"
+
+#: ../parser_interface.c:135 ../parser_interface.c:138
+#, c-format
+msgid "%s: Unable to write to output file\n"
+msgstr ""
+
+#: ../parser_interface.c:138 ../parser_interface.c:162
+#: ../parser_interface.c:141 ../parser_interface.c:165
+#, c-format
+msgid "%s: ASSERT: Invalid option: %d\n"
+msgstr "%s: 顯示：無效的選項： %d\n"
+
+#: ../parser_interface.c:147 ../parser_interface.c:150
+#, c-format
+msgid "Addition succeeded for \"%s\".\n"
+msgstr "\"%s\" 附加成功。\n"
+
+#: ../parser_interface.c:151 ../parser_interface.c:154
+#, c-format
+msgid "Replacement succeeded for \"%s\".\n"
+msgstr "\"%s\" 取代成功。\n"
+
+#: ../parser_interface.c:155 ../parser_interface.c:158
+#, c-format
+msgid "Removal succeeded for \"%s\".\n"
+msgstr "\"%s\" 移除成功。\n"
+
+#: ../parser_interface.c:251 ../parser_interface.c:254
+#, c-format
+msgid "PANIC bad increment buffer %p pos %p ext %p size %d res %p\n"
+msgstr "PANIC 不良的增量緩衝區 %p pos %p ext %p size %d res %p\n"
+
+#: ../parser_interface.c:656 ../parser_interface.c:658
+#, c-format
+msgid "profile %s network rules not enforced\n"
+msgstr ""
+
+#: ../parser_interface.c:666
+msgid "Unknown pattern type\n"
+msgstr ""
+
+#: ../parser_interface.c:750 ../parser_interface.c:902
+#: ../parser_interface.c:743 ../parser_interface.c:894
+#, c-format
+msgid "Unable to open %s - %s\n"
+msgstr "無法開啟 %s - %s\n"
+
+#: ../parser_interface.c:776 ../parser_interface.c:768
+#, c-format
+msgid "Memory Allocation Error: Unable to remove ^%s\n"
+msgstr "記憶體配置錯誤：無法移除 ^%s\n"
+
+#: ../parser_interface.c:789 ../parser_interface.c:781
+#, c-format
+msgid "Memory Allocation Error: Unable to remove %s:%s."
+msgstr "記憶體配置錯誤：無法移除 %s:%s。"
+
+#: ../parser_interface.c:810 ../parser_interface.c:802
+msgid "unable to create work area\n"
+msgstr "無法建立工作區\n"
+
+#: ../parser_interface.c:818 ../parser_interface.c:810
+#, c-format
+msgid "unable to serialize profile %s\n"
+msgstr "無法序列化設定檔 %s\n"
+
+#: ../parser_interface.c:829 ../parser_interface.c:916
+#: ../parser_interface.c:821 ../parser_interface.c:908
+#, c-format
+msgid "%s: Unable to write entire profile entry\n"
+msgstr "%s: 無法寫入整個設定檔項目\n"
+
+#: ../parser_interface.c:839 ../parser_interface.c:831
+#, c-format
+msgid "%s: Unable to write entire profile entry to cache\n"
+msgstr ""
+
+#: parser_lex.l:100 parser_lex.l:163
+#, c-format
+msgid "Could not open '%s'"
+msgstr ""
+
+#: parser_lex.l:104 parser_lex.l:167
+#, c-format
+msgid "fstat failed for '%s'"
+msgstr ""
+
+#: parser_lex.l:121
+#, c-format
+msgid "opendir failed '%s'"
+msgstr ""
+
+#: parser_lex.l:152
+#, c-format
+msgid "stat failed for '%s'"
+msgstr ""
+
+#: parser_lex.l:155 parser_lex.l:133
+#, c-format
+msgid "Could not open '%s' in '%s'"
+msgstr ""
+
+#: parser_lex.l:284 parser_lex.l:322 parser_lex.l:362 parser_lex.l:399
+#: parser_lex.l:469 parser_lex.l:655 parser_lex.l:586
+#, c-format
+msgid "Found unexpected character: '%s'"
+msgstr "找到非預期的字元： '%s'"
+
+#: parser_lex.l:386 parser_lex.l:418
+msgid "Variable declarations do not accept trailing commas"
+msgstr ""
+
+#: parser_lex.l:420
+#, c-format
+msgid "(network_mode) Found unexpected character: '%s'"
+msgstr "(網路模式) 發現非預期的字元︰%s"
+
+#: ../parser_main.c:333 ../parser_common.c:61
+#, c-format
+msgid "Warning from %s (%s%sline %d): %s"
+msgstr ""
+
+#: ../parser_main.c:531
+#, c-format
+msgid "%s: Could not allocate memory for subdomainbase mount point\n"
+msgstr "%s: 無法為子網域基地裝載點配置記憶體\n"
+
+#: ../parser_main.c:577 ../parser_main.c:616
+#, c-format
+msgid ""
+"Warning: unable to find a suitable fs in %s, is it mounted?\n"
+"Use --subdomainfs to override.\n"
+msgstr ""
+"警告︰%s 中找不到適合的 fs，是否已裝載？\n"
+"請使用 --subdomainfs 覆寫。\n"
+
+#: ../parser_main.c:597 ../parser_main.c:635
+#, c-format
+msgid ""
+"%s: Sorry. You need root privileges to run this program.\n"
+"\n"
+msgstr ""
+"%s︰抱歉。您必須具有根使用者權限才能執行此程式。\n"
+"\n"
+
+#: ../parser_main.c:604 ../parser_main.c:642
+#, c-format
+msgid ""
+"%s: Warning! You've set this program setuid root.\n"
+"Anybody who can run this program can update your AppArmor profiles.\n"
+"\n"
+msgstr ""
+"%s︰警告！您已將此程式設定為 setuid root。\n"
+"任何可執行此程式的使用者均可更新您的 AppArmor 設定檔。\n"
+"\n"
+
+#: ../parser_main.c:704 ../parser_main.c:813 ../parser_main.c:836
+#: ../parser_main.c:946
+#, c-format
+msgid "Error: Could not read profile %s: %s.\n"
+msgstr "錯誤︰無法讀取設定檔 %s︰%s。\n"
+
+#: ../parser_main.c:718 ../parser_misc.c:270 parser_yacc.y:227
+#: parser_yacc.y:374 parser_yacc.y:386 parser_yacc.y:484 parser_yacc.y:586
+#: parser_yacc.y:624 parser_yacc.y:939 parser_yacc.y:948 parser_yacc.y:960
+#: parser_yacc.y:1008 parser_yacc.y:1019 parser_yacc.y:1101 parser_yacc.y:1119
+#: parser_yacc.y:1126 ../parser_main.c:850 ../parser_main.c:1015
+#: ../parser_main.c:1229 ../parser_main.c:1283 ../parser_misc.c:431
+#: parser_yacc.y:268 parser_yacc.y:416 parser_yacc.y:426 parser_yacc.y:537
+#: parser_yacc.y:626 parser_yacc.y:976 parser_yacc.y:1021 parser_yacc.y:1030
+#: parser_yacc.y:1042 parser_yacc.y:1078 parser_yacc.y:1082 parser_yacc.y:1092
+#: parser_yacc.y:1102 parser_yacc.y:1201 parser_yacc.y:1223 parser_yacc.y:1234
+#: parser_yacc.y:1309 parser_yacc.y:1327 parser_yacc.y:1334 parser_yacc.y:1385
+msgid "Memory allocation error."
+msgstr "記憶體配置錯誤。"
+
+#: ../parser_main.c:740 ../parser_main.c:872
+#, c-format
+msgid "Cached load succeeded for \"%s\".\n"
+msgstr ""
+
+#: ../parser_main.c:744 ../parser_main.c:876
+#, c-format
+msgid "Cached reload succeeded for \"%s\".\n"
+msgstr ""
+
+#: ../parser_main.c:910 ../parser_main.c:1058
+#, c-format
+msgid "%s: Errors found in file. Aborting.\n"
+msgstr "%s: 檔案中發現錯誤。正在中止。\n"
+
+#: ../parser_misc.c:426 ../parser_misc.c:597
+msgid ""
+"Uppercase qualifiers \"RWLIMX\" are deprecated, please convert to lowercase\n"
+"See the apparmor.d(5) manpage for details.\n"
+msgstr ""
+"大寫修飾詞「RWLIMX」已廢棄，請將其轉換成小寫\n"
+"如需詳細資料，請參閱 apparmor.d(5) manpage。\n"
+
+#: ../parser_misc.c:467 ../parser_misc.c:474 ../parser_misc.c:638
+#: ../parser_misc.c:645
+msgid "Conflict 'a' and 'w' perms are mutually exclusive."
+msgstr "衝突的「a」與「w」許可互不相容。"
+
+#: ../parser_misc.c:491 ../parser_misc.c:662
+msgid "Exec qualifier 'i' invalid, conflicting qualifier already specified"
+msgstr "Exec 修飾語「i」是無效的，已指定衝突的修飾語"
+
+#: ../parser_misc.c:502 ../parser_misc.c:673
+#, c-format
+msgid ""
+"Unconfined exec qualifier (%c%c) allows some dangerous environment variables "
+"to be passed to the unconfined process; 'man 5 apparmor.d' for details.\n"
+msgstr ""
+"未設限 exec 修飾詞 (%c%c) 允許將某些危險環境變數傳遞至未設限程序；如需詳細資料，請參閱 man 5 apparmor.d。\n"
+
+#: ../parser_misc.c:510 ../parser_misc.c:551 ../parser_misc.c:681
+#: ../parser_misc.c:722
+#, c-format
+msgid "Exec qualifier '%c' invalid, conflicting qualifier already specified"
+msgstr "Exec 修飾詞「%c」無效，指定了衝突的修飾詞"
+
+#: ../parser_misc.c:537 ../parser_misc.c:545 ../parser_misc.c:708
+#: ../parser_misc.c:716
+#, c-format
+msgid ""
+"Exec qualifier '%c%c' invalid, conflicting qualifier already specified"
+msgstr "Exec 修飾詞「%c%c」無效，指定了衝突的修飾詞"
+
+#: ../parser_misc.c:593 ../parser_misc.c:764
+#, c-format
+msgid "Internal: unexpected mode character '%c' in input"
+msgstr "內部：輸入中存在非預期的模式字元「%c」"
+
+#: ../parser_misc.c:615 ../parser_misc.c:786
+#, c-format
+msgid "Internal error generated invalid perm 0x%llx\n"
+msgstr "內部錯誤產生無效許可權 0x%llx\n"
+
+#: ../parser_misc.c:865 ../parser_symtab.c:561 ../parser_regex.c:626
+#: ../parser_variable.c:229
+#, c-format
+msgid "AppArmor parser error: %s\n"
+msgstr "AppArmor 剖析程式錯誤︰%s\n"
+
+#: ../parser_merge.c:92 ../parser_merge.c:91
+msgid "Couldn't merge entries. Out of Memory\n"
+msgstr "無法合併項目。記憶體不足\n"
+
+#: ../parser_merge.c:111 ../parser_merge.c:113
+#, c-format
+msgid "profile %s: has merged rule %s with conflicting x modifiers\n"
+msgstr ""
+
+#: parser_yacc.y:236 parser_yacc.y:277
+msgid "Profile attachment must begin with a '/'."
+msgstr ""
+
+#: parser_yacc.y:260 parser_yacc.y:302
+msgid ""
+"Profile names must begin with a '/', namespace or keyword 'profile' or 'hat'."
+msgstr ""
+
+#: parser_yacc.y:296 parser_yacc.y:338
+#, c-format
+msgid "Failed to create alias %s -> %s\n"
+msgstr "無法建立別名 %s -> %s\n"
+
+#: parser_yacc.y:417 parser_yacc.y:460
+msgid "Profile flag chroot_relative conflicts with namespace_relative"
+msgstr ""
+
+#: parser_yacc.y:421 parser_yacc.y:464
+msgid "Profile flag mediate_deleted conflicts with delegate_deleted"
+msgstr ""
+
+#: parser_yacc.y:424 parser_yacc.y:467
+msgid ""
+"Profile flag attach_disconnected conflicts with no_attach_disconnected"
+msgstr ""
+
+#: parser_yacc.y:427 parser_yacc.y:470
+msgid "Profile flag chroot_attach conflicts with chroot_no_attach"
+msgstr ""
+
+#: parser_yacc.y:441 parser_yacc.y:484
+msgid "Profile flag 'debug' is no longer valid."
+msgstr "設定檔旗標「debug」不再有效。"
+
+#: parser_yacc.y:463 parser_yacc.y:506
+#, c-format
+msgid "Invalid profile flag: %s."
+msgstr "設定檔旗標 %s 無效。"
+
+#: parser_yacc.y:498 parser_yacc.y:520 parser_yacc.y:548
+msgid "Assert: `rule' returned NULL."
+msgstr "顯示：`rule' 傳回 NULL。"
+
+#: parser_yacc.y:501 parser_yacc.y:546 parser_yacc.y:552 parser_yacc.y:584
+msgid ""
+"Invalid mode, in deny rules 'x' must not be preceded by exec qualifier 'i', "
+"'p', or 'u'"
+msgstr "無效模式，拒絕規則「x」的前面必須是 Exec 修飾詞「i」、「p」或「u」"
+
+#: parser_yacc.y:524 parser_yacc.y:556
+msgid ""
+"Invalid mode, 'x' must be preceded by exec qualifier 'i', 'p', 'c', or 'u'"
+msgstr "無效模式，「x」的前面必須是 Exec 修飾詞「i」、「p」、「c」或「u」"
+
+#: parser_yacc.y:549 parser_yacc.y:587
+msgid "Invalid mode, 'x' must be preceded by exec qualifier 'i', 'p', or 'u'"
+msgstr "無效模式，「x」的前面必須是 Exec 修飾詞「i」、「p」或「u」"
+
+#: parser_yacc.y:574 parser_yacc.y:612 parser_yacc.y:614
+msgid "Assert: `network_rule' return invalid protocol."
+msgstr "提示︰「network_rule」傳回無效的通訊協定。"
+
+#: parser_yacc.y:649 parser_yacc.y:696
+msgid "Assert: `change_profile' returned NULL."
+msgstr "提示︰「change_profile」傳回 NULL。"
+
+#: parser_yacc.y:680 parser_yacc.y:720
+msgid "Assert: 'hat rule' returned NULL."
+msgstr "顯示：'hat rule' 傳回 NULL。"
+
+#: parser_yacc.y:689 parser_yacc.y:729
+msgid "Assert: 'local_profile rule' returned NULL."
+msgstr "顯示：「local_profile rule」傳回 NULL。"
+
+#: parser_yacc.y:824 parser_yacc.y:885
+#, c-format
+msgid "Unset boolean variable %s used in if-expression"
+msgstr "取消設定 if 運算式中使用的布林變數 %s"
+
+#: parser_yacc.y:882 parser_yacc.y:986
+msgid "unsafe rule missing exec permissions"
+msgstr "不安全規則缺少 exec 許可權"
+
+#: parser_yacc.y:901 parser_yacc.y:954
+msgid "subset can only be used with link rules."
+msgstr "子集只能與連結規則一起使用。"
+
+#: parser_yacc.y:903 parser_yacc.y:956
+msgid "link and exec perms conflict on a file rule using ->"
+msgstr "使用 -> 的檔案規則有連結許可權與執行許可權衝突"
+
+#: parser_yacc.y:905 parser_yacc.y:958
+msgid "link perms are not allowed on a named profile transition.\n"
+msgstr "不允許對指定的設定檔轉換使用連結許可權。\n"
+
+#: parser_yacc.y:921 parser_yacc.y:1003
+#, c-format
+msgid "missing an end of line character? (entry: %s)"
+msgstr "找不到行尾字元？(項目： %s)"
+
+#: parser_yacc.y:975 parser_yacc.y:985 parser_yacc.y:1057 parser_yacc.y:1067
+msgid "Invalid network entry."
+msgstr "網路項目無效。"
+
+#: parser_yacc.y:1039 parser_yacc.y:1048 parser_yacc.y:1254
+#, c-format
+msgid "Invalid capability %s."
+msgstr "功能 %s 無效。"
+
+#: parser_yacc.y:1066 parser_yacc.y:1269
+#, c-format
+msgid "AppArmor parser error for %s%s%s at line %d: %s\n"
+msgstr ""
+
+#: parser_yacc.y:1072 parser_yacc.y:1275
+#, c-format
+msgid "AppArmor parser error,%s%s line %d: %s\n"
+msgstr ""
+
+#: ../parser_regex.c:244
+#, c-format
+msgid "%s: Illegal open {, nesting groupings not allowed\n"
+msgstr "%s: 非法開啟 {, 不允許巢狀群組\n"
+
+#: ../parser_regex.c:265 ../parser_regex.c:274
+#, c-format
+msgid "%s: Regex grouping error: Invalid number of items between {}\n"
+msgstr "%s: Regex 群組錯誤：無效的項目數在 {} 之間\n"
+
+#: ../parser_regex.c:271 ../parser_regex.c:280
+#, c-format
+msgid ""
+"%s: Regex grouping error: Invalid close }, no matching open { detected\n"
+msgstr "%s: Regex 群組錯誤：非法關閉 }, 無相符的開啟 { 已偵測到\n"
+
+#: ../parser_regex.c:337 ../parser_regex.c:343
+#, c-format
+msgid ""
+"%s: Regex grouping error: Unclosed grouping or character class, expecting "
+"close }\n"
+msgstr "%s︰Regex 群組錯誤：存在未關閉的群組或字元類別，需要關閉}\n"
+
+#: ../parser_regex.c:351 ../parser_regex.c:357
+#, c-format
+msgid "%s: Internal buffer overflow detected, %d characters exceeded\n"
+msgstr "%s: 偵測到內部緩衝區溢位，超過 %d 個字元\n"
+
+#: ../parser_regex.c:355 ../parser_regex.c:361
+#, c-format
+msgid "%s: Unable to parse input line '%s'\n"
+msgstr "%s: 無法剖析輸入行 '%s'\n"
+
+#: ../parser_regex.c:397 ../parser_regex.c:405
+#, c-format
+msgid "%s: Invalid profile name '%s' - bad regular expression\n"
+msgstr ""
+
+#: ../parser_policy.c:202 ../parser_policy.c:402
+#, c-format
+msgid "ERROR merging rules for profile %s, failed to load\n"
+msgstr "為設定檔 %s 合併規則時發生錯誤，無法載入\n"
+
+#: ../parser_policy.c:234
+#, c-format
+msgid ""
+"ERROR profile %s contains policy elements not usable with this kernel:\n"
+"\t'*', '?', character ranges, and alternations are not allowed.\n"
+"\t'**' may only be used at the end of a rule.\n"
+msgstr ""
+"錯誤 設定檔 %s 包含此核心無法使用的規則元素︰\n"
+"\t不允許使用「*」、「?」、字元範圍和替代項。\n"
+"\t「**」僅可用於規則的末尾。\n"
+
+#: ../parser_policy.c:279 ../parser_policy.c:359
+#, c-format
+msgid "ERROR processing regexs for profile %s, failed to load\n"
+msgstr "為設定檔 %s 處理 regexs 時發生錯誤，無法載入\n"
+
+#: ../parser_policy.c:306 ../parser_policy.c:389
+#, c-format
+msgid "ERROR expanding variables for profile %s, failed to load\n"
+msgstr "展開設定檔 %s 的變數時發生錯誤，無法載入\n"
+
+#: ../parser_policy.c:390 ../parser_policy.c:382
+#, c-format
+msgid "ERROR adding hat access rule for profile %s\n"
+msgstr "新增對設定檔 %s 的 hat 存取規則時出錯\n"
+
+#: ../parser_policy.c:490 ../parser_policy.c:271
+#, c-format
+msgid "ERROR in profile %s, failed to load\n"
+msgstr "設定檔 %s 中有錯誤，載入失敗\n"
+
+#: ../parser_policy.c:675
+#, c-format
+msgid "%s: Errors found during postprocessing.  Aborting.\n"
+msgstr "%s：後處理期間發現錯誤。正在中止。\n"
+
+#: ../parser_policy.c:682 ../parser_policy.c:704
+#, c-format
+msgid "%s: Errors found during regex postprocess.  Aborting.\n"
+msgstr "%s︰regex 後處理期間發現錯誤。正在中止。\n"
+
+#: ../parser_policy.c:689
+#, c-format
+msgid "%s: Errors found during postprocess.  Aborting.\n"
+msgstr "%s：後處理期間發現錯誤。正在中止。\n"
+
+#: ../parser_policy.c:696
+#, c-format
+msgid "%s: Errors found in combining rules postprocessing. Aborting.\n"
+msgstr "%s: 結合規則後處理時發現錯誤。正在中止。\n"
+
+#: parser_lex.l:180
+#, c-format
+msgid "Could not process include directory '%s' in '%s'"
+msgstr ""
+
+#: ../parser_main.c:660
+msgid "Feature buffer full."
+msgstr ""
+
+#: ../parser_main.c:1115 ../parser_main.c:1132
+msgid "Out of memory"
+msgstr ""
+
+#: ../parser_main.c:1182
+#, c-format
+msgid "Can't create cache directory: %s\n"
+msgstr ""
+
+#: ../parser_main.c:1185
+#, c-format
+msgid "File in cache directory location: %s\n"
+msgstr ""
+
+#: ../parser_main.c:1188
+#, c-format
+msgid "Can't update cache directory: %s\n"
+msgstr ""
+
+#: ../parser_misc.c:833
+#, c-format
+msgid "Internal: unexpected DBus mode character '%c' in input"
+msgstr ""
+
+#: ../parser_misc.c:857
+#, c-format
+msgid "Internal error generated invalid DBus perm 0x%x\n"
+msgstr ""
+
+#: parser_yacc.y:575
+msgid "deny prefix not allowed"
+msgstr ""
+
+#: parser_yacc.y:612
+msgid "owner prefix not allowed"
+msgstr ""
+
+#: parser_yacc.y:660
+msgid "owner prefix not allow on mount rules"
+msgstr ""
+
+#: parser_yacc.y:677
+msgid "owner prefix not allow on dbus rules"
+msgstr ""
+
+#: parser_yacc.y:704
+msgid "owner prefix not allow on capability rules"
+msgstr ""
+
+#: parser_yacc.y:1357
+#, c-format
+msgid "invalid mount conditional %s%s"
+msgstr ""
+
+#: parser_yacc.y:1374
+msgid "bad mount rule"
+msgstr ""
+
+#: parser_yacc.y:1381
+msgid "mount point conditions not currently supported"
+msgstr ""
+
+#: parser_yacc.y:1398
+#, c-format
+msgid "invalid pivotroot conditional '%s'"
+msgstr ""
+
+#: ../parser_regex.c:241
+#, c-format
+msgid ""
+"%s: Regex grouping error: Invalid close ], no matching open [ detected\n"
+msgstr ""
+
+#: ../parser_regex.c:257
+#, c-format
+msgid "%s: Regex grouping error: Exceeded maximum nesting of {}\n"
+msgstr ""
+
+#: ../parser_policy.c:366
+#, c-format
+msgid "ERROR processing policydb rules for profile %s, failed to load\n"
+msgstr ""
+
+#: ../parser_policy.c:396
+#, c-format
+msgid "ERROR replacing aliases for profile %s, failed to load\n"
+msgstr ""
+
+#: ../parser_interface.c:635 ../parser_interface.c:638
+#, c-format
+msgid "%s: Unable to write %s\n"
+msgstr ""
+
+#: ../parser_main.c:721
+#, c-format
+msgid "Error: Could not read binary profile or cache file %s: %s.\n"
+msgstr ""
+
+#: ../parser_main.c:811
+#, c-format
+msgid "Error: Could not read cache file '%s', skipping...\n"
+msgstr ""
+
+#: ../parser_misc.c:575
+#, c-format
+msgid "Internal: unexpected %s mode character '%c' in input"
+msgstr ""
+
+#: ../parser_misc.c:599
+#, c-format
+msgid "Internal error generated invalid %s perm 0x%x\n"
+msgstr ""
+
+#: parser_yacc.y:703
+msgid "owner prefix not allowed on mount rules"
+msgstr ""
+
+#: parser_yacc.y:720
+msgid "owner prefix not allowed on dbus rules"
+msgstr ""
+
+#: parser_yacc.y:736
+msgid "owner prefix not allowed on signal rules"
+msgstr ""
+
+#: parser_yacc.y:752
+msgid "owner prefix not allowed on ptrace rules"
+msgstr ""
+
+#: parser_yacc.y:768
+msgid "owner prefix not allowed on unix rules"
+msgstr ""
+
+#: parser_yacc.y:794
+msgid "owner prefix not allowed on capability rules"
+msgstr ""
+
+#: parser_yacc.y:1293
+#, c-format
+msgid "dbus rule: invalid conditional group %s=()"
+msgstr ""
+
+#: parser_yacc.y:1371
+#, c-format
+msgid "unix rule: invalid conditional group %s=()"
+msgstr ""
+
+#: ../parser_regex.c:368
+#, c-format
+msgid "%s: Regex error: trailing '\\' escape character\n"
+msgstr ""

@@ -1,0 +1,34 @@
+caps {mask {chown dac_override dac_read_search fowner fsetid kill setgid setuid setpcap linux_immutable net_bind_service net_broadcast net_admin net_raw ipc_lock ipc_owner sys_module sys_rawio sys_chroot sys_ptrace sys_pacct sys_admin sys_boot sys_nice sys_resource sys_time sys_tty_config mknod lease audit_write audit_control setfcap mac_override mac_admin syslog wake_alarm block_suspend
+}
+}
+rlimit {mask {cpu fsize data stack core rss nproc nofile memlock as locks sigpending msgqueue nice rtprio rttime
+}
+}
+capability {0xffffff
+}
+namespaces {pivot_root {yes
+}
+profile {yes
+}
+}
+mount {mask {mount umount
+}
+}
+network {af_mask {unspec unix local inet ax25 ipx appletalk netrom bridge atmpvc x25 inet6 rose netbeui security key netlink packet ash econet atmsvc rds sna irda pppox wanpipe llc ib can tipc bluetooth iucv rxrpc isdn phonet ieee802154 caif alg nfc vsock max
+}
+}
+file {mask {create read write exec append mmap_exec link lock
+}
+}
+domain {change_profile {yes
+}
+change_onexec {yes
+}
+change_hatv {yes
+}
+change_hat {yes
+}
+}
+policy {set_load {yes
+}
+}

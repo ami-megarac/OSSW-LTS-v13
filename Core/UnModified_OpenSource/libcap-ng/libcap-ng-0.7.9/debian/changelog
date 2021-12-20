@@ -1,0 +1,212 @@
+libcap-ng (0.7.9-2) unstable; urgency=medium
+
+  * Refreshed quilt patches
+  * Import patch: fix mark the DSOs as unloadable
+    Thanks to Laurent Bigonville.
+    (Closes: #914565, #915642, #904808)
+  * Drop X-Python-Version fields, versions are ok since oldstable now
+
+ -- Pierre Chifflier <pollux@debian.org>  Mon, 14 Jan 2019 13:33:52 +0100
+
+libcap-ng (0.7.9-1) unstable; urgency=medium
+
+  * New upstream version 0.7.9 (Closes: #896314, #725926)
+  * Add symbols file (Closes: #829061)
+
+ -- Pierre Chifflier <pollux@debian.org>  Sat, 28 Apr 2018 17:10:47 +0200
+
+libcap-ng (0.7.7-3.1) unstable; urgency=medium
+
+  [ Manuel A. Fernandez Montecelo ]
+  * Non-maintainer upload.
+
+  [ Helmut Grohne ]
+  * Add nopython build profile (Closes: #831362)
+  * Fix FTCBFS: make python-related Build-Depends cross-satisfiable
+    (Closes: #840848)
+
+ -- Manuel A. Fernandez Montecelo <mafm@debian.org>  Mon, 25 Sep 2017 00:43:37 +0200
+
+libcap-ng (0.7.7-3) unstable; urgency=high
+
+  * Install libcap-ng so file to /lib (Closes: #829126, #828992)
+  * Urgency high, RC bug
+
+ -- Pierre Chifflier <pollux@debian.org>  Sun, 03 Jul 2016 21:04:40 +0200
+
+libcap-ng (0.7.7-2) unstable; urgency=medium
+
+  * Trigger build to fix link problems (Closes: #807664)
+  * Bump Standards Version to 3.9.8
+
+ -- Pierre Chifflier <pollux@debian.org>  Tue, 26 Apr 2016 11:02:08 +0200
+
+libcap-ng (0.7.7-1) unstable; urgency=medium
+
+  * Imported Upstream version 0.7.7
+    - Fix leaked FD in library init (Closes: #796167)
+
+ -- Pierre Chifflier <pollux@debian.org>  Sat, 26 Sep 2015 13:09:17 +0200
+
+libcap-ng (0.7.6-1) unstable; urgency=medium
+
+  * Imported Upstream version 0.7.6
+  * Add new binary package for Python3 bindings
+
+ -- Pierre Chifflier <pollux@debian.org>  Sun, 10 May 2015 16:26:29 +0200
+
+libcap-ng (0.7.4-3) unstable; urgency=medium
+
+  * Bump Standards Version to 3.9.6
+  * Switch to dh_python, merge patch from James Wilson
+    That should fix empty python packages on non-amd64 architectures
+    (Closes: #766136)
+  * Remove build-dep on chrpath, not used anymore (Closes: #738514)
+    Keep the build-dep on python-all-dev, this is the correct dependency for
+    use with dh_python
+
+ -- Pierre Chifflier <pollux@debian.org>  Tue, 05 May 2015 13:03:00 +0200
+
+libcap-ng (0.7.4-2) unstable; urgency=medium
+
+  * Replace pyversions file with X-Python-Version control field
+  * Disable tests for now, they fail because of a failing relink
+
+ -- Pierre Chifflier <pollux@debian.org>  Fri, 22 Aug 2014 08:37:26 +0200
+
+libcap-ng (0.7.4-1) unstable; urgency=medium
+
+  * Imported Upstream version 0.7.4
+  * Bump Standards Version to 3.9.5
+  * Drop dependency on hardening-wrapper, we are using dpkg-buildflags
+  * Ack NMU
+
+ -- Pierre Chifflier <pollux@debian.org>  Wed, 20 Aug 2014 15:33:07 +0200
+
+libcap-ng (0.7.3-1.1) unstable; urgency=low
+
+  * Non-maintainer upload.
+  * Use dh-autoreconf for better support of new architectures.  Thanks
+    Breno Leitao <brenohl@br.ibm.com> (Closes: #745562)
+  * Do not Build-Depend on python-support, since the package uses dh9 and
+    --with python2 (thus using the current dh_python2 utility and rendering
+    the other build-dependency obsolete).  Thanks Sebastien Bacher
+    <seb128@ubuntu.com> (Closes: #707100)
+  * Add "Multi-Arch: same" in debian/control to avoid some conflicts in
+    dpkg.  Thanks Frédéric Brière <fbriere@fbriere.net> (Closes: #697385)
+    - Also change 'Pre-Depends: multiarch-support' to
+     'Pre-Depends: ${misc:Pre-Depends}', as recommended in the guides
+  * Fix typo in package description, thanks Pascal De Vuyst
+    <pascal.devuyst@gmail.com> (Closes: #704466)
+
+ -- Manuel A. Fernandez Montecelo <mafm@debian.org>  Tue, 20 May 2014 20:54:46 +0100
+
+libcap-ng (0.7.3-1) unstable; urgency=low
+
+  * Imported Upstream version 0.7.3
+  * Swith to DH 9
+  * Tests are no enabled during build (Closes: #583882)
+
+ -- Pierre Chifflier <pollux@debian.org>  Sat, 10 Nov 2012 16:29:37 +0100
+
+libcap-ng (0.6.6-2) unstable; urgency=high
+
+  * Switch to dpkg-source 3.0 (quilt) format
+  * Bump Standards Version to 3.9.3
+  * Add patch to replace memset calls by a loop to zero array.
+    This should fix a segfault on armel (and other) architectures
+    (Closes: #631807, #635664)
+  * RC bugs, so urgency high
+
+ -- Pierre Chifflier <pollux@debian.org>  Sat, 16 Jun 2012 22:38:20 +0200
+
+libcap-ng (0.6.6-1) unstable; urgency=low
+
+  * Imported Upstream version 0.6.6
+  * Enable hardening-wrapper
+  * Bump Standard Version to 3.9.2
+
+ -- Pierre Chifflier <pollux@debian.org>  Sat, 25 Jun 2011 13:57:30 +0200
+
+libcap-ng (0.6.5-1) unstable; urgency=low
+
+  * Imported Upstream version 0.6.5
+  * Bump standards version to 3.9.1
+  * debian/rules: Fix installation for python2.7 (Closes: #607121).
+    Thanks to Matthias Klose for the patch.
+  * Use uppercase for word POSIX (Closes: #591065)
+
+ -- Pierre Chifflier <pollux@debian.org>  Tue, 14 Dec 2010 22:12:49 +0100
+
+libcap-ng (0.6.4-1) unstable; urgency=low
+
+  * Imported Upstream version 0.6.4
+  * Bump Standards version to 3.9.0
+
+ -- Pierre Chifflier <pollux@debian.org>  Tue, 20 Jul 2010 10:03:49 +0200
+
+libcap-ng (0.6.3-1) unstable; urgency=low
+
+  * Imported Upstream version 0.6.3
+  * Bump standards version to 3.8.4
+
+ -- Pierre Chifflier <pollux@debian.org>  Sat, 13 Mar 2010 11:14:11 +0100
+
+libcap-ng (0.6.2-4) unstable; urgency=low
+
+  * Acknowledge NMU (Closes: #563146, #553156, #555716)
+    Thanks Matthias.
+  * Fix lintian warning debhelper-but-no-misc-depends libcap-ng-dev
+
+ -- Pierre Chifflier <pollux@debian.org>  Mon, 04 Jan 2010 20:32:45 +0100
+
+libcap-ng (0.6.2-3.1) unstable; urgency=low
+
+  * NMU
+  * Build with -O0 on sparc/sparc64 to work around GCC ICE. Closes: #563146.
+  * Swap libcap-ng0/libcap-ng-dev package descriptions.
+    Closes: #553156, #555716.
+
+ -- Matthias Klose <doko@debian.org>  Thu, 31 Dec 2009 11:30:56 +0100
+
+libcap-ng (0.6.2-3) unstable; urgency=low
+
+  * Apply patch from Simon McVittie:
+  * Use host rather than build to detect armel (for correct
+    cross-compilation), use the Debian architecture rather than the GNU
+    triplet, and reference Bug #552224 to explain why the workaround is there
+
+ -- Pierre Chifflier <pollux@debian.org>  Mon, 26 Oct 2009 23:34:37 +0100
+
+libcap-ng (0.6.2-2) unstable; urgency=low
+
+  * Apply patch from Simon McVittie:
+  * Don't optimize on armel, to work around overly aggressive optimization (?)
+    on __thread variable. Closes: #546823
+  * Fix NAME sections of man pages so whatis can understand them (Lintian
+    warning).
+  * Install .pc file so pkg-config can be used to find libcap-ng (dh_install
+    warning). Closes: #552039
+
+ -- Pierre Chifflier <pollux@debian.org>  Fri, 23 Oct 2009 14:25:28 +0200
+
+libcap-ng (0.6.2-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Pierre Chifflier <pollux@debian.org>  Fri, 09 Oct 2009 10:22:55 +0200
+
+libcap-ng (0.6.1-1) unstable; urgency=low
+
+  * New upstream release (Closes: #545556)
+  * Bump Standards Version to 3.8.3 (no changes)
+  * Set package priority to optional (Closes: #545558)
+  * Add new bonary package for Python bindings
+
+ -- Pierre Chifflier <pollux@debian.org>  Thu, 10 Sep 2009 01:41:27 +0200
+
+libcap-ng (0.5.1-1) unstable; urgency=low
+
+  * Initial release (Closes: #533508)
+
+ -- Pierre Chifflier <pollux@debian.org>  Mon, 22 Jun 2009 21:47:25 +0200

@@ -1,0 +1,33 @@
+From bc3c7d342bf53afdfdf46bc92dac5c624c89fb91 Mon Sep 17 00:00:00 2001
+From: John Johansen <john.johansen@canonical.com>
+Date: Sat, 16 Apr 2016 14:19:38 -0700
+Subject: [PATCH 11/27] apparmor: fix audit full profile hname on successful
+ load
+
+Currently logging of a successful profile load only logs the basename
+of the profile. This can result in confusion when a child profile has
+the same name as the another profile in the set. Logging the hname
+will ensure there is no confusion.
+
+Signed-off-by: John Johansen <john.johansen@canonical.com>
+Acked-by: Seth Arnold <seth.arnold@canonical.com>
+---
+ security/apparmor/policy.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/security/apparmor/policy.c b/security/apparmor/policy.c
+index db31bc5..ca402d0 100644
+--- a/security/apparmor/policy.c
++++ b/security/apparmor/policy.c
+@@ -1159,7 +1159,7 @@ ssize_t aa_replace_profiles(void *udata, size_t size, bool noreplace)
+ 		list_del_init(&ent->list);
+ 		op = (!ent->old && !ent->rename) ? OP_PROF_LOAD : OP_PROF_REPL;
+ 
+-		audit_policy(op, GFP_ATOMIC, ent->new->base.name, NULL, error);
++		audit_policy(op, GFP_ATOMIC, ent->new->base.hname, NULL, error);
+ 
+ 		if (ent->old) {
+ 			__replace_profile(ent->old, ent->new, 1);
+-- 
+2.7.4
+

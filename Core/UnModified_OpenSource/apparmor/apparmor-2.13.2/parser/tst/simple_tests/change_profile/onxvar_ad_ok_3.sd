@@ -1,0 +1,8 @@
+#
+#=DESCRIPTION audit deny change_profile @{var} with name space
+#=EXRESULT PASS
+#
+@{var}=/test
+/usr/bin/foo {
+   audit deny change_profile @{var} -> :foo:/bin/foo,
+}

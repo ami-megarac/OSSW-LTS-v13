@@ -1,0 +1,7 @@
+#
+#=DESCRIPTION unix entry with a repeated modifier
+#=EXRESULT FAIL
+
+profile foo {
+  unix send type=stream type=dgram,
+}

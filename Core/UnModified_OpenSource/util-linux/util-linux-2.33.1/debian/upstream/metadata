@@ -1,0 +1,4 @@
+Name: util-linux
+Repository: https://git.kernel.org/pub/scm/utils/util-linux/util-linux.git
+Repository-Browse: https://git.kernel.org/cgit/utils/util-linux/util-linux.git/
+Contact: util-linux@vger.kernel.org

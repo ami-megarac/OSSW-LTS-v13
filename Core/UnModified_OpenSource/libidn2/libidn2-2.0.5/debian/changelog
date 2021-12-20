@@ -1,0 +1,307 @@
+libidn2 (2.0.5-1+deb10u1) buster-security; urgency=high
+
+  * Non-maintainer upload by the Security Team.
+  * Fix free of random (stack) value in idn2_to_ascii_4i()
+  * idn2_to_ascii_4i(): Restrict output length to 63 (CVE-2019-18224)
+    (Closes: #942895)
+  * Fail make if 'ronn' doesn't exist when building docs
+  * Fix generation of idn2.1 man page file
+  * Move texinfo from Build-Depends-Indep to Build-Depends (Closes: #949705)
+
+ -- Salvatore Bonaccorso <carnil@debian.org>  Thu, 30 Jan 2020 23:15:38 +0100
+
+libidn2 (2.0.5-1) unstable; urgency=medium
+
+  * New upstream version 2.0.5
+  * Install locales into the libidn2-0 package
+
+ -- Ondřej Surý <ondrej@debian.org>  Fri, 31 Aug 2018 13:05:31 +0000
+
+libidn2 (2.0.4-2.2) unstable; urgency=medium
+
+  * Non-maintainer upload.
+  * Add two minor fixes to ease backporting into Stretch
+    + Add alternate dependency for ronn | ruby-ronn
+    + Disable automake portability warning
+
+ -- Bernhard Schmidt <berni@debian.org>  Mon, 30 Jul 2018 00:24:54 +0200
+
+libidn2 (2.0.4-2.1) unstable; urgency=medium
+
+  * Non-maintainer upload with permission of both Ondrej and Simon,
+    uploading changes staged for -2 that has never hit the archive
+  * Move Vcs-* to salsa
+  * Only build documentation in arch:all builds, reducing Build-Depends
+    (Closes: #891873). Based on a patch from Helmut Grohne.
+  * Build doc/idn2.1 from source (Closes: #903082)
+
+ -- Bernhard Schmidt <berni@debian.org>  Thu, 26 Jul 2018 22:14:21 +0200
+
+libidn2 (2.0.4-2) unstable; urgency=medium
+
+  * Make libidn2-dev multi-arch compatible (Closes: #872550)
+  * Fix gtk-doc-tools >= 1.26 FTBFS due missing gtkdoc-mktmpl
+    + Delete extra Makefile.in before dh_autoreconf
+    + Run gtkdocize --copy --flavour no-tmpl before dh_autoreconf
+    + Add libglib2.0-dev needed by gtk-doc-tools to Build-Depends
+    + Add dblatex to Build-Depends to fix the FTBFS in gtkdoc-mkpdf
+
+ -- Ondřej Surý <ondrej@debian.org>  Mon, 18 Sep 2017 09:03:04 +0200
+
+libidn2 (2.0.4-1.1) unstable; urgency=medium
+
+  * Non-maintainer upload.
+
+  [ Helmut Grohne ]
+  * Fix FTBFS: gtkdocize and add dblatex to Build-Depends. (Closes: #881915)
+
+  [ Simon McVittie ]
+  * Run gtkdocize via a script debian/autogen.sh passed as a parameter
+    to dh_autoreconf, so that the changed gtk-doc.make will be recorded
+    by dh_autoreconf and deleted by dh_autoreconf_clean
+    - Use gtkdocize --copy to avoid gtk-doc.make becoming a symlink, which
+      dh_autoreconf doesn't currently handle
+  * libidn2-doc Breaks/Replaces older versions of both libidn2-dev and
+    libidn2-0-dev (Closes: #881968)
+
+ -- Simon McVittie <smcv@debian.org>  Thu, 23 Nov 2017 11:11:41 +0000
+
+libidn2 (2.0.4-1) unstable; urgency=medium
+
+  * Add myself to Uploaders
+  * Update d/watch to use GNU ftp again, add cryptographic signature
+    verification
+  * New upstream version 2.0.4
+
+ -- Ondřej Surý <ondrej@debian.org>  Mon, 04 Sep 2017 14:17:51 +0200
+
+libidn2 (2.0.3-1) unstable; urgency=medium
+
+  [ Ondřej Surý ]
+  * New upstream version 2.0.3 (Closes: #869561)
+  * Update d/watch to use gitlab.com to check new upstream releases
+  * Rename the -dev package to libidn2-dev and source package to libidn2
+    (Closes: #863030)
+  * Merge the *.manpages and *.info into simple *.install files to
+    allow easier --fail-missing run
+  * Install the pkgconfig file libidn2.pc (Closes: #855948)
+  * Remove runpath mangling, it looks like it's not needed anymore
+  * Enable --fail-missing to catch any not-installed files
+  * Add proper dbgsym-migration option for dh_strip
+  * Add ruby-ronn to Build-Depends to generate the idn2.1 man page
+  * Introduce libidn2-doc package and move the PDF, HTML and Info
+    documentation there
+  * Add lintian override for wrong embedded libidn2-0 library check on the
+    package itself
+  * Simplify debian/copyright to reuse license blocks
+
+  [ Simon Josefsson ]
+  * Mark libidn2-dev as Multi-Arch: same.  Closes: #872550.
+  * Standards-Version 4.1.0.
+  * Add build-dep on gtk-doc-tools to rebuild generated content.
+  * Change Priority:extra to optional as per 4.1.0.
+
+  [ Helmut Grohne ]
+  * Switch libidn2-0-dev back to arch:any again. Closes: #872567.
+
+ -- Simon Josefsson <simon@josefsson.org>  Mon, 04 Sep 2017 11:01:44 +0200
+
+libidn2-0 (2.0.2-5) unstable; urgency=medium
+
+  [ Simon Josefsson ]
+  * Switch libidn2-0-dev back to arch:any again. (Closes: #872567)
+
+  [ Ondřej Surý ]
+  * Make libidn2-dev multi-arch compatible (Closes: #872550)
+
+ -- Ondřej Surý <ondrej@debian.org>  Mon, 18 Sep 2017 08:00:10 +0200
+
+libidn2-0 (2.0.2-4) unstable; urgency=medium
+
+  * CVE-2017-14061: Fix integer overflow in _isBidi function (Closes: #873904)
+  * CVE-2017-14062: Fix integer overflow in decode_digit (Closes: #873902)
+  * Add upstream fix to stop stripping underscores (Closes: #869561)
+  * Add myself to Uploaders:
+
+ -- Ondřej Surý <ondrej@debian.org>  Tue, 12 Sep 2017 10:42:14 +0200
+
+libidn2-0 (2.0.2-3) unstable; urgency=low
+
+  * Rename libidn2-0-dev to libidn2-dev.
+  * Ship new transitional package libidn2-0-dev.
+  * Update libidn2-dev.doc-base.
+
+ -- Simon Josefsson <simon@josefsson.org>  Wed, 02 Aug 2017 20:27:38 +0200
+
+libidn2-0 (2.0.2-2) unstable; urgency=low
+
+  * Ship pkg-config file in libidn2-0-dev.  Closes: #855948.
+
+ -- Simon Josefsson <simon@josefsson.org>  Mon, 17 Jul 2017 08:50:44 +0200
+
+libidn2-0 (2.0.2-1) unstable; urgency=low
+
+  * New upstream release.
+  * Standards-Version 4.0.0.
+  * Add new symbols.
+  * Drop libidn2-0-dbg package (lintian
+    debian-control-has-obsolete-dbg-package).
+  * Use chrpath during build.
+  * Mention TR46 in package description.
+
+ -- Simon Josefsson <simon@josefsson.org>  Sun, 09 Jul 2017 23:53:14 +0200
+
+libidn2-0 (0.16-1) unstable; urgency=low
+
+  * New upstream release.
+
+ -- Simon Josefsson <simon@josefsson.org>  Mon, 16 Jan 2017 09:20:46 +0100
+
+libidn2-0 (0.15-1) unstable; urgency=low
+
+  * New upstream release.
+
+ -- Simon Josefsson <simon@josefsson.org>  Sat, 14 Jan 2017 16:34:11 +0100
+
+libidn2-0 (0.14-1) unstable; urgency=low
+
+  * New upstream release.
+  * Add gengetopt & help2man as build-dep.
+  * Update debian/copyright a bit.
+
+ -- Simon Josefsson <simon@josefsson.org>  Fri, 30 Dec 2016 07:47:29 +0100
+
+libidn2-0 (0.13-1) unstable; urgency=low
+
+  * New upstream release.
+  * Add libunistring-dev as build-dep.
+
+ -- Simon Josefsson <simon@josefsson.org>  Thu, 29 Dec 2016 11:25:33 +0100
+
+libidn2-0 (0.12-1) unstable; urgency=low
+
+  * New upstream release.
+
+ -- Simon Josefsson <simon@josefsson.org>  Mon, 26 Dec 2016 23:12:31 +0100
+
+libidn2-0 (0.11-1) unstable; urgency=low
+
+  * New upstream release.
+  * Standards-Version 3.9.8.
+  * Use https URLs in Vcs-Browser and Vcs-Git.
+  * Build with hardening=+all.
+  * Update upstream PGP key.
+
+ -- Simon Josefsson <simon@josefsson.org>  Thu, 03 Nov 2016 11:57:44 +0100
+
+libidn2-0 (0.10-3) unstable; urgency=low
+
+  * Move to collab-maint.  Closes: #781199.
+  * Add debian/gbp.conf and update debian/README.source.
+
+ -- Simon Josefsson <simon@josefsson.org>  Mon, 20 Apr 2015 23:13:19 +0200
+
+libidn2-0 (0.10-2) unstable; urgency=low
+
+  * Standards-Version 3.9.6.
+  * Fix Unicode 'License:' header in copyright file.
+  * Drop autotools-dev build-dep (we use dh-autoreconf now).
+  * Build without gtk-doc-tools (not needed for anything).
+  * Add pkg-config as build-dependency, for pkg-config.m4.
+  * Build-depend on texlive so we can rebuild doc/libidn2.pdf.
+
+ -- Simon Josefsson <simon@josefsson.org>  Thu, 02 Oct 2014 12:27:34 +0200
+
+libidn2-0 (0.10-1) unstable; urgency=low
+
+  * New upstream release.
+  * Standards-Version 3.9.5.
+  * Use debian/source/options with diff-ignore to silence --twice builds.
+  * Change copyright to reflect dual-licensing of the library.
+  * Use pgpsigurlmangle in debian/watch file.
+
+ -- Simon Josefsson <simon@josefsson.org>  Wed, 25 Jun 2014 16:10:41 +0200
+
+libidn2-0 (0.9-1) unstable; urgency=low
+
+  * New upstream release.
+  * Use dh instead of cdbs.
+
+ -- Simon Josefsson <simon@josefsson.org>  Wed, 24 Jul 2013 00:15:09 +0200
+
+libidn2-0 (0.8-3) unstable; urgency=low
+
+  * Update README.source.
+  * Standards-Version 3.9.4.
+  * Drop obsolete XS-Dm-Upload-Allowed.
+  * Build gtk-doc outputs.
+  * Build-Depend on autotools-dev.
+  * Support Multi-Arch.
+  * Bump compat to 9 to resolve multi arch vs binary debug symbols.
+
+ -- Simon Josefsson <simon@josefsson.org>  Mon, 22 Jul 2013 23:28:07 +0200
+
+libidn2-0 (0.8-2) unstable; urgency=low
+
+  * Standards-Version 3.9.3.
+  * Use https URL to upstream.
+  * Improve copyright file to silence lintian warnings.
+
+ -- Simon Josefsson <simon@josefsson.org>  Wed, 30 May 2012 13:41:26 +0200
+
+libidn2-0 (0.8-1) unstable; urgency=low
+
+  * New upstream version.
+    - Fix build warnings. (Closes: #643427)
+  * Use DEB_COMPRESS_EXCLUDE_DEFAULT instead of
+    deprecated DEB_COMPRESS_EXCLUDE.
+
+ -- Simon Josefsson <simon@josefsson.org>  Wed, 28 Sep 2011 20:39:19 +0200
+
+libidn2-0 (0.7-6) unstable; urgency=low
+
+  * Add XS-Dm-Upload-Allowed: yes header to permit myself to upload.
+
+ -- Simon Josefsson <simon@josefsson.org>  Wed, 21 Sep 2011 16:06:35 +0200
+
+libidn2-0 (0.7-5) unstable; urgency=low
+
+  * Fix dep5 copyright file format.
+
+ -- Simon Josefsson <simon@josefsson.org>  Mon, 19 Sep 2011 13:58:13 +0200
+
+libidn2-0 (0.7-4) unstable; urgency=low
+
+  * Add Vcs-Browser and Vcs-Git tags.
+
+ -- Simon Josefsson <simon@josefsson.org>  Fri, 19 Aug 2011 23:57:31 +0200
+
+libidn2-0 (0.7-3) unstable; urgency=low
+
+  * Fix typo in package description for idn2.
+
+ -- Simon Josefsson <simon@josefsson.org>  Fri, 19 Aug 2011 11:05:15 +0200
+
+libidn2-0 (0.7-2) unstable; urgency=low
+
+  * Fix standards-version to be a released version.
+
+ -- Simon Josefsson <simon@josefsson.org>  Thu, 18 Aug 2011 22:27:18 +0200
+
+libidn2-0 (0.7-1) unstable; urgency=low
+
+  * New upstream version.
+
+ -- Simon Josefsson <simon@josefsson.org>  Thu, 11 Aug 2011 23:43:09 +0200
+
+libidn2-0 (0.6-2) unstable; urgency=low
+
+  * Fix typo in bugs.debian.org URL.
+
+ -- Simon Josefsson <simon@josefsson.org>  Thu, 14 Jul 2011 14:34:54 +0200
+
+libidn2-0 (0.6-1) unstable; urgency=low
+
+  * Initial Release. (Closes: #633837)
+
+ -- Simon Josefsson <simon@josefsson.org>  Thu, 14 Jul 2011 10:34:54 +0200

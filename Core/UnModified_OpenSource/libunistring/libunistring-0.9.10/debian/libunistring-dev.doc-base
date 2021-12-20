@@ -1,0 +1,13 @@
+Document: libunistring-manual
+Title: GNU libunistring Manual
+Author: Bruno Haible
+Abstract: Programmer's Manual for GNU libunistring
+Section: Programming/C
+
+Format: HTML
+Index: /usr/share/doc/libunistring-dev/html/libunistring_toc.html
+Files: /usr/share/doc/libunistring-dev/html/*.html
+
+Format: Info
+Index: /usr/share/info/libunistring.info.gz
+Files: /usr/share/info/libunistring.info*.gz

@@ -1,0 +1,23 @@
+Author: Wookey <wookey@linaro.org>
+Description: Fix for incompatibility with autoconf2.13
+ This package will not build if autconf2.13 is installed.
+ Adding AC_PREREQ allows the automatic checks to run the correct
+ version of autconf, whichever is installed, or to get a clear error
+ message about the problem.
+Bug-Debian: https://bugs.debian.org/643587
+
+
+---
+ configure.ac |    1 +
+ 1 file changed, 1 insertion(+)
+
+--- a/configure.ac
++++ b/configure.ac
+@@ -14,6 +14,7 @@
+ # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ #
+ 
++AC_PREREQ([2.59])
+ AC_INIT([attr], [2.4.48], [acl-devel@nongnu.org])
+ AC_CONFIG_AUX_DIR([build-aux])
+ AC_CONFIG_MACRO_DIR([m4])

@@ -1,0 +1,10 @@
+#=DESCRIPTION quoted commas should not trigger an error
+#=EXRESULT PASS
+
+@{LIBVIRT} = "libvirt, libtriv"
+
+/does/not/exist {
+
+  change_profile ->
+  	@{LIBVIRT}-[0-9a-f]*-[0-9a-f]*-[0-9a-f]*-[0-9a-f]*-[0-9a-f]*,
+}

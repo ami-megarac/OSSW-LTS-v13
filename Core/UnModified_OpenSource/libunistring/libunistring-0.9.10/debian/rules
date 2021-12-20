@@ -1,0 +1,25 @@
+#!/usr/bin/make -f
+
+#export DH_VERBOSE=1
+
+# hardening
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+
+ifneq ($(findstring $(DEB_BUILD_ARCH), mips mipsel),)
+	CFLAGS += -mplt
+endif
+
+DEB_CONFIGURE_EXTRA_FLAGS := --disable-Werror \
+	--libdir=\$${prefix}/lib/$(DEB_HOST_MULTIARCH)
+DEB_DH_INSTALL_ARGS := --sourcedir=$(DEB_DESTDIR)
+
+DEB_MAKE_CHECK_TARGET = check
+
+VERSION = $(shell head -n1 debian/changelog | sed -e 's/.*(//;s/-.*).*//;s/\+/\-/')
+
+%:
+	dh $@
+
+override_dh_makeshlibs:
+	dh_makeshlibs
+	dpkg-gensymbols -v$(VERSION) -plibunistring2

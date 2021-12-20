@@ -1,0 +1,5 @@
+fix-ftbfs.patch
+fix-hyphens-in-manpages
+fix-spelling-of-writable.patch
+document-files-handled-by-their-inodes
+0001-Fix-segfault-with-csv-output-when-filename-contains-.patch

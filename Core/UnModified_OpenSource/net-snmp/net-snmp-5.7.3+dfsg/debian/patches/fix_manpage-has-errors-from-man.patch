@@ -1,0 +1,28 @@
+From: Net-SNMP Packaging Team <pkg-net-snmp-devel@lists.alioth.debian.org>
+Date: Thu, 18 Jun 2015 06:12:05 +0900
+Subject: fix_manpage-has-errors-from-man
+
+$ LC_ALL=C MANROFFSEQ='' MANWIDTH=80 man --warnings -E UTF-8 -l -Tutf8 -Z man/variables.5.def > /dev/null
+ 
+ cause error.
+
+Forwarded: no
+Last-Update: 2014-01-11
+---
+ man/variables.5.def | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/man/variables.5.def b/man/variables.5.def
+index 14ee5e2..ccf8f77 100644
+--- a/man/variables.5.def
++++ b/man/variables.5.def
+@@ -84,7 +84,8 @@ A variant of this (typically used when writing OIDs in descriptive
+ text, rather than running programs), is to combine the name and
+ numeric subidentifier:
+ .RS
+- .iso(1).org(3).dod(6).internet(1).mgmt(2).mib-2(1).system(1).sysDescr(1)
++ .iso(1).org(3).dod(6).internet(1).mgmt(2).mib-2(1).system(1)
++ .sysDescr(1)
+ .RE
+ 
+ .SS Module-qualified OIDs

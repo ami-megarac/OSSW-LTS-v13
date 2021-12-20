@@ -1,0 +1,178 @@
+#! /usr/bin/python3
+# ----------------------------------------------------------------------
+#    Copyright (C) 2013 Kshitij Gupta <kgupta8592@gmail.com>
+#
+#    This program is free software; you can redistribute it and/or
+#    modify it under the terms of version 2 of the GNU General Public
+#    License as published by the Free Software Foundation.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+# ----------------------------------------------------------------------
+import argparse
+import atexit
+import os
+import re
+import subprocess
+import sys
+
+import apparmor.aa as apparmor
+import apparmor.ui as aaui
+from apparmor.common import warn
+
+# setup exception handling
+from apparmor.fail import enable_aa_exception_handler
+enable_aa_exception_handler()
+
+# setup module translations
+from apparmor.translations import init_translation
+_ = init_translation()
+
+def sysctl_read(path):
+    value = None
+    with open(path, 'r') as f_in:
+        value = int(f_in.readline())
+    return value
+
+def sysctl_write(path, value):
+    if value is None:
+        warn('Not writing invalid value "None" to %s'%path)
+        return
+    with open(path, 'w') as f_out:
+        f_out.write(str(value))
+
+def last_audit_entry_time():
+    out = subprocess.check_output(['tail', '-1', apparmor.logfile])
+    logmark = None
+    out = out.decode('ascii')
+    if re.search('^.*msg\=audit\((\d+\.\d+\:\d+).*\).*$', out):
+        logmark = re.search('^.*msg\=audit\((\d+\.\d+\:\d+).*\).*$', out).groups()[0]
+    else:
+        logmark = ''
+    return logmark
+
+def restore_ratelimit():
+    try:
+        sysctl_write(ratelimit_sysctl, ratelimit_saved)
+    except PermissionError:
+        if ratelimit_saved != sysctl_read(ratelimit_sysctl):
+            raise  # happens only if a) running under lxd and b) something changed the ratelimit since starting aa-genprof
+
+parser = argparse.ArgumentParser(description=_('Generate profile for the given program'))
+parser.add_argument('-d', '--dir', type=str, help=_('path to profiles'))
+parser.add_argument('-f', '--file', type=str, help=_('path to logfile'))
+parser.add_argument('program', type=str, help=_('name of program to profile'))
+parser.add_argument('-j', '--json', action="store_true", help=_('Input and Output in JSON'))
+args = parser.parse_args()
+
+if args.json:
+    aaui.set_json_mode()
+
+profiling = args.program
+profiledir = args.dir
+
+apparmor.init_aa()
+apparmor.set_logfile(args.file)
+
+aa_mountpoint = apparmor.check_for_apparmor()
+if not aa_mountpoint:
+    raise apparmor.AppArmorException(_('It seems AppArmor was not started. Please enable AppArmor and try again.'))
+
+if profiledir:
+    apparmor.profile_dir = apparmor.get_full_path(profiledir)
+    if not os.path.isdir(apparmor.profile_dir):
+        raise apparmor.AppArmorException(_("%s is not a directory.") %profiledir)
+
+program = None
+#if os.path.exists(apparmor.which(profiling.strip())):
+if os.path.exists(profiling):
+    program = apparmor.get_full_path(profiling)
+else:
+    if '/' not in profiling:
+        which = apparmor.which(profiling)
+        if which:
+            program = apparmor.get_full_path(which)
+
+if not program or not os.path.exists(program):
+    if '/' not in profiling:
+        raise apparmor.AppArmorException(_("Can't find %(profiling)s in the system path list. If the name of the application\nis correct, please run 'which %(profiling)s' as a user with correct PATH\nenvironment set up in order to find the fully-qualified path and\nuse the full path as parameter.") % { 'profiling': profiling })
+    else:
+        raise apparmor.AppArmorException(_('%s does not exists, please double-check the path.') %profiling)
+
+# Check if the program has been marked as not allowed to have a profile
+apparmor.check_qualifiers(program)
+
+apparmor.loadincludes()
+
+profile_filename = apparmor.get_profile_filename_from_attachment(program, True)
+if os.path.exists(profile_filename):
+    apparmor.helpers[program] = apparmor.get_profile_flags(profile_filename, program)
+else:
+    apparmor.autodep(program)
+    apparmor.helpers[program] = 'enforce'
+
+if apparmor.helpers[program] == 'enforce':
+    apparmor.complain(program)
+    apparmor.reload(program)
+
+# When reading from syslog, it is possible to hit the default kernel
+# printk ratelimit. This will result in audit entries getting skipped,
+# making profile generation inaccurate. When using genprof, disable
+# the printk ratelimit, and restore it on exit.
+ratelimit_sysctl = '/proc/sys/kernel/printk_ratelimit'
+ratelimit_saved = sysctl_read(ratelimit_sysctl)
+
+try:
+    sysctl_write(ratelimit_sysctl, 0)
+except PermissionError:  # will fail in lxd
+    warn("Can't set printk_ratelimit, some events might be lost")
+
+atexit.register(restore_ratelimit)
+
+aaui.UI_Info(_('\nBefore you begin, you may wish to check if a\nprofile already exists for the application you\nwish to confine. See the following wiki page for\nmore information:')+'\nhttps://gitlab.com/apparmor/apparmor/wikis/Profiles')
+
+syslog = True
+logmark = ''
+done_profiling = False
+
+if os.path.exists('/var/log/audit/audit.log'):
+    syslog = False
+
+passno = 0
+while not done_profiling:
+    if syslog:
+        logmark = subprocess.check_output(['date | md5sum'], shell=True)
+        logmark = logmark.decode('ascii').strip()
+        logmark = re.search('^([0-9a-f]+)', logmark).groups()[0]
+        t=subprocess.call("%s -p kern.warn 'GenProf: %s'"%(apparmor.logger_path(), logmark), shell=True)
+
+    else:
+        logmark = last_audit_entry_time()
+
+    q = aaui.PromptQuestion()
+    q.headers = [_('Profiling'), program]
+    q.functions = ['CMD_SCAN', 'CMD_FINISHED']
+    q.default = 'CMD_SCAN'
+    q.explanation = _('Please start the application to be profiled in\nanother window and exercise its functionality now.\n\nOnce completed, select the "Scan" option below in \norder to scan the system logs for AppArmor events. \n\nFor each AppArmor event, you will be given the \nopportunity to choose whether the access should be \nallowed or denied.')
+    ans, arg = q.promptUser('noexit')
+
+    if ans == 'CMD_SCAN':
+        lp_ret = apparmor.do_logprof_pass(logmark, passno)
+        passno += 1
+        if lp_ret == 'FINISHED':
+            done_profiling = True
+    else:
+        done_profiling = True
+
+for p in sorted(apparmor.helpers.keys()):
+    if apparmor.helpers[p] == 'enforce':
+        apparmor.enforce(p)
+        apparmor.reload(p)
+
+aaui.UI_Info(_('\nReloaded AppArmor profiles in enforce mode.'))
+aaui.UI_Info(_('\nPlease consider contributing your new profile!\nSee the following wiki page for more information:')+'\nhttps://gitlab.com/apparmor/apparmor/wikis/Profiles\n')
+aaui.UI_Info(_('Finished generating profile for %s.')%program)
+sys.exit(0)

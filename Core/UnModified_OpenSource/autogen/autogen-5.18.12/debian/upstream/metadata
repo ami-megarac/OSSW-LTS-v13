@@ -1,0 +1,4 @@
+# See https://wiki.debian.org/UpstreamMetadata
+Bug-Database: http://sourceforge.net/p/autogen/bugs/
+Repository: git://git.savannah.gnu.org/autogen.git
+Repository-Browse: http://git.savannah.gnu.org/cgit/autogen.git

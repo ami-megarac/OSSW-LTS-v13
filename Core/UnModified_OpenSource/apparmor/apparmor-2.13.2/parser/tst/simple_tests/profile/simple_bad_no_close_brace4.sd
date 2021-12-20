@@ -1,0 +1,17 @@
+#
+#=DESCRIPTION A simple syntax error -- no closing brace with hat.
+#=EXRESULT FAIL
+#
+/usr/bin/foo {
+  /usr/bin/foo r,
+  /blah rw,
+
+  ^hat1 {
+    /foo rw,
+  
+  ^hat2 {
+    /bar rw,
+  }
+
+  /var/log/messages w,
+}

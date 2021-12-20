@@ -1,0 +1,52 @@
+#
+#=DESCRIPTION deny change_profile @{var} with a variable (LP: #390810)
+#=EXRESULT PASS
+#
+
+@{LIBVIRT}="libvirt"
+@{LIBVIRT_RE}="libvirt*"
+
+@{var}=/test
+/usr/bin/foo {
+   deny change_profile @{var} -> @{LIBVIRT}-fo*,
+}
+
+/usr/bin/foo2 {
+   deny change_profile @{var} -> @{LIBVIRT}-fo**,
+}
+
+/usr/bin/foo3 {
+   deny change_profile @{var} -> @{LIBVIRT}-fo[ab],
+}
+
+/usr/bin/foo4 {
+   deny change_profile @{var} -> @{LIBVIRT}-fo[^ab],
+}
+
+/usr/bin/foo5 {
+   deny change_profile @{var} -> @{LIBVIRT}-fo?,
+}
+
+/usr/bin/foo6 {
+   deny change_profile @{var} -> @{LIBVIRT_RE}-foo,
+}
+
+/usr/bin/foo7 {
+   deny change_profile @{var} -> @{LIBVIRT_RE}-fo*,
+}
+
+/usr/bin/foo8 {
+   deny change_profile @{var} -> @{LIBVIRT_RE}-fo**,
+}
+
+/usr/bin/foo9 {
+   deny change_profile @{var} -> @{LIBVIRT_RE}-fo?,
+}
+
+/usr/bin/foo10 {
+   deny change_profile @{var} -> @{LIBVIRT_RE}-fo[ab],
+}
+
+/usr/bin/foo11 {
+   deny change_profile @{var} -> @{LIBVIRT_RE}-fo[^ab],
+}

@@ -1,0 +1,275 @@
+From: Matt Caswell <matt@openssl.org>
+Date: Thu, 18 Mar 2021 16:52:10 +0000
+Subject: Ensure buffer/length pairs are always in sync
+
+Following on from CVE-2021-3449 which was caused by a non-zero length
+associated with a NULL buffer, other buffer/length pairs are updated to
+ensure that they too are always in sync.
+---
+ ssl/s3_lib.c                 |  5 ++++-
+ ssl/ssl_lib.c                | 14 +++++++++++---
+ ssl/statem/extensions.c      |  1 +
+ ssl/statem/extensions_clnt.c | 14 ++++++++++++--
+ ssl/statem/statem_clnt.c     |  7 ++++++-
+ ssl/statem/statem_srvr.c     | 17 ++++++++++++++---
+ 6 files changed, 48 insertions(+), 10 deletions(-)
+
+diff --git a/ssl/s3_lib.c b/ssl/s3_lib.c
+index 066bf47221e2..7875226a4d9b 100644
+--- a/ssl/s3_lib.c
++++ b/ssl/s3_lib.c
+@@ -4638,6 +4638,7 @@ int ssl_generate_master_secret(SSL *s, unsigned char *pms, size_t pmslen,
+ 
+         OPENSSL_clear_free(s->s3->tmp.psk, psklen);
+         s->s3->tmp.psk = NULL;
++        s->s3->tmp.psklen = 0;
+         if (!s->method->ssl3_enc->generate_master_secret(s,
+                     s->session->master_key,pskpms, pskpmslen,
+                     &s->session->master_key_length)) {
+@@ -4667,8 +4668,10 @@ int ssl_generate_master_secret(SSL *s, unsigned char *pms, size_t pmslen,
+         else
+             OPENSSL_cleanse(pms, pmslen);
+     }
+-    if (s->server == 0)
++    if (s->server == 0) {
+         s->s3->tmp.pms = NULL;
++        s->s3->tmp.pmslen = 0;
++    }
+     return ret;
+ }
+ 
+diff --git a/ssl/ssl_lib.c b/ssl/ssl_lib.c
+index ac820cf9fe16..dc8afd248554 100644
+--- a/ssl/ssl_lib.c
++++ b/ssl/ssl_lib.c
+@@ -779,8 +779,10 @@ SSL *SSL_new(SSL_CTX *ctx)
+         s->ext.ecpointformats =
+             OPENSSL_memdup(ctx->ext.ecpointformats,
+                            ctx->ext.ecpointformats_len);
+-        if (!s->ext.ecpointformats)
++        if (!s->ext.ecpointformats) {
++            s->ext.ecpointformats_len = 0;
+             goto err;
++        }
+         s->ext.ecpointformats_len =
+             ctx->ext.ecpointformats_len;
+     }
+@@ -789,8 +791,10 @@ SSL *SSL_new(SSL_CTX *ctx)
+             OPENSSL_memdup(ctx->ext.supportedgroups,
+                            ctx->ext.supportedgroups_len
+                                 * sizeof(*ctx->ext.supportedgroups));
+-        if (!s->ext.supportedgroups)
++        if (!s->ext.supportedgroups) {
++            s->ext.supportedgroups_len = 0;
+             goto err;
++        }
+         s->ext.supportedgroups_len = ctx->ext.supportedgroups_len;
+     }
+ #endif
+@@ -800,8 +804,10 @@ SSL *SSL_new(SSL_CTX *ctx)
+ 
+     if (s->ctx->ext.alpn) {
+         s->ext.alpn = OPENSSL_malloc(s->ctx->ext.alpn_len);
+-        if (s->ext.alpn == NULL)
++        if (s->ext.alpn == NULL) {
++            s->ext.alpn_len = 0;
+             goto err;
++        }
+         memcpy(s->ext.alpn, s->ctx->ext.alpn, s->ctx->ext.alpn_len);
+         s->ext.alpn_len = s->ctx->ext.alpn_len;
+     }
+@@ -2778,6 +2784,7 @@ int SSL_CTX_set_alpn_protos(SSL_CTX *ctx, const unsigned char *protos,
+     OPENSSL_free(ctx->ext.alpn);
+     ctx->ext.alpn = OPENSSL_memdup(protos, protos_len);
+     if (ctx->ext.alpn == NULL) {
++        ctx->ext.alpn_len = 0;
+         SSLerr(SSL_F_SSL_CTX_SET_ALPN_PROTOS, ERR_R_MALLOC_FAILURE);
+         return 1;
+     }
+@@ -2797,6 +2804,7 @@ int SSL_set_alpn_protos(SSL *ssl, const unsigned char *protos,
+     OPENSSL_free(ssl->ext.alpn);
+     ssl->ext.alpn = OPENSSL_memdup(protos, protos_len);
+     if (ssl->ext.alpn == NULL) {
++        ssl->ext.alpn_len = 0;
+         SSLerr(SSL_F_SSL_SET_ALPN_PROTOS, ERR_R_MALLOC_FAILURE);
+         return 1;
+     }
+diff --git a/ssl/statem/extensions.c b/ssl/statem/extensions.c
+index 267e534f1795..78a5abf80d5b 100644
+--- a/ssl/statem/extensions.c
++++ b/ssl/statem/extensions.c
+@@ -1146,6 +1146,7 @@ static int init_sig_algs_cert(SSL *s, unsigned int context)
+     /* Clear any signature algorithms extension received */
+     OPENSSL_free(s->s3->tmp.peer_cert_sigalgs);
+     s->s3->tmp.peer_cert_sigalgs = NULL;
++    s->s3->tmp.peer_cert_sigalgslen = 0;
+ 
+     return 1;
+ }
+diff --git a/ssl/statem/extensions_clnt.c b/ssl/statem/extensions_clnt.c
+index f0ae642fa098..058fdb33ccf6 100644
+--- a/ssl/statem/extensions_clnt.c
++++ b/ssl/statem/extensions_clnt.c
+@@ -816,6 +816,7 @@ EXT_RETURN tls_construct_ctos_early_data(SSL *s, WPACKET *pkt,
+         OPENSSL_free(s->psksession_id);
+         s->psksession_id = OPENSSL_memdup(id, idlen);
+         if (s->psksession_id == NULL) {
++            s->psksession_id_len = 0;
+             SSLfatal(s, SSL_AD_INTERNAL_ERROR,
+                      SSL_F_TLS_CONSTRUCT_CTOS_EARLY_DATA, ERR_R_INTERNAL_ERROR);
+             return EXT_RETURN_FAIL;
+@@ -1375,6 +1376,7 @@ int tls_parse_stoc_ec_pt_formats(SSL *s, PACKET *pkt, unsigned int context,
+         OPENSSL_free(s->ext.peer_ecpointformats);
+         s->ext.peer_ecpointformats = OPENSSL_malloc(ecpointformats_len);
+         if (s->ext.peer_ecpointformats == NULL) {
++            s->ext.peer_ecpointformats_len = 0;
+             SSLfatal(s, SSL_AD_INTERNAL_ERROR,
+                      SSL_F_TLS_PARSE_STOC_EC_PT_FORMATS, ERR_R_INTERNAL_ERROR);
+             return 0;
+@@ -1492,8 +1494,13 @@ int tls_parse_stoc_sct(SSL *s, PACKET *pkt, unsigned int context, X509 *x,
+         s->ext.scts_len = (uint16_t)size;
+         if (size > 0) {
+             s->ext.scts = OPENSSL_malloc(size);
+-            if (s->ext.scts == NULL
+-                    || !PACKET_copy_bytes(pkt, s->ext.scts, size)) {
++            if (s->ext.scts == NULL) {
++                s->ext.scts_len = 0;
++                SSLfatal(s, SSL_AD_INTERNAL_ERROR, SSL_F_TLS_PARSE_STOC_SCT,
++                         ERR_R_MALLOC_FAILURE);
++                return 0;
++            }
++            if (!PACKET_copy_bytes(pkt, s->ext.scts, size)) {
+                 SSLfatal(s, SSL_AD_INTERNAL_ERROR, SSL_F_TLS_PARSE_STOC_SCT,
+                          ERR_R_INTERNAL_ERROR);
+                 return 0;
+@@ -1592,6 +1599,7 @@ int tls_parse_stoc_npn(SSL *s, PACKET *pkt, unsigned int context, X509 *x,
+     OPENSSL_free(s->ext.npn);
+     s->ext.npn = OPENSSL_malloc(selected_len);
+     if (s->ext.npn == NULL) {
++        s->ext.npn_len = 0;
+         SSLfatal(s, SSL_AD_INTERNAL_ERROR, SSL_F_TLS_PARSE_STOC_NPN,
+                  ERR_R_INTERNAL_ERROR);
+         return 0;
+@@ -1632,6 +1640,7 @@ int tls_parse_stoc_alpn(SSL *s, PACKET *pkt, unsigned int context, X509 *x,
+     OPENSSL_free(s->s3->alpn_selected);
+     s->s3->alpn_selected = OPENSSL_malloc(len);
+     if (s->s3->alpn_selected == NULL) {
++        s->s3->alpn_selected_len = 0;
+         SSLfatal(s, SSL_AD_INTERNAL_ERROR, SSL_F_TLS_PARSE_STOC_ALPN,
+                  ERR_R_INTERNAL_ERROR);
+         return 0;
+@@ -1663,6 +1672,7 @@ int tls_parse_stoc_alpn(SSL *s, PACKET *pkt, unsigned int context, X509 *x,
+         s->session->ext.alpn_selected =
+             OPENSSL_memdup(s->s3->alpn_selected, s->s3->alpn_selected_len);
+         if (s->session->ext.alpn_selected == NULL) {
++            s->session->ext.alpn_selected_len = 0;
+             SSLfatal(s, SSL_AD_INTERNAL_ERROR, SSL_F_TLS_PARSE_STOC_ALPN,
+                      ERR_R_INTERNAL_ERROR);
+             return 0;
+diff --git a/ssl/statem/statem_clnt.c b/ssl/statem/statem_clnt.c
+index 6410414fb64a..66e0e1f50ba9 100644
+--- a/ssl/statem/statem_clnt.c
++++ b/ssl/statem/statem_clnt.c
+@@ -2461,6 +2461,7 @@ MSG_PROCESS_RETURN tls_process_certificate_request(SSL *s, PACKET *pkt)
+         s->s3->tmp.ctype_len = 0;
+         OPENSSL_free(s->pha_context);
+         s->pha_context = NULL;
++        s->pha_context_len = 0;
+ 
+         if (!PACKET_get_length_prefixed_1(pkt, &reqctx) ||
+             !PACKET_memdup(&reqctx, &s->pha_context, &s->pha_context_len)) {
+@@ -2770,16 +2771,17 @@ int tls_process_cert_status_body(SSL *s, PACKET *pkt)
+     }
+     s->ext.ocsp.resp = OPENSSL_malloc(resplen);
+     if (s->ext.ocsp.resp == NULL) {
++        s->ext.ocsp.resp_len = 0;
+         SSLfatal(s, SSL_AD_INTERNAL_ERROR, SSL_F_TLS_PROCESS_CERT_STATUS_BODY,
+                  ERR_R_MALLOC_FAILURE);
+         return 0;
+     }
++    s->ext.ocsp.resp_len = resplen;
+     if (!PACKET_copy_bytes(pkt, s->ext.ocsp.resp, resplen)) {
+         SSLfatal(s, SSL_AD_DECODE_ERROR, SSL_F_TLS_PROCESS_CERT_STATUS_BODY,
+                  SSL_R_LENGTH_MISMATCH);
+         return 0;
+     }
+-    s->ext.ocsp.resp_len = resplen;
+ 
+     return 1;
+ }
+@@ -3349,9 +3351,11 @@ int tls_construct_client_key_exchange(SSL *s, WPACKET *pkt)
+  err:
+     OPENSSL_clear_free(s->s3->tmp.pms, s->s3->tmp.pmslen);
+     s->s3->tmp.pms = NULL;
++    s->s3->tmp.pmslen = 0;
+ #ifndef OPENSSL_NO_PSK
+     OPENSSL_clear_free(s->s3->tmp.psk, s->s3->tmp.psklen);
+     s->s3->tmp.psk = NULL;
++    s->s3->tmp.psklen = 0;
+ #endif
+     return 0;
+ }
+@@ -3426,6 +3430,7 @@ int tls_client_key_exchange_post_work(SSL *s)
+  err:
+     OPENSSL_clear_free(pms, pmslen);
+     s->s3->tmp.pms = NULL;
++    s->s3->tmp.pmslen = 0;
+     return 0;
+ }
+ 
+diff --git a/ssl/statem/statem_srvr.c b/ssl/statem/statem_srvr.c
+index 8cf9c40d15c0..97b21534386c 100644
+--- a/ssl/statem/statem_srvr.c
++++ b/ssl/statem/statem_srvr.c
+@@ -2153,6 +2153,7 @@ int tls_handle_alpn(SSL *s)
+             OPENSSL_free(s->s3->alpn_selected);
+             s->s3->alpn_selected = OPENSSL_memdup(selected, selected_len);
+             if (s->s3->alpn_selected == NULL) {
++                s->s3->alpn_selected_len = 0;
+                 SSLfatal(s, SSL_AD_INTERNAL_ERROR, SSL_F_TLS_HANDLE_ALPN,
+                          ERR_R_INTERNAL_ERROR);
+                 return 0;
+@@ -2828,9 +2829,16 @@ int tls_construct_certificate_request(SSL *s, WPACKET *pkt)
+         if (s->post_handshake_auth == SSL_PHA_REQUEST_PENDING) {
+             OPENSSL_free(s->pha_context);
+             s->pha_context_len = 32;
+-            if ((s->pha_context = OPENSSL_malloc(s->pha_context_len)) == NULL
+-                    || RAND_bytes(s->pha_context, s->pha_context_len) <= 0
+-                    || !WPACKET_sub_memcpy_u8(pkt, s->pha_context, s->pha_context_len)) {
++            if ((s->pha_context = OPENSSL_malloc(s->pha_context_len)) == NULL) {
++                s->pha_context_len = 0;
++                SSLfatal(s, SSL_AD_INTERNAL_ERROR,
++                         SSL_F_TLS_CONSTRUCT_CERTIFICATE_REQUEST,
++                         ERR_R_INTERNAL_ERROR);
++                return 0;
++            }
++            if (RAND_bytes(s->pha_context, s->pha_context_len) <= 0
++                    || !WPACKET_sub_memcpy_u8(pkt, s->pha_context,
++                                              s->pha_context_len)) {
+                 SSLfatal(s, SSL_AD_INTERNAL_ERROR,
+                          SSL_F_TLS_CONSTRUCT_CERTIFICATE_REQUEST,
+                          ERR_R_INTERNAL_ERROR);
+@@ -2944,6 +2952,7 @@ static int tls_process_cke_psk_preamble(SSL *s, PACKET *pkt)
+     OPENSSL_cleanse(psk, psklen);
+ 
+     if (s->s3->tmp.psk == NULL) {
++        s->s3->tmp.psklen = 0;
+         SSLfatal(s, SSL_AD_INTERNAL_ERROR,
+                  SSL_F_TLS_PROCESS_CKE_PSK_PREAMBLE, ERR_R_MALLOC_FAILURE);
+         return 0;
+@@ -3491,6 +3500,7 @@ MSG_PROCESS_RETURN tls_process_client_key_exchange(SSL *s, PACKET *pkt)
+ #ifndef OPENSSL_NO_PSK
+     OPENSSL_clear_free(s->s3->tmp.psk, s->s3->tmp.psklen);
+     s->s3->tmp.psk = NULL;
++    s->s3->tmp.psklen = 0;
+ #endif
+     return MSG_PROCESS_ERROR;
+ }
+@@ -4100,6 +4110,7 @@ int tls_construct_new_session_ticket(SSL *s, WPACKET *pkt)
+             s->session->ext.alpn_selected =
+                 OPENSSL_memdup(s->s3->alpn_selected, s->s3->alpn_selected_len);
+             if (s->session->ext.alpn_selected == NULL) {
++                s->session->ext.alpn_selected_len = 0;
+                 SSLfatal(s, SSL_AD_INTERNAL_ERROR,
+                          SSL_F_TLS_CONSTRUCT_NEW_SESSION_TICKET,
+                          ERR_R_MALLOC_FAILURE);

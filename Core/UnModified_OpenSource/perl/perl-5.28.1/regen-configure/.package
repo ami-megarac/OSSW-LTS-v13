@@ -1,0 +1,34 @@
+: This file was created by running packinit on Thu Apr 19 17:35:50 CEST 2018.
+: Do not hand edit -- run packinit again if changes are to be made.
+packver='3.036'
+: Basic variables
+package=perl5
+baserev=5.0
+patchbranch=0
+copyright=' '
+mydiff='gdiff -u'
+maintname='Perl Maintainers'
+maintloc='perlbug@perl.org'
+ftpsite=''
+orgname='Illuminati'
+newsgroups=''
+recipients=''
+ftpdir=''
+mailagent='false'
+changelog=' '
+changercs=0
+: File lookup extensions
+cext='.xs'
+shext=''
+: File to consult for symbol exclusions
+exclusions_file='.metaconf-exclusions.txt'
+: Mailing list variables
+list_users='false'
+list_name=''
+list_addr=''
+list_request=''
+list_manager=''
+list_sub=''
+list_unsub=''
+: Derivative variables -- do not change
+revbranch="$baserev.$patchbranch"

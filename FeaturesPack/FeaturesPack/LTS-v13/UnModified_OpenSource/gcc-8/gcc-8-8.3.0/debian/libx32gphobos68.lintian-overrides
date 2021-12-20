@@ -1,0 +1,2 @@
+# no multilib zlib for x32
+libx32gphobos68 binary: embedded-library

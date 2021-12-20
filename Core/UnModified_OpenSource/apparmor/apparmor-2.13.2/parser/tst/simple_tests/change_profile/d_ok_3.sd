@@ -1,0 +1,7 @@
+#
+#=DESCRIPTION deny change_profile with name space
+#=EXRESULT PASS
+#
+/usr/bin/foo {
+   deny change_profile -> :foo:/bin/foo,
+}

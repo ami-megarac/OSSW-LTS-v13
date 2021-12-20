@@ -1,0 +1,22 @@
+#=DESCRIPTION ensure profile_name expansion after subprofiles works
+#=EXRESULT PASS
+
+profile top_profile /test/profile {
+  /test/profile rix,
+
+  /first/path/@{profile_name}/tmp rwk,
+  /bin/spork Cx -> spork,
+
+  profile spork {
+    owner /tmp/* r,
+    /run/@{profile_name}/** rw,
+  }
+
+  hat spelunkk {
+    owner /tmp/* r,
+    /run/@{profile_name}/** rw,
+  }
+
+  # Does this expand properly?
+  /second/path/@{profile_name}/tmp rk,
+}

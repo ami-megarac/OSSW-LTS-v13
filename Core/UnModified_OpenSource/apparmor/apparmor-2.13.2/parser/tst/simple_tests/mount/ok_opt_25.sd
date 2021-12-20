@@ -1,0 +1,10 @@
+#
+#=Description basic rules to test the "move" mount option
+#=EXRESULT PASS
+/usr/bin/foo {
+  mount options=move /a -> /1,
+  mount options=(move) /b -> /2,
+  mount options=(rw,move) /c -> /3,
+  mount options in (move) /d -> /4,
+  mount options in (ro,move) /e -> /5,
+}

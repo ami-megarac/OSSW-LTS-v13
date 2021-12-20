@@ -1,0 +1,5 @@
+etc/mysql/conf.d/rocksdb.cnf etc/mysql/mariadb.conf.d
+usr/bin/myrocks_hotbackup
+usr/bin/mysql_ldb
+usr/lib/*/mariadb19/plugin/ha_rocksdb.so
+usr/share/man/man1/mysql_ldb.1

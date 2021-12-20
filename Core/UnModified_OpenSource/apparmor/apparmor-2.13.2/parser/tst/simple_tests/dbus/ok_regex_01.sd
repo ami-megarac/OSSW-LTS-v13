@@ -1,0 +1,8 @@
+#
+#=DESCRIPTION dbus rule with a peer regex expansion that needs escaping
+#=EXRESULT PASS
+#
+
+profile foo {
+  dbus send bus=session peer=(label=splat\ ),
+}

@@ -1,0 +1,3 @@
+#!/usr/bin/dh-exec
+./fdisk.static => /usr/sbin/fdisk
+./sfdisk.static => /usr/sbin/sfdisk

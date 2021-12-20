@@ -1,0 +1,30 @@
+On HP/PA (aka PA-RISC), the test suite failed because it was making a
+bad assumption about the behavior of inotify assigning ids. It still
+makes bad assumptions, but now with this change all of them are true
+(for now).
+
+The original Debian bug report:
+http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=558981
+
+The discussion with the kernel maintainers about this behavior:
+http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=561880
+
+--- a/libinotifytools/src/test.c
++++ b/libinotifytools/src/test.c
+@@ -170,12 +170,12 @@
+ 	compare( inotifytools_wd_from_filename( "/" ), -1 );
+ 	compare( inotifytools_filename_from_wd( 1 ), 0 );
+ 	verify( inotifytools_watch_file( "/", IN_CLOSE ) );
+-	compare( inotifytools_wd_from_filename( "/" ), 2 );
++        int new = inotifytools_wd_from_filename( "/" );
+ 	compare( inotifytools_wd_from_filename( "foobar" ), -1 );
+-	verify( !strcmp( inotifytools_filename_from_wd(2), "/" ) );
+-	verify( inotifytools_remove_watch_by_wd( 2 ) );
++	verify( !strcmp( inotifytools_filename_from_wd(new), "/" ) );
++	verify( inotifytools_remove_watch_by_wd( new ) );
+ 	compare( inotifytools_wd_from_filename( "/" ), -1 );
+-	compare( inotifytools_filename_from_wd( 2 ), 0 );
++	compare( inotifytools_filename_from_wd( new ), 0 );
+ EXIT
+ }
+ 

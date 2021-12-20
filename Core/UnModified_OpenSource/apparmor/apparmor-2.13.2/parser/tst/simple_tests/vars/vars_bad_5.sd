@@ -1,0 +1,7 @@
+#=DESCRIPTION don't accept variables with leading numeric
+#=EXRESULT FAIL
+@{4FOO} = /foo /bar /baz /biff
+
+/usr/bin/foo {
+  /@{4FOO}/.foo/* r,
+}

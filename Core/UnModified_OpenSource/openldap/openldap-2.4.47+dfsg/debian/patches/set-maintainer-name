@@ -1,0 +1,16 @@
+--- a/build/mkversion
++++ b/build/mkversion
+@@ -50,12 +50,7 @@
+ fi
+ 
+ APPLICATION=$1
+-# Reproducible builds set SOURCE_DATE_EPOCH, want constant strings
+-if [ -n "${SOURCE_DATE_EPOCH}" ]; then
+-   WHOWHERE="openldap"
+-else
+-   WHOWHERE="$USER@$(uname -n):$(pwd)"
+-fi
++WHOWHERE="Debian OpenLDAP Maintainers <pkg-openldap-devel@lists.alioth.debian.org>"
+ 
+ cat << __EOF__
+ /* This work is part of OpenLDAP Software <http://www.openldap.org/>.

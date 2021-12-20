@@ -1,0 +1,9 @@
+#
+#=DESCRIPTION fail conflicting perm mod same line
+#=EXRESULT FAIL
+# vim:syntax=apparmor
+# Last Modified: Sun Apr 17 19:44:44 2005
+#
+/does/not/exist {
+  audit allow deny capability chown,
+}

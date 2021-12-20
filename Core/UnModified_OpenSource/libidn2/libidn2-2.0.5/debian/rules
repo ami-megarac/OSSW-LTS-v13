@@ -1,0 +1,46 @@
+#! /usr/bin/make -f
+
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+DOPACKAGES = $(shell dh_listpackages)
+
+%:
+	dh $@ --parallel --with autoreconf --fail-missing -O--dbgsym-migration="libidn2-0-dbg (<< 2.0.2-1~)" -X.la
+
+override_dh_autoreconf:
+ifneq ($(filter libidn2-doc,$(DOPACKAGES)),)
+	gtkdocize --copy --flavour no-tmpl
+endif
+	find . -name Makefile.in -delete
+	rm -f doc/idn2.1
+	dh_autoreconf
+
+CONFIGURE_FLAGS = \
+	--enable-ld-version-script \
+	--disable-rpath \
+	--with-packager=Debian \
+	--with-packager-bug-reports=https://bugs.debian.org/ \
+	--with-packager-version="$(DEB_VERSION)"
+ifneq ($(filter libidn2-doc,$(DOPACKAGES)),)
+CONFIGURE_FLAGS += --enable-gtk-doc --enable-gtk-doc-pdf
+else
+CONFIGURE_FLAGS += --disable-gtk-doc --disable-gtk-doc-pdf
+endif
+
+override_dh_auto_configure:
+	dh_auto_configure -- $(CONFIGURE_FLAGS)
+
+# Texinfo PDF manual is not built by 'make' but removed by 'make clean'.
+override_dh_auto_build:
+	dh_auto_build
+
+override_dh_auto_build-indep:
+	dh_auto_build -Ddoc pdf html info
+
+override_dh_auto_install-indep:
+	dh_auto_install -Ddoc install-pdf install-html install-info
+
+override_dh_auto_clean:
+	test ! -f Makefile || dh_auto_clean
+
+override_dh_compress:
+	dh_compress -Xlibidn2.pdf

@@ -1,0 +1,2 @@
+obj-legacy/lib/libtinfo.so.*  lib/${DEB_HOST_MULTIARCH}
+obj-legacy/lib/libtic.so.*    usr/lib/${DEB_HOST_MULTIARCH}

@@ -1,0 +1,1 @@
+type=APPARMOR_HINT msg=audit(1188599886.852:8780): operation="ptrace" task=8320 parent=8322 pid=8322 profile="null-complain-profile"

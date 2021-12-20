@@ -1,0 +1,5 @@
+libcgal13 (<< 4.11-2+b1),
+libflint-2.5.2 (<< 2.5.2-17+b2),
+libgiac0 (<< 1.2.3.57+dfsg1-2+b4),
+libnormaliz3 (<< 3.5.1+ds-4),
+sagemath (<< 8.1-2+b2),

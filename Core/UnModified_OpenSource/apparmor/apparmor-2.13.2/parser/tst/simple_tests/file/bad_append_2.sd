@@ -1,0 +1,8 @@
+#
+#=DESCRIPTION a and w conflict (reverse order from bad_append_1.sd)
+#=EXRESULT FAIL
+#
+/usr/bin/foo {
+  /a aw,
+}
+

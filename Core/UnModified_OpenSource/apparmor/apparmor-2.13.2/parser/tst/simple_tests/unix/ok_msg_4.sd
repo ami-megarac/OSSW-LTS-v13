@@ -1,0 +1,7 @@
+#
+#=DESCRIPTION simple unix msg test
+#=EXRESULT PASS
+
+profile a_profile {
+  unix (send),
+}

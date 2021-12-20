@@ -1,0 +1,2 @@
+# perl-doc needs perl
+doc-package-depends-on-main-package

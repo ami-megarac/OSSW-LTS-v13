@@ -1,0 +1,47 @@
+#
+#=DESCRIPTION allow change_profile @{var} re with quotes
+#=EXRESULT PASS
+#
+
+@{var}=/test
+
+/usr/bin/foo5 {
+   allow change_profile @{var} -> "/bin/*",
+}
+
+/usr/bin/foo6 {
+   allow change_profile @{var} -> "/bin/**",
+}
+
+/usr/bin/foo7 {
+   allow change_profile @{var} -> "/bin/[ab]",
+}
+
+/usr/bin/foo8 {
+   allow change_profile @{var} -> "/bin/[^ab]",
+}
+
+/usr/bin/foo10 {
+   allow change_profile @{var} -> "/bin/?ab",
+}
+
+/usr/bin/foo11 {
+   allow change_profile @{var} -> "/bin/ *",
+}
+
+/usr/bin/foo12 {
+   allow change_profile @{var} -> "/bin/ **",
+}
+
+/usr/bin/foo13 {
+   allow change_profile @{var} -> "/bin/ [ab]",
+}
+
+/usr/bin/foo14 {
+   allow change_profile @{var} -> "/bin/ [^ab]",
+}
+
+/usr/bin/foo15 {
+   allow change_profile @{var} -> "/bin/ ?ab",
+}
+

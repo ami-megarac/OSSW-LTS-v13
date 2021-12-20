@@ -1,0 +1,14 @@
+#=DESCRIPTION Test of duplicate alias detection
+#=EXRESULT PASS
+
+@{MEEP} = meep moop
+alias /etc -> /Etcetera,
+alias /usr/ -> /Libraries/,
+alias /tmp -> /var/tmp,
+alias /usr/ -> /User/,
+@{FOO} = foo bar
+
+/bin/foo {
+  #include <includes/base>
+  /tmp/@{FOO}/@{MEEP} rw,
+}

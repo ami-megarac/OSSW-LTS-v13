@@ -1,0 +1,6 @@
+usr/lib/*/libparted.a
+usr/lib/*/libparted.so
+usr/lib/*/libparted-fs-resize.a
+usr/lib/*/libparted-fs-resize.so
+usr/lib/*/pkgconfig
+usr/include

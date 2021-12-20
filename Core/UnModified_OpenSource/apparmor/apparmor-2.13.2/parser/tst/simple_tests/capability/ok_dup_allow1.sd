@@ -1,0 +1,12 @@
+#
+#=DESCRIPTION validate allow of duplicate capabilities.
+#=EXRESULT PASS
+# vim:syntax=apparmor
+# Last Modified: Sun Apr 17 19:44:44 2005
+#
+
+# Test for duplicates?
+/does/not/exist3 {
+  allow capability mknod,
+  allow capability mknod,
+}

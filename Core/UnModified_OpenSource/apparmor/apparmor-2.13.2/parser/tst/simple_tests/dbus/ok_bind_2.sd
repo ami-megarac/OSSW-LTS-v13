@@ -1,0 +1,7 @@
+#
+#=DESCRIPTION simple dbus implicit bind acceptance test with deny keyword
+#=EXRESULT PASS
+
+profile a_profile {
+  deny dbus name=(SomeService),
+}

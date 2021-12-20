@@ -1,0 +1,13 @@
+# vim:syntax=apparmor
+# Rules for Mesa implementation of the OpenGL API
+
+  # System files
+  /dev/dri/ r, # libGLX_mesa.so calls drmGetDevice2()
+
+  # User files
+  owner @{HOME}/.cache/ w, # if user clears all caches
+  owner @{HOME}/.cache/mesa_shader_cache/ w,
+  owner @{HOME}/.cache/mesa_shader_cache/index rw,
+  owner @{HOME}/.cache/mesa_shader_cache/??/ w,
+  owner @{HOME}/.cache/mesa_shader_cache/??/* rwk,
+

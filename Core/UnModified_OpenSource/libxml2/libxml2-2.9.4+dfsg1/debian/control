@@ -1,0 +1,203 @@
+Source: libxml2
+Priority: optional
+Section: libs
+Maintainer: Debian XML/SGML Group <debian-xml-sgml-pkgs@lists.alioth.debian.org>
+Uploaders:
+ Aron Xu <aron@debian.org>,
+ YunQiang Su <wzssyqa@gmail.com>,
+Build-Depends:
+ debhelper (>= 11),
+ dh-python <!nopython>,
+ libicu-dev,
+ liblzma-dev,
+ libpython-all-dbg <!nopython>,
+ libpython-all-dev <!nopython>,
+ libpython3-all-dbg <!nopython>,
+ libpython3-all-dev <!nopython>,
+ pkg-config,
+ python-all-dbg:any <!nopython>,
+ python-all-dev:any (>= 2.7.5-5~) <!nopython>,
+ python3-all-dbg:any <!nopython>,
+ python3-all-dev:any (>= 3.5) <!nopython>,
+ rename,
+ zlib1g-dev | libz-dev,
+Standards-Version: 4.1.3
+Rules-Requires-Root: no
+Homepage: http://xmlsoft.org
+Vcs-Git: https://anonscm.debian.org/git/debian-xml-sgml/libxml2.git
+Vcs-Browser: https://anonscm.debian.org/git/debian-xml-sgml/libxml2.git
+
+Package: libxml2
+Architecture: any
+Pre-Depends:
+ ${misc:Pre-Depends},
+Depends:
+ ${misc:Depends},
+ ${shlibs:Depends},
+Multi-Arch: same
+Description: GNOME XML library
+ XML is a metalanguage to let you design your own markup language.
+ A regular markup language defines a way to describe information in
+ a certain class of documents (eg HTML). XML lets you define your
+ own customized markup languages for many classes of document. It
+ can do this because it's written in SGML, the international standard
+ metalanguage for markup languages.
+ .
+ This package provides a library providing an extensive API to handle
+ such XML data files.
+
+Package: libxml2-utils
+Architecture: any
+Section: text
+Depends:
+ ${misc:Depends},
+ ${shlibs:Depends},
+Multi-Arch: foreign
+Description: XML utilities
+ XML is a metalanguage to let you design your own markup language.
+ A regular markup language defines a way to describe information in
+ a certain class of documents (eg HTML). XML lets you define your
+ own customized markup languages for many classes of document. It
+ can do this because it's written in SGML, the international standard
+ metalanguage for markup languages.
+ .
+ This package provides xmllint, a tool for validating and reformatting
+ XML documents, and xmlcatalog, a tool to parse and manipulate XML or
+ SGML catalog files.
+
+Package: libxml2-dev
+Architecture: any
+Section: libdevel
+Depends:
+ libicu-dev,
+ libxml2 (= ${binary:Version}),
+ ${misc:Depends},
+Suggests:
+ pkg-config,
+Multi-Arch: same
+Description: Development files for the GNOME XML library
+ XML is a metalanguage to let you design your own markup language.
+ A regular markup language defines a way to describe information in
+ a certain class of documents (eg HTML). XML lets you define your
+ own customized markup languages for many classes of document. It
+ can do this because it's written in SGML, the international standard
+ metalanguage for markup languages.
+ .
+ Install this package if you wish to develop your own programs using
+ the GNOME XML library.
+
+Package: libxml2-dbg
+Architecture: any
+Section: debug
+Depends:
+ libxml2 (= ${binary:Version}),
+ ${misc:Depends},
+Multi-Arch: same
+Description: Debugging symbols for the GNOME XML library
+ XML is a metalanguage to let you design your own markup language.
+ A regular markup language defines a way to describe information in
+ a certain class of documents (eg HTML). XML lets you define your
+ own customized markup languages for many classes of document. It
+ can do this because it's written in SGML, the international standard
+ metalanguage for markup languages.
+ .
+ This package provides the debugging symbols for the library.
+
+Package: libxml2-doc
+Architecture: all
+Section: doc
+Depends:
+ ${misc:Depends},
+Suggests:
+ devhelp,
+Multi-Arch: foreign
+Description: Documentation for the GNOME XML library
+ XML is a metalanguage to let you design your own markup language.
+ A regular markup language defines a way to describe information in
+ a certain class of documents (eg HTML). XML lets you define your
+ own customized markup languages for many classes of document. It
+ can do this because it's written in SGML, the international standard
+ metalanguage for markup languages.
+ .
+ This package contains general information about the GNOME XML library
+ and more specific API references.
+
+Package: python-libxml2
+Architecture: any
+Build-Profiles: <!nopython>
+Section: python
+Depends:
+ ${misc:Depends},
+ ${python:Depends},
+ ${shlibs:Depends},
+Description: Python bindings for the GNOME XML library
+ XML is a metalanguage to let you design your own markup language.
+ A regular markup language defines a way to describe information in
+ a certain class of documents (eg HTML). XML lets you define your
+ own customized markup languages for many classes of document. It
+ can do this because it's written in SGML, the international standard
+ metalanguage for markup languages.
+ .
+ This package contains the files needed to use the GNOME XML library
+ in Python programs.
+
+Package: python-libxml2-dbg
+Architecture: any
+Build-Profiles: <!nopython>
+Section: debug
+Depends:
+ python-dbg,
+ python-libxml2 (= ${binary:Version}),
+ ${misc:Depends},
+ ${shlibs:Depends},
+Description: Python bindings for the GNOME XML library (debug extension)
+ XML is a metalanguage to let you design your own markup language.
+ A regular markup language defines a way to describe information in
+ a certain class of documents (eg HTML). XML lets you define your
+ own customized markup languages for many classes of document. It
+ can do this because it's written in SGML, the international standard
+ metalanguage for markup languages.
+ .
+ This package contains the files needed to use the GNOME XML library
+ in Python programs for use with the Python debug interpreter.
+
+Package: python3-libxml2
+Architecture: any
+Build-Profiles: <!nopython>
+Section: python
+Multi-Arch: same
+Depends:
+ ${misc:Depends},
+ ${python3:Depends},
+ ${shlibs:Depends},
+Description: Python3 bindings for the GNOME XML library
+ XML is a metalanguage to let you design your own markup language.
+ A regular markup language defines a way to describe information in
+ a certain class of documents (eg HTML). XML lets you define your
+ own customized markup languages for many classes of document. It
+ can do this because it's written in SGML, the international standard
+ metalanguage for markup languages.
+ .
+ This package contains the files needed to use the GNOME XML library
+ in Python3 programs.
+
+Package: python3-libxml2-dbg
+Architecture: any
+Build-Profiles: <!nopython>
+Section: debug
+Multi-Arch: same
+Depends:
+ python3-dbg,
+ python3-libxml2 (= ${binary:Version}),
+ ${misc:Depends},
+ ${shlibs:Depends},
+Description: Python3 bindings for the GNOME XML library (debug extension)
+ XML is a metalanguage to let you design your own markup language.
+ A regular markup language defines a way to describe information in
+ a certain class of documents (eg HTML). XML lets you define your
+ own customized markup languages for many classes of document. It
+ can do this because it's written in SGML, the international standard
+ metalanguage for markup languages.
+ .
+ This package contains the files needed to use the GNOME XML library
+ in Python3 programs for use with the Python3 debug interpreter.

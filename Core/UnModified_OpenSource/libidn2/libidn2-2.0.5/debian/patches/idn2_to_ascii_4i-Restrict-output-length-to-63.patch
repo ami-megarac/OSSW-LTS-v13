@@ -1,0 +1,40 @@
+From: =?UTF-8?q?Tim=20R=C3=BChsen?= <tim.ruehsen@gmx.de>
+Date: Wed, 9 Jan 2019 14:36:16 +0100
+Subject: idn2_to_ascii_4i(): Restrict output length to 63
+Origin: https://github.com/libidn/libidn2/commit/e4d1558aa2c1c04a05066ee8600f37603890ba8c
+Bug-Debian-Security: https://security-tracker.debian.org/tracker/CVE-2019-18224
+Bug-Debian: https://bugs.debian.org/942895
+Bug: https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=12420
+
+---
+ lib/lookup.c | 12 ++++++++++--
+ 1 file changed, 10 insertions(+), 2 deletions(-)
+
+diff --git a/lib/lookup.c b/lib/lookup.c
+index 7c5b52bb7bc8..cc918d951ea7 100644
+--- a/lib/lookup.c
++++ b/lib/lookup.c
+@@ -617,10 +617,18 @@ idn2_to_ascii_4i (const uint32_t * input, size_t inlen, char * output, int flags
+        * char * out  output zero terminated string that must have room for at
+        * least 63 characters plus the terminating zero.
+        */
++      size_t len = strlen ((char *) output_u8);
++
++      if (len > 63)
++        {
++	  free (output_u8);
++	  return IDN2_TOO_BIG_DOMAIN;
++        }
++
+       if (output)
+-	strcpy (output, (const char *) output_u8);
++	strcpy (output, (char *) output_u8);
+ 
+-      free(output_u8);
++      free (output_u8);
+     }
+ 
+   return rc;
+-- 
+2.25.0
+

@@ -1,0 +1,24 @@
+#
+#=Description basic signal w/multiple signal set rule
+#=EXRESULT PASS
+#
+/usr/bin/signal-test1 {
+  audit signal set=(hup, int, quit, ill, trap, abrt, bus, fpe, kill, usr1, segv, usr2, pipe, alrm, term, stkflt, chld, cont, stop, stp, ttin, ttou, urg, xcpu, xfsz, vtalrm, prof, winch, io, pwr, sys, emt, exists),
+}
+
+/usr/bin/signal-test2 {
+  deny signal set=(hup int quit ill trap abrt bus fpe kill usr1 segv usr2 pipe alrm term stkflt chld cont stop stp ttin ttou urg xcpu xfsz vtalrm prof winch io pwr sys emt exists),
+}
+
+/usr/bin/signal-test3 {
+  allow signal send set=(hup, int, quit, ill, trap, abrt, bus, fpe, kill, usr1, segv, usr2, pipe, alrm, term, stkflt, chld, cont, stop, stp, ttin, ttou, urg, xcpu, xfsz, vtalrm, prof, winch, io, pwr, sys, emt, exists),
+}
+
+/usr/bin/signal-test4 {
+  audit allow signal (send, receive)  set=(hup, int, quit, ill, trap, abrt, bus, fpe, kill, usr1, segv, usr2, pipe, alrm, term, stkflt, chld, cont, stop, stp, ttin, ttou, urg, xcpu, xfsz, vtalrm, prof, winch, io, pwr, sys, emt, exists),
+}
+
+/usr/bin/signal-test5 {
+  audit deny signal (send receive)  set=(hup, int, quit, ill, trap, abrt, bus, fpe, kill, usr1, segv, usr2, pipe, alrm, term, stkflt, chld, cont, stop, stp, ttin, ttou, urg, xcpu, xfsz, vtalrm, prof, winch, io, pwr, sys, emt, exists),
+}
+

@@ -1,0 +1,9 @@
+#
+#=DESCRIPTION ux and Ux conflict, different identical rules
+#=EXRESULT FAIL
+#
+/usr/bin/foo {
+  /bin/cat Ux,
+  /lib/lib*.so* rix,
+  /bin/cat ux,
+}

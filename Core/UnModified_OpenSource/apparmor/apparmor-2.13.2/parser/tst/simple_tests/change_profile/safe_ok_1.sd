@@ -1,0 +1,7 @@
+#
+#=DESCRIPTION change_profile w/ safe modifier
+#=EXRESULT PASS
+#
+/usr/bin/foo {
+   change_profile safe /usr/bin/bar -> baz,
+}

@@ -1,0 +1,8 @@
+#
+#=DESCRIPTION comma at end of pathname
+#=EXRESULT PASS
+# vim:syntax=apparmor
+#
+/usr/bin/foo {
+  allow "/foobar," r,
+}

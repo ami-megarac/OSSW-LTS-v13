@@ -1,0 +1,70 @@
+This is the README for the AppArmor parser regression testsuite.
+
+Running the testsuite
+---------------------
+Running the tests is pretty easy, a simple 'make tests' should make it
+go, assuming the subdomain parser and perl are installed.
+
+There is a user configuration file 'uservars.conf'. If you wish to test
+against a different parser, or use a different set of profiles for the
+simple.pl test, you can change those settings in 'uservars.conf'.
+
+You can also override which parser is used through make by specifying
+the PARSER veriable. For example, to run the tests on the system parser,
+run 'make PARSER=/sbin/apparmor_parser'.
+
+Adding to the testsuite
+-----------------------
+
+The testsuite currently contains one testscript (simple.pl) and makes use
+of perl's Test::Simple, Test::Harness, and prove utilities (see 'perldoc
+Test::Tutorial', 'perldoc Test::Simple', 'perldoc Test::Harness', and
+'man 1 prove' for more information on these).
+
+It should be relatively easy to extend the suite with other testscripts,
+as long as they're written using Test::Simple or can emulate the
+Test::Harness protocol. To add a script, add it to the TESTS variable
+in the Makefile, and it will included in the tests to be run.
+
+However, in many cases, it is not necessary to add an entire new
+testscript for a testcase. Instead, the simple testcase (see below)
+will run all the profiles it finds on the parser, thus adding testcases
+is usually as simple as writing a new profile with a couple of extra
+comments.
+
+Simple parsing tests (simple.pl)
+--------------------------------
+This test script tests the parser front end's ability to identify legal
+profiles. It does this by running the parser against several legal and
+illegal profiles (in debug mode, so as not to load them into the module
+proper)
+
+The simple script has the parser attempt to parse all of the profiles
+named *.sd in the simple_tests/ subdirectory; thus, to add a new profile
+to test, simply add it to the simple_tests/ directory. The simple
+script also adds the testdir (simple_tests/ by default) to the parsers
+include path (assuming that particular bug has been fixed :-)). There
+is an includes/ subdir to place additional includes if necessary (we
+purposefully choose to use different directory names versus the shipped
+profiles to minimize testsuite breakage with changes in the external
+policy).
+
+The simple script looks for a few special comments in the profile,
+#=DESCRIPTION, #=EXRESULT, and #=TODO:
+
+  - #=DESCRIPTION -- all text following the keyword is considered a
+    description for the test. Please try to make these meaningful.
+
+  - #=EXRESULT -- This records the expected result of parsing this
+    profile. Values can either be PASS or FAIL; if no comment is found
+    that matches this pattern, then the profile is assumed to have an
+    expected parse result of PASS.
+
+  - #=TODO -- marks the test as being for a future item to implement and
+    thus are expected testsuite failures and hsould be ignored.
+
+  - #=DISABLED -- skips the test, and marks it as a failed TODO task.
+    Useful if the particular testcase causes the parser to infinite
+    loop or dump core.
+
+Otherwise, the profile is passed on as-is to the subdomain parser.

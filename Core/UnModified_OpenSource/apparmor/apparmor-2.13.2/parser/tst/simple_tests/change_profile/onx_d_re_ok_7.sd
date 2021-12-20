@@ -1,0 +1,65 @@
+#
+#=DESCRIPTION deny change_profile /onexec with just re, namespace
+#=EXRESULT PASS
+#
+
+
+/usr/bin/foo {
+   deny change_profile /onexec -> :ab:*,
+}
+
+/usr/bin/foo2 {
+   deny change_profile /onexec -> :ab:**,
+}
+
+/usr/bin/foo3 {
+   deny change_profile /onexec -> :ab:?,
+}
+
+/usr/bin/foo4 {
+   deny change_profile /onexec -> :ab:[ab],
+}
+
+/usr/bin/foo5 {
+   deny change_profile /onexec -> :ab:[^ab],
+}
+
+/usr/bin/foo6 {
+   deny change_profile /onexec -> :*:ab,
+}
+
+/usr/bin/foo7 {
+   deny change_profile /onexec -> :**:ab,
+}
+
+/usr/bin/foo8 {
+   deny change_profile /onexec -> :?:ab,
+}
+
+/usr/bin/foo9 {
+   deny change_profile /onexec -> :[ab]:ab,
+}
+
+/usr/bin/foo10 {
+   deny change_profile /onexec -> :[^ab]:ab,
+}
+
+/usr/bin/foo11 {
+   deny change_profile /onexec -> :*:*,
+}
+
+/usr/bin/foo12 {
+   deny change_profile /onexec -> :**:**,
+}
+
+/usr/bin/foo13 {
+   deny change_profile /onexec -> :?:?,
+}
+
+/usr/bin/foo14 {
+   deny change_profile /onexec -> :[ab]:[ab],
+}
+
+/usr/bin/foo15 {
+   deny change_profile /onexec -> :[^ab]:[^ab],
+}

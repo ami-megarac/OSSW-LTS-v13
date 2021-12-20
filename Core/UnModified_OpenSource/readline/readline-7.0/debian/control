@@ -1,0 +1,146 @@
+Source: readline
+Section: libs
+Priority: important
+Maintainer: Matthias Klose <doko@debian.org>
+Standards-Version: 4.1.4
+Build-Depends: debhelper (>= 9),
+  libncurses-dev,
+  lib32ncurses-dev [amd64 ppc64], lib64ncurses-dev [i386 powerpc sparc s390],
+  mawk | awk, texinfo, autotools-dev,
+  gcc-multilib [amd64 i386 kfreebsd-amd64 powerpc ppc64 s390 sparc]
+
+Package: libreadline7
+Architecture: any
+Depends: readline-common, ${shlibs:Depends}, ${misc:Depends}
+Pre-Depends: ${misc:Pre-Depends}
+Multi-Arch: same
+Section: libs
+Priority: important
+Description: GNU readline and history libraries, run-time libraries
+ The GNU readline library aids in the consistency of user interface
+ across discrete programs that need to provide a command line
+ interface.
+ .
+ The GNU history library provides a consistent user interface for
+ recalling lines of previously typed input.
+
+Package: lib64readline7
+Architecture: i386 powerpc s390 sparc
+Depends: readline-common, ${shlibs:Depends}, ${misc:Depends}
+Section: libs
+Priority: optional
+Description: GNU readline and history libraries, run-time libraries (64-bit)
+ The GNU readline library aids in the consistency of user interface
+ across discrete programs that need to provide a command line
+ interface.
+ .
+ The GNU history library provides a consistent user interface for
+ recalling lines of previously typed input.
+
+Package: readline-common
+Architecture: all
+Multi-Arch: foreign
+Section: utils
+Depends: dpkg (>= 1.15.4) | install-info, ${misc:Depends}
+Conflicts: libreadline5 (<< 5.0-11), libreadline-common
+Replaces: libreadline4 (<< 4.3-16), libreadline5 (<< 5.0-11), libreadline-common
+Suggests: readline-doc
+Priority: important
+Description: GNU readline and history libraries, common files
+ The GNU readline library aids in the consistency of user interface
+ across discrete programs that need to provide a command line
+ interface.
+ .
+ The GNU history library provides a consistent user interface for
+ recalling lines of previously typed input.
+
+Package: libreadline-dev
+Architecture: any
+Section: libdevel
+Priority: optional
+Depends: libreadline7 (= ${binary:Version}), libncurses-dev, dpkg (>= 1.15.4) | install-info, ${misc:Depends}
+Multi-Arch: same
+Conflicts: libreadline5-dev, libreadline6-dev, libreadline-gplv2-dev
+Suggests: readline-doc
+Provides: libreadline6-dev
+Description: GNU readline and history libraries, development files
+ The GNU readline library aids in the consistency of user interface
+ across discrete programs that need to provide a command line
+ interface.
+ .
+ The GNU history library provides a consistent user interface for
+ recalling lines of previously typed input.
+ .
+ This package contains development files.
+
+Package: lib64readline-dev
+Architecture: i386 powerpc s390 sparc
+Depends: lib64readline7 (= ${binary:Version}), lib64ncurses-dev, ${devxx:Depends}, ${misc:Depends}
+Conflicts: lib64readline6-dev, lib64readline-gplv2-dev
+Provides: lib64readline6-dev
+Section: libdevel
+Priority: optional
+Description: GNU readline and history libraries, development files (64-bit)
+ The GNU readline library aids in the consistency of user interface
+ across discrete programs that need to provide a command line
+ interface.
+ .
+ The GNU history library provides a consistent user interface for
+ recalling lines of previously typed input.
+
+Package: rlfe
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Section: utils
+Priority: optional
+Provides: readline-editor
+Description: Front-end using readline to "cook" input lines for other programs
+ This tool lets you use history and line-editing in any text oriented
+ tool. This is especially useful with third-party proprietary tools that
+ cannot be distributed linked against readline. It is not perfect but it
+ works pretty well.
+ .
+ See the ledit and rlwrap packages for other programs of that kind.
+
+Package: lib32readline7
+Architecture: amd64 ppc64
+Depends: readline-common, ${shlibs:Depends}, ${misc:Depends}
+Section: libs
+Priority: optional
+Description: GNU readline and history libraries, run-time libraries (32-bit)
+ The GNU readline library aids in the consistency of user interface
+ across discrete programs that need to provide a command line
+ interface.
+ .
+ The GNU history library provides a consistent user interface for
+ recalling lines of previously typed input.
+
+Package: lib32readline-dev
+Architecture: amd64 ppc64
+Depends: lib32readline7 (= ${binary:Version}), lib32ncurses-dev, ${devxx:Depends}, ${misc:Depends}
+Conflicts: lib32readline6-dev, lib32readline-gplv2-dev
+Provides: lib32readline6-dev
+Section: libdevel
+Priority: optional
+Description: GNU readline and history libraries, development files (32-bit)
+ The GNU readline library aids in the consistency of user interface
+ across discrete programs that need to provide a command line
+ interface.
+ .
+ The GNU history library provides a consistent user interface for
+ recalling lines of previously typed input.
+
+Package: readline-doc
+Architecture: all
+Multi-Arch: foreign
+Section: doc
+Depends: dpkg (>= 1.15.4) | install-info, ${misc:Depends}
+Replaces: libreadline6-dev (<< 6.3-8)
+Priority: optional
+Description: GNU readline and history libraries, documentation and examples
+ The GNU readline library aids in the consistency of user interface
+ across discrete programs that need to provide a command line
+ interface.
+ .
+ The GNU history library provides a consistent user interface for
+ recalling lines of previously typed input.

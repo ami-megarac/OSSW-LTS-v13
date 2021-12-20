@@ -1,0 +1,8 @@
+#
+#=DESCRIPTION simple signal w/bad perm
+#=EXRESULT FAIL
+#
+
+/usr/bin/signal-test {
+  signal mr,
+}

@@ -1,0 +1,11 @@
+#
+#=DESCRIPTION owner not allowed in change_profile rule
+#=EXRESULT FAIL
+#
+
+@{LIBVIRT}="libvirt"
+
+@{var}=/test
+/usr/bin/foo {
+   deny owner change_profile @{var} -> @{LIBVIRT}-[0-9a-f]*-[0-9a-f]*-[0-9a-f]*-[0-9a-f]*-[0-9a-f]*,
+}

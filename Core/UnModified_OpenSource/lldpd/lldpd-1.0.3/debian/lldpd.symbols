@@ -1,0 +1,4 @@
+liblldpctl.so.4 lldpd #MINVER#
+ (symver)LIBLLDPCTL_4.6 0.7.16
+ (symver)LIBLLDPCTL_4.7 0.7.16
+ (symver)LIBLLDPCTL_4.8 0.8.0

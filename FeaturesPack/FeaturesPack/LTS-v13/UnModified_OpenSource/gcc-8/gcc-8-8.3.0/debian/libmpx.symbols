@@ -1,0 +1,5 @@
+libmpx.so.2 #PACKAGE# #MINVER#
+ (symver)LIBMPX_1.0 5
+ (symver)LIBMPX_2.0 6
+libmpxwrappers.so.2 #PACKAGE# #MINVER#
+ (symver)LIBMPXWRAPPERS_1.0 5

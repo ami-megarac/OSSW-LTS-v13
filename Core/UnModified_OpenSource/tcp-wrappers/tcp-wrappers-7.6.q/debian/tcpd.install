@@ -1,0 +1,5 @@
+tcpd /usr/sbin/
+tcpdchk /usr/sbin/
+tcpdmatch /usr/sbin/
+try-from /usr/sbin/
+safe_finger /usr/sbin/

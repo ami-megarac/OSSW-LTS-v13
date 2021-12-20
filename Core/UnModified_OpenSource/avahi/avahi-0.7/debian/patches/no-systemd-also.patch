@@ -1,0 +1,24 @@
+From: Steve Langasek <steve.langasek@ubuntu.com>
+Date: Fri, 27 Apr 2018 08:29:29 +0100
+Subject: Don't use 'Also=' in dnsconfd systemd unit
+
+'Also=avahi-daemon.socket' means that 'systemctl disable avahi-dnsconfd'
+will also disable avahi-daemon.socket, which is definitely not what we
+want, and it also causes debhelper to throw an error.  Just drop this entry
+from the configuration.
+
+Last-Modified: 2018-01-02 20:30:00 -0800
+Bug-Debian: https://bugs.debian.org/878911
+---
+ avahi-dnsconfd/avahi-dnsconfd.service.in | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/avahi-dnsconfd/avahi-dnsconfd.service.in b/avahi-dnsconfd/avahi-dnsconfd.service.in
+index 95db79f..7c293da 100644
+--- a/avahi-dnsconfd/avahi-dnsconfd.service.in
++++ b/avahi-dnsconfd/avahi-dnsconfd.service.in
+@@ -26,4 +26,3 @@ ExecStart=@sbindir@/avahi-dnsconfd -s
+ 
+ [Install]
+ WantedBy=multi-user.target
+-Also=avahi-daemon.socket

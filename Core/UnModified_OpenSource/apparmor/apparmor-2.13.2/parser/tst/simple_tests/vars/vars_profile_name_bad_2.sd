@@ -1,0 +1,6 @@
+#=DESCRIPTION special @{profile_name} not defined for profile name declaration
+#=EXRESULT FAIL
+
+profile @{profile_name} {
+  /does/not/exist r,
+}

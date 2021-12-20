@@ -1,0 +1,31 @@
+#
+#=Description basic signal mixed send/receive w/modifiers rules
+#=EXRESULT PASS
+#
+/usr/bin/signal-test {
+  deny signal (r),
+  audit signal (rw),
+
+}
+
+/usr/bin/signal-test2 {
+  allow signal (r, w),
+  audit signal (read, write),
+
+}
+
+/usr/bin/signal-test3 {
+  audit deny signal (send, receive),
+
+}
+
+/usr/bin/signal-test4 {
+  audit allow signal (r send, receive, write, rw, send),
+  deny signal r,
+
+}
+
+/usr/bin/signal-test5 {
+  deny signal (r send,,,, receive,write,rw, send),
+}
+

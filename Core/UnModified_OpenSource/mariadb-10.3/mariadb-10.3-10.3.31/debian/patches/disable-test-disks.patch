@@ -1,0 +1,9 @@
+Author: Vicentiu Ciorbaru <vicentiu@mariadb.org>
+Date:   Wed Jul 4 13:29:55 2018 +0300
+
+    Disable disks.disks test
+
+--- /dev/null
++++ b/plugin/disks/mysql-test/disks/disabled.def
+@@ -0,0 +1 @@
++disks                    : does not work on Launchpad

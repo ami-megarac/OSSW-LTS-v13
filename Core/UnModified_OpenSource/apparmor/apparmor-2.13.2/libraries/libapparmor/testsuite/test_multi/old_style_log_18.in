@@ -1,0 +1,1 @@
+type=APPARMOR msg=audit(1168661976.062:55): LOGPROF-HINT unknown_hat TESTHAT pid=27764 profile=/home/matt/projects/change_hat_test/test_hat active=/home/matt/projects/change_hat_test/test_hat 

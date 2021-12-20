@@ -1,0 +1,7 @@
+#
+#=DESCRIPTION deny audit in wrong order
+#=EXRESULT FAIL
+#
+/usr/bin/foo {
+   deny audit change_profile /onexec -> /bin/*,
+}

@@ -1,0 +1,67 @@
+#
+#=DESCRIPTION allow change_profile with name space
+#=EXRESULT PASS
+#
+/usr/bin/foo {
+   allow change_profile -> :foo:/bin/foo,
+}
+
+/usr/bin/foo2 {
+   allow change_profile -> :foo:/bin/fo*,
+}
+
+/usr/bin/foo3 {
+   allow change_profile -> :foo:/bin/fo**,
+}
+
+/usr/bin/foo4 {
+   allow change_profile -> :foo:/bin/fo?,
+}
+
+/usr/bin/foo5 {
+   allow change_profile -> :foo:/bin/fo[ab],
+}
+
+/usr/bin/foo6 {
+   allow change_profile -> :foo:/bin/fo[^ab],
+}
+
+/usr/bin/foo7 {
+   allow change_profile -> :fo*:/bin/foo,
+}
+
+/usr/bin/foo8 {
+   allow change_profile -> :fo**:/bin/foo,
+}
+
+/usr/bin/foo9 {
+   allow change_profile -> :fo?:/bin/foo,
+}
+
+/usr/bin/foo10 {
+   allow change_profile -> :fo[ab]:/bin/foo,
+}
+
+/usr/bin/foo11 {
+   allow change_profile -> :fo[^ab]:/bin/foo,
+}
+
+/usr/bin/foo12 {
+   allow change_profile -> :fo*:/bin/fo*,
+}
+
+/usr/bin/foo13 {
+   allow change_profile -> :fo**:/bin/fo**,
+}
+
+/usr/bin/foo14 {
+   allow change_profile -> :fo?:/bin/fo?,
+}
+
+/usr/bin/foo15 {
+   allow change_profile -> :fo[ab]:/bin/fo[ab],
+}
+
+/usr/bin/foo16 {
+   allow change_profile -> :fo[^ab]:/bin/fo[^ab],
+}

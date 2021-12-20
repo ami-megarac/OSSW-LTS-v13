@@ -1,0 +1,3 @@
+debian/changelog	libperl-dev/changelog.Debian
+debian/copyright	libperl-dev/copyright
+debian/libperl-dev.README.cross     libperl-dev/README.cross

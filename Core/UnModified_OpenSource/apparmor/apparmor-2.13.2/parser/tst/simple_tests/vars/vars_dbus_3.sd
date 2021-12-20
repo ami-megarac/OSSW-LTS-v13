@@ -1,0 +1,10 @@
+#=DESCRIPTION reference variables in dbus rules, bus fields
+#=EXRESULT PASS
+
+@{BUSES}=session system accessability choochoo
+
+/does/not/exist {
+  dbus (send)
+       bus=@{BUSES}
+       path="/com/canonical/hud/applications/baz",
+}

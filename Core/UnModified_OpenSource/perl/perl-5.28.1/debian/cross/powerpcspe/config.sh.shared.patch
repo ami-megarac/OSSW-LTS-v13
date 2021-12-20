@@ -1,0 +1,24 @@
+--- config.sh.static	2018-12-02 12:32:40.949083707 +0200
++++ config.sh.shared	2018-12-02 12:32:40.941083467 +0200
+@@ -17 +17 @@
+-config_args='-Dusethreads -Duselargefiles -Dcc=powerpc-linux-gnuspe-gcc -Dcpp=powerpc-linux-gnuspe-cpp -Dld=powerpc-linux-gnuspe-gcc -Dccflags=-DDEBIAN -Wdate-time -D_FORTIFY_SOURCE=2 -g -O2 -fdebug-prefix-map=/build/perl-qjCtfu/perl-5.28.1=. -fstack-protector-strong -Wformat -Werror=format-security -Dldflags= -Wl,-z,relro -Dlddlflags=-shared -Wl,-z,relro -Dcccdlflags=-fPIC -Darchname=powerpc-linux-gnuspe -Dprefix=/usr -Dprivlib=/usr/share/perl/5.28 -Darchlib=/usr/lib/powerpc-linux-gnuspe/perl/5.28 -Dvendorprefix=/usr -Dvendorlib=/usr/share/perl5 -Dvendorarch=/usr/lib/powerpc-linux-gnuspe/perl5/5.28 -Dsiteprefix=/usr/local -Dsitelib=/usr/local/share/perl/5.28.1 -Dsitearch=/usr/local/lib/powerpc-linux-gnuspe/perl/5.28.1 -Dman1dir=/usr/share/man/man1 -Dman3dir=/usr/share/man/man3 -Dsiteman1dir=/usr/local/man/man1 -Dsiteman3dir=/usr/local/man/man3 -Duse64bitint -Dman1ext=1 -Dman3ext=3perl -Dpager=/usr/bin/sensible-pager -Uafs -Ud_csh -Ud_ualarm -Uusesfio -Uusenm -Ui_libutil -Ui_xlocale -Uversiononly -DDEBUGGING=-g -Doptimize=-O2 -dEs -Uuseshrplib -Dotherlibdirs=/usr/lib/powerpc-linux-gnuspe/perl-base'
++config_args='-Dusethreads -Duselargefiles -Dcc=powerpc-linux-gnuspe-gcc -Dcpp=powerpc-linux-gnuspe-cpp -Dld=powerpc-linux-gnuspe-gcc -Dccflags=-DDEBIAN -Wdate-time -D_FORTIFY_SOURCE=2 -g -O2 -fdebug-prefix-map=/build/perl-qjCtfu/perl-5.28.1=. -fstack-protector-strong -Wformat -Werror=format-security -Dldflags= -Wl,-z,relro -Dlddlflags=-shared -Wl,-z,relro -Dcccdlflags=-fPIC -Darchname=powerpc-linux-gnuspe -Dprefix=/usr -Dprivlib=/usr/share/perl/5.28 -Darchlib=/usr/lib/powerpc-linux-gnuspe/perl/5.28 -Dvendorprefix=/usr -Dvendorlib=/usr/share/perl5 -Dvendorarch=/usr/lib/powerpc-linux-gnuspe/perl5/5.28 -Dsiteprefix=/usr/local -Dsitelib=/usr/local/share/perl/5.28.1 -Dsitearch=/usr/local/lib/powerpc-linux-gnuspe/perl/5.28.1 -Dman1dir=/usr/share/man/man1 -Dman3dir=/usr/share/man/man3 -Dsiteman1dir=/usr/local/man/man1 -Dsiteman3dir=/usr/local/man/man3 -Duse64bitint -Dman1ext=1 -Dman3ext=3perl -Dpager=/usr/bin/sensible-pager -Uafs -Ud_csh -Ud_ualarm -Uusesfio -Uusenm -Ui_libutil -Ui_xlocale -Uversiononly -DDEBUGGING=-g -Doptimize=-O2 -dEs -Duseshrplib -Dlibperl=libperl.so.5.28.1'
+@@ -57,2 +57,2 @@
+-config_arg39='-Uuseshrplib'
+-config_arg40='-Dotherlibdirs=/usr/lib/powerpc-linux-gnuspe/perl-base'
++config_arg39='-Duseshrplib'
++config_arg40='-Dlibperl=libperl.so.5.28.1'
+@@ -474 +474 @@
+-d_perl_otherlibdirs='define'
++d_perl_otherlibdirs='undef'
+@@ -920 +920 @@
+-libperl='libperl.a'
++libperl='libperl.so.5.28.1'
+@@ -1003 +1003 @@
+-otherlibdirs='/usr/lib/powerpc-linux-gnuspe/perl-base'
++otherlibdirs=' '
+@@ -1203 +1203 @@
+-useshrplib='false'
++useshrplib='true'
+@@ -1256 +1255,0 @@
+-# Extracted from Debian package version 5.28.1-1

@@ -1,0 +1,8 @@
+#
+#=DESCRIPTION owner is not allowed on capability rules
+#=EXRESULT FAIL
+#
+/usr/bin/foo {
+  owner capability sys_admin,
+
+}

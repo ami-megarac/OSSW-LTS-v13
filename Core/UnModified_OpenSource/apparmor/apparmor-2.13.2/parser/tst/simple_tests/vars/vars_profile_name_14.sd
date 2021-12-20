@@ -1,0 +1,10 @@
+#=DESCRIPTION reference variables in rules that also have alternations
+#=EXRESULT PASS
+# This test needs check on @{FOO} attachment having leading / post var expansion
+
+@{FOO}=/bar /baz
+@{BAR}=baz
+
+profile @{BAR} @{FOO} {
+  /does/not/exist r,
+}

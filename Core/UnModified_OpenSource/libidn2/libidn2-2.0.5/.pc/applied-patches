@@ -1,0 +1,4 @@
+Fix-free-of-random-stack-value-in-idn2_to_ascii_4i.patch
+idn2_to_ascii_4i-Restrict-output-length-to-63.patch
+Fail-make-if-ronn-doesn-t-existi-when-building-docs.patch
+Fix-generation-of-idn2.1-man-page-file.patch

@@ -1,0 +1,10 @@
+#
+#=Description basic rules to test the "strictatime" mount option
+#=EXRESULT PASS
+/usr/bin/foo {
+  mount options=strictatime /a -> /1,
+  mount options=(strictatime) /b -> /2,
+  mount options=(rw,strictatime) /c -> /3,
+  mount options in (strictatime) /d -> /4,
+  mount options in (ro,strictatime) /e -> /5,
+}

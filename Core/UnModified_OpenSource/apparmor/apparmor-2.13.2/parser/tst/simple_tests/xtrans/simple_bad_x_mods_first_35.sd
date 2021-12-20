@@ -1,0 +1,16 @@
+#
+#=DESCRIPTION test pix - in forward perms P and p are the same and the
+# unsafe keyword is required.  So these should conflict
+#=EXRESULT FAIL
+#
+/usr/bin/foo {
+  /bin/cat pix,
+  /bin/foo Pix,
+  /bin/bar pIx,
+  /bin/a   PIx,
+
+  unsafe pix /bin/cat,
+  unsafe Pix /bin/foo,
+  pIx /bin/bar,
+  PIx /bin/a,
+}

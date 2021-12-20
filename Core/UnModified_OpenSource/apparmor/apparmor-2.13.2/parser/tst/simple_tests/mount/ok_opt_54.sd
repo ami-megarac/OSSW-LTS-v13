@@ -1,0 +1,10 @@
+#
+#=Description basic rules to test the "make-rslave" mount option
+#=EXRESULT PASS
+/usr/bin/foo {
+  mount options=make-rslave -> /1,
+  mount options=(make-rslave) -> /2,
+  mount options=(rw,make-rslave) -> /3,
+  mount options in (make-rslave) -> /4,
+  mount options in (ro,make-rslave) -> /5,
+}

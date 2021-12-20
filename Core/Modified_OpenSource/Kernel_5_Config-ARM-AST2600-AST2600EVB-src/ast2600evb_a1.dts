@@ -39,7 +39,16 @@
                         compatible = "shared-dma-pool";
                         reusable;
                 };
-         };
+#if defined(CONFIG_SPX_FEATURE_VIDEO_RVAS)
+                linux,cma {
+			            size = <0x4000000>; //64MB
+			            alignment = <0x01000000>;
+			            compatible = "shared-dma-pool";
+			            reusable;
+			            linux,cma-default;
+                };
+#endif				
+		};
 
 
 
@@ -308,7 +317,7 @@
 #endif
 
 &adc0 {
-	ref_voltage = <2500>;
+	vref = <2500>;
 	status = "okay";
 
 	pinctrl-names = "default";
@@ -319,7 +328,7 @@
 };
 
 &adc1 {
-	ref_voltage = <2500>;
+	vref = <2500>;
 	status = "okay";
 
 	pinctrl-names = "default";
@@ -387,8 +396,10 @@
 };
 
 &fmc {
+	spi-dma-write;
+	low-spi-clk-write;
 	status = "okay";
-	flash@0 {
+	flash0:flash@0 {
 		status = "okay";
 		m25p,fast-read;
 		label = "bmc";
@@ -401,7 +412,7 @@
 	        };
 #endif	
 	};
-	flash@1 {
+	flash1:flash@1 {
 		status = "okay";
 		m25p,fast-read;
 		spi-max-frequency = <50000000>;
@@ -414,7 +425,17 @@
 #endif				
 	};
 };
+#ifdef CONFIG_SPX_FEATURE_DEDICATED_SPI_FLASH_BANK
+&mtdconcat {
+	status="okay";
+	devices=<&flash0 &flash1>;
+ 	label = "bmc";
+	partitions {
+           compatible = "ami,spx-fmh";
+	};
 
+};
+#endif
 &spi1 {
         spi-dma-write;
         low-spi-clk-write;
@@ -471,7 +492,9 @@
 	status = "okay";
 };
 
-
+&i3cglobal {
+	status = "okay";
+};
 &i3c0 {
         status = "okay";
         jdec-spd;
@@ -528,14 +551,6 @@
 	status = "okay";
 };
 
-&i2c12 {
-	status = "okay";
-};
-
-&i2c13 {
-	status = "okay";
-};
-
 &i2c14 {
 	status = "okay";
 };
@@ -548,6 +563,17 @@
 	status = "okay";
 };
 &sgpiom0 {
+        status = "okay";
+};
+&sgpiom1 { 
+	status = "okay"; 
+}; 
+
+&hace {
+        status = "okay";
+};
+
+&acry {
         status = "okay";
 };
 
@@ -576,46 +602,47 @@
 			&pinctrl_tach6_default
 			&pinctrl_tach7_default>;
 	fan@0 {
-		aspeed,tach-ch = <0x00>;
+		reg = <0x00>;
 		aspeed,pulse-pr = <2>;
 	};
 
 	fan@1 {
-		aspeed,tach-ch = <0x01>;
+		reg = <0x01>;
 		aspeed,pulse-pr = <2>;
 	};
 
 	fan@2 {
-		aspeed,tach-ch = <0x02>;
+		reg = <0x02>;
 		aspeed,pulse-pr = <2>;
 	};
 
 	fan@3 {
-		aspeed,tach-ch = <0x03>;
+		reg = <0x03>;
 		aspeed,pulse-pr = <2>;
 	};
 
 	fan@4 {
-		aspeed,tach-ch = <0x04>;
+		reg = <0x04>;
 		aspeed,pulse-pr = <2>;
 	};
 
 	fan@5 {
-		aspeed,tach-ch = <0x05>;
+		reg = <0x05>;
 		aspeed,pulse-pr = <2>;
 	};
 
 	fan@6 {
-		aspeed,tach-ch = <0x06>;
+		reg = <0x06>;
 		aspeed,pulse-pr = <2>;
 	};
 
 	fan@7 {
-		aspeed,tach-ch = <0x07>;
+		reg = <0x07>;
 		aspeed,pulse-pr = <2>;
 	};
 };
 
+#ifdef CONFIG_SPX_FEATURE_USB_PORT_B_HOST_SUPPORT
 &ehci1 {
 	status = "okay";
 };
@@ -623,9 +650,19 @@
 &uhci {
 	status = "okay";
 };
+#endif
+
 &vhub {
         status = "okay";
 };
+
+#ifdef CONFIG_SPX_FEATURE_USB_PORT_B_SUPPORT
+&udc {
+        status = "okay";
+        pinctrl-names = "default";
+        pinctrl-0 = <&pinctrl_usb2bd_default>;
+};
+#endif
 
 #include "legacy.dtsi" /* For Legacy AMI Drivers */
 

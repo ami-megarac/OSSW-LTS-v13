@@ -1,0 +1,7 @@
+#
+#=DESCRIPTION simple cpu rlimit test, cpu allows default units
+#=EXRESULT PASS
+
+profile rlimit {
+  set rlimit cpu <= 1024,
+}

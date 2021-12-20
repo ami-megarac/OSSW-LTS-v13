@@ -1,0 +1,61 @@
+#
+# $Id$
+#=DESCRIPTION same named profile mixed with unnamed same attach different namespaces test,
+#=EXRESULT PASS
+# vim:syntax=subdomain
+# Last Modified: Sun Apr 17 19:44:44 2005
+#
+profile /does/not/exist {
+  /usr/X11R6/lib/lib*so* rrr,
+  /does/not/exist r,
+  /var/log/messages www,
+  /tmp/sd*.foo rwrwwrll,
+  /bin/cat pxpxpxpxpx,
+  /bin/ls ixixixix,
+}
+
+:foo:/does/not/exist {
+  /usr/X11R6/lib/lib*so* rrr,
+  /does/not/exist r,
+  /var/log/messages www,
+  /tmp/sd*.foo rwrwwrll,
+  /bin/cat pxpxpxpxpx,
+  /bin/ls ixixixix,
+}
+
+profile :bar:/does/not/exist {
+  /usr/X11R6/lib/lib*so* rrr,
+  /does/not/exist r,
+  /var/log/messages www,
+  /tmp/sd*.foo rwrwwrll,
+  /bin/cat pxpxpxpxpx,
+  /bin/ls ixixixix,
+}
+
+profile exist /does/not/exist {
+  /usr/X11R6/lib/lib*so* rrr,
+  /does/not/exist r,
+  /var/log/messages www,
+  /tmp/sd*.foo rwrwwrll,
+  /bin/cat pxpxpxpxpx,
+  /bin/ls ixixixix,
+}
+
+:foo:exist /does/not/exist {
+  /usr/X11R6/lib/lib*so* rrr,
+  /does/not/exist r,
+  /var/log/messages www,
+  /tmp/sd*.foo rwrwwrll,
+  /bin/cat pxpxpxpxpx,
+  /bin/ls ixixixix,
+}
+
+profile :bar:exist /does/not/exist {
+  /usr/X11R6/lib/lib*so* rrr,
+  /does/not/exist r,
+  /var/log/messages www,
+  /tmp/sd*.foo rwrwwrll,
+  /bin/cat pxpxpxpxpx,
+  /bin/ls ixixixix,
+}
+

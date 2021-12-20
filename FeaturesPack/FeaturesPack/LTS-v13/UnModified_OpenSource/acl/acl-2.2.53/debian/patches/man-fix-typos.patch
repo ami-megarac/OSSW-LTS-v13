@@ -1,0 +1,92 @@
+Description: Typo fixes
+Author: Guillem Jover <guillem@debian.org>
+Origin: vendor
+Forwarded: no
+Last-Update: 2019-02-16
+
+---
+ man/man1/chacl.1         |    8 ++++----
+ man/man1/getfacl.1       |    2 +-
+ man/man3/acl_from_text.3 |    2 +-
+ man/man3/acl_to_text.3   |    2 +-
+ man/man5/acl.5           |    6 ++++--
+ 5 files changed, 11 insertions(+), 9 deletions(-)
+
+--- a/man/man1/getfacl.1
++++ b/man/man1/getfacl.1
+@@ -162,7 +162,7 @@ If the environment variable POSIXLY_CORR
+ option is given. If no command line parameter is given,
+ .I getfacl
+ behaves as if it was invoked as ``getfacl \-''.
+-No flags comments indicating the setuid, setgit, and sticky bits are generated.
++No flags comments indicating the setuid, setgid, and sticky bits are generated.
+ .SH AUTHOR
+ Andreas Gruenbacher,
+ .RI < a.gruenbacher@bestbits.at >.
+--- a/man/man5/acl.5
++++ b/man/man5/acl.5
+@@ -109,7 +109,7 @@ to the permissions of the ACL_USER_OBJ e
+ entry, the group permissions correspond to the permissions of the
+ ACL_MASK entry.  Otherwise, if the ACL has no ACL_MASK entry, the group
+ permissions correspond to the permissions of the ACL_GROUP_OBJ entry.
+-The other permissions correspond to the permissions of the ACL_OTHER_OBJ
++The other permissions correspond to the permissions of the ACL_OTHER
+ entry.
+ .Pp
+ The file owner, group, and other permissions always match the
+@@ -256,7 +256,9 @@ entry for the file owner and the
+ .Li other
+ entry (entry tag type ACL_MASK).
+ .It Li other
+-An other ACL entry specifies the access granted to any process that does
++An
++.Li other
++ACL entry specifies the access granted to any process that does
+ not match any
+ .Li user
+ or
+--- a/man/man3/acl_from_text.3
++++ b/man/man3/acl_from_text.3
+@@ -84,7 +84,7 @@ IEEE Std 1003.1e draft 17 (\(lqPOSIX.1e\
+ .Sh SEE ALSO
+ .Xr acl_free 3 ,
+ .Xr acl_get_entry 3 ,
+-.Xw acl_to_text 3 ,
++.Xr acl_to_text 3 ,
+ .Xr acl 5
+ .Sh AUTHOR
+ Derived from the FreeBSD manual pages written by
+--- a/man/man3/acl_to_text.3
++++ b/man/man3/acl_to_text.3
+@@ -101,7 +101,7 @@ by the hardware or system-imposed memory
+ IEEE Std 1003.1e draft 17 (\(lqPOSIX.1e\(rq, abandoned)
+ .Sh SEE ALSO
+ .Xr acl_free 3 ,
+-.Xw acl_from_text 3 ,
++.Xr acl_from_text 3 ,
+ .Xr acl_to_any_text 3 ,
+ .Xr acl 5
+ .Sh AUTHOR
+--- a/man/man1/chacl.1
++++ b/man/man1/chacl.1
+@@ -60,16 +60,16 @@ These strings are made up of comma separ
+ is of the form, tag:name:perm.  Where \f4tag\fP can be:
+ .TP
+ "user" (or "u")
+-indicating that the entry is a user ACL entry.
++indicating that the entry is a "user" ACL entry.
+ .TP
+ "group" (or "g")
+-indicating that the entry is a group ACL entry.
++indicating that the entry is a "group" ACL entry.
+ .TP
+ "other" (or "o")
+-indicating that the entry is an other ACL entry.
++indicating that the entry is an "other" ACL entry.
+ .TP
+ "mask" (or "m")
+-indicating that the entry is a mask ACL entry.
++indicating that the entry is a "mask" ACL entry.
+ .P
+ \f4name\fP is a string which is the user or group name for the ACL entry.
+ A null \f4name\fP in a user or group ACL entry indicates the file's

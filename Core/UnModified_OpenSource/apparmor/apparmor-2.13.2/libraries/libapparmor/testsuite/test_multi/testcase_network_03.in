@@ -1,0 +1,1 @@
+type=AVC msg=audit(1333648169.009:11707146): apparmor="ALLOWED" operation="accept" parent=25932 profile="/usr/lib/dovecot/imap-login" pid=5049 comm="imap-login" lport=143 family="inet6" sock_type="stream" protocol=6

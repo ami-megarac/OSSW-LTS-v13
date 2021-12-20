@@ -1,0 +1,7 @@
+#
+#=DESCRIPTION simple unix listen w/peer test
+#=EXRESULT FAIL
+
+profile a_profile {
+  unix listen peer=(label=you_cannot_label_me),
+}

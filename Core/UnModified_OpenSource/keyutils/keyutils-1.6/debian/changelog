@@ -1,0 +1,632 @@
+keyutils (1.6-6) unstable; urgency=medium
+
+  * d/tests:
+     - Use set -e only for test setup
+     - upstream-runtime-tests
+       + Skip tests requiring root
+         They don't work with some container solutions due to their close
+         interaction with the kernel. These tests are moved to
+         upstream-runtime-test-isolation. (Closes: #923156)
+       + Drop needs-root restriction
+     - upstream-runtime-tests-isolation
+       + Drop redundant tests
+         Clean out tests not requiring machine-isolation, as these are
+         performed by the test upstream-runtime-tests.
+
+ -- Christian Kastner <ckk@debian.org>  Wed, 06 Mar 2019 17:18:19 +0100
+
+keyutils (1.6-5) unstable; urgency=medium
+
+  * d/tests:
+    - Save all output to $AUTOPKGTEST_ARTIFACTS
+  * d/tests:
+    - Run individual tests in AUTOPKGTEST_TMP subdirs, just in case
+
+ -- Christian Kastner <ckk@debian.org>  Fri, 01 Mar 2019 15:47:59 +0100
+
+keyutils (1.6-4) unstable; urgency=medium
+
+  * d/tests: upstream-runtime-tests: Fix broken option value
+    SKIPINSTALLREQ expects "yes", not "1". This led to debci tests failing.
+  * d/changelog: Fix line too long in 1.6.0-3
+
+ -- Christian Kastner <ckk@debian.org>  Fri, 22 Feb 2019 16:49:41 +0100
+
+keyutils (1.6-3) unstable; urgency=medium
+
+  * d/patches:
+    - Add Debian-specific-kernel-feature-tests.patch
+      Fold various Debian kernel feature test patches into one, dropping all
+      the other patches
+    - Drop Disable-some-tests.patch
+      The test is guarded by a kernel feature test for CONFIG_BIG_KEYS, which
+      we disable in another patch anyway
+  * d/tests: Split tests in two: isolation-machine required, or not
+  * d/control: Add Rules-Requires-Root: no
+    We don't need (fake)root to build the packages
+  * d/rules: Re-enable tests on MIPS
+    Bug #881830 blocking this has been fixed in stable in 2017, and the fix
+    should have propagated to the buildds by now
+
+ -- Christian Kastner <ckk@debian.org>  Thu, 21 Feb 2019 20:49:14 +0100
+
+keyutils (1.6-2) unstable; urgency=medium
+
+  * Add patchd/Disable-DH-tests.patch
+    Apparently, this requires a kernel feature not available on all buildds, and
+    the upstream feature tests only checks for kernel version and not actually
+    enabled kernel options.
+
+ -- Christian Kastner <ckk@debian.org>  Tue, 12 Feb 2019 07:36:31 +0100
+
+keyutils (1.6-1) unstable; urgency=medium
+
+  * New upstream version 1.6
+  * Update git repository layout to follow DEP-14
+
+  * d/patches (dropped):
+    - Drop tests-directories.patch.
+      It's purpose was to get rid of bashisms, but in the meantime, bash has
+      become a requirement
+  * d/patches (dropped, included or fixed upstream):
+     - man-page-syntax-fixes.patch
+     - enable-skipping-tests-req-root.patch
+     - Enable-skipping-test-requiring-installation.patch
+     - Make-testcase-aware-of-a-kernel-behaviour-change.patch
+     - Disable-tests-hitting-bug-in-MIPS-kernel-3.19.patch
+     - Use-bash-to-execute-the-tests.patch
+     - Conditionalize-tests-based-on-kernel-version.patch
+     - Insert-delay-in-key-invalidation-test.patch
+     - Include-limits.h-for-UINT_MAX.patch
+     - Adjust-tests-for-3.18-kernel-change.patch
+  * d/patches (added):
+     - pkg-config-install-tweaks.patch
+     - man-page-fixes.patch
+  * d/patches:
+    - Refresh remaining patches against 1.6
+  * d/libkeyutils1.symbols:
+    - Add symbols from new upstream version
+    - Add field Build-Depends-Package
+  * d/rules:
+    - Re-sync build option names with upstream
+  * d/tests:
+    -  Add restriction isolation-machine to upstream-runtime-tests
+  * gbp.conf:
+    - Update to reflect new DEP-14 layout
+  * d/copyright:
+    - Bump copyright years
+
+ -- Christian Kastner <ckk@debian.org>  Sun, 10 Feb 2019 15:29:04 +0100
+
+keyutils (1.5.9-10) unstable; urgency=medium
+
+  * Acknowledge NMUs. Thanks, Holger Levsen and James Cowgill!
+
+  [ Ondřej Nový ]
+  * d/tests:
+    - Use AUTOPKGTEST_TMP instead of ADTTMP
+  * d/copyright:
+    - Use https protocol in Format field
+
+  [ Christian Kastner ]
+  * d/watch:
+    - Update to formation version 4
+    - Switch URI to https
+  * d/rules:
+    - Switch from dh_install to dh_missing
+    - Drop override_dh_strip
+      It was only needed for the dbgsym migration
+    - Remove unused DEB_VERSION
+  * d/control:
+    - Bump Standards-Version to 4.3.0 (no changes needed)
+    - Switch Build-Depends from debhelper to debhelper-compat
+    - Bump Build-Depends for debhelper-compat to 12
+    - Switch to https protocol in Homepage field
+    - Remove Priority from library libkeyutils1
+      Default to the package Priority of "optional". lintian is correct in that
+      a library gets pulled in not per se, but as a dependency
+  * d/compat:
+    - Drop, as made obsolete by debhelper-compat
+  * d/copyright:
+    - Bump copyrights
+
+ -- Christian Kastner <ckk@debian.org>  Wed, 06 Feb 2019 23:12:27 +0100
+
+keyutils (1.5.9-9.3) unstable; urgency=medium
+
+  * Non-maintainer upload.
+  * d/control: Migrate Vcs repository to salsa.d.o.
+  * d/patches: Add endianness-and-PIE.patch to fix FTBFS.
+    Thanks to Steve Langasek and Adam Conrad (Closes: #895463)
+
+ -- James Cowgill <jcowgill@debian.org>  Mon, 16 Jul 2018 09:53:06 +0100
+
+keyutils (1.5.9-9.2) unstable; urgency=medium
+
+  * Non-maintainer upload.
+  * debian/rules:
+    - Disable testsuite on mips and mipsel until kernel bug #881830 is fixed.
+      (Closes: #881912)
+
+ -- James Cowgill <jcowgill@debian.org>  Thu, 16 Nov 2017 12:19:11 +0000
+
+keyutils (1.5.9-9.1) unstable; urgency=medium
+
+  * Non-maintainer upload.
+  * d/rules:
+    - Read SOURCE_DATE_EPOCH in UTC, thanks to Reiner Herrmann for the patch.
+      (Closes: #828681)
+
+ -- Holger Levsen <holger@debian.org>  Thu, 28 Sep 2017 14:19:16 +0200
+
+keyutils (1.5.9-9) unstable; urgency=medium
+
+  * Drop package keyutils-dbg in favor of automatic dbgsym packages, as per
+    https://lists.debian.org/debian-devel/2015/12/msg00262.html
+  * d/control:
+    - Bump Standards-Version to 3.9.8 (no changes needed)
+    - Bump Build-Depends version of debhelper to (>= 9.20151004). Needed for
+      $SOURCE_DATE_EPOCH
+    - Switch Vcs-Browser from gitweb to cgit
+    - Switch to secure URIs in Vcs-* fields
+  * d/copyright:
+    - Bump copyright years
+  * d/tests:
+    - Amend missing dependencies for upstream-runtime-tests
+    - Add allow-stderr restriction
+  * d/rules:
+    - Use debhelper's $SOURCE_DATE_EPOCH for embedded timestamp. This should
+      resolve a reproducible-builds issue
+  * d/patches (added):
+    - Drop-tests-requiring-CONFIG_BIG_KEYS.patch
+      The Debian kernel is built without CONFIG_BIG_KEYS
+    - Add Adjust-tests-for-3.18-kernel-change.patch
+      The maximum description size is 4095 plus a NULL in kernels from v3.18.
+      Backported from upstream
+
+ -- Christian Kastner <ckk@debian.org>  Sun, 01 May 2016 13:08:32 +0200
+
+keyutils (1.5.9-8) unstable; urgency=medium
+
+  * d/rules:
+    - Use date from changelog as build date
+  * d/patches (added):
+    - Add patch Include-limits.h-for-UINT_MAX.patch
+      Closes: #798157
+    - Add patch Make-build-reproducible.patch
+      Makes it possible to set build date instead of using the current date
+  * d/patches (updated):
+    - Disable-tests-hitting-bug-in-MIPS-kernel-3.19.patch
+    - Make-testcase-aware-of-a-kernel-behaviour-change.patch
+      Extend DEP3 headers
+
+ -- Christian Kastner <ckk@debian.org>  Wed, 07 Oct 2015 20:42:53 +0200
+
+keyutils (1.5.9-7) unstable; urgency=medium
+
+  * debian/patches (updated):
+    - Disable-tests-hitting-bug-in-MIPS-kernel-3.19.patch
+      Add another affected test that I seem to have overlooked previously.
+
+ -- Christian Kastner <ckk@debian.org>  Thu, 03 Sep 2015 01:55:10 +0200
+
+keyutils (1.5.9-6) unstable; urgency=medium
+
+  * Add package-specific d/gbp.conf
+  * d/patches:
+    - Drop patch numbers from .patch filenames
+  * d/control:
+    - Bump Standards-Version to 3.9.6 (no changes needed)
+    - Mark package keyutils-dbg as Multi-Arch: same
+    - Mark package keyutils-dev as Multi-Arch: same
+    - Mark package keyutils as Multi-Arch: foreign
+    - Drop XS-Testsuite. dpkg now recognizes the Testsuite header, and
+      dpkg-source automatically adds one when an autopkgtest suite is found
+    - Switch Maintainer email to my @debian.org address
+  * d/copyright:
+    - Fix a Files pattern (the GPL-2+ applies to all but two files)
+    - Bump copyright years
+  * d/patches (dropped):
+    - Enable-skipping-of-MAXDESCLEN-tests
+      This was a Debian-specific temporary workaround for a kernel issue on
+      arm64, MIPS, and sparc.
+        + The arm64 issue (#754206) is no longer reproducible on a porter box
+          which also has a 3.16 (albeit a later release), so lets see if these
+          just were early arm64 adoption problems
+        + The patch added below addresses the problem on MIPS more cleanly
+        + sparc has been dropped in the meantime
+  * d/patches (updated):
+     - Enable-skipping-test-requiring-installation.patch
+     - enable-skipping-tests-req-root.patch
+     - man-page-syntax-fixes.patch
+       Added DEP3 Applied-Upstream headers to the above three
+  * d/patches (added):
+    - Disable-tests-hitting-bug-in-MIPS-kernel-3.19.patch
+      This disables the "overlong description length" tests when running on a
+      MIPS kernel earlier than 3.19. They could not pass because of a kernel
+      bug. Closes: #779351
+    - Add patch Make-testcase-aware-of-a-kernel-behaviour-change.patch
+      This was a transient issue with kernels 3.8 - 3.12. Closes: #768905
+
+ -- Christian Kastner <ckk@debian.org>  Tue, 01 Sep 2015 21:17:27 +0200
+
+keyutils (1.5.9-5) unstable; urgency=low
+
+  * debian/rules:
+    - Also exclude arm64 from maxdesclen test, fixing a FTBFS. Closes: #754206
+  * debian/patches (refreshed):
+    - 0009-Use-bash-to-execute-the-tests.patch
+      0010-enable-skipping-tests-req-root.patch
+      0016-Enable-skipping-of-MAXDESCLEN-tests.patch
+      Refreshed DEP3 headers
+
+ -- Christian Kastner <debian@kvr.at>  Sat, 26 Jul 2014 23:39:12 +0200
+
+keyutils (1.5.9-4) unstable; urgency=low
+
+  * debian/rules:
+    - On mips, mipsel, and sparc, add a build flag disabling tests for maximum
+      description length. These tests appear to be too strict. Fixes a FTBFS on
+      this platforms. Closes: #749657
+  * debian/patches (added):
+    - 0016-Disable-maxdesclen-tests-on-mipsel-sparc
+      On some platforms, the maximum description length seems to be longer than
+      assumed by the tests (verified manually), so we add a build flag that
+      allows us to disable those tests.
+
+ -- Christian Kastner <debian@kvr.at>  Wed, 04 Jun 2014 10:32:14 +0200
+
+keyutils (1.5.9-3) unstable; urgency=low
+
+  * debian/patches (updated):
+    - 0011-Disable-some-tests
+      Do not completely disable tests requiring big_key support (see below)
+  * debian/patches (added):
+    - Add patch 0014-Conditionalize-tests-based-on-kernel-version
+      Check the kernel version before running some tests to make sure that the
+      currently running kernel supports the features they require, thereby
+      avoiding a FTBFS on buildds with older kernels. Closes: #749657
+    - Add patch 0015-Insert-delay-in-key-invalidation-test
+      Cherry-picked from upstream
+
+ -- Christian Kastner <debian@kvr.at>  Thu, 29 May 2014 14:16:33 +0200
+
+keyutils (1.5.9-2) unstable; urgency=low
+
+  * debian/rules:
+    - Skip build-time tests requiring installed version. Fixes FTBFS on all
+      architectures.
+  * debian/patches (added):
+    - 0013-Enable-skipping-test-requiring-installation
+    Allow skipping of tests requiring an installation. The request2 and
+    prequest2 require the /sbin/request-key helper, but the kernel looks for
+    this in the real root (outside of any chroot).
+
+ -- Christian Kastner <debian@kvr.at>  Mon, 26 May 2014 23:35:04 +0200
+
+keyutils (1.5.9-1) unstable; urgency=low
+
+  * New upstream release. Closes: #741336
+    - New man pages in section 7
+    - New functions in libkeyutils1:
+      + keyctl_get_persistent
+      + find_key_by_type_and_desc
+  * debian/control:
+    - Set myself to the new Maintainer. Closes: #748488
+    - Bump Standards-Version to 3.9.5 (no changes needed)
+    - Add XS-Testsuite: autopkgtest
+    - Add Vcs-* URLs
+  * debian/rules:
+    - dpkg-deb uses xz compression by default now, no need to request it
+    - Explicitly set DEB_HOST_MULTIARCH
+    - override_dh_auto_test: execute tests with a modified PATH and
+      LD_LIBRARY_PATH so that the build result is tested instead of the
+      installed versions. Furthermore, skip tests requiring root.
+  * debian/source/options:
+    - Remove (xz compression is the default now)
+  * debian/copyright:
+    - Update copyright for upstream, Luk, and myself
+  * debian/libkeyutils1.symbols:
+    - Add symbols file based on upstream's versioning and past Debian
+      releases
+  * debian/doc:
+    - Include upstream's README and SUBMITTING_PATCHES
+  * debian/tests/*:
+    - Create an autopkgtest with executes upstream's runtime tests. Indicate
+      that they require root privileges.
+  * debian/patches (dropped, broken):
+    - 0007-tests-keyctl
+  * debian/patches (dropped, fixed/included upstream):
+    - 0001-memleak-from-realloc
+    - 0002-another-memleak
+  * debian/patches (refreshed, DEP3-formatted):
+    - 0003-cifs
+    - 0004-cflags
+    - 0005-hardening
+    - 0006-tests-directories
+  * debian/patches (added):
+    - 0008-man-page-syntax-fixes
+      Fix minor syntax errors in man pages, thereby resolving lintian warnings
+    - 0009-Use-bash-to-execute-the-tests
+      The test fixtures make heavy use of bashisms; removal should be
+      discussed/coordinated with upstream first
+    - 0010-enable-skipping-tests-req-root
+      Allow skipping of tests that need root privileges (which we don't have at
+      build time).
+    - 0011-Disable-some-tests
+      Some test do not properly check whether features they need are available.
+      This will be fixed in the next upstream release.
+    - 0012-Remove-RHEL-specific-feature-test
+      The numeric test clashes with "unstable" as a release version.
+
+ -- Christian Kastner <debian@kvr.at>  Sun, 18 May 2014 15:22:19 +0200
+
+keyutils (1.5.6-1) unstable; urgency=low
+
+  * New upstream release.
+
+ -- Luk Claes <luk@debian.org>  Wed, 11 Sep 2013 07:41:59 +0200
+
+keyutils (1.5.5-7) unstable; urgency=low
+
+  * Taking over with maintainer's consent.
+  * Adding watch file.
+
+ -- Luk Claes <luk@debian.org>  Sat, 06 Apr 2013 09:38:50 +0200
+
+keyutils (1.5.5-6) unstable; urgency=low
+
+  * Removing all references to my old email address.
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Sun, 10 Mar 2013 20:53:34 +0100
+
+keyutils (1.5.5-5) unstable; urgency=low
+
+  * Updating year in copyright file.
+  * Dropping dpkg-source compression levels (Closes: #695714).
+  * Trimming diff headers in patches.
+  * Prefixing patches with four digits.
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Tue, 26 Feb 2013 13:21:20 +0100
+
+keyutils (1.5.5-4) unstable; urgency=low
+
+  * Adding dpkg-source local options.
+  * Using make interna rather than 'true' in rules to make the testsuite
+    not fail on purpose.
+  * Updating to standards version 3.9.4.
+  * Using correct compiler and ar when cross-building, thanks to Colin
+    Watson <cjwatson@ubuntu.com> (Closes: #695022).
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Tue, 11 Dec 2012 21:30:53 +0100
+
+keyutils (1.5.5-3) unstable; urgency=low
+
+  * Switching to xz compression.
+  * Updating GPL boilerplate in copyright file.
+  * Adding patch to use change-directory instead of push- and pop-
+    directory in tests to fix FTBFS with dash (Closes: #659297).
+  * Adding missing build-depends to lsb-release for testsuite.
+  * Adding patch to use keyctl from the current build rather the one
+    from system in testsuite (Closes: #659299).
+  * Making test-suite failures not bailout for the moment as some tests
+    do not work properly yet, but the test-suite should be run
+    nevertheless.
+  * Using space rather than comma seperated files field in copyright
+    file.
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Fri, 29 Jun 2012 21:01:32 +0200
+
+keyutils (1.5.5-2) unstable; urgency=low
+
+  * Adding patch from Simon Ruderich <simon@ruderich.org> to fix FTBFS
+    with hardening flags (Closes: #661393).
+  * Updating to standards version 3.9.3.
+  * Updating copyright file machine-readable format version 1.0.
+  * Tightening debhelper install files.
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Mon, 16 Apr 2012 09:45:04 +0000
+
+keyutils (1.5.5-1) unstable; urgency=low
+
+  * Using compression level 9 also for binary packages.
+  * Merging upstream version 1.5.5.
+  * Updating year in copyright file.
+  * Updating to debhelper version 9.
+  * Enabling hardening build options.
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Tue, 24 Jan 2012 17:08:44 +0100
+
+keyutils (1.5.2-2) unstable; urgency=low
+
+  * Adding patch from Nobuhiro Iwamatsu <iwamatsu@debian.org> to avoid
+    setting Intel Architecture specific CFLAGS (Closes: #638925).
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Wed, 24 Aug 2011 19:20:47 +0200
+
+keyutils (1.5.2-1) unstable; urgency=low
+
+  * Merging upstream version 1.5.2.
+  * Updating year in copyright file.
+  * Marking package as linux-any.
+  * Rediffing memleak-from-realloc.patch.
+  * Rediffing another-memleak.patch.
+  * Rediffing cifs.patch.
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Fri, 12 Aug 2011 20:40:57 +0200
+
+keyutils (1.4-6) unstable; urgency=low
+
+  * Compacting copyright file.
+  * Bumping versioned build-depends on debhelper to please lintian.
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Sun, 10 Jul 2011 17:09:01 +0200
+
+keyutils (1.4-5) unstable; urgency=low
+
+  * Updating standards version to 3.9.2.
+  * Applying patch from Steve Langasek <steve.langasek@canonical.com> to
+    add support for multiarch (Closes: #631579).
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Tue, 28 Jun 2011 06:58:39 +0200
+
+keyutils (1.4-4) unstable; urgency=low
+
+  * Making reference to licenses in copyright distribution neutral.
+  * Improving previous changelog entries.
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Sat, 22 Jan 2011 21:39:57 +0100
+
+keyutils (1.4-3) unstable; urgency=low
+
+  * Updating maintainer and uploaders fields.
+  * Removing vcs fields.
+  * Removing references to my old email address.
+  * Removing README.source, not required anymore.
+  * Makeing packaging distribution neutral.
+  * Updating year in copyright file.
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Sun, 16 Jan 2011 18:44:03 +0100
+
+keyutils (1.4-2) experimental; urgency=low
+
+  * Updating standards version to 3.9.0.
+  * Switching to source format 3.0 (quilt).
+  * Updating to debhelper version 8.
+  * Updating to standards version 3.9.1.
+  * Rediffing memleak-from-realloc.patch.
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Sun, 19 Dec 2010 21:16:19 +0100
+
+keyutils (1.4-1) unstable; urgency=low
+
+  * Merging upstream version 1.4.
+  * Call dh_install with --fail-missing in rules.
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Sat, 27 Mar 2010 10:22:54 +0100
+
+keyutils (1.3-1) unstable; urgency=low
+
+  * Correcting wrong vcs-browser field.
+  * Adding explicit debian source version 1.0 until switch to 3.0.
+  * Updating year in copyright file.
+  * Updating to standards 3.8.4.
+  * Merging upstream version 1.3.
+  * Updating README.source.
+  * Updating year in copyright file.
+  * Making build-depends on quilt versioned.
+  * Sorting dh call in rules to more common order.
+  * Removing manpage.patch, not required anymore.
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Mon, 15 Mar 2010 18:57:29 +0100
+
+keyutils (1.2-12) unstable; urgency=low
+
+  * Updating maintainer field.
+  * Updating vcs fields.
+  * Updating package to standards version 3.8.3.
+  * Bumping versioned build-depends on debhelper.
+  * Sorting and wrapping depends.
+  * Simplifying libkeyutils-dev install file.
+  * Adding README.source.
+  * Adding maintainer homepage in copyright.
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Sun, 04 Oct 2009 09:53:38 +0200
+
+keyutils (1.2-11) unstable; urgency=low
+
+  * Updating priority for libkeyutils1.
+  * Updating sections for keyutils, libkeyutils1, and libkeyutils-dev.
+  * Updating to standards version 3.8.2.
+  * Using correct rfc-2822 date formats in changelog.
+  * Updating section of the debug package.
+  * Minimizing rules file.
+  * Adding misc depends to development and debug package.
+  * Updating section for all packages.
+  * Adding patch to remove undefined sequence from manpage.
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Mon, 27 Jul 2009 12:52:28 +0200
+
+keyutils (1.2-10) unstable; urgency=low
+
+  * Updating vcs fields in control file.
+  * Using patch-stamp rather than patch in rules file.
+  * Replacing obsolete dh_clean -k with dh_prep.
+  * Using quilt rather than dpatch.
+  * Updating year in copyright file.
+  * Updating rules to current state of the art.
+  * Adding patch from Marcus Meissner <meissner@suse.de> to add 2 cifs
+    helpers to request-key.conf (for CIFS DFS support).
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Thu, 05 Feb 2009 02:03:00 +0100
+
+keyutils (1.2-9) unstable; urgency=low
+
+  * Correcting previous local email address in changelog.
+  * Simplyfing libkeyutils1 install file.
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Mon, 01 Sep 2008 13:01:00 +0200
+
+keyutils (1.2-8) unstable; urgency=low
+
+  * Removing cflags handling in rules, not required anymore.
+  * Adding two patches from Michael Gebetsroither <gebi@grml.org> to fix memory
+    leaks (Closes: #496466).
+  * Updating to standards 3.8.0.
+  * Using comma seperator for file pattern in copyright file.
+  * Updatingto debhelper 7.
+  * Correcting indenting in copyright file.
+  * Adjusting indenting in rules file.
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Mon, 25 Aug 2008 13:45:00 +0200
+
+keyutils (1.2-7) unstable; urgency=medium
+
+  * Adding debug package.
+  * Reordering control file.
+  * Reordering rules file.
+  * Rewriting copyright file in machine-interpretable format.
+  * Adding vcs fields in control file.
+  * Updating package to debhelper 6.
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Sat, 12 Apr 2008 16:53:00 +0200
+
+keyutils (1.2-6) unstable; urgency=low
+
+  * Applied patch from Neil Williams <codehelp@debian.org> to add crossbuild
+    support to debian/rules (Closes: #465217).
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Mon, 11 Feb 2008 11:56:00 +0100
+
+keyutils (1.2-5) unstable; urgency=low
+
+  * Updated to new policy.
+  * Corrected sections.
+  * Improved package descriptions (Closes: #406441).
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Sun, 23 Dec 2007 11:20:00 +0100
+
+keyutils (1.2-4) unstable; urgency=low
+
+  * Minor cleanups.
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Sun, 26 Aug 2007 09:35:00 +0200
+
+keyutils (1.2-3) unstable; urgency=medium
+
+  * Downgrate to debhelper 4 again for etch inclusion.
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Sun, 25 Feb 2007 08:12:00 +0100
+
+keyutils (1.2-2) unstable; urgency=medium
+
+  * Renaming packages (Closes: #409977).
+  * Minor cleanups.
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Tue, 06 Feb 2007 22:25:00 +0100
+
+keyutils (1.2-1) unstable; urgency=low
+
+  * Initial release (Closes: #401499).
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Mon, 04 Dec 2006 10:31:00 +0100

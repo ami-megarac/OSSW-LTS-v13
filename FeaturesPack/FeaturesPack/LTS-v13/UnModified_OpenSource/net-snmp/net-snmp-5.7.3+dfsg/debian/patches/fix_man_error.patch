@@ -1,0 +1,21 @@
+From: Net-SNMP Packaging Team <pkg-net-snmp-devel@lists.alioth.debian.org>
+Date: Thu, 18 Jun 2015 06:12:05 +0900
+Subject: fix_man_error
+
+Author: Hideki Yamane <henrich@debian.org>
+---
+ man/mib2c.conf.5.in | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/man/mib2c.conf.5.in b/man/mib2c.conf.5.in
+index 3692a65..d756055 100644
+--- a/man/mib2c.conf.5.in
++++ b/man/mib2c.conf.5.in
+@@ -1,6 +1,6 @@
+ .TH MIB2C.CONF 5 "28 Apr 2004" VVERSIONINFO "Net-SNMP"
+ .SH NAME
+-mib2c.conf \[em] How to write mib2c.conf files to do ANYTHING based on MIB input.
++mib2c.conf - How to write mib2c.conf files to do ANYTHING based on MIB input.
+ .SH SYNOPSIS
+ % cat > mib2c.test.conf  << EOF
+ @foreach $t table@

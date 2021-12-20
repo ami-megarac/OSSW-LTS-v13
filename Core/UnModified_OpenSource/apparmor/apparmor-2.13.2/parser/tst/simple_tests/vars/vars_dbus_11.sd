@@ -1,0 +1,14 @@
+#=DESCRIPTION reference variables in dbus rules, nested embedded alternations
+#=EXRESULT PASS
+
+@{BUSES}=session system
+@{TLDS}=com org
+@{MEMBERS}={Get,Set}
+
+/does/not/exist {
+   dbus (send, receive)
+       bus=@{BUSES}
+       path=/@{TLDS}/foo
+       member={@{MEMBERS}.bar,List.baz},
+
+}

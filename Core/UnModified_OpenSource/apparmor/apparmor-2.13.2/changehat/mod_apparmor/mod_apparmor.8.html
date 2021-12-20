@@ -1,0 +1,110 @@
+<?xml version="1.0" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title></title>
+<link rel="stylesheet" href="apparmor.css" type="text/css" />
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rev="made" href="mailto:root@localhost" />
+</head>
+
+<body>
+<table border="0" width="100%" cellspacing="0" cellpadding="3">
+<tr><td class="_podblock_" valign="middle">
+<big><strong><span class="_podblock_">&nbsp;</span></strong></big>
+</td></tr>
+</table>
+
+
+
+<ul id="index">
+  <li><a href="#NAME">NAME</a></li>
+  <li><a href="#DESCRIPTION">DESCRIPTION</a></li>
+  <li><a href="#URI-REQUEST-SUMMARY">URI REQUEST SUMMARY</a></li>
+  <li><a href="#BUGS">BUGS</a></li>
+  <li><a href="#SEE-ALSO">SEE ALSO</a></li>
+</ul>
+
+<h1 id="NAME">NAME</h1>
+
+<p>mod_apparmor - fine-grained AppArmor confinement for Apache</p>
+
+<h1 id="DESCRIPTION">DESCRIPTION</h1>
+
+<p>An AppArmor profile applies to an executable program; if a portion of the program needs different access permissions than other portions, the program can &quot;change hats&quot; via aa_change_hat(2) to a different role, also known as a subprofile. The mod_apparmor Apache module uses the aa_change_hat(2) mechanism to offer more fine-grained confinement of dynamic elements within Apache such as individual php and perl scripts, while still allowing the performance benefits of using mod_php and mod_perl.</p>
+
+<p>To use mod_apparmor with Apache, ensure that mod_apparmor is configured to be loaded into Apache, either via a2enmod, yast or manual editing of the apache2(8)/httpd(8) configuration files, and restart Apache. Make sure that apparmor is also functioning.</p>
+
+<p>Once mod_apparmor is loaded within Apache, all requests to Apache will cause mod_apparmor to attempt to change into a hat that matches the ServerName for the server/vhost. If no such hat is found, it will first fall back by attempting to change into a hat composed of the ServerName-URI (e.g. &quot;www.example.com-/app/some.cgi&quot;). If that hat is not found, it will fall back to attempting to use the hat named by the URI (e.g. &quot;/app/some.cgi&quot;). If that hat is not found, it will fall back to attempting to use the hat DEFAULT_URI; if that also does not exist, it will fall back to using the global Apache profile. Most static web pages can simply make use of the DEFAULT_URI hat.</p>
+
+<p>Additionally, before any requests come in to Apache, mod_apparmor will attempt to change hat into the HANDLING_UNTRUSTED_INPUT hat. mod_apparmor will attempt to use this hat while Apache is doing the initial parsing of a given http request, before its given to a specific handler (like mod_php) for processing.</p>
+
+<p>Because defining hats for every URI/URL often becomes tedious, mod_apparmor provides the AAHatName and AADefaultHatName Apache configuration options.</p>
+
+<dl>
+
+<dt id="AAHatName"><b>AAHatName</b></dt>
+<dd>
+
+<p>AAHatName allows you to specify a hat to be used for a given Apache &lt;Directory&gt;, &lt;DirectoryMatch&gt;, &lt;Location&gt; or &lt;LocationMatch&gt; directive (see the Apache documentation for more details). Note that mod_apparmor behavior can become confused if &lt;Directory*&gt; and &lt;Location*&gt; directives are intermingled and it is recommended to use one type of directive. If the hat specified by AAHatName does not exist in the Apache profile, then it falls back to the behavior described above.</p>
+
+</dd>
+<dt id="AADefaultHatName"><b>AADefaultHatName</b></dt>
+<dd>
+
+<p>AADefaultHatName allows you to specify a default hat to be used for virtual hosts and other Apache server directives, so that you can have different defaults for different virtual hosts. This can be overridden by the AAHatName directive and is checked for only if there isn&#39;t a matching AAHatName. The default value of AADefaultHatName is the ServerName for the server/vhost configuration. If the AADefaultHatName hat does not exist, then it falls back to the behavior described above.</p>
+
+</dd>
+</dl>
+
+<h1 id="URI-REQUEST-SUMMARY">URI REQUEST SUMMARY</h1>
+
+<p>When profiling with mod_apparmor, it is helpful to keep the following order of operations in mind:</p>
+
+<p>On each URI request, mod_apparmor will first aa_change_hat(2) into ^HANDLING_UNTRUSTED_INPUT, if it exists.</p>
+
+<p>Then, after performing the initial parsing of the request, mod_apparmor will:</p>
+
+<ol>
+
+<li><p>try to aa_change_hat(2) into a matching AAHatName hat if it exists and applies, otherwise it will</p>
+
+</li>
+<li><p>try to aa_change_hat(2) into an AADefaultHatName hat, either the ServerName (the default) or the configuration value specified by the AADefaultHatName directive, for the server/vhost, otherwise it will</p>
+
+</li>
+<li><p>try to aa_change_hat(2) into the ServerName-URI, otherwise it will</p>
+
+</li>
+<li><p>try to aa_change_hat(2) into the URI itself, otherwise it will</p>
+
+</li>
+<li><p>try to aa_change_hat(2) into the DEFAULT_URI hat, if it exists, otherwise it will</p>
+
+</li>
+<li><p>fall back to the global Apache policy</p>
+
+</li>
+</ol>
+
+<h1 id="BUGS">BUGS</h1>
+
+<p>mod_apparmor() currently only supports apache2, and has only been tested with the prefork MPM configuration -- threaded configurations of Apache may not work correctly. For Apache 2.4 users, you should enable the mpm_prefork module.</p>
+
+<p>There are likely other bugs lurking about; if you find any, please report them at <a href="https://bugs.launchpad.net/apparmor/+filebug">https://bugs.launchpad.net/apparmor/+filebug</a>.</p>
+
+<h1 id="SEE-ALSO">SEE ALSO</h1>
+
+<p>apparmor(7), subdomain.conf(5), apparmor_parser(8), aa_change_hat(2) and <a href="https://wiki.apparmor.net">https://wiki.apparmor.net</a>.</p>
+
+<table border="0" width="100%" cellspacing="0" cellpadding="3">
+<tr><td class="_podblock_" valign="middle">
+<big><strong><span class="_podblock_">&nbsp;</span></strong></big>
+</td></tr>
+</table>
+
+</body>
+
+</html>
+
+

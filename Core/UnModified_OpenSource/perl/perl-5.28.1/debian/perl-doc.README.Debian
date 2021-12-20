@@ -1,0 +1,23 @@
+Perldoc formatter changes
+=========================
+
+The default perldoc formatter was changed upstream in Perl 5.20 to 'Term'
+and in 5.28 from that to 'Text' for various compatibility reasons.
+This has resulted in pure text-based output with no bold or underline
+effects, which is clearly not ideal.
+
+The defaults for the Debian packaging may be revisited after the Buster
+release, but for the time being the formatter can be overridden with
+environment variables:
+
+  export PERLDOC=-oTerm PERLDOC_PAGER='less -R' # works like Stretch, Jessie
+  export PERLDOC=-oMan                          # works like Wheezy
+
+See https://bugs.debian.org/917530 for more information.
+
+Other information
+=================
+
+Note that parts of this package, including Perl changelog history
+since version 5.000, can be found in /usr/share/doc/perl rather than
+this directory.

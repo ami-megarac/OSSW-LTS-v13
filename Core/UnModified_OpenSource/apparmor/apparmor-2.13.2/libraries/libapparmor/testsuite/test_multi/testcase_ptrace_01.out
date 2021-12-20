@@ -1,0 +1,13 @@
+START
+File: testcase_ptrace_01.in
+Event type: AA_RECORD_DENIED
+Audit ID: 1409700683.304:547661
+Operation: ptrace
+Mask: tracedby
+Denied Mask: tracedby
+Profile: /home/ubuntu/bzr/apparmor/tests/regression/apparmor/ptrace
+Peer: /home/ubuntu/bzr/apparmor/tests/regression/apparmor/ptrace
+Command: ptrace
+PID: 22465
+Epoch: 1409700683
+Audit subid: 547661

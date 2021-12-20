@@ -1,0 +1,242 @@
+From 55c76aab7620aa2609bb488a8ab72c7d782e8424 Mon Sep 17 00:00:00 2001
+From: Karsten Ohme <k_o_@users.sourceforge.net>
+Date: Sat, 22 Jun 2019 00:39:56 +0200
+Subject: [PATCH] Support for Generalname registeredID from RFC 5280 in subject
+ alt name
+
+Added test certificates (cert10.der) with registered ID
+
+Updated Makefile for inclusion of test certificates
+
+Updated SAN unknown test certificates (cert5.der)
+
+Signed-off-by: Karsten Ohme <k_o_@users.sourceforge.net>
+---
+ NEWS                               |   3 ++
+ lib/includes/gnutls/gnutls.h.in    |   4 ++-
+ lib/x509/common.c                  |   5 +++
+ lib/x509/extensions.c              |   3 ++
+ lib/x509/output.c                  |   4 +++
+ lib/x509/x509.c                    |   9 ++++--
+ tests/Makefile.am                  |   4 +--
+ tests/certs-interesting/cert10.der | Bin 0 -> 571 bytes
+ tests/certs-interesting/cert5.der  | Bin 418 -> 414 bytes
+ tests/crt_apis.c                   |  49 +++++++++++++++++++++++------
+ 10 files changed, 66 insertions(+), 15 deletions(-)
+ create mode 100644 tests/certs-interesting/cert10.der
+
+--- a/NEWS
++++ b/NEWS
+@@ -5,6 +5,8 @@ Copyright (C) 2000-2016 Free Software Fo
+ Copyright (C) 2013-2019 Nikos Mavrogiannopoulos
+ See the end for copying conditions.
+ 
++** libgnutls: Added support for Generalname registeredID.
++
+ * Version 3.6.7 (released 2019-03-27)
+ 
+ ** libgnutls, gnutls tools: Every gnutls_free() will automatically set
+--- a/lib/includes/gnutls/gnutls.h.in
++++ b/lib/includes/gnutls/gnutls.h.in
+@@ -2547,6 +2547,7 @@ gnutls_psk_set_server_params_function(gn
+  * @GNUTLS_SAN_IPADDRESS: IP address SAN.
+  * @GNUTLS_SAN_OTHERNAME: OtherName SAN.
+  * @GNUTLS_SAN_DN: DN SAN.
++ * @GNUTLS_SAN_REGISTERED_ID: RegisteredID.
+  * @GNUTLS_SAN_OTHERNAME_XMPP: Virtual SAN, used by certain functions for convenience.
+  * @GNUTLS_SAN_OTHERNAME_KRB5PRINCIPAL: Virtual SAN, used by certain functions for convenience.
+  *
+@@ -2559,7 +2560,8 @@ typedef enum gnutls_x509_subject_alt_nam
+ 	GNUTLS_SAN_IPADDRESS = 4,
+ 	GNUTLS_SAN_OTHERNAME = 5,
+ 	GNUTLS_SAN_DN = 6,
+-	GNUTLS_SAN_MAX = GNUTLS_SAN_DN,
++	GNUTLS_SAN_REGISTERED_ID = 7,
++	GNUTLS_SAN_MAX = GNUTLS_SAN_REGISTERED_ID,
+ 	/* The following are "virtual" subject alternative name types, in
+ 	   that they are represented by an otherName value and an OID.
+ 	   Used by gnutls_x509_crt_get_subject_alt_othername_oid.  */
+--- a/lib/x509/common.c
++++ b/lib/x509/common.c
+@@ -537,6 +537,9 @@ gnutls_x509_subject_alt_name_t _gnutls_x
+ 		return GNUTLS_SAN_OTHERNAME;
+ 	if (strcmp(str_type, "directoryName") == 0)
+ 		return GNUTLS_SAN_DN;
++	if (strcmp(str_type, "registeredID") == 0)
++		return GNUTLS_SAN_REGISTERED_ID;
++
+ 	return (gnutls_x509_subject_alt_name_t) - 1;
+ }
+ 
+@@ -703,6 +706,8 @@ x509_read_value(ASN1_TYPE c, const char
+ 	if (result == 0 && allow_null == 0 && len == 0) {
+ 		/* don't allow null strings */
+ 		return gnutls_assert_val(GNUTLS_E_ASN1_DER_ERROR);
++	} else if (result == 0 && allow_null == 0 && etype == ASN1_ETYPE_OBJECT_ID && len == 1) {
++		return gnutls_assert_val(GNUTLS_E_ASN1_DER_ERROR);
+ 	}
+ 
+ 	if (result != ASN1_MEM_ERROR) {
+--- a/lib/x509/extensions.c
++++ b/lib/x509/extensions.c
+@@ -715,6 +715,9 @@ _gnutls_write_general_name(ASN1_TYPE ext
+ 	case GNUTLS_SAN_IPADDRESS:
+ 		str = "iPAddress";
+ 		break;
++	case GNUTLS_SAN_REGISTERED_ID:
++		str = "registeredID";
++		break;
+ 	default:
+ 		gnutls_assert();
+ 		return GNUTLS_E_INTERNAL_ERROR;
+--- a/lib/x509/output.c
++++ b/lib/x509/output.c
+@@ -144,6 +144,10 @@ print_name(gnutls_buffer_st *str, const
+ 		addf(str,  _("%sdirectoryName: %.*s\n"), prefix, name->size, NON_NULL(name->data));
+ 		break;
+ 
++	case GNUTLS_SAN_REGISTERED_ID:
++			addf(str,  _("%sRegistered ID: %.*s\n"), prefix, name->size, NON_NULL(name->data));
++			break;
++
+ 	case GNUTLS_SAN_OTHERNAME_XMPP:
+ 		addf(str,  _("%sXMPP Address: %.*s\n"), prefix, name->size, NON_NULL(name->data));
+ 		break;
+--- a/lib/x509/x509.c
++++ b/lib/x509/x509.c
+@@ -1344,7 +1344,7 @@ inline static int is_type_printable(int
+ {
+ 	if (type == GNUTLS_SAN_DNSNAME || type == GNUTLS_SAN_RFC822NAME ||
+ 	    type == GNUTLS_SAN_URI || type == GNUTLS_SAN_OTHERNAME_XMPP ||
+-	    type == GNUTLS_SAN_OTHERNAME)
++	    type == GNUTLS_SAN_OTHERNAME || type == GNUTLS_SAN_REGISTERED_ID)
+ 		return 1;
+ 	else
+ 		return 0;
+@@ -1657,7 +1657,6 @@ _gnutls_parse_general_name2(ASN1_TYPE sr
+ 
+ 	len = sizeof(choice_type);
+ 	result = asn1_read_value(src, nptr, choice_type, &len);
+-
+ 	if (result == ASN1_VALUE_NOT_FOUND
+ 	    || result == ASN1_ELEMENT_NOT_FOUND) {
+ 		return GNUTLS_E_REQUESTED_DATA_NOT_AVAILABLE;
+@@ -1739,6 +1738,12 @@ _gnutls_parse_general_name2(ASN1_TYPE sr
+ 			return ret;
+ 		}
+ 
++		if (type == GNUTLS_SAN_REGISTERED_ID && tmp.size > 0) {
++			/* see #805; OIDs contain the null termination byte */
++			assert(tmp.data[tmp.size-1] == 0);
++			tmp.size--;
++		}
++
+ 		/* _gnutls_x509_read_value() null terminates */
+ 		dname->size = tmp.size;
+ 		dname->data = tmp.data;
+--- a/tests/Makefile.am
++++ b/tests/Makefile.am
+@@ -50,9 +50,9 @@ EXTRA_DIST = suppressions.valgrind eagai
+ 	certs-interesting/README.md certs-interesting/cert1.der certs-interesting/cert1.der.err \
+ 	certs-interesting/cert2.der certs-interesting/cert2.der.err certs-interesting/cert3.der \
+ 	certs-interesting/cert3.der.err certs-interesting/cert4.der certs-interesting/cert5.der \
+-	certs-interesting/cert6.der certs-interesting/cert6.der.err \
++	certs-interesting/cert5.der.err certs-interesting/cert6.der certs-interesting/cert6.der.err \
+ 	certs-interesting/cert7.der certs-interesting/cert8.der \
+-	certs-interesting/cert9.der certs-interesting/cert5.der.err \
++	certs-interesting/cert9.der certs-interesting/cert10.der \
+ 	certs-interesting/cert3.der.err certs-interesting/cert4.der \
+ 	scripts/common.sh scripts/starttls-common.sh \
+ 	rng-op.c x509sign-verify-common.h common-key-tests.h \
+--- a/tests/crt_apis.c
++++ b/tests/crt_apis.c
+@@ -39,19 +39,19 @@
+ 
+ static unsigned char saved_crt_pem[] =
+ 	"-----BEGIN CERTIFICATE-----\n"
+-	"MIICWTCCAcKgAwIBAgIDChEAMA0GCSqGSIb3DQEBCwUAMCsxDjAMBgNVBAMTBW5p\n"
++	"MIICWjCCAcOgAwIBAgIDChEAMA0GCSqGSIb3DQEBCwUAMCsxDjAMBgNVBAMTBW5p\n"
+ 	"a29zMRkwFwYDVQQKExBub25lIHRvLCBtZW50aW9uMCAXDTA4MDMzMTIyMDAwMFoY\n"
+ 	"Dzk5OTkxMjMxMjM1OTU5WjArMQ4wDAYDVQQDEwVuaWtvczEZMBcGA1UEChMQbm9u\n"
+ 	"ZSB0bywgbWVudGlvbjCBnzANBgkqhkiG9w0BAQEFAAOBjQAwgYkCgYEAu2ZD9fLF\n"
+ 	"17aMzMXf9Yg7sclLag6hrSBQQAiAoU9co9D4bM/mPPfsBHYTF4tkiSJbwN1TfDvt\n"
+ 	"fAS7gLkovo6bxo6gpRLL9Vceoue7tzNJn+O7Sq5qTWj/yRHiMo3OPYALjXXv2ACB\n"
+-	"jygEA6AijWEEB/q2N30hB0nSCWFpmJCjWKkCAwEAAYEFAAABAgOCBQAEAwIBo3sw\n"
+-	"eTAMBgNVHRMBAf8EAjAAMA8GA1UdDwEB/wQFAwMHgAAwNgYDVR0RBC8wLYIDYXBh\n"
+-	"ghF4bi0tbXhhYTRhczZkLmNvbYETdGVzdEB4bi0ta3hhd2hrLm9yZzAgBgNVHSUB\n"
+-	"Af8EFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADgYEAsCHT\n"
+-	"vpIFkQG8th0DbEU3BE3KP5aa93HDLpZPu5PVLkoBb4PPWjKPK+737mwaSs9zXe58\n"
+-	"awhM0ycZ1ymSC+MiRuQlzt4Opx1Fm8WFsDr7d0g/C96Arr1Ss4ZhNi15nyoYeaWJ\n"
+-	"1n7nX+msWnuc+aABt1d8aAhAvaU8do0+WI2jY90=\n"
++	"jygEA6AijWEEB/q2N30hB0nSCWFpmJCjWKkCAwEAAYEFAAABAgOCBQAEAwIBo3ww\n"
++	"ejAMBgNVHRMBAf8EAjAAMA8GA1UdDwEB/wQFAwMHgAAwNwYDVR0RBDAwLogEKgME\n"
++	"BYIReG4tLW14YWE0YXM2ZC5jb22BE3Rlc3RAeG4tLWt4YXdoay5vcmcwIAYDVR0l\n"
++	"AQH/BBYwFAYIKwYBBQUHAwEGCCsGAQUFBwMCMA0GCSqGSIb3DQEBCwUAA4GBADzP\n"
++	"piA0s50R+oM/OWcHrARRMFhmOv8oj4mQeXjePCUJub8CDj1XnZwseIY9K9IU6Lxm\n"
++	"43p7kw1jFzPRBJyuZC5X92AdG1meR1RKd91M3VEvn2cgfesX7/MbhZIYJ8ZD2S1L\n"
++	"rqzVabXTZjKdHT727mCJdqzjDh7CFmb9Q2ZU6jDR\n"
+ 	"-----END CERTIFICATE-----\n";
+ 
+ const gnutls_datum_t saved_crt = { saved_crt_pem, sizeof(saved_crt_pem)-1 };
+@@ -71,6 +71,8 @@ static time_t mytime(time_t * t)
+ 	return then;
+ }
+ 
++#define REGISTERED_OID "1.2.3.4.5"
++
+ void doit(void)
+ {
+ 	gnutls_x509_privkey_t pkey;
+@@ -79,9 +81,9 @@ void doit(void)
+ 	const char *err = NULL;
+ 	unsigned char buf[64];
+ 	unsigned char large_buf[5*1024];
+-	unsigned int status;
++	unsigned int status, san_type;
+ 	gnutls_datum_t out;
+-	size_t s = 0;
++	size_t s = 0, i;
+ 	int ret;
+ 
+ 	ret = global_init();
+@@ -181,6 +183,11 @@ void doit(void)
+ 	if (ret != 0)
+ 		fail("gnutls_x509_crt_set_subject_alt_name\n");
+ 
++	ret = gnutls_x509_crt_set_subject_alt_name(crt, GNUTLS_SAN_REGISTERED_ID,
++						   REGISTERED_OID, strlen(REGISTERED_OID), 0);
++	if (ret != 0)
++		fail("gnutls_x509_crt_set_subject_alt_name\n");
++
+ 	ret = gnutls_x509_crt_set_subject_alt_name(crt, GNUTLS_SAN_DNSNAME,
+ 						   "απαλό.com", strlen("απαλό.com"), 1);
+ #if defined(HAVE_LIBIDN2) || defined(HAVE_LIBIDN)
+@@ -355,6 +362,28 @@ void doit(void)
+ 	assert(s == out.size);
+ 	assert(memcmp(large_buf, out.data, out.size) == 0);
+ 
++	/* verify some values written in the original cert */
++	gnutls_x509_crt_deinit(crt2);
++	ret = gnutls_x509_crt_init(&crt2);
++	if (ret != 0)
++		fail("gnutls_x509_crt_init\n");
++
++	ret = gnutls_x509_crt_import(crt2, &out, GNUTLS_X509_FMT_DER);
++	if (ret != 0)
++		fail("gnutls_x509_crt_import\n");
++
++	i = 0;
++	do {
++		s = sizeof(buf);
++		ret = gnutls_x509_crt_get_subject_alt_name2(crt2, i++, buf, &s, &san_type, NULL);
++		if (ret < 0)
++			fail("gnutls_x509_crt_get_subject_alt_name2: %s\n", gnutls_strerror(ret));
++	} while (san_type != GNUTLS_SAN_REGISTERED_ID);
++
++	assert(san_type == GNUTLS_SAN_REGISTERED_ID);
++	assert(s == strlen(REGISTERED_OID));
++	assert(memcmp(buf, REGISTERED_OID, s) == 0);
++
+ 	gnutls_free(out.data);
+ 
+ 	gnutls_x509_crt_deinit(crt);

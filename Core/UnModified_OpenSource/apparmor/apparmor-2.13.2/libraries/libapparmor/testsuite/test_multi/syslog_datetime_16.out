@@ -1,0 +1,16 @@
+START
+File: syslog_datetime_16.in
+Event type: AA_RECORD_ALLOWED
+Audit ID: 1357024144.556:6368
+Operation: open
+Mask: r
+Denied Mask: r
+fsuid: 1000
+ouid: 0
+Profile: /usr/lib/virtualbox/VBoxSVC//null-2d
+Name: /sys/class/power_supply/
+Command: ACPI Poller
+Parent: 5390
+PID: 5457
+Epoch: 1357024144
+Audit subid: 6368

@@ -1,0 +1,75 @@
+Description: NET_SNMP_EXTEND-MIB readonly by default
+Author: Bart Van Assche <bvanassche@acm.org>
+Origin: upstream, https://github.com/net-snmp/net-snmp/commit/77f6c60f57dba0aaea5d8ef1dd94bcd0c8e6d205
+Bug-Debian: https://bugs.debian.org/965166
+Reviewed-by: Craig Small <csmall@debian.org>
+Last-Update: 2020-07-29
+--- a/agent/mibgroup/agent/extend.c
++++ b/agent/mibgroup/agent/extend.c
+@@ -16,6 +16,12 @@
+ #define SHELLCOMMAND 3
+ #endif
+ 
++/*  This mib is potentially dangerous to turn on by default, since it
++ *  allows arbitrary commands to be set by anyone with SNMP WRITE
++ *  access to the MIB table.  If all of your users are "root" level
++ *  users, then it may be safe to turn on. */
++#define ENABLE_EXTEND_WRITE_ACCESS 0
++
+ netsnmp_feature_require(extract_table_row_data)
+ netsnmp_feature_require(table_data_delete_table)
+ #ifndef NETSNMP_NO_WRITE_SUPPORT
+@@ -723,7 +729,7 @@
+          *
+          **********/
+ 
+-#ifndef NETSNMP_NO_WRITE_SUPPORT
++#if !defined(NETSNMP_NO_WRITE_SUPPORT) && ENABLE_EXTEND_WRITE_ACCESS
+         case MODE_SET_RESERVE1:
+             /*
+              * Validate the new assignments
+@@ -1049,7 +1055,7 @@
+                 }
+             }
+             break;
+-#endif /* !NETSNMP_NO_WRITE_SUPPORT */ 
++#endif /* !NETSNMP_NO_WRITE_SUPPORT and ENABLE_EXTEND_WRITE_ACCESS */
+ 
+         default:
+             netsnmp_set_request_error(reqinfo, request, SNMP_ERR_GENERR);
+@@ -1057,7 +1063,7 @@
+         }
+     }
+ 
+-#ifndef NETSNMP_NO_WRITE_SUPPORT
++#if !defined(NETSNMP_NO_WRITE_SUPPORT) && ENABLE_EXTEND_WRITE_ACCESS
+     /*
+      * If we're marking a given row as active,
+      *  then we need to check that it's ready.
+@@ -1082,7 +1088,7 @@
+             }
+         }
+     }
+-#endif /* !NETSNMP_NO_WRITE_SUPPORT */
++#endif /* !NETSNMP_NO_WRITE_SUPPORT && ENABLE_EXTEND_WRITE_ACCESS */
+     
+     return SNMP_ERR_NOERROR;
+ }
+@@ -1571,7 +1577,7 @@
+     idx = name[name_len-1] -1;
+     exten = &compatability_entries[ idx ];
+ 
+-#ifndef NETSNMP_NO_WRITE_SUPPORT
++#if !defined(NETSNMP_NO_WRITE_SUPPORT) && ENABLE_EXTEND_WRITE_ACCESS
+     switch (action) {
+     case MODE_SET_RESERVE1:
+         if (var_val_type != ASN_INTEGER) {
+@@ -1592,7 +1598,7 @@
+     case MODE_SET_COMMIT:
+         netsnmp_cache_check_and_reload( exten->efix_entry->cache );
+     }
+-#endif /* !NETSNMP_NO_WRITE_SUPPORT */
++#endif /* !NETSNMP_NO_WRITE_SUPPORT && ENABLE_EXTEND_WRITE_ACCESS */
+     return SNMP_ERR_NOERROR;
+ }
+ #endif /* USING_UCD_SNMP_EXTENSIBLE_MODULE */

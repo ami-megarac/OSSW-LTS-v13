@@ -1,0 +1,8 @@
+#
+#=DESCRIPTION unix rule with a bad peer regex expansion
+#=EXRESULT FAIL
+#
+
+profile foo {
+  unix send peer=(label=spla{t,r ),
+}

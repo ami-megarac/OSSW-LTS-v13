@@ -1,0 +1,7 @@
+SASL2 {
+    global:
+        sasl_*; prop_*; auxprop_plugin_info; _sasl_MD5*;
+};
+
+HIDDEN { local: __*; _rest*; _save*; *; };
+

@@ -1,0 +1,48 @@
+#!/bin/sh
+
+set -e
+exec 2>&1
+set -u
+
+: "${AUTOPKGTEST_TMP:="${ADTTMP}"}"
+
+if [ -z "${HOME-}" ] || ! [ -w "${HOME}" ]; then
+    export HOME="${AUTOPKGTEST_TMP}"
+fi
+
+cd "$AUTOPKGTEST_TMP"
+
+echo "1..1"
+
+cat > connect.c <<'EOF'
+#include <stdio.h>
+
+#include <dbus/dbus.h>
+
+int main (void)
+{
+    DBusError error;
+    DBusConnection *connection;
+
+    dbus_error_init(&error);
+    connection = dbus_bus_get(DBUS_BUS_SESSION, &error);
+
+    if (connection == NULL) {
+        fprintf(stderr, "%s: %s", error.name, error.message);
+        dbus_error_free(&error);
+        return 1;
+    }
+
+    dbus_connection_unref(connection);
+    printf ("ok 1\n");
+    return 0;
+}
+EOF
+
+# We don't exercise static linking because libsystemd is not available
+# as a static library.
+
+gcc -o connect connect.c $(pkg-config --cflags --libs dbus-1)
+test -x connect
+dbus-run-session -- ./connect
+echo "# everything seems OK"

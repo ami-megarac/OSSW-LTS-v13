@@ -1,0 +1,6 @@
+#
+#=Description basic rule to test the valid "shared" mount opt and an invalid src
+#=EXRESULT FAIL
+/usr/bin/foo {
+  mount options=(shared) /a -> /1,
+  }

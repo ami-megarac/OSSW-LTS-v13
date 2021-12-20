@@ -1,0 +1,53 @@
+From: Debian Cyrus SASL Team
+ <pkg-cyrus-sasl2-debian-devel@lists.alioth.debian.org>
+Date: Thu, 24 Mar 2016 11:35:05 +0100
+Subject: properly create libsasl2.pc
+
+---
+ Makefile.am  | 13 +++++++++++++
+ configure.ac |  1 -
+ 2 files changed, 13 insertions(+), 1 deletion(-)
+
+diff --git a/Makefile.am b/Makefile.am
+index 83dae6f..25694a8 100644
+--- a/Makefile.am
++++ b/Makefile.am
+@@ -44,6 +44,15 @@ ACLOCAL_AMFLAGS = -I m4
+ #
+ ################################################################
+ 
++do_subst = sed -e 's,[@]LIB_DOOR[@],$(LIB_DOOR),g' \
++	       -e 's,[@]SASL_DL_LIB[@],$(SASL_DL_LIB),g' \
++	       -e 's,[@]LIBS[@],$(LIBS),g' \
++	       -e 's,[@]VERSION[@],$(VERSION),g' \
++	       -e 's,[@]libdir[@],$(libdir),g' \
++	       -e 's,[@]prefix[@],$(prefix),g' \
++	       -e 's,[@]exec_prefix[@],$(exec_prefix),g' \
++	       -e 's,[@]includedir[@],$(includedir),g'
++
+ if SASLAUTHD
+ SAD = saslauthd
+ else
+@@ -141,6 +150,10 @@ pkgconfig_DATA = libsasl2.pc
+ ## define this unconditionally because dist-hook references it
+ SPHINX_CACHE = docsrc/.doctrees
+ 
++libsasl2.pc:	$(srcdir)/libsasl2.pc.in Makefile
++	rm -f $@
++	$(do_subst) < $(srcdir)/libsasl2.pc.in > $@
++
+ dist-hook:
+ 	@find $(distdir) -exec chmod u+w {} ';'
+ 	@find $(distdir) -name CVS -print | xargs -t rm -rf
+diff --git a/configure.ac b/configure.ac
+index 17b3f99..fe7f0eb 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -1558,7 +1558,6 @@ AH_BOTTOM([#if defined __GNUC__ &&  __GNUC__ > 6
+ AC_CONFIG_HEADERS(config.h)
+ 
+ AC_OUTPUT(Makefile
+-libsasl2.pc
+ include/Makefile
+ saslauthd/Makefile
+ sasldb/Makefile

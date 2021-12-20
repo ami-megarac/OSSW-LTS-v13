@@ -1,0 +1,8 @@
+#
+#=DESCRIPTION dbus rule with a bad member regex expansion
+#=EXRESULT FAIL
+#
+
+profile foo {
+  dbus send member=s{{ession,ystem} peer=(label=splat),
+}

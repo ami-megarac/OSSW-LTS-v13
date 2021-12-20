@@ -1,0 +1,28 @@
+--- a/aclocal.m4
++++ b/aclocal.m4
+@@ -856,11 +856,7 @@ AC_CHECK_TYPE(intmax_t,,,[#include <$ac_
+ 
+ fi # shortcircut to system "stdint.h"
+ # ------------------ PREPARE VARIABLES ------------------------------
+-if test "$GCC" = "yes" ; then
+-ac_cv_stdint_message="using gnu compiler "`$CC --version | head -1` 
+-else
+ ac_cv_stdint_message="using $CC"
+-fi
+ 
+ AC_MSG_RESULT([make use of $ac_cv_header_stdint in $ac_stdint_h dnl
+ $ac_cv_stdint_result])
+--- a/configure
++++ b/configure
+@@ -6471,11 +6471,7 @@ fi
+ 
+ fi # shortcircut to system "stdint.h"
+ # ------------------ PREPARE VARIABLES ------------------------------
+-if test "$GCC" = "yes" ; then
+-ac_cv_stdint_message="using gnu compiler "`$CC --version | head -1`
+-else
+ ac_cv_stdint_message="using $CC"
+-fi
+ 
+ { $as_echo "$as_me:${as_lineno-$LINENO}: result: make use of $ac_cv_header_stdint in $ac_stdint_h $ac_cv_stdint_result" >&5
+ $as_echo "make use of $ac_cv_header_stdint in $ac_stdint_h $ac_cv_stdint_result" >&6; }

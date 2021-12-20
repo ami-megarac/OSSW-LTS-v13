@@ -1,0 +1,15 @@
+START
+File: testcase_syslog_truncate.in
+Event type: AA_RECORD_DENIED
+Audit ID: 1282626827.320:411
+Operation: truncate
+Mask: w::
+Denied Mask: w::
+fsuid: 0
+ouid: 0
+Profile: /etc/update-motd.d/91-release-upgrade
+Name: /var/lib/update-notifier/release-upgrade-available
+Parent: 1
+PID: 1957
+Epoch: 1282626827
+Audit subid: 411

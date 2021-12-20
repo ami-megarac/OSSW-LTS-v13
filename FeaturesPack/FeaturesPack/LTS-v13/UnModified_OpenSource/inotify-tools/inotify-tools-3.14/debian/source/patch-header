@@ -1,0 +1,15 @@
+The Debian packaging of inotify-tools is maintained in git, using the merging
+workflow described in dgit-maint-merge(7).  There isn't a patch
+queue that can be represented as a quilt series.
+
+A detailed breakdown of the changes is available from their
+canonical representation - git commits in the packaging repository.
+
+    % git clone https://git.dgit.debian.org/inotify-tools
+    % cd foo
+    % git log --oneline 3.14-3..debian/3.14 -- . ':!debian'
+
+(If you have dgit, use `dgit clone foo', rather than plain `git
+clone'.)
+
+A single combined diff, containing all the changes, follows.

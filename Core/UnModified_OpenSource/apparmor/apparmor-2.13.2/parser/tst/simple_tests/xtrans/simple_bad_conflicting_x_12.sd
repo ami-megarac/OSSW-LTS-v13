@@ -1,0 +1,9 @@
+#
+#=DESCRIPTION ix and Px conflict, different identical rules
+#=EXRESULT FAIL
+#
+/usr/bin/foo {
+  /bin/cat ix,
+  /lib/lib*.so* rix,
+  /bin/cat Px,
+}

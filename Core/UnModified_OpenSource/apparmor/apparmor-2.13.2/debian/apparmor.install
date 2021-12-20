@@ -1,0 +1,31 @@
+debian/apport/source_apparmor.py /usr/share/apport/package-hooks/
+debian/features /usr/share/apparmor-features/
+debian/lib/apparmor/profile-load /lib/apparmor/
+etc/apparmor.d/abstractions/*
+etc/apparmor.d/local/README
+etc/apparmor.d/nvidia_modprobe
+etc/apparmor.d/tunables/alias
+etc/apparmor.d/tunables/apparmorfs
+etc/apparmor.d/tunables/dovecot
+etc/apparmor.d/tunables/global
+etc/apparmor.d/tunables/home
+etc/apparmor.d/tunables/home.d
+etc/apparmor.d/tunables/kernelvars
+etc/apparmor.d/tunables/multiarch
+etc/apparmor.d/tunables/multiarch.d
+etc/apparmor.d/tunables/proc
+etc/apparmor.d/tunables/securityfs
+etc/apparmor.d/tunables/share
+etc/apparmor.d/tunables/sys
+etc/apparmor.d/tunables/xdg-user-dirs
+etc/apparmor.d/tunables/xdg-user-dirs.d
+etc/apparmor/parser.conf
+sbin/apparmor_parser
+parser/aa-teardown /usr/sbin/
+parser/apparmor.systemd /lib/apparmor/
+parser/rc.apparmor.functions /lib/apparmor/
+usr/bin/aa-enabled
+usr/bin/aa-exec
+usr/sbin/aa-remove-unknown
+usr/sbin/aa-status
+usr/sbin/apparmor_status

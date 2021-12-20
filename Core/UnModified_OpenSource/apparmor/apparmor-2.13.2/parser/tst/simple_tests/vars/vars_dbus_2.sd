@@ -1,0 +1,11 @@
+#=DESCRIPTION reference variables in dbus rules, interfaces
+#=EXRESULT PASS
+
+@{ORGS}=freedesktop ubuntu gnome kde
+
+/does/not/exist {
+  dbus (receive)
+       bus=accessibility
+       interface=org.@{ORGS}.DBus.Properties
+       path="/com/canonical/hud/applications/bar",
+}

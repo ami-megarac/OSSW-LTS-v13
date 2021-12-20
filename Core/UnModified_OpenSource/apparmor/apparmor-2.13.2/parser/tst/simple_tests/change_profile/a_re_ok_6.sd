@@ -1,0 +1,65 @@
+#
+#=DESCRIPTION audit change_profile with just res, child profile
+#=EXRESULT PASS
+#
+
+/usr/bin/foo {
+   audit change_profile -> *//ab,
+}
+
+/usr/bin/foo2 {
+   audit change_profile -> **//ab,
+}
+
+/usr/bin/foo3 {
+   audit change_profile -> ?//ab,
+}
+
+/usr/bin/foo4 {
+   audit change_profile -> [ab]//ab,
+}
+
+/usr/bin/foo5 {
+   audit change_profile -> [^ab]//ab,
+}
+
+/usr/bin/foo6 {
+   audit change_profile -> ab//*,
+}
+
+/usr/bin/foo7 {
+   audit change_profile -> ab//**,
+}
+
+/usr/bin/foo8 {
+   audit change_profile -> ab//?,
+}
+
+/usr/bin/foo9 {
+   audit change_profile -> ab//[ab],
+}
+
+/usr/bin/foo10 {
+   audit change_profile -> ab//[^ab],
+}
+
+/usr/bin/foo11 {
+   audit change_profile -> *//*,
+}
+
+/usr/bin/foo12 {
+   audit change_profile -> **//*,
+}
+
+/usr/bin/foo13 {
+   audit change_profile -> ?//*,
+}
+
+/usr/bin/foo14 {
+   audit change_profile -> [ab]//*,
+}
+
+/usr/bin/foo15 {
+   audit change_profile -> [^ab]//*,
+}
+

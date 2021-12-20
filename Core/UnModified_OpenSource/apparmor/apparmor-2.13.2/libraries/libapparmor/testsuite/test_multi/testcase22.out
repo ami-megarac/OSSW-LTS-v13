@@ -1,0 +1,12 @@
+START
+File: testcase22.in
+Event type: AA_RECORD_DENIED
+Audit ID: 1190305421.066:14665
+Operation: inode_permission
+Mask: w
+Denied Mask: w
+Profile: /home/steve/tmp/sh
+Name: /tmp/does not exist
+PID: 31401
+Epoch: 1190305421
+Audit subid: 14665

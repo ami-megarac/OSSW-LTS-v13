@@ -1,0 +1,83 @@
+diff -Naur uboot_orig/oem/ami/fmh/cmd_fmh.c uboot/oem/ami/fmh/cmd_fmh.c
+--- uboot_orig/oem/ami/fmh/cmd_fmh.c	2021-11-18 15:41:29.493989884 +0530
++++ uboot/oem/ami/fmh/cmd_fmh.c	2021-11-18 15:50:58.118790873 +0530
+@@ -887,13 +887,17 @@
+ 		/* Scan through the flash for FMH */
+ 		for (i=0;i<SectorCount;)
+ 		{
+-	            #ifdef CONFIG_SPX_FEATURE_GLOBAL_DUAL_IMAGE_SUPPORT
+-				#ifndef CONFIG_SPX_FEATURE_DEDICATED_SPI_FLASH_BANK
+-        	        if( (i*SectorSize) >= (2 * CONFIG_SPX_FEATURE_GLOBAL_USED_FLASH_SIZE) ) { break; }
+-                #endif
+-	            #else
+-        	        if( (i*SectorSize) >= CONFIG_SPX_FEATURE_GLOBAL_USED_FLASH_SIZE ) { break; }
+-	            #endif
++			#ifdef CONFIG_SPX_FEATURE_GLOBAL_DUAL_IMAGE_SUPPORT
++			#ifndef CONFIG_SPX_FEATURE_DEDICATED_SPI_FLASH_BANK
++				if( (i*SectorSize) >= (2 * CONFIG_SPX_FEATURE_GLOBAL_USED_FLASH_SIZE) ) { break; }
++				if( ((i*SectorSize) >= CONFIG_SPX_FEATURE_GLOBAL_USED_FLASH_SIZE) && (imgIndex == 0) ) {
++					imgIndex++; 
++				}
++				
++			#endif
++			#else
++				if( (i*SectorSize) >= CONFIG_SPX_FEATURE_GLOBAL_USED_FLASH_SIZE ) { break; }
++			#endif
+ 			/* Check if FMH found at this sector */
+ 			fmh = ScanforFMH(flash,(i*SectorSize),SectorSize);
+ 			if (fmh == NULL)
+@@ -942,14 +946,6 @@
+ 					img2_presence = 1;
+ 		        }
+ 			i++;
+-			
+-			if ((i*SectorSize) >= CONFIG_SPX_FEATURE_GLOBAL_USED_FLASH_SIZE)//Image Size
+-			{
+-				if(mod->Module_Type == FIRMWARE_INFO_TYPE)
+-				{
+-					imgIndex++;
+-				}
+-			}
+ 		}
+ 		
+         
+@@ -1100,7 +1096,6 @@
+ }
+ #endif
+ 
+-#if 0
+ #ifdef  CONFIG_SPX_FEATURE_GLOBAL_DUAL_IMAGE_SUPPORT
+ static int TriggerWDT2(void)
+ {
+@@ -1140,7 +1135,6 @@
+        return 0;
+ }
+ #endif
+-#endif
+ 
+ int
+ BootFMH(unsigned short PathID)
+@@ -1854,10 +1848,8 @@
+ 		console_assign(stdout,"serial");
+ #else
+         printf("Error locating Kernel. Reset the board\n");
+-#if 0
+ #ifdef  CONFIG_SPX_FEATURE_GLOBAL_DUAL_IMAGE_SUPPORT
+         TriggerWDT2();
+-#endif	
+ #endif
+ #endif                
+ 		printf("Unable to locate %s\n",KERNEL_FILE);
+@@ -1939,12 +1931,10 @@
+ 	UpdateFirmware();
+ #else
+    printf("Error locating Kernel. Reset the board\n");
+-#if 0
+ #ifdef CONFIG_SPX_FEATURE_GLOBAL_DUAL_IMAGE_SUPPORT
+ 	TriggerWDT2();
+ #endif
+ #endif
+-#endif
+ 
+ 	UpdateFirmware();
+ 	/* Module Type JFFS and JFFS2 are File System  - Not executable */

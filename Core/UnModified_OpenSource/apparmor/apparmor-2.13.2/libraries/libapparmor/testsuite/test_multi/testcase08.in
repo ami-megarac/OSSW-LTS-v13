@@ -1,0 +1,1 @@
+Jul 12 13:59:10 jj-amd64 kernel: [ 1157.775350] type=1503 audit(1236891550.807:870): operation="capable" name="setuid" pid=3593 profile="/bin/ping"

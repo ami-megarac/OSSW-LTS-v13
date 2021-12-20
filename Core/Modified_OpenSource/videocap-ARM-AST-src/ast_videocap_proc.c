@@ -122,7 +122,7 @@ int ast_videocap_write_jpeg(struct file *filp, const char __user *buff, unsigned
 {
 	char buf_val[16];
 
-	if (len > 16)
+	if (len >= 16)
 		return -EFAULT;
 
 	if (copy_from_user(buf_val, buff, len))

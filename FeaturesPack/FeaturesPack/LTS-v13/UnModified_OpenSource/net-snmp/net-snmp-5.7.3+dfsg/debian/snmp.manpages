@@ -1,0 +1,4 @@
+man/snmp*.1
+man/encode*.1
+man/fixproc.1
+debian/snmpcheck.1

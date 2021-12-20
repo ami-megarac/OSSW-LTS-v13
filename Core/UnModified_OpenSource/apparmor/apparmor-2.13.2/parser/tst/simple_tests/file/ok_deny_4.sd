@@ -1,0 +1,10 @@
+#
+#=DESCRIPTION an exact overlapping deny rule
+#=EXRESULT PASS
+# vim:syntax=apparmor
+#
+/usr/bin/foo {
+  /usr/bin/foo r,
+  deny /usr/bin/foo r,
+}
+

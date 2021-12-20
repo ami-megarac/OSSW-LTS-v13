@@ -52,6 +52,7 @@ typedef struct
 
 /* LPC UART Registers */
 #define AST_LPC_HICRA			0x9C
+#define AST_LPC_HICR9			0x98
 
 /* HICRA BITS MASK SHIFT*/
 #define SEL_5_DW			28	
@@ -65,6 +66,9 @@ typedef struct
 #define SEL_2_IO			3
 #define SEL_1_IO			0
 #define SEL_6_IO			8
+#define SEL_10_IO			8 // A2 Silicon
+#define SEL_6_DW			12 // A1 Silicon
+#define SEL_10_DW			12 // A2 Silicon
 
 #define IO1				1
 #define IO2				2
@@ -72,11 +76,14 @@ typedef struct
 #define IO4				4
 #define IO5				5
 #define IO6				6
+#define IO10				6 // A2 Silicon
 #define UART1				7
 #define UART2				8
 #define UART3				9
 #define UART4				10
 #define UART5				11
+#define UART6				12 // A1 Silicon
+#define UART10				12 // A2 Silicon
 
 
 #endif /* _LPC_UART_H_ */

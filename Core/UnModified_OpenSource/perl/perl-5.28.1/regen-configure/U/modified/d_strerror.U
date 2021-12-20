@@ -1,0 +1,70 @@
+?RCS: $Id: d_strerror.U,v 3.0.1.3 1994/05/13 15:20:27 ram Exp $
+?RCS:
+?RCS: Copyright (c) 1991-1993, Raphael Manfredi
+?RCS:
+?RCS: You may redistribute only under the terms of the Artistic License,
+?RCS: as specified in the README file that comes with the distribution.
+?RCS: You may reuse parts of this distribution only within the terms of
+?RCS: that same Artistic License; a copy of which may be found at the root
+?RCS: of the source tree for dist 3.0.
+?RCS:
+?RCS: $Log: d_strerror.U,v $
+?RCS: Revision 3.0.1.3  1994/05/13  15:20:27  ram
+?RCS: patch27: now uses new macro support for cleaner Strerror def
+?RCS:
+?RCS: Revision 3.0.1.2  1994/05/06  14:58:26  ram
+?RCS: patch23: renamed strerror into Strerror to protect name space (ADO)
+?RCS:
+?RCS: Revision 3.0.1.1  1994/01/24  14:08:56  ram
+?RCS: patch16: protected code looking for sys_errnolist[] with @if
+?RCS: patch16: added default value for d_sysernlst
+?RCS:
+?RCS: Revision 3.0  1993/08/18  12:07:35  ram
+?RCS: Baseline for dist 3.0 netwide release.
+?RCS:
+?MAKE:d_syserrlst d_sysernlst: Csym Findhdr
+?MAKE:	-pick add $@ %<
+?S:d_syserrlst:
+?S:	This variable conditionally defines HAS_SYS_ERRLIST if sys_errlist[] is
+?S:	available to translate error numbers to strings.
+?S:.
+?S:d_sysernlst:
+?S:	This variable conditionally defines HAS_SYS_ERRNOLIST if sys_errnolist[]
+?S:	is available to translate error numbers to the symbolic name.
+?S:.
+?C:HAS_SYS_ERRLIST (SYSERRLIST):
+?C:	This symbol, if defined, indicates that the sys_errlist array is
+?C:	available to translate error numbers to strings. The extern int
+?C:	sys_nerr gives the size of that table.
+?C:.
+?C:HAS_SYS_ERRNOLIST (SYSERRNOLIST):
+?C:	This symbol, if defined, indicates that the sys_errnolist array is
+?C:	available to translate an errno code into its symbolic name (e.g.
+?C:	ENOENT). The extern int sys_nerrno gives the size of that table.
+?C:.
+?H:#$d_syserrlst HAS_SYS_ERRLIST	/**/
+?H:#$d_sysernlst HAS_SYS_ERRNOLIST	/**/
+?H:.
+?D:d_sysernlst=''
+?T:val
+: see if sys_errlist[] exists
+echo " "
+if test "X$d_syserrlst" = X; then
+	if set sys_errlist val -a d_syserrlst; eval $csym; $val; then
+		echo "You have sys_errlist[], so we could roll our own strerror."
+		d_syserrlst="$define"
+	else
+		echo "You don't have sys_errlist[], so strerror() is welcome."
+		d_syserrlst="$undef"
+	fi
+fi
+@if d_sysernlst || HAS_SYS_ERRNOLIST
+if set sys_errnolist val -a d_sysernlst; eval $csym; $val; then
+	echo "(Symbolic error codes can be fetched via the sys_errnolist[] array.)"
+	d_sysernlst="$define"
+else
+	echo "(However, I can't extract the symbolic error code out of errno.)"
+	d_sysernlst="$undef"
+fi
+@end
+

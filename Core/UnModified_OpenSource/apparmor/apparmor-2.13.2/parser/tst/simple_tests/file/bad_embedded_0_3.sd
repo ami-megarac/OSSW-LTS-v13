@@ -1,0 +1,9 @@
+#
+#=DESCRIPTION embedded \d00 in file path
+#=EXRESULT PASS
+# currently do NOT have semantic checks for \000 in file path
+#
+/usr/bin/foo {
+  /foo\d00bar w,
+}
+

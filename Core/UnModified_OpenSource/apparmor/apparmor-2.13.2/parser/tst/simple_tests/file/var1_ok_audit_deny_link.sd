@@ -1,0 +1,10 @@
+#
+#=DESCRIPTION simple link access test
+#=EXRESULT PASS
+#
+
+@{var}=/test
+profile test {
+  audit deny link @{var} -> @{var},
+}
+

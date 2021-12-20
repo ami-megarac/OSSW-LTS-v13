@@ -1,0 +1,14 @@
+#
+#=DESCRIPTION m and [upi]x do not conflict, seperate rules
+#=EXRESULT PASS
+#
+/usr/bin/foo {
+  file /bin/cat rm,
+  file /bin/cat ix,
+  file /bin/true px,
+  file /bin/true m,
+  file /bin/false m,
+  file /bin/false ux,
+  file /lib/libc.so rwl,
+  file /lib/libc.so m,
+}

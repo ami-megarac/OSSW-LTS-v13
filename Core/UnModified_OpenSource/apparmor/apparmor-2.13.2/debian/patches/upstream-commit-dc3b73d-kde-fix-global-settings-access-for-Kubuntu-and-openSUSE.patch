@@ -1,0 +1,46 @@
+From: Vincas Dargis <vindrg@gmail.com>
+Date: Mon, 4 Feb 2019 19:59:47 +0200
+Subject: kde: fix global settings access for Kubuntu and openSUSE
+
+On Kubuntu, these denies are being produced:
+```
+type=AVC msg=audit(1549301888.419:91): apparmor="DENIED" operation="open"
+profile="qtox"
+name="/usr/share/kubuntu-default-settings/kf5-settings/kdeglobals" pid=1603
+comm="qtox" requested_mask="r" denied_mask="r" fsuid=1000 ouid=0
+
+type=AVC msg=audit(1549301964.008:126): apparmor="DENIED" operation="open"
+profile="qtox" name="/usr/share/kubuntu-default-settings/kf5-settings/breezerc"
+pid=1822 comm="qtox" requested_mask="r" denied_mask="r" fsuid=1000 ouid=0
+
+type=AVC msg=audit(1549302031.194:155): apparmor="DENIED" operation="open"
+profile="qtox"
+name="/usr/share/kubuntu-default-settings/kf5-settings/baloofilerc" pid=1899
+comm="qtox" requested_mask="r" denied_mask="r" fsuid=1000 ouid=0
+```
+
+Meanwhile, on openSUSE:
+```
+type=AVC msg=audit(1549302286.921:205): apparmor="DENIED" operation="open" profile="qtox" name="/etc/xdg/kdeglobals" pid=12781 comm="qtox" requested_mask="r" denied_mask="r" fsuid=1000 ouid=0
+```
+
+Add read only rules for allowing access to global KDE settings.
+---
+ profiles/apparmor.d/abstractions/kde | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/profiles/apparmor.d/abstractions/kde b/profiles/apparmor.d/abstractions/kde
+index be03995..cad5c7d 100644
+--- a/profiles/apparmor.d/abstractions/kde
++++ b/profiles/apparmor.d/abstractions/kde
+@@ -23,8 +23,10 @@
+ /etc/kderc r,
+ /etc/kde3/* r,
+ /etc/kde4rc r,
++/etc/xdg/kdeglobals r,
+ /etc/xdg/Trolltech.conf r,
+ /usr/share/knotifications5/*.notifyrc r, # KNotification::sendEvent()
++/usr/share/kubuntu-default-settings/kf5-settings/* r,
+ 
+ owner @{HOME}/.DCOPserver_* r,
+ owner @{HOME}/.ICEauthority r,

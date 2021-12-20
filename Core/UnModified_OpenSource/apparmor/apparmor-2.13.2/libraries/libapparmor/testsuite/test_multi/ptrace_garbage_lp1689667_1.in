@@ -1,0 +1,1 @@
+type=AVC msg=audit(1494272099.261:3455): apparmor="DENIED" operation="ptrace" profile="/bin/netstat" pid=1962 comm="netstat" target=""

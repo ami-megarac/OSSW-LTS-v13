@@ -1,0 +1,3 @@
+debian/upstream-signing-key.pgp
+debian/binary/cert10.der
+debian/binary/cert5.der

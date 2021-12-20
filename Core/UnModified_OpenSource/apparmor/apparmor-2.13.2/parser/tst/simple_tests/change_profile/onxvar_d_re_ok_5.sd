@@ -1,0 +1,26 @@
+#
+#=DESCRIPTION deny change_profile @{var} with just res
+#=EXRESULT PASS
+#
+
+@{var}=/test
+/usr/bin/foo {
+   deny change_profile @{var} -> *,
+}
+
+/usr/bin/foo2 {
+   deny change_profile @{var} -> **,
+}
+
+/usr/bin/foo3 {
+   deny change_profile @{var} -> ?,
+}
+
+/usr/bin/foo4 {
+   deny change_profile @{var} -> [ab],
+}
+
+/usr/bin/foo5 {
+   deny change_profile @{var} -> [^ab],
+}
+

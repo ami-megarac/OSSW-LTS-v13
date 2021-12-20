@@ -1,0 +1,16 @@
+libstdc++.so.6 libstdc++6 #MINVER#
+#include "libstdc++6.symbols.64bit"
+#include "libstdc++6.symbols.128bit"
+#include "libstdc++6.symbols.excprop"
+#include "libstdc++6.symbols.money.ldbl"
+ _ZN9__gnu_cxx12__atomic_addEPVii@GLIBCXX_3.4 4.1.1
+ _ZN9__gnu_cxx18__exchange_and_addEPVii@GLIBCXX_3.4 4.1.1
+ _ZNKSt3tr14hashIeEclEe@GLIBCXX_3.4.10 4.3
+ _ZNKSt4hashIeEclEe@GLIBCXX_3.4.10 4.3
+#(optional)_Z16__VLTRegisterSetPPvPKvmmS0_@CXXABI_1.3.8 4.9.0
+#(optional)_Z17__VLTRegisterPairPPvPKvmS2_@CXXABI_1.3.8 4.9.0
+#(optional)_Z21__VLTRegisterSetDebugPPvPKvmmS0_@CXXABI_1.3.8 4.9.0
+#(optional)_Z22__VLTRegisterPairDebugPPvPKvmS2_PKcS4_@CXXABI_1.3.8 4.9.0
+#(optional)_Z24__VLTVerifyVtablePointerPPvPKv@CXXABI_1.3.8 4.9.0
+#(optional)_Z29__VLTVerifyVtablePointerDebugPPvPKvPKcS4_@CXXABI_1.3.8 4.9.0
+#(optional)__VLTChangePermission@CXXABI_1.3.8 4.9.0

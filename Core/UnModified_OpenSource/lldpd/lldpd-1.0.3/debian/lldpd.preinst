@@ -1,0 +1,9 @@
+#!/bin/sh
+
+set -e
+
+dpkg-maintscript-helper rm_conffile /etc/bash_completion.d/lldpcli.bash-completion 0.7.15~ lldpd -- "$@"
+
+#DEBHELPER#
+
+exit 0

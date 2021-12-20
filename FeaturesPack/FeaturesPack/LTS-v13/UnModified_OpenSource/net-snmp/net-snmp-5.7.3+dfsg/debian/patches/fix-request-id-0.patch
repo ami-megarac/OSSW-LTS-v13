@@ -1,0 +1,22 @@
+From: Net-SNMP Packaging Team <pkg-net-snmp-devel@lists.alioth.debian.org>
+Date: Thu, 18 Jun 2015 06:12:05 +0900
+Subject: fix-request-id-0
+
+---
+ snmplib/snmp_api.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/snmplib/snmp_api.c b/snmplib/snmp_api.c
+index 191debf..d2568bf 100644
+--- a/snmplib/snmp_api.c
++++ b/snmplib/snmp_api.c
+@@ -5025,6 +5025,9 @@ _sess_async_send(void *sessp,
+         /*
+          * No response expected...  
+          */
++        if ((reqid == 0) && (pdu->command == SNMP_MSG_RESPONSE)) {
++            reqid = 2;
++        }
+         if (reqid) {
+             /*
+              * Free v1 or v2 TRAP PDU iff no error  

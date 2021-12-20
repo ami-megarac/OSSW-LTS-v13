@@ -1,0 +1,7 @@
+#
+#=DESCRIPTION allow change_profile /onexec to a hat
+#=EXRESULT PASS
+#
+/usr/bin/foo {
+   allow change_profile /onexec -> /bin/foo//bar,
+}

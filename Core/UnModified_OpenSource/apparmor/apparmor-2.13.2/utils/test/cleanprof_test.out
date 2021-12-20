@@ -1,0 +1,46 @@
+abi  <abi/4.19>    ,
+
+alias /foo -> /bar,
+
+#include <tunables/global>
+
+# A simple test comment which will persist
+
+
+/usr/bin/a/simple/cleanprof/test/profile {
+  abi  "abi/4.20"    ,
+
+  #include <abstractions/base>
+
+  set rlimit nofile <= 256,
+
+  audit capability,
+
+  network stream,
+
+  dbus send bus=session,
+
+  signal set=(abrt alrm bus chld fpe hup ill int kill pipe quit segv stkflt term trap usr1 usr2),
+
+  unix (receive) type=dgram,
+
+  link subset /alpha/beta -> /tmp/**,
+
+  allow /home/*/** r,
+  allow /home/foo/** w,
+
+  change_profile,
+
+
+  ^foo {
+    capability dac_override,
+
+    /etc/fstab r,
+
+  }
+}
+/usr/bin/other/cleanprof/test/profile {
+  allow /home/*/** rw,
+  allow /home/foo/bar r,
+
+}

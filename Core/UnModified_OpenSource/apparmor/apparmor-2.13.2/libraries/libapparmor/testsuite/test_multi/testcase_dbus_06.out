@@ -1,0 +1,18 @@
+START
+File: testcase_dbus_06.in
+Event type: AA_RECORD_DENIED
+Audit ID: 1375323488.608:182
+Operation: dbus_signal
+Denied Mask: receive
+Profile: /tmp/apparmor-2.8.0/tests/regression/apparmor/dbus_service
+Peer profile: unconfined
+Name: org.freedesktop.nm_dhcp_client
+Command: /bin/dbus-daemon
+PID: 2859
+Peer PID: 2875
+DBus bus: system
+DBus path: /org/freedesktop/nm_dhcp_client
+DBus interface: org.freedesktop.nm_dhcp_client
+DBus member: Signal
+Epoch: 1375323488
+Audit subid: 182

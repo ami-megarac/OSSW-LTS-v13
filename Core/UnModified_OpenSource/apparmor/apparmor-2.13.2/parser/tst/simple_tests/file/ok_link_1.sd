@@ -1,0 +1,10 @@
+#
+#=DESCRIPTION simple link access test
+#=EXRESULT PASS
+#
+
+profile test {
+  /alpha/beta rl,
+  /gamma/* rwl,
+}
+

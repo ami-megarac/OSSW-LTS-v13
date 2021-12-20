@@ -1,0 +1,7 @@
+#
+#=DESCRIPTION dbus entry with a bad 'in' keyword
+#=EXRESULT FAIL
+
+profile foo {
+  dbus send bus in (session, system),
+}

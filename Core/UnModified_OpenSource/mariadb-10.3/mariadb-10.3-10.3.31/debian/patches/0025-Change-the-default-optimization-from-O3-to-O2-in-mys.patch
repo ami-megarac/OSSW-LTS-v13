@@ -1,0 +1,85 @@
+From: =?utf-8?q?Ond=C5=99ej_Sur=C3=BD?= <ondrej@debian.org>
+Date: Wed, 22 Nov 2017 20:32:51 +0000
+Subject: Change the default optimization from -O3 to -O2 in
+ mysql_release.cmake BUILD_CONFIG profile
+
+---
+ cmake/build_configurations/mysql_release.cmake           | 12 ++++++------
+ .../PerconaFT/cmake_modules/TokuSetupCompiler.cmake      | 16 ++++++++--------
+ 2 files changed, 14 insertions(+), 14 deletions(-)
+
+--- a/cmake/build_configurations/mysql_release.cmake
++++ b/cmake/build_configurations/mysql_release.cmake
+@@ -167,12 +167,12 @@ IF(UNIX)
+   IF(CMAKE_COMPILER_IS_GNUCC)
+     SET(COMMON_C_FLAGS               "-g -static-libgcc -fno-omit-frame-pointer -fno-strict-aliasing  -Wno-uninitialized")
+     SET(CMAKE_C_FLAGS_DEBUG          "-O ${COMMON_C_FLAGS}")
+-    SET(CMAKE_C_FLAGS_RELWITHDEBINFO "-O3 ${COMMON_C_FLAGS}")
++    SET(CMAKE_C_FLAGS_RELWITHDEBINFO "-O2 ${COMMON_C_FLAGS}")
+   ENDIF()
+   IF(CMAKE_COMPILER_IS_GNUCXX)
+     SET(COMMON_CXX_FLAGS               "-g -static-libgcc -fno-omit-frame-pointer -fno-strict-aliasing -Wno-uninitialized")
+     SET(CMAKE_CXX_FLAGS_DEBUG          "-O ${COMMON_CXX_FLAGS}")
+-    SET(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O3 ${COMMON_CXX_FLAGS}")
++    SET(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 ${COMMON_CXX_FLAGS}")
+   ENDIF()
+ 
+   # IBM Z flags
+@@ -221,8 +221,8 @@ IF(UNIX)
+       ENDIF()
+       SET(CMAKE_C_FLAGS_DEBUG            "${COMMON_C_FLAGS}")
+       SET(CMAKE_CXX_FLAGS_DEBUG          "${COMMON_CXX_FLAGS}")
+-      SET(CMAKE_C_FLAGS_RELWITHDEBINFO   "-O3 -unroll2 -ip ${COMMON_C_FLAGS}")
+-      SET(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O3 -unroll2 -ip ${COMMON_CXX_FLAGS}")
++      SET(CMAKE_C_FLAGS_RELWITHDEBINFO   "-O2 -unroll2 -ip ${COMMON_C_FLAGS}")
++      SET(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -unroll2 -ip ${COMMON_CXX_FLAGS}")
+       SET(WITH_SSL no)
+     ENDIF()
+   ENDIF()
+@@ -231,12 +231,12 @@ IF(UNIX)
+   IF(CMAKE_C_COMPILER_ID MATCHES "Clang")
+     SET(COMMON_C_FLAGS               "-g -fno-omit-frame-pointer -fno-strict-aliasing")
+     SET(CMAKE_C_FLAGS_DEBUG          "${COMMON_C_FLAGS}")
+-    SET(CMAKE_C_FLAGS_RELWITHDEBINFO "-O3 ${COMMON_C_FLAGS}")
++    SET(CMAKE_C_FLAGS_RELWITHDEBINFO "-O2 ${COMMON_C_FLAGS}")
+   ENDIF()
+   IF(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+     SET(COMMON_CXX_FLAGS               "-g -fno-omit-frame-pointer -fno-strict-aliasing")
+     SET(CMAKE_CXX_FLAGS_DEBUG          "${COMMON_CXX_FLAGS}")
+-    SET(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O3 ${COMMON_CXX_FLAGS}")
++    SET(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 ${COMMON_CXX_FLAGS}")
+   ENDIF()
+ 
+   # Solaris flags
+--- a/storage/tokudb/PerconaFT/cmake_modules/TokuSetupCompiler.cmake
++++ b/storage/tokudb/PerconaFT/cmake_modules/TokuSetupCompiler.cmake
+@@ -107,10 +107,10 @@ set(CMAKE_CXX_FLAGS_DRD "-g3 -O1 ${CMAKE
+ ## need to set flags for RelWithDebInfo as well because we want the MySQL/MariaDB builds to use them
+ if (CMAKE_CXX_COMPILER_ID STREQUAL Clang)
+   # have tried -flto and -O4, both make our statically linked executables break apple's linker
+-  set(CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELWITHDEBINFO} -g -O3 -UNDEBUG")
+-  set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -g -O3 -UNDEBUG")
+-  set(CMAKE_C_FLAGS_RELEASE "-g -O3 ${CMAKE_C_FLAGS_RELEASE} -UNDEBUG")
+-  set(CMAKE_CXX_FLAGS_RELEASE "-g -O3 ${CMAKE_CXX_FLAGS_RELEASE} -UNDEBUG")
++  set(CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELWITHDEBINFO} -g -O2 -UNDEBUG")
++  set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -g -O2 -UNDEBUG")
++  set(CMAKE_C_FLAGS_RELEASE "-g -O2 ${CMAKE_C_FLAGS_RELEASE} -UNDEBUG")
++  set(CMAKE_CXX_FLAGS_RELEASE "-g -O2 ${CMAKE_CXX_FLAGS_RELEASE} -UNDEBUG")
+ else ()
+   if (APPLE)
+     set(FLTO_OPTS "-fwhole-program")
+@@ -118,10 +118,10 @@ else ()
+     set(FLTO_OPTS "-fuse-linker-plugin")
+   endif()
+   # we overwrite this because the default passes -DNDEBUG and we don't want that
+-  set(CMAKE_C_FLAGS_RELWITHDEBINFO "-flto ${FLTO_OPTS} ${CMAKE_C_FLAGS_RELWITHDEBINFO} -g -O3 -UNDEBUG")
+-  set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-flto ${FLTO_OPTS} ${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -g -O3 -UNDEBUG")
+-  set(CMAKE_C_FLAGS_RELEASE "-g -O3 -flto ${FLTO_OPTS} ${CMAKE_C_FLAGS_RELEASE} -UNDEBUG")
+-  set(CMAKE_CXX_FLAGS_RELEASE "-g -O3 -flto ${FLTO_OPTS} ${CMAKE_CXX_FLAGS_RELEASE} -UNDEBUG")
++  set(CMAKE_C_FLAGS_RELWITHDEBINFO "-flto ${FLTO_OPTS} ${CMAKE_C_FLAGS_RELWITHDEBINFO} -g -O2 -UNDEBUG")
++  set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-flto ${FLTO_OPTS} ${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -g -O2 -UNDEBUG")
++  set(CMAKE_C_FLAGS_RELEASE "-g -O2 -flto ${FLTO_OPTS} ${CMAKE_C_FLAGS_RELEASE} -UNDEBUG")
++  set(CMAKE_CXX_FLAGS_RELEASE "-g -O2 -flto ${FLTO_OPTS} ${CMAKE_CXX_FLAGS_RELEASE} -UNDEBUG")
+   set(CMAKE_EXE_LINKER_FLAGS "-g ${FLTO_OPTS} ${CMAKE_EXE_LINKER_FLAGS}")
+   set(CMAKE_SHARED_LINKER_FLAGS "-g ${FLTO_OPTS} ${CMAKE_SHARED_LINKER_FLAGS}")
+ endif ()

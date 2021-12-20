@@ -1,0 +1,7 @@
+#
+#=DESCRIPTION simple unix getopt acceptance test
+#=EXRESULT PASS
+
+profile a_profile {
+  unix getopt,
+}

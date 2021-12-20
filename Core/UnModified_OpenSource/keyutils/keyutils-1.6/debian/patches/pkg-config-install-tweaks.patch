@@ -1,0 +1,24 @@
+From: Christian Kastner <ckk@debian.org>
+Date: Sat, 9 Feb 2019 10:15:00 +0100
+Subject: pkg-config install tweaks
+
+Forwarded: yes
+Last-Update: 2019-02-09
+
+---
+ Makefile | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Makefile b/Makefile
+index 16b171b..39f6622 100644
+--- a/Makefile
++++ b/Makefile
+@@ -195,7 +195,7 @@ ifeq ($(NO_SOLIB),0)
+ 	-e 's,@libdir\@,$(USRLIBDIR),g' \
+ 	-e 's,@includedir\@,$(INCLUDEDIR),g' \
+ 	< $(PKGCONFIG).in > $(PKGCONFIG) || rm $(PKGCONFIG)
+-	$(INSTALL) -D $(PKGCONFIG) $(DESTDIR)$(LIBDIR)/$(PKGCONFIG_DIR)/$(PKGCONFIG)
++	$(INSTALL) -D -m 0644 $(PKGCONFIG) $(DESTDIR)$(USRLIBDIR)/$(PKGCONFIG_DIR)/$(PKGCONFIG)
+ 	rm $(PKGCONFIG)
+ endif
+ 	$(INSTALL) -D keyctl $(DESTDIR)$(BINDIR)/keyctl

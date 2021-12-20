@@ -1,0 +1,10 @@
+#
+#=Description basic rules to test the "noiversion" mount option
+#=EXRESULT PASS
+/usr/bin/foo {
+  mount options=noiversion /a -> /1,
+  mount options=(noiversion) /b -> /2,
+  mount options=(rw,noiversion) /c -> /3,
+  mount options in (noiversion) /d -> /4,
+  mount options in (ro,noiversion) /e -> /5,
+}

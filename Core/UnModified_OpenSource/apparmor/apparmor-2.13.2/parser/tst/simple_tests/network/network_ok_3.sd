@@ -1,0 +1,14 @@
+
+#
+#=DESCRIPTION basic network tests
+#=EXRESULT PASS
+#
+/usr/bin/foo {
+  network inet stream,
+  network inet dgram,
+  network inet raw,
+  network inet tcp,
+  network inet udp,
+  network inet icmp,
+
+}

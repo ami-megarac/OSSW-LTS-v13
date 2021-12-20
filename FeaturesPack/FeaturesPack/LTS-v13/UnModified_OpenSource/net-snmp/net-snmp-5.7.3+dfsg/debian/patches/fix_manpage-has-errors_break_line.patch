@@ -1,0 +1,52 @@
+From: Net-SNMP Packaging Team <pkg-net-snmp-devel@lists.alioth.debian.org>
+Date: Thu, 18 Jun 2015 06:12:05 +0900
+Subject: fix_manpage-has-errors_break_line
+
+ see http://lintian.debian.org/tags/manpage-has-errors-from-man.html
+
+Author: Hideki Yamane <henrich@debian.org>
+---
+ man/netsnmp_config_api.3.def | 2 +-
+ man/netsnmp_mib_api.3.def    | 2 +-
+ man/snmpcmd.1.def            | 2 +-
+ 3 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/man/netsnmp_config_api.3.def b/man/netsnmp_config_api.3.def
+index d009fc5..bb7e80b 100644
+--- a/man/netsnmp_config_api.3.def
++++ b/man/netsnmp_config_api.3.def
+@@ -365,7 +365,7 @@ function that it should abort the operation of the application.
+ SNMPCONFPATH
+ A colon separated list of directories to search for configuration
+ files in.
+-Default: SYSCONFDIR/snmp:DATADIR/snmp:LIBDIR/snmp:$HOME/.snmp
++Default\: SYSCONFDIR/snmp\:DATADIR/snmp\:LIBDIR/snmp\:$HOME/.snmp
+ .SH "SEE ALSO"
+ netsnmp_mib_api(3), snmp_api(3)
+ .\" Local Variables:
+diff --git a/man/netsnmp_mib_api.3.def b/man/netsnmp_mib_api.3.def
+index 2e1da8f..72924ce 100644
+--- a/man/netsnmp_mib_api.3.def
++++ b/man/netsnmp_mib_api.3.def
+@@ -277,7 +277,7 @@ A colon separated list of MIB modules to load.
+ .br
+ The default list of modules will depend on how the Net-SNMP software
+ was originally compiled, but is typically:
+-IP\-MIB:IF\-MIB:TCP\-MIB:UDP\-MIB:SNMPv2\-MIB:RFC1213\-MIB: UCD\-SNMP\-MIB:HOST\-RESOURCES\-MIB
++IP\-MIB\:IF\-MIB\:TCP\-MIB\:UDP\-MIB\:SNMPv2\-MIB\:RFC1213\-MIB\: UCD\-SNMP\-MIB\:HOST\-RESOURCES\-MIB
+ .IP
+ If the value of the
+ .B MIBS
+diff --git a/man/snmpcmd.1.def b/man/snmpcmd.1.def
+index e4df8b2..c41c24a 100644
+--- a/man/snmpcmd.1.def
++++ b/man/snmpcmd.1.def
+@@ -888,7 +888,7 @@ The standard prefix for object identifiers (when using UCD-style output).
+ Defaults to .iso.org.dod.internet.mgmt.mib\-2
+ .IP MIBS
+ The list of MIBs to load. Defaults to
+-SNMPv2\-TC:SNMPv2\-MIB:IF\-MIB:IP\-MIB:TCP\-MIB:UDP\-MIB:SNMP\-VACM\-MIB.
++SNMPv2\-TC\:SNMPv2\-MIB:IF\-MIB:IP\-MIB\:TCP\-MIB\:UDP\-MIB\:SNMP\-VACM\-MIB.
+ Overridden by the
+ .B \-m
+ option.

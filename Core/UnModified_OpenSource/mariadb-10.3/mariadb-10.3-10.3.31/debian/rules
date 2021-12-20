@@ -1,0 +1,218 @@
+#!/usr/bin/make -f
+
+export DH_VERBOSE=1
+
+# enable Debian Hardening
+# see: https://wiki.debian.org/Hardening
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+DPKG_EXPORT_BUILDFLAGS = 1
+include /usr/share/dpkg/default.mk
+# CPPFLAGS are nor read by CMake, so copy them to CXXFLAGS
+# See why at https://cmake.org/Bug/view.php?id=12928
+# This is needed for e.g. all automatic Debian hardening flags to apply on all cmake builds.
+CFLAGS+=$(CPPFLAGS)
+CXXFLAGS+=$(CPPFLAGS)
+
+# Only do a strict symbol checking on Linux
+ifneq (,$(filter linux,$(DEB_HOST_ARCH_OS)))
+  DPKG_GENSYMBOLS_CHECK_LEVEL := 4
+endif
+
+BUILDDIR := builddir
+DEB_VERSION_REVISION := $(shell echo $(DEB_VERSION) | sed -e 's/^.*-//')
+RELEASE := $(shell lsb_release -r -s) # Use changelog based DEB_DISTRIBUTION instead?
+TMP:=$(CURDIR)/debian/tmp
+
+CC := $(DEB_HOST_GNU_TYPE)-gcc
+CXX := $(DEB_HOST_GNU_TYPE)-g++
+
+# Parallel build support as advised
+# at https://www.debian.org/doc/debian-policy/ch-source.html#s-debianrules-options
+ifneq (,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
+    NUMJOBS = $(patsubst parallel=%,%,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
+    MAKEFLAGS += -j $(NUMJOBS)
+else
+    # NUMJOBS cannot be empty as it is used as a parameter to mtr, default to 1.
+    NUMJOBS = 1
+endif
+
+# Ignore test suite exit code on unstable platforms
+ifeq ($(DEB_HOST_ARCH),$(filter $(DEB_HOST_ARCH),mips mipsel mips64el alpha powerpc sh4 hurd-i386 sparc64 kfreebsd-i386 kfreebsd-amd64))
+    TESTSUITE_FAIL_CMD:=true
+else
+    TESTSUITE_FAIL_CMD:=exit 1
+endif
+
+ifeq (32,$(DEB_HOST_ARCH_BITS))
+    CMAKEFLAGS += -DWITHOUT_ROCKSDB=true
+endif
+
+# Skip TokuDB if arch is not amd64 (also disable for kfreebsd-amd64 as it FTBFS)
+# Skipped on the x32 ABI too; untested, but unlikely to work given i386 is not
+# supported.
+ifneq ($(DEB_HOST_ARCH),amd64)
+    CMAKEFLAGS += -DWITHOUT_TOKUDB=true
+endif
+
+# Add support for verbose builds
+MAKEFLAGS += VERBOSE=1
+
+override_dh_auto_clean:
+	@echo "RULES.$@"
+	dh_testdir
+	dh_testroot
+	rm -rf mysql-test/var
+	rm -f storage/mroonga/mysql-test/mroonga/storage/r/information_schema_plugins.result
+	rm -f storage/mroonga/mysql-test/mroonga/storage/r/variable_version.result
+	rm -f debian/mariadb-server-10.3.mariadb.service
+	rm -f debian/mariadb-server-10.3.mariadb@.service
+	rm -rf $(BUILDDIR) builddir-native
+
+	[ ! -f debian/mysql-test-unstable-tests.orig ] || \
+	    mv debian/mysql-test-unstable-tests.orig mysql-test/unstable-tests
+
+	debconf-updatepo # Update po-files when clean runs before each build
+
+override_dh_auto_configure:
+	@echo "RULES.$@"
+	dh_testdir
+
+	# Versioned symbols are only available on Linux.
+	# Remove symbols file on kFreeBSD builds so that
+	# dpkg-gensymbols will not fail the build.
+ifneq (,$(filter $(DEB_HOST_ARCH), kfreebsd-i386 kfreebsd-amd64))
+	rm debian/libmariadb3.symbols
+endif
+
+ifneq ($(DEB_BUILD_ARCH),$(DEB_HOST_ARCH))
+	dpkg-architecture -a$(DEB_BUILD_ARCH) -f -c dh_auto_configure --builddirectory=builddir-native
+	dh_auto_build --builddirectory=builddir-native -- import_executables
+endif
+
+	# Remove -DWITH_SSL=bundle if you want to use system OpenSSL, otherwise
+	# the server will use YaSSL and Connector/C will use GnuTLS
+	mkdir -p $(BUILDDIR) && cd $(BUILDDIR) && \
+	sh -c  'PATH=$${MYSQL_BUILD_PATH:-"/usr/lib/ccache:/usr/local/bin:/usr/bin:/bin"} \
+	    	CC=${CC} \
+	    	CXX=${CXX} \
+	    cmake -DCMAKE_INSTALL_PREFIX=/usr \
+	    $(CMAKEFLAGS) \
+	    $(if $(filter $(DEB_BUILD_ARCH),$(DEB_HOST_ARCH)),,-DIMPORT_EXECUTABLES=$(CURDIR)/builddir-native/import_executables.cmake) \
+	    -DCOMPILATION_COMMENT="$(DEB_VENDOR) $(RELEASE)" \
+	    -DMYSQL_SERVER_SUFFIX="-$(DEB_VERSION_REVISION)" \
+	    -DSYSTEM_TYPE="debian-$(DEB_HOST_GNU_SYSTEM)" \
+	    -DCMAKE_SYSTEM_PROCESSOR=$(DEB_HOST_ARCH) \
+	    -DBUILD_CONFIG=mysql_release \
+	    -DINSTALL_LIBDIR=lib/$(DEB_HOST_MULTIARCH) \
+	    -DINSTALL_PLUGINDIR=lib/$(DEB_HOST_MULTIARCH)/mariadb19/plugin \
+	    -DINSTALL_MYSQLTESTDIR=share/mysql/mysql-test \
+	    -DPLUGIN_AUTH_SOCKET=STATIC \
+			-DWITH_SSL=bundled \
+	    -DPLUGIN_AWS_KEY_MANAGEMENT=NO \
+	    -DWITH_INNODB_SNAPPY=ON \
+	    -DDEB=$(DEB_VENDOR) ..'
+
+# This is needed, otherwise 'make test' will run before binaries have been built
+override_dh_auto_build:
+	@echo "RULES.$@"
+	# Print build env info to help debug builds on different platforms
+	dpkg-architecture
+	cd $(BUILDDIR) && $(MAKE)
+
+override_dh_auto_test:
+	@echo "RULES.$@"
+	dh_testdir
+	# Skip unstable tests if such are defined for arch
+	cp mysql-test/unstable-tests debian/mysql-test-unstable-tests.orig
+	[ ! -f debian/unstable-tests.$(DEB_HOST_ARCH) ] || cat debian/unstable-tests.$(DEB_HOST_ARCH) >> mysql-test/unstable-tests
+	# Run testsuite
+ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
+	# Don't use --mem here as official Debian builders and most Docker systems don't have a large mem device available and
+	# would fail with errors on lack of disk space.
+	cd $(BUILDDIR)/mysql-test && ./mtr --force --testcase-timeout=30 --suite-timeout=540 --retry=3 --parallel=$(NUMJOBS) --skip-rpl --suite=main --skip-test-list=unstable-tests  || $(TESTSUITE_FAIL_CMD) ;
+endif
+
+override_dh_auto_install:
+	@echo "RULES.$@"
+	dh_testdir
+	dh_testroot
+
+ifneq (,$(filter linux,$(DEB_HOST_ARCH_OS)))
+	# Copy systemd files to a location available for dh_installinit
+	cp $(BUILDDIR)/support-files/mariadb.service debian/mariadb-server-10.3.mariadb.service
+	cp $(BUILDDIR)/support-files/mariadb@.service debian/mariadb-server-10.3.mariadb@.service
+endif
+
+	# make install
+	cd $(BUILDDIR) && $(MAKE) install DESTDIR=$(TMP)
+
+	# Delete runnable files we don't want to have in the test data package.
+	# This avoids triggering multiple Lintian errors.
+	rm -rf $(TMP)/usr/share/mysql/mysql-test/plugin/tokudb/tokudb/*.py
+	rm -rf $(TMP)/usr/share/mysql/mysql-test/plugin/tokudb/tokudb/t/*.py
+
+	# Remove test plugins
+	rm -f $(TMP)/usr/lib/*/mariadb19/plugin/adt_null.so
+	rm -f $(TMP)/usr/lib/*/mariadb19/plugin/auth_0x0100.so
+	rm -f $(TMP)/usr/lib/*/mariadb19/plugin/auth_test_plugin.so
+	rm -f $(TMP)/usr/lib/*/mariadb19/plugin/daemon_example.ini
+	rm -f $(TMP)/usr/lib/*/mariadb19/plugin/debug_key_management.so
+	rm -f $(TMP)/usr/lib/*/mariadb19/plugin/dialog_examples.so
+	rm -f $(TMP)/usr/lib/*/mariadb19/plugin/example_key_management.so
+	rm -f $(TMP)/usr/lib/*/mariadb19/plugin/ha_example.so
+	rm -f $(TMP)/usr/lib/*/mariadb19/plugin/ha_test_sql_discovery.so
+	rm -f $(TMP)/usr/lib/*/mariadb19/plugin/libdaemon_example.so
+	rm -f $(TMP)/usr/lib/*/mariadb19/plugin/mypluglib.so
+	rm -f $(TMP)/usr/lib/*/mariadb19/plugin/qa_auth_client.so
+	rm -f $(TMP)/usr/lib/*/mariadb19/plugin/qa_auth_interface.so
+	rm -f $(TMP)/usr/lib/*/mariadb19/plugin/qa_auth_server.so
+	rm -f $(TMP)/usr/lib/*/mariadb19/plugin/test_versioning.so
+
+	# Delete useless systemd files introduced in upstream commit
+	# https://github.com/MariaDB/server/commit/7bbc6c14d1e8fcf1f4737e0a5fcf6237fe18bd23
+	# They have no function in Debian systems and their path and usage is unstandardized.
+	rm -rf $(TMP)/usr/lib/sysusers.d/sysusers.conf
+	rm -rf $(TMP)/usr/lib/tmpfiles.d/tmpfiles.conf
+
+	# nm numeric soft is not enough, therefore extra sort in command
+	# to satisfy Debian reproducible build requirements
+	nm --defined-only $(BUILDDIR)/sql/mysqld | LC_ALL=C sort | gzip -n -9 > $(TMP)/usr/share/doc/mariadb-server-10.3/mysqld.sym.gz
+
+	# rename and install AppArmor profile
+	install -D -m 644 debian/apparmor-profile $(TMP)/etc/apparmor.d/usr.sbin.mysqld
+
+	# Install libmariadbclient18 compatibility links
+	ln -s libmariadb.so.3 $(TMP)/usr/lib/$(DEB_HOST_MULTIARCH)/libmariadbclient.so
+
+	# Install libmysqlclientclientXX compatibility links
+	ln -s libmariadb.so.3 $(TMP)/usr/lib/$(DEB_HOST_MULTIARCH)/libmysqlclient.so.18
+	ln -s libmariadb.so.3 $(TMP)/usr/lib/$(DEB_HOST_MULTIARCH)/libmysqlclient.so.19
+	ln -s libmariadb.so.3 $(TMP)/usr/lib/$(DEB_HOST_MULTIARCH)/libmysqlclient.so.20
+
+override_dh_installlogrotate-arch:
+	dh_installlogrotate --name mysql-server
+
+override_dh_systemd_enable:
+	dh_systemd_enable --name=mariadb
+	dh_systemd_enable --no-enable --name=mariadb@
+
+# Disable dh_systemd_start due /etc/init.d/mysql messing with the automatic snippets
+override_dh_systemd_start:
+	:
+
+# Start mysql at sequence number 19 before 20 where apache, proftpd etc gets
+# started which might depend on a running database server.
+override_dh_installinit-arch:
+	dh_installinit --name=mysql --no-start -- defaults 19 21
+
+override_dh_installcron-arch:
+	dh_installcron --name mysql-server
+
+# If a file is not supposed to be included anywhere, add it to the not-installed
+# file and document the reason. Note that dh_install supports the above mentioned
+# white list file only starting from Debian Stretch and Ubuntu Xenial.
+# To find more, grep build logs for 'but is not installed to anywhere'.
+%:
+	dh $@ --parallel --with systemd --list-missing
+
+# vim: ts=8

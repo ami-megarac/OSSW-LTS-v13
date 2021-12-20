@@ -1,0 +1,4 @@
+libhistory.so.7 #PACKAGE# #MINVER#
+#include "libhistory7.symbols.common"
+libreadline.so.7 #PACKAGE# #MINVER#
+#include "libreadline7.symbols.common"

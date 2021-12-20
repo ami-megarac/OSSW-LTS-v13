@@ -1,0 +1,1 @@
+Jul 24 12:25:33 spriggan kernel: [42416.178567] type=1400 audit(1279967133.365:54): apparmor="DENIED" operation="open" parent=19650 profile="/usr/sbin/cupsd" name="/boot/" pid=19651 comm="ls" requested_mask="r" denied_mask="r" fsuid=0 ouid=0

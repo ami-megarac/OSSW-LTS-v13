@@ -1,0 +1,387 @@
+Source: util-linux
+Build-Depends: bc <!stage1 !nocheck>,
+               debhelper (>= 11),
+               dh-exec (>= 0.13),
+               dpkg-dev (>= 1.17.14),
+               gettext,
+               libaudit-dev [linux-any] <!stage1>,
+               libcap-ng-dev [linux-any] <!stage1>,
+               libncurses5-dev,
+               libncursesw5-dev,
+               libpam0g-dev <!stage1>,
+               libselinux1-dev (>= 2.6-3~) [linux-any],
+               libsystemd-dev [linux-any] <!stage1>,
+               libtool,
+               libudev-dev [linux-any] <!stage1>,
+               netbase <!stage1 !nocheck>,
+               pkg-config,
+               po-debconf,
+               socat <!stage1 !nocheck>,
+               systemd [linux-any] <!stage1>,
+               bison,
+               zlib1g-dev
+Section: base
+Priority: required
+Maintainer: LaMont Jones <lamont@debian.org>
+Uploaders: Adam Conrad <adconrad@0c3.net>
+Standards-Version: 4.1.2
+Rules-Requires-Root: binary-targets
+Vcs-Browser: https://salsa.debian.org/debian/util-linux
+Vcs-Git: https://salsa.debian.org/debian/util-linux.git
+
+Package: util-linux
+Architecture: any
+Build-Profiles: <!stage1>
+Section: utils
+Essential: yes
+Pre-Depends: ${misc:Pre-Depends}, ${shlibs:Depends}
+Depends: ${misc:Depends}, fdisk, login (>= 1:4.5-1.1~)
+Suggests: dosfstools, kbd | console-tools, util-linux-locales
+Replaces: bash-completion (<< 1:2.8),
+          sysvinit-utils (<< 2.88dsf-59.1~),
+          initscripts (<< 2.88dsf-59.2~),
+          mount (<< 2.29.2-3~),
+          s390-tools (<< 2.2.0-1~),
+          login (<< 1:4.5-1.1~),
+          setpriv (<< 2.32.1-0.2~)
+Breaks: bash-completion (<< 1:2.8),
+          grml-debootstrap (<< 0.68),
+          sysvinit-utils (<< 2.88dsf-59.4~),
+          mount (<< 2.29.2-3~),
+          s390-tools (<< 2.2.0-1~),
+          setpriv (<< 2.32.1-0.2~)
+Multi-Arch: foreign
+Description: miscellaneous system utilities
+ This package contains a number of important utilities, most of which
+ are oriented towards maintenance of your system. Some of the more
+ important utilities included in this package allow you to view kernel
+ messages, create new filesystems, view block device information,
+ interface with real time clock, etc.
+
+Package: util-linux-locales
+Architecture: all
+Build-Profiles: <!stage1>
+Section: localization
+Priority: optional
+Depends: util-linux (>= ${source:Upstream-Version}), ${misc:Depends}
+Replaces: util-linux (<< 2.11b)
+Multi-Arch: foreign
+Description: locales files for util-linux
+ This package contains the internationalization files for the util-linux
+ package.
+ .
+ They are needed when you want the programs in util-linux to print their
+ messages in other languages than English.
+
+Package: mount
+Architecture: linux-any
+Build-Profiles: <!stage1>
+XB-Important: yes
+Section: admin
+Pre-Depends: ${misc:Pre-Depends}, ${shlibs:Depends}
+Depends: ${misc:Depends}, util-linux (>= 2.29.2-3~)
+Suggests: nfs-common (>=1:1.1.0-13)
+Breaks: bash-completion (<< 1:2.1-4.3~)
+Replaces: bash-completion (<< 1:2.1-4.3~)
+Multi-Arch: foreign
+Description: tools for mounting and manipulating filesystems
+ This package provides the mount(8), umount(8), swapon(8),
+ swapoff(8), and losetup(8) commands.
+
+Package: bsdutils
+Architecture: any
+Build-Profiles: <!stage1>
+Essential: yes
+Section: utils
+Pre-Depends: ${misc:Pre-Depends}, ${shlibs:Depends}
+Depends: ${misc:Depends}
+Recommends: bsdmainutils
+Replaces: bash-completion (<< 1:2.1-4.1~)
+Breaks: bash-completion (<< 1:2.1-4.1~)
+Multi-Arch: foreign
+Description: basic utilities from 4.4BSD-Lite
+ This package contains the bare minimum of BSD utilities needed for a
+ Debian system: logger, renice, script, scriptreplay, and wall. The
+ remaining standard BSD utilities are provided by bsdmainutils.
+
+Package: fdisk
+Architecture: any
+Build-Profiles: <!stage1>
+XB-Important: yes
+Section: utils
+Priority: important
+Pre-Depends: ${misc:Pre-Depends}
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Replaces: util-linux (<< 2.29.2-3~)
+Breaks: util-linux (<< 2.29.2-3~)
+Multi-Arch: foreign
+Description: collection of partitioning utilities
+ This package contains the classic fdisk, sfdisk and cfdisk partitioning
+ utilities from the util-linux suite.
+ .
+ The utilities included in this package allow you to partition
+ your hard disk. The utilities supports both modern and legacy
+ partition tables (eg. GPT, MBR, etc).
+ .
+ The fdisk utility is the classical text-mode utility.
+ The cfdisk utilitity gives a more userfriendly curses based interface.
+ The sfdisk utility is mostly for automation and scripting uses.
+
+Package: fdisk-udeb
+Architecture: hurd-any linux-any
+Build-Profiles: <!stage1>
+Priority: optional
+Section: debian-installer
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Package-Type: udeb
+XB-Installer-Menu-Item: 99999
+Description: Manually partition a hard drive (fdisk)
+
+Package: libblkid1
+Architecture: any
+Section: libs
+Priority: optional
+Pre-Depends: ${misc:Pre-Depends}
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Multi-Arch: same
+Description: block device ID library
+ The blkid library allows system programs such as fsck and mount to
+ quickly and easily find block devices by filesystem UUID or label.
+ This allows system administrators to avoid specifying filesystems by
+ hard-coded device names and use a logical naming system instead.
+
+Package: libblkid1-udeb
+Architecture: any
+Section: debian-installer
+Priority: optional
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Package-Type: udeb
+Description: stripped down block device ID library, for debian-installer
+ The blkid library allows system programs such as fsck and mount to
+ quickly and easily find block devices by filesystem UUID or label.
+ This allows system administrators to avoid specifying filesystems by
+ hard-coded device names and use a logical naming system instead.
+ .
+ This is a minimal package for debian-installer.
+
+Package: libblkid-dev
+Architecture: any
+Section: libdevel
+Priority: optional
+Pre-Depends: ${misc:Pre-Depends}
+Depends: libblkid1 (= ${binary:Version}),
+         libc6-dev | libc-dev,
+         uuid-dev,
+         ${misc:Depends}
+Multi-Arch: same
+Description: block device ID library - headers and static libraries
+ The blkid library allows system programs such as fsck and mount to
+ quickly and easily find block devices by filesystem UUID or label.
+ This allows system administrators to avoid specifying filesystems by
+ hard-coded device names and use a logical naming system instead.
+ .
+ This package contains the development environment for the blkid library.
+
+Package: libfdisk1
+Architecture: any
+Section: libs
+Priority: optional
+Pre-Depends: ${misc:Pre-Depends}
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Multi-Arch: same
+Description: fdisk partitioning library
+ The libfdisk library is used for manipulating partition tables. It is
+ the core of the fdisk, cfdisk, and sfdisk tools.
+
+Package: libfdisk1-udeb
+Architecture: any
+Section: debian-installer
+Priority: optional
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Package-Type: udeb
+Description: stripped down fdisk partitioning library, for debian-installer
+ The libfdisk library is used for manipulating partition tables. It is
+ the core of the fdisk, cfdisk, and sfdisk tools.
+ .
+ This is a minimal package for debian-installer.
+
+Package: libfdisk-dev
+Architecture: any
+Section: libdevel
+Priority: optional
+Pre-Depends: ${misc:Pre-Depends}
+Depends: libfdisk1 (= ${binary:Version}),
+         libc6-dev | libc-dev,
+         libblkid-dev,
+         uuid-dev,
+         ${misc:Depends}
+Multi-Arch: same
+Description: fdisk partitioning library - headers and static libraries
+ The libfdisk library is used for manipulating partition tables. It is
+ the core of the fdisk, cfdisk, and sfdisk tools.
+ .
+ This package contains the development environment for the fdisk library.
+
+Package: libmount1
+Architecture: any
+Section: libs
+Priority: optional
+Pre-Depends: ${misc:Pre-Depends}
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Multi-Arch: same
+Description: device mounting library
+ This device mounting library is used by mount and umount helpers.
+
+Package: libmount1-udeb
+Package-Type: udeb
+Section: debian-installer
+Priority: optional
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Architecture: linux-any
+Description: stripped down device mounting library, for debian-installer
+ The device mounting library, used by mount and umount helpers.
+ .
+ This is a minimal package for debian-installer.
+
+Package: libmount-dev
+Architecture: linux-any
+Section: libdevel
+Priority: optional
+Depends: libc6-dev | libc-dev,
+         libmount1 (= ${binary:Version}),
+         libblkid-dev,
+         ${misc:Depends}
+Multi-Arch: same
+Description: device mounting library - headers and static libraries
+ This device mounting library is used by mount and umount helpers.
+ .
+ This package contains the development environment for the mount library.
+
+Package: libsmartcols1
+Architecture: any
+Section: libs
+Priority: optional
+Pre-Depends: ${misc:Pre-Depends}
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Multi-Arch: same
+Description: smart column output alignment library
+ This smart column output alignment library is used by fdisk utilities.
+
+Package: libsmartcols1-udeb
+Architecture: any
+Section: debian-installer
+Priority: optional
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Package-Type: udeb
+Description: stripped down smart column output aligment library, for debian-installer
+ This smart column output alignment library is used by fdisk utilities.
+ .
+ This is a minimal package for debian-installer.
+
+Package: libsmartcols-dev
+Architecture: any
+Section: libdevel
+Priority: optional
+Depends: libc6-dev | libc-dev,
+         libsmartcols1 (= ${binary:Version}),
+         ${misc:Depends}
+Multi-Arch: same
+Description: smart column output alignment library - headers and static libraries
+ This smart column output alignment library is used by fdisk utilities.
+ .
+ This package contains the development environment for the mount library.
+
+Package: libuuid1
+Architecture: any
+Section: libs
+Priority: optional
+Pre-Depends: ${misc:Pre-Depends}
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Recommends: uuid-runtime
+Replaces: e2fsprogs (<< 1.34-1)
+Multi-Arch: same
+Description: Universally Unique ID library
+ The libuuid library generates and parses 128-bit Universally Unique
+ IDs (UUIDs). A UUID is an identifier that is unique within the space
+ of all such identifiers across both space and time. It can be used for
+ multiple purposes, from tagging objects with an extremely short lifetime
+ to reliably identifying very persistent objects across a network.
+ .
+ See RFC 4122 for more information.
+
+Package: uuid-runtime
+Architecture: any
+Build-Profiles: <!stage1>
+Section: utils
+Priority: optional
+Pre-Depends: libuuid1 (>= 2.25-5~), ${misc:Pre-Depends}
+Depends: adduser, ${misc:Depends}, ${shlibs:Depends}
+Replaces: e2fsprogs (<= 1.40.3-1ubuntu1)
+Multi-Arch: foreign
+Description: runtime components for the Universally Unique ID library
+ The libuuid library generates and parses 128-bit Universally Unique
+ IDs (UUIDs). A UUID is an identifier that is unique within the space
+ of all such identifiers across both space and time. It can be used for
+ multiple purposes, from tagging objects with an extremely short lifetime
+ to reliably identifying very persistent objects across a network.
+ .
+ See RFC 4122 for more information.
+ .
+ This package contains the uuidgen program and the uuidd daemon.
+ .
+ The uuidd daemon is used to generate UUIDs, especially time-based
+ UUIDs, in a secure and guaranteed-unique fashion, even in the face of
+ large numbers of threads trying to grab UUIDs running on different CPUs.
+ It is used by libuuid as well as the uuidgen program.
+
+Package: libuuid1-udeb
+Architecture: any
+Section: debian-installer
+Priority: optional
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Package-Type: udeb
+Description: stripped down Universally Unique ID library, for debian-installer
+ The libuuid library generates and parses 128-bit Universally Unique IDs
+ (UUIDs). See RFC 4122 for more information.
+ .
+ This is a minimal package for debian-installer.
+
+Package: uuid-dev
+Architecture: any
+Section: libdevel
+Priority: optional
+Depends: libc6-dev | libc-dev, libuuid1 (= ${binary:Version}), ${misc:Depends}
+Replaces: e2fslibs-dev (<< 1.15)
+Multi-Arch: same
+Description: Universally Unique ID library - headers and static libraries
+ The libuuid library generates and parses 128-bit Universally Unique IDs
+ (UUIDs). See RFC 4122 for more information.
+ .
+ This package contains the development environment for the uuid library.
+
+Package: util-linux-udeb
+Architecture: any
+Build-Profiles: <!stage1>
+Priority: optional
+Section: debian-installer
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Package-Type: udeb
+Description: stripped down miscellaneous system utilities, for debian-installer
+ This is a minimal version of util-linux for debian-installer. It only
+ contains the blkid binary at the moment.
+
+Package: rfkill
+Architecture: linux-any
+Build-Profiles: <!stage1>
+Section: utils
+Priority: optional
+Pre-Depends: ${misc:Pre-Depends}
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Breaks: bash-completion (<< 1:2.8~)
+Replaces: bash-completion (<< 1:2.8~)
+Multi-Arch: foreign
+Description: tool for enabling and disabling wireless devices
+ rfkill is a simple tool for accessing the Linux rfkill device interface,
+ which is used to enable and disable wireless networking devices, typically
+ WLAN, Bluetooth and mobile broadband.
+

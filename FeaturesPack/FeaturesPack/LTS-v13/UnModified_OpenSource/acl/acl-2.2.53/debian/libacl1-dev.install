@@ -1,0 +1,6 @@
+usr/include/acl/
+usr/include/sys/
+usr/lib/*/*.a
+usr/lib/*/*.so
+usr/lib/*/pkgconfig/*.pc
+usr/share/man/man3/

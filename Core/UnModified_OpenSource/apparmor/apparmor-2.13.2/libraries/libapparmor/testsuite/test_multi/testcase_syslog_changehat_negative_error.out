@@ -1,0 +1,11 @@
+START
+File: testcase_syslog_changehat_negative_error.in
+Event type: AA_RECORD_DENIED
+Audit ID: 1284061896.005:28
+Operation: change_hat
+Command: syscall_ptrace
+Info: unconfined
+ErrorCode: 1
+PID: 2698
+Epoch: 1284061896
+Audit subid: 28

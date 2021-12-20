@@ -1,0 +1,71 @@
+Patch by Panu Matilainen <pmatilai@redhat.com> for popt <= 1.16 which kludges
+poptBadOption() to return something semi-meaningful on exec alias fail:
+
+- poptBadOption() is totally unaware of exec alias failures, and will return
+  either the first argument or last option, giving wonderfully misleading error
+  messages (#697435, #710267).
+- Remember execvp() first argument on failure and return that from
+  poptBadOption() if present to give the user a reasonable clue what exactly
+  went wrong.
+
+This patch was proposed to upstream: http://rpm5.org/community/popt-devel/0264.html
+
+--- a/popt.c
++++ b/popt.c
+@@ -193,6 +193,7 @@
+     con->flags = flags;
+     con->execs = NULL;
+     con->numExecs = 0;
++    con->execFail = NULL;
+     con->finalArgvAlloced = argc * 2;
+     con->finalArgv = calloc( (size_t)con->finalArgvAlloced, sizeof(*con->finalArgv) );
+     con->execAbsolute = 1;
+@@ -237,6 +238,7 @@
+     con->nextLeftover = 0;
+     con->restLeftover = 0;
+     con->doExec = NULL;
++    con->execFail = _free(con->execFail);
+ 
+     if (con->finalArgv != NULL)
+     for (i = 0; i < con->finalArgvCount; i++) {
+@@ -565,6 +567,7 @@
+ /*@-nullstate@*/
+     rc = execvp(argv[0], (char *const *)argv);
+ /*@=nullstate@*/
++    con->execFail = xstrdup(argv[0]);
+ 
+ exit:
+     if (argv) {
+@@ -1727,11 +1730,19 @@
+ const char * poptBadOption(poptContext con, unsigned int flags)
+ {
+     struct optionStackEntry * os = NULL;
++    const char *badOpt = NULL;
+ 
+-    if (con != NULL)
+-	os = (flags & POPT_BADOPTION_NOALIAS) ? con->optionStack : con->os;
++    if (con != NULL) {
++       /* Stupid hack to return something semi-meaningful from exec failure */
++       if (con->execFail) {
++           badOpt = con->execFail;
++       } else {
++           os = (flags & POPT_BADOPTION_NOALIAS) ? con->optionStack : con->os;
++           badOpt = os->argv[os->next - 1];
++       }
++    }
+ 
+-    return (os != NULL && os->argv != NULL ? os->argv[os->next - 1] : NULL);
++    return badOpt;
+ }
+ 
+ const char * poptStrerror(const int error)
+--- a/poptint.h
++++ b/poptint.h
+@@ -133,6 +133,7 @@
+ /*@owned@*/ /*@null@*/
+     poptItem execs;
+     int numExecs;
++    char * execFail;
+ /*@only@*/ /*@null@*/
+     poptArgv finalArgv;
+     int finalArgvCount;

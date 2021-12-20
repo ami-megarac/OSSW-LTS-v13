@@ -1,0 +1,15 @@
+START
+File: testcase_syslog_rename_src.in
+Event type: AA_RECORD_ALLOWED
+Audit ID: 1282626827.320:412
+Operation: rename_src
+Mask: r::
+Denied Mask: r::
+fsuid: 0
+ouid: 0
+Profile: /usr/sbin/sshd
+Name: /var/run/motd.new
+Parent: 650
+PID: 1881
+Epoch: 1282626827
+Audit subid: 412

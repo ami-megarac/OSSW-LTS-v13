@@ -40,6 +40,7 @@
 #include <linux/spinlock.h>
 #include <linux/cdev.h>
 #include <linux/device.h>
+#include <net/bonding.h>
 #include "netmon_io.h"
 
 #ifdef HAVE_UNLOCKED_IOCTL
@@ -171,7 +172,7 @@ static int
 netmon_netdev_event(struct notifier_block *this, unsigned long event, void *ptr)
 {
 	struct net_device *dev = netdev_notifier_info_to_dev(ptr);
-
+	
 	/* Handle only Ethernet devices. Don't handle others */
 	if (dev->type != ARPHRD_ETHER)
 		return NOTIFY_DONE;
@@ -230,10 +231,27 @@ netmon_netdev_event(struct notifier_block *this, unsigned long event, void *ptr)
 			wake_up_interruptible_all(&link_event);
 			break;
 #endif
-		case NETDEV_CHANGE:
-			linkdev = dev;
-			/* netif_carrier_ok() => 1 (carrier connected) else 0 */
-			linkstate = netif_carrier_ok(dev);
+		case NETDEV_CHANGE:		
+			//Ignore bond slave event
+			if( dev->priv_flags & IFF_BONDING )
+			{								
+				struct slave *slave;
+				
+				slave = bond_slave_get_rcu(dev);
+				if(slave != NULL){
+					if (verbose)
+						printk("NETMON: ignore bond slave %s\n",dev->name);
+					break;
+				}else{					
+					linkdev = dev;
+					linkstate = dev->ethtool_ops->get_link(dev);
+				}					
+			}
+			else{
+				linkdev = dev;
+				linkstate = dev->ethtool_ops->get_link(dev);				
+			}			
+			
 			if (verbose)
 				printk("NETMON: NetDev Link Change (%s) Event for %s\n",linkstate?"UP":"DOWN",dev->name);
 
@@ -546,4 +564,3 @@ MODULE_DESCRIPTION("Network Interface Monitor");
 MODULE_LICENSE("GPL");
 
 #endif
-

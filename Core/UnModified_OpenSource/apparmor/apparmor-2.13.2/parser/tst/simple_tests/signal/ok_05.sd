@@ -1,0 +1,18 @@
+#
+#=Description basic signal read rules
+#=EXRESULT PASS
+#
+/usr/bin/signal-test {
+  signal r,
+
+}
+
+/usr/bin/signal-test2 {
+  signal read,
+
+}
+
+/usr/bin/signal-test3 {
+  signal receive,
+
+}

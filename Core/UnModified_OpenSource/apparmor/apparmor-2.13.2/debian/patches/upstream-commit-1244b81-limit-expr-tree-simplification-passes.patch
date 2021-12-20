@@ -1,0 +1,40 @@
+From: John Johansen <john.johansen@canonical.com>
+Date: Sat, 20 Oct 2018 15:59:51 -0700
+Subject: parser: limit the number of passes expr tree simplification does
+
+---
+ parser/libapparmor_re/expr-tree.cc | 7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
+
+diff --git a/parser/libapparmor_re/expr-tree.cc b/parser/libapparmor_re/expr-tree.cc
+index a80f903..75af8b0 100644
+--- a/parser/libapparmor_re/expr-tree.cc
++++ b/parser/libapparmor_re/expr-tree.cc
+@@ -551,7 +551,8 @@ static void count_tree_nodes(Node *t, struct node_counts *counts)
+ 
+ Node *simplify_tree(Node *t, dfaflags_t flags)
+ {
+-	bool update;
++	bool update = true;
++	int i, limit = 1;
+ 
+ 	if (flags & DFA_DUMP_TREE_STATS) {
+ 		struct node_counts counts = { 0, 0, 0, 0, 0, 0, 0, 0 };
+@@ -562,7 +563,7 @@ Node *simplify_tree(Node *t, dfaflags_t flags)
+ 			counts.alt, counts.plus, counts.star, counts.any,
+ 			counts.cat);
+ 	}
+-	do {
++	for (i = 0; update && i < limit; i++) {
+ 		update = false;
+ 		//default to right normalize first as this reduces the number
+ 		//of trailing nodes which might follow an internal *
+@@ -588,7 +589,7 @@ Node *simplify_tree(Node *t, dfaflags_t flags)
+ 			else
+ 				dir--;
+ 		}
+-	} while (update);
++	}
+ 	if (flags & DFA_DUMP_TREE_STATS) {
+ 		struct node_counts counts = { 0, 0, 0, 0, 0, 0, 0, 0 };
+ 		count_tree_nodes(t, &counts);

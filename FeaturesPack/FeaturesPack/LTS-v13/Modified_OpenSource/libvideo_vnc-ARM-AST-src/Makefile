@@ -2,8 +2,15 @@ DEBUG = n
 
 LIBRARY_NAME = libvideo_vnc
 
-SRC = hwcursor.c vnc.c decode.c jtables.c
+ifeq "$(CONFIG_SPX_FEATURE_VIDEO_INT)" "YES"
 
+SRC = hwcursor.c vnc_ast.c decode.c jtables.c
+
+else ifeq "$(CONFIG_SPX_FEATURE_VIDEO_RVAS)" "YES"
+
+SRC = vnc_rvas.c
+
+endif
 
 CFLAGS += -I${SPXINC}/videocap
 

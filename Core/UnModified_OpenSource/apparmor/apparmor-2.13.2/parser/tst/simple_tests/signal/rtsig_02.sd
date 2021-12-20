@@ -1,0 +1,8 @@
+#
+#=DESCRIPTION simple rtsig test
+#=EXRESULT PASS
+#
+
+/usr/bin/signal-test {
+  signal set=(rtmin+20) set=rtmin+5 set=(rtmin+001, rtmin+8),
+}

@@ -1,0 +1,68 @@
+#
+#=DESCRIPTION audit change_profile @{var} with name space
+#=EXRESULT PASS
+#
+@{var}=/test
+/usr/bin/foo {
+   audit change_profile @{var} -> :foo:/bin/foo,
+}
+
+/usr/bin/foo2 {
+   audit change_profile @{var} -> :foo:/bin/fo*,
+}
+
+/usr/bin/foo3 {
+   audit change_profile @{var} -> :foo:/bin/fo**,
+}
+
+/usr/bin/foo4 {
+   audit change_profile @{var} -> :foo:/bin/fo?,
+}
+
+/usr/bin/foo5 {
+   audit change_profile @{var} -> :foo:/bin/fo[ab],
+}
+
+/usr/bin/foo6 {
+   audit change_profile @{var} -> :foo:/bin/fo[^ab],
+}
+
+/usr/bin/foo7 {
+   audit change_profile @{var} -> :fo*:/bin/foo,
+}
+
+/usr/bin/foo8 {
+   audit change_profile @{var} -> :fo**:/bin/foo,
+}
+
+/usr/bin/foo9 {
+   audit change_profile @{var} -> :fo?:/bin/foo,
+}
+
+/usr/bin/foo10 {
+   audit change_profile @{var} -> :fo[ab]:/bin/foo,
+}
+
+/usr/bin/foo11 {
+   audit change_profile @{var} -> :fo[^ab]:/bin/foo,
+}
+
+/usr/bin/foo12 {
+   audit change_profile @{var} -> :fo*:/bin/fo*,
+}
+
+/usr/bin/foo13 {
+   audit change_profile @{var} -> :fo**:/bin/fo**,
+}
+
+/usr/bin/foo14 {
+   audit change_profile @{var} -> :fo?:/bin/fo?,
+}
+
+/usr/bin/foo15 {
+   audit change_profile @{var} -> :fo[ab]:/bin/fo[ab],
+}
+
+/usr/bin/foo16 {
+   audit change_profile @{var} -> :fo[^ab]:/bin/fo[^ab],
+}

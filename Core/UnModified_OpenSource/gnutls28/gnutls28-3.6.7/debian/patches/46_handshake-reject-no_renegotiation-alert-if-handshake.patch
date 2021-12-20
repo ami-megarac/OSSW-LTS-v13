@@ -1,0 +1,112 @@
+From 521e6492b9bbc8ec1519924526942cf2fc719497 Mon Sep 17 00:00:00 2001
+From: Daiki Ueno <ueno@gnu.org>
+Date: Sat, 22 Aug 2020 17:19:39 +0200
+Subject: [PATCH] handshake: reject no_renegotiation alert if handshake is
+ incomplete
+
+If the initial handshake is incomplete and the server sends a
+no_renegotiation alert, the client should treat it as a fatal error
+even if its level is warning.  Otherwise the same handshake
+state (e.g., DHE parameters) are reused in the next gnutls_handshake
+call, if it is called in the loop idiom:
+
+  do {
+          ret = gnutls_handshake(session);
+  } while (ret < 0 && gnutls_error_is_fatal(ret) == 0);
+
+Signed-off-by: Daiki Ueno <ueno@gnu.org>
+---
+ ...a04b3d3f7dcc0ab4571cf0df3b67ab7e1005e9e7a8 | Bin 0 -> 671 bytes
+ ...1da801fb3c6d1f7f846f227721e221adea08aa319c | Bin 0 -> 729 bytes
+ lib/gnutls_int.h                              |   1 +
+ lib/handshake.c                               |  48 +++++++++++++-----
+ 4 files changed, 36 insertions(+), 13 deletions(-)
+ create mode 100644 fuzz/gnutls_client_fuzzer.in/00ea40761ce11e769f1817a04b3d3f7dcc0ab4571cf0df3b67ab7e1005e9e7a8
+ create mode 100644 fuzz/gnutls_psk_client_fuzzer.in/b16434290b77e13d7a983d1da801fb3c6d1f7f846f227721e221adea08aa319c
+
+--- a/lib/gnutls_int.h
++++ b/lib/gnutls_int.h
+@@ -1366,6 +1366,8 @@ typedef struct {
+ #define HSK_RECORD_SIZE_LIMIT_SENT (1<<25) /* record_size_limit extension was sent */
+ #define HSK_RECORD_SIZE_LIMIT_RECEIVED (1<<26) /* server: record_size_limit extension was seen but not accepted yet */
+ 
++#define HSK_SERVER_HELLO_RECEIVED (1<<29) /* client: Server Hello message has been received */
++
+ 	/* The hsk_flags are for use within the ongoing handshake;
+ 	 * they are reset to zero prior to handshake start by gnutls_handshake. */
+ 	unsigned hsk_flags;
+--- a/lib/handshake.c
++++ b/lib/handshake.c
+@@ -1824,6 +1824,8 @@ static int generate_early_traffic_secret
+ 				 session->key.proto.tls13.e_ckey,
+ 				 prf->output_size);
+ 
++	session->internals.hsk_flags |= HSK_SERVER_HELLO_RECEIVED;
++
+ 	return 0;
+ }
+ 
+@@ -2636,16 +2638,42 @@ int gnutls_rehandshake(gnutls_session_t
+ 	return 0;
+ }
+ 
++/* This function checks whether the error code should be treated fatal
++ * or not, and also does the necessary state transition.  In
++ * particular, in the case of a rehandshake abort it resets the
++ * handshake's internal state.
++ */
+ inline static int
+ _gnutls_abort_handshake(gnutls_session_t session, int ret)
+ {
+-	if (((ret == GNUTLS_E_WARNING_ALERT_RECEIVED) &&
+-	     (gnutls_alert_get(session) == GNUTLS_A_NO_RENEGOTIATION))
+-	    || ret == GNUTLS_E_GOT_APPLICATION_DATA)
+-		return 0;
++	switch (ret) {
++	case GNUTLS_E_WARNING_ALERT_RECEIVED:
++		if (gnutls_alert_get(session) == GNUTLS_A_NO_RENEGOTIATION) {
++			/* The server always toleretes a "no_renegotiation" alert. */
++			if (session->security_parameters.entity == GNUTLS_SERVER) {
++				STATE = STATE0;
++				return ret;
++			}
+ 
+-	/* this doesn't matter */
+-	return GNUTLS_E_INTERNAL_ERROR;
++			/* The client should tolerete a "no_renegotiation" alert only if:
++			 * - the initial handshake has completed, or
++			 * - a Server Hello is not yet received
++			 */
++			if (session->internals.initial_negotiation_completed ||
++			    !(session->internals.hsk_flags & HSK_SERVER_HELLO_RECEIVED)) {
++				STATE = STATE0;
++				return ret;
++			}
++
++			return gnutls_assert_val(GNUTLS_E_UNEXPECTED_PACKET);
++		}
++		return ret;
++	case GNUTLS_E_GOT_APPLICATION_DATA:
++		STATE = STATE0;
++		return ret;
++	default:
++		return ret;
++	}
+ }
+ 
+ 
+@@ -2807,13 +2835,7 @@ int gnutls_handshake(gnutls_session_t se
+ 	}
+ 
+ 	if (ret < 0) {
+-		/* In the case of a rehandshake abort
+-		 * we should reset the handshake's internal state.
+-		 */
+-		if (_gnutls_abort_handshake(session, ret) == 0)
+-			STATE = STATE0;
+-
+-		return ret;
++		return _gnutls_abort_handshake(session, ret);
+ 	}
+ 
+ 	/* clear handshake buffer */

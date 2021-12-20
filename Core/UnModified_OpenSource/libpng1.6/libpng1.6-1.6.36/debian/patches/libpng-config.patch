@@ -1,0 +1,61 @@
+Description: this patch is needed to strip arch-dep bits and get a multiarch -dev package.
+Index: libpng1.6-1.6.21/scripts/libpng-config-body.in
+===================================================================
+--- libpng1.6-1.6.21.orig/scripts/libpng-config-body.in
++++ libpng1.6-1.6.21/scripts/libpng-config-body.in
+@@ -7,7 +7,7 @@
+ Known values for OPTION are:
+ 
+   --prefix        print libpng prefix
+-  --libdir        print path to directory containing library
++  --libdir        print path to directory containing library (disabled in Debian/Ubuntu)
+   --libs          print library linking information
+   --ccopts        print compiler options
+   --cppflags      print pre-processor flags
+@@ -58,6 +58,8 @@
+         ;;
+ 
+     --libdir)
++        echo >&1 "$(basename $0): --libdir option is disabled in Debian/Ubuntu"
++        exit 1
+         echo ${libdir}
+         ;;
+ 
+Index: libpng1.6-1.6.21/libpng-config.in
+===================================================================
+--- libpng1.6-1.6.21.orig/libpng-config.in
++++ libpng1.6-1.6.21/libpng-config.in
+@@ -14,12 +14,13 @@
+ version="@PNGLIB_VERSION@"
+ prefix="@prefix@"
+ exec_prefix="@exec_prefix@"
+-libdir="@libdir@"
++# we disable that to make the -dev package Multi-Arch: same
++libdir=
+ includedir="@includedir@/libpng@PNGLIB_MAJOR@@PNGLIB_MINOR@"
+ libs="-lpng@PNGLIB_MAJOR@@PNGLIB_MINOR@"
+ all_libs="-lpng@PNGLIB_MAJOR@@PNGLIB_MINOR@ @LIBS@"
+ I_opts="-I${includedir}"
+-L_opts="-L${libdir}"
++L_opts=
+ R_opts=""
+ cppflags=""
+ ccopts=""
+@@ -33,7 +34,7 @@
+ Known values for OPTION are:
+ 
+   --prefix        print libpng prefix
+-  --libdir        print path to directory containing library
++  --libdir        print path to directory containing library (disabled in Debian/Ubuntu)
+   --libs          print library linking information
+   --ccopts        print compiler options
+   --cppflags      print pre-processor flags
+@@ -84,6 +85,8 @@
+         ;;
+ 
+     --libdir)
++        echo >&1 "$(basename $0): --libdir option is disabled in Debian/Ubuntu"
++        exit 1
+         echo ${libdir}
+         ;;
+ 

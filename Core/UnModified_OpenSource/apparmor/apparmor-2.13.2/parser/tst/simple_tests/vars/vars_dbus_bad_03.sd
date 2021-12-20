@@ -1,0 +1,10 @@
+#
+#=DESCRIPTION missing reference variable in dbus path modifier
+#=EXRESULT FAIL
+#
+
+/does/not/exist {
+  dbus (send)
+       bus=session
+       path="/com/canonical/hud/applications/@{MISSING_VAR}",
+}

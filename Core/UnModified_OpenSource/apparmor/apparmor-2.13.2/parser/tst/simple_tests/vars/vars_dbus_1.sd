@@ -1,0 +1,11 @@
+#=DESCRIPTION reference variables in dbus rules
+#=EXRESULT PASS
+
+@{FOO}=bar baz
+@{BAR}=@{FOO} blort
+
+/does/not/exist {
+  dbus (send)
+       bus=session
+       path="/com/canonical/hud/applications/@{BAR}",
+}

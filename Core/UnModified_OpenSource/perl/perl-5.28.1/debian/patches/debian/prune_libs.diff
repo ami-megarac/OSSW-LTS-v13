@@ -1,0 +1,45 @@
+From fdc176691bec932f73821f7725b9db81576f69a3 Mon Sep 17 00:00:00 2001
+From: Brendan O'Dea <bod@debian.org>
+Date: Fri, 18 Mar 2005 22:22:25 +1100
+Subject: Prune the list of libraries wanted to what we actually need.
+
+Bug-Debian: http://bugs.debian.org/128355
+
+We want to keep the dependencies on perl-base as small as possible,
+and some of the original list may be present on buildds (see Bug#128355).
+
+(Backported to metaconfig unit probes by Niko Tyni)
+
+Patch-Name: debian/prune_libs.diff
+---
+ regen-configure/U/modified/Myinit.U | 3 +--
+ regen-configure/U/perl/End.U        | 2 +-
+ 2 files changed, 2 insertions(+), 3 deletions(-)
+
+diff --git a/regen-configure/U/modified/Myinit.U b/regen-configure/U/modified/Myinit.U
+index 0e3155aecd..e1d58c2077 100644
+--- a/regen-configure/U/modified/Myinit.U
++++ b/regen-configure/U/modified/Myinit.U
+@@ -32,8 +32,7 @@
+ ?X: Put crypt here, even though I should really fix d_crypt.U to look
+ ?X: for it correctly, including possible shared library versions.
+ : If anyone needs extra -lxxx, put those in a hint file.
+-libswanted="cl pthread socket bind inet nsl ndbm gdbm dbm db malloc dl ld"
+-libswanted="$libswanted sun m crypt sec util c cposix posix ucb bsd BSD"
++libswanted='gdbm gdbm_compat db dl m c crypt'
+ : We probably want to search /usr/shlib before most other libraries.
+ : This is only used by the lib/ExtUtils/MakeMaker.pm routine extliblist.
+ glibpth=`echo " $glibpth " | sed -e 's! /usr/shlib ! !'`
+diff --git a/regen-configure/U/perl/End.U b/regen-configure/U/perl/End.U
+index 352071422f..9716623ae0 100644
+--- a/regen-configure/U/perl/End.U
++++ b/regen-configure/U/perl/End.U
+@@ -37,7 +37,7 @@ sunos*X4*)
+     ;;
+ *) case "$usedl" in
+     $define|true|[yY]*)
+-	    set X `echo " $libs " | sed -e 's@ -lndbm @ @' -e 's@ -lgdbm @ @' -e 's@ -lgdbm_compat @ @' -e 's@ -ldbm @ @' -e 's@ -ldb @ @'`
++	    set X `echo " $libs " | sed -e 's@ -lgdbm @ @' -e 's@ -lgdbm_compat @ @' -e 's@ -ldb @ @'`
+ 	    shift
+ 	    perllibs="$*"
+ 	    ;;

@@ -1,0 +1,2 @@
+Fix_extraction_of_namespace_prefix_from_XML_name.patch
+xmlparse.c-Deny-internal-entities-closing-the-doctyp.patch

@@ -1,0 +1,30 @@
+From e64ba3c28908b6b7da33658ec078ccc0db25ef19 Mon Sep 17 00:00:00 2001
+From: Johan Vromans <jvromans@squirrel.nl>
+Date: Tue, 13 Jun 2017 13:26:00 +0200
+Subject: Fix issue #122068.
+
+Origin: backport, https://github.com/sciurius/perl-Getopt-Long/commit/2d16f355e25537aa742eb2833a7d52a63051429b
+Bug: https://rt.cpan.org/Ticket/Display.html?id=122068
+Bug-Debian: https://bugs.debian.org/864544
+Patch-Name: fixes/getopt-long-4.diff
+---
+ cpan/Getopt-Long/lib/Getopt/Long.pm | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/cpan/Getopt-Long/lib/Getopt/Long.pm b/cpan/Getopt-Long/lib/Getopt/Long.pm
+index 664c8b63c9..e4e3026db6 100644
+--- a/cpan/Getopt-Long/lib/Getopt/Long.pm
++++ b/cpan/Getopt-Long/lib/Getopt/Long.pm
+@@ -1123,6 +1123,12 @@ sub FindOption ($$$$$) {
+ 	    $optargtype = 3;
+ 	}
+ 	if(($optargtype == 0) && !$mand) {
++	    if ( $type eq 'I' ) {
++		# Fake incremental type.
++		my @c = @$ctl;
++		$c[CTL_TYPE] = '+';
++		return (1, $opt, \@c, 1);
++	    }
+ 	    my $val
+ 	      = defined($ctl->[CTL_DEFAULT]) ? $ctl->[CTL_DEFAULT]
+ 	      : $type eq 's'                 ? ''

@@ -1,0 +1,10 @@
+#
+#=Description basic rules to test the "async" mount option
+#=EXRESULT PASS
+/usr/bin/foo {
+  mount options=async /a -> /1,
+  mount options=(async) /b -> /2,
+  mount options=(rw,async) /c -> /3,
+  mount options in (async) /d -> /4,
+  mount options in (ro,async) /e -> /5,
+}

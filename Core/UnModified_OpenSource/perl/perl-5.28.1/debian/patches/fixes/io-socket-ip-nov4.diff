@@ -1,0 +1,272 @@
+From f957f72fbf1f8097741f2e7383cb504fb728391d Mon Sep 17 00:00:00 2001
+From: Dominic Hargreaves <dom@earth.li>
+Date: Wed, 3 Jun 2020 22:38:09 +0100
+Subject: Fix test failures in IO::Socket::IP with an IPv6-only host
+
+This can be tested with:
+
+    # unshare -n
+    # ip li set lo up
+    # ip li add dummy0 type dummy
+    # ip li set dummy0 up
+
+Thanks to Julien Cristau and Niko Tyni for contributing the basis
+of the patch and test instructions.
+
+Bug-Debian: https://bugs.debian.org/962019
+Forwarded: https://rt.cpan.org/Ticket/Display.html?id=132760
+Patch-Name: fixes/io-socket-ip-nov4.diff
+---
+ cpan/IO-Socket-IP/t/01local-client-v4.t     | 4 +++-
+ cpan/IO-Socket-IP/t/02local-server-v4.t     | 3 ++-
+ cpan/IO-Socket-IP/t/03local-cross-v4.t      | 3 +++
+ cpan/IO-Socket-IP/t/11sockopts.t            | 6 +++++-
+ cpan/IO-Socket-IP/t/18fdopen.t              | 3 ++-
+ cpan/IO-Socket-IP/t/20subclass.t            | 3 +++
+ cpan/IO-Socket-IP/t/21as-inet.t             | 3 +++
+ cpan/IO-Socket-IP/t/22timeout.t             | 3 +++
+ cpan/IO-Socket-IP/t/30nonblocking-connect.t | 4 +++-
+ 9 files changed, 27 insertions(+), 5 deletions(-)
+
+diff --git a/cpan/IO-Socket-IP/t/01local-client-v4.t b/cpan/IO-Socket-IP/t/01local-client-v4.t
+index 7ab7156993..f6aeac4c3b 100644
+--- a/cpan/IO-Socket-IP/t/01local-client-v4.t
++++ b/cpan/IO-Socket-IP/t/01local-client-v4.t
+@@ -8,7 +8,7 @@ use Test::More;
+ use IO::Socket::IP;
+ 
+ use IO::Socket::INET;
+-use Socket qw( inet_aton inet_ntoa pack_sockaddr_in unpack_sockaddr_in );
++use Socket qw( inet_aton inet_ntoa pack_sockaddr_in unpack_sockaddr_in AI_NUMERICHOST );
+ 
+ # Some odd locations like BSD jails might not like INADDR_LOOPBACK. We'll
+ # establish a baseline first to test against
+@@ -29,12 +29,14 @@ foreach my $socktype (qw( SOCK_STREAM SOCK_DGRAM )) {
+       LocalHost => "127.0.0.1",
+       Type      => Socket->$socktype,
+       Proto     => ( $socktype eq "SOCK_STREAM" ? "tcp" : "udp" ), # Because IO::Socket::INET is stupid and always presumes tcp
++      GetAddrInfoFlags => AI_NUMERICHOST,
+    ) or die "Cannot listen on PF_INET - $@";
+ 
+    my $socket = IO::Socket::IP->new(
+       PeerHost    => "127.0.0.1",
+       PeerService => $testserver->sockport,
+       Type        => Socket->$socktype,
++      GetAddrInfoFlags => AI_NUMERICHOST,
+    );
+ 
+    ok( defined $socket, "IO::Socket::IP->new constructs a $socktype socket" ) or
+diff --git a/cpan/IO-Socket-IP/t/02local-server-v4.t b/cpan/IO-Socket-IP/t/02local-server-v4.t
+index c0d349f573..fb711f08bd 100644
+--- a/cpan/IO-Socket-IP/t/02local-server-v4.t
++++ b/cpan/IO-Socket-IP/t/02local-server-v4.t
+@@ -8,7 +8,7 @@ use Test::More;
+ use IO::Socket::IP;
+ 
+ use IO::Socket::INET;
+-use Socket qw( inet_aton inet_ntoa pack_sockaddr_in unpack_sockaddr_in );
++use Socket qw( inet_aton inet_ntoa pack_sockaddr_in unpack_sockaddr_in AI_NUMERICHOST );
+ 
+ # Some odd locations like BSD jails might not like INADDR_LOOPBACK. We'll
+ # establish a baseline first to test against
+@@ -29,6 +29,7 @@ foreach my $socktype (qw( SOCK_STREAM SOCK_DGRAM )) {
+       LocalHost => "127.0.0.1",
+       LocalPort => "0",
+       Type      => Socket->$socktype,
++      GetAddrInfoFlags => AI_NUMERICHOST,
+    );
+ 
+    ok( defined $testserver, "IO::Socket::IP->new constructs a $socktype socket" ) or
+diff --git a/cpan/IO-Socket-IP/t/03local-cross-v4.t b/cpan/IO-Socket-IP/t/03local-cross-v4.t
+index 8cac72a95b..3e8174ee08 100644
+--- a/cpan/IO-Socket-IP/t/03local-cross-v4.t
++++ b/cpan/IO-Socket-IP/t/03local-cross-v4.t
+@@ -6,6 +6,7 @@ use warnings;
+ use Test::More;
+ 
+ use IO::Socket::IP;
++use Socket qw(AI_NUMERICHOST);
+ 
+ foreach my $socktype (qw( SOCK_STREAM SOCK_DGRAM )) {
+    my $testserver = IO::Socket::IP->new(
+@@ -13,12 +14,14 @@ foreach my $socktype (qw( SOCK_STREAM SOCK_DGRAM )) {
+       LocalHost => "127.0.0.1",
+       LocalPort => "0",
+       Type      => Socket->$socktype,
++      GetAddrInfoFlags => AI_NUMERICHOST,
+    ) or die "Cannot listen on PF_INET - $@";
+ 
+    my $socket = IO::Socket::IP->new(
+       PeerHost    => "127.0.0.1",
+       PeerService => $testserver->sockport,
+       Type        => Socket->$socktype,
++      GetAddrInfoFlags => AI_NUMERICHOST,
+    ) or die "Cannot connect on PF_INET - $@";
+ 
+    my $testclient = ( $socktype eq "SOCK_STREAM" ) ? 
+diff --git a/cpan/IO-Socket-IP/t/11sockopts.t b/cpan/IO-Socket-IP/t/11sockopts.t
+index 5b850924dd..28daada89f 100644
+--- a/cpan/IO-Socket-IP/t/11sockopts.t
++++ b/cpan/IO-Socket-IP/t/11sockopts.t
+@@ -8,7 +8,7 @@ use Test::More;
+ use IO::Socket::IP;
+ 
+ use Errno qw( EACCES );
+-use Socket qw( SOL_SOCKET SO_REUSEADDR SO_REUSEPORT SO_BROADCAST );
++use Socket qw( SOL_SOCKET SO_REUSEADDR SO_REUSEPORT SO_BROADCAST AI_NUMERICHOST);
+ 
+ TODO: {
+    local $TODO = "SO_REUSEADDR doesn't appear to work on cygwin smokers" if $^O eq "cygwin";
+@@ -21,6 +21,7 @@ TODO: {
+       Type      => SOCK_STREAM,
+       Listen    => 1,
+       ReuseAddr => 1,
++      GetAddrInfoFlags => AI_NUMERICHOST,
+    ) or die "Cannot socket() - $@";
+ 
+    ok( $sock->getsockopt( SOL_SOCKET, SO_REUSEADDR ), 'SO_REUSEADDR set' );
+@@ -32,6 +33,7 @@ TODO: {
+       Sockopts  => [
+          [ SOL_SOCKET, SO_REUSEADDR ],
+       ],
++      GetAddrInfoFlags => AI_NUMERICHOST,
+    ) or die "Cannot socket() - $@";
+ 
+    ok( $sock->getsockopt( SOL_SOCKET, SO_REUSEADDR ), 'SO_REUSEADDR set via Sockopts' );
+@@ -50,6 +52,7 @@ SKIP: {
+       Type      => SOCK_STREAM,
+       Listen    => 1,
+       ReusePort => 1,
++      GetAddrInfoFlags => AI_NUMERICHOST,
+    ) or die "Cannot socket() - $@";
+ 
+    ok( $sock->getsockopt( SOL_SOCKET, SO_REUSEPORT ), 'SO_REUSEPORT set' );
+@@ -62,6 +65,7 @@ SKIP: {
+       LocalHost => "127.0.0.1",
+       Type      => SOCK_DGRAM,
+       Broadcast => 1,
++      GetAddrInfoFlags => AI_NUMERICHOST,
+    );
+    skip "Privileges required to set broadcast on datagram socket", 1 if !$sock and $! == EACCES;
+    die "Cannot socket() - $@" unless $sock;
+diff --git a/cpan/IO-Socket-IP/t/18fdopen.t b/cpan/IO-Socket-IP/t/18fdopen.t
+index 20cbe46d47..6843a2c3d2 100644
+--- a/cpan/IO-Socket-IP/t/18fdopen.t
++++ b/cpan/IO-Socket-IP/t/18fdopen.t
+@@ -6,12 +6,13 @@ use warnings;
+ use Test::More;
+ 
+ use IO::Socket::IP;
+-use Socket qw( SOCK_STREAM );
++use Socket qw( SOCK_STREAM AI_NUMERICHOST );
+ 
+ my $s1 = IO::Socket::IP->new(
+    LocalHost => "127.0.0.1",
+    Type      => SOCK_STREAM,
+    Listen    => 1,
++   GetAddrInfoFlags => AI_NUMERICHOST,
+ ) or die "Cannot listen on AF_INET - $@";
+ 
+ my $s2 = IO::Socket::IP->new;
+diff --git a/cpan/IO-Socket-IP/t/20subclass.t b/cpan/IO-Socket-IP/t/20subclass.t
+index 231bd52cab..fbc9cff23e 100644
+--- a/cpan/IO-Socket-IP/t/20subclass.t
++++ b/cpan/IO-Socket-IP/t/20subclass.t
+@@ -6,16 +6,19 @@ use warnings;
+ use Test::More;
+ 
+ use IO::Socket::IP;
++use Socket qw( AI_NUMERICHOST );
+ 
+ my $server = IO::Socket::IP->new(
+    Listen    => 1,
+    LocalHost => "127.0.0.1",
+    LocalPort => 0,
++   GetAddrInfoFlags => AI_NUMERICHOST,
+ ) or die "Cannot listen on PF_INET - $!";
+ 
+ my $client = IO::Socket::IP->new(
+    PeerHost => $server->sockhost,
+    PeerPort => $server->sockport,
++   GetAddrInfoFlags => AI_NUMERICHOST,
+ ) or die "Cannot connect on PF_INET - $!";
+ 
+ my $accepted = $server->accept( 'MySubclass' )
+diff --git a/cpan/IO-Socket-IP/t/21as-inet.t b/cpan/IO-Socket-IP/t/21as-inet.t
+index 2b8713d46f..fedb8be538 100644
+--- a/cpan/IO-Socket-IP/t/21as-inet.t
++++ b/cpan/IO-Socket-IP/t/21as-inet.t
+@@ -6,16 +6,19 @@ use warnings;
+ use Test::More;
+ 
+ use IO::Socket::IP;
++use Socket qw( AI_NUMERICHOST );
+ 
+ my $server = IO::Socket::IP->new(
+    Listen    => 1,
+    LocalHost => "127.0.0.1",
+    LocalPort => 0,
++   GetAddrInfoFlags => AI_NUMERICHOST,
+ ) or die "Cannot listen on PF_INET - $!";
+ 
+ my $client = IO::Socket::IP->new(
+    PeerHost => $server->sockhost,
+    PeerPort => $server->sockport,
++   GetAddrInfoFlags => AI_NUMERICHOST,
+ ) or die "Cannot connect on PF_INET - $!";
+ 
+ my $accepted = $server->accept
+diff --git a/cpan/IO-Socket-IP/t/22timeout.t b/cpan/IO-Socket-IP/t/22timeout.t
+index a4c28b3af0..c4a08f5d1f 100644
+--- a/cpan/IO-Socket-IP/t/22timeout.t
++++ b/cpan/IO-Socket-IP/t/22timeout.t
+@@ -6,17 +6,20 @@ use warnings;
+ use Test::More;
+ 
+ use IO::Socket::IP;
++use Socket qw( AI_NUMERICHOST );
+ 
+ my $server = IO::Socket::IP->new(
+    Listen    => 1,
+    LocalHost => "127.0.0.1",
+    LocalPort => 0,
++   GetAddrInfoFlags => AI_NUMERICHOST,
+ ) or die "Cannot listen on PF_INET - $!";
+ 
+ my $client = IO::Socket::IP->new(
+    PeerHost => $server->sockhost,
+    PeerPort => $server->sockport,
+    Timeout  => 0.1,
++   GetAddrInfoFlags => AI_NUMERICHOST,
+ ) or die "Cannot connect on PF_INET - $!";
+ 
+ ok( defined $client, 'client constructed with Timeout' );
+diff --git a/cpan/IO-Socket-IP/t/30nonblocking-connect.t b/cpan/IO-Socket-IP/t/30nonblocking-connect.t
+index 518bd2ebd8..ade8349354 100644
+--- a/cpan/IO-Socket-IP/t/30nonblocking-connect.t
++++ b/cpan/IO-Socket-IP/t/30nonblocking-connect.t
+@@ -8,7 +8,7 @@ use Test::More;
+ use IO::Socket::IP;
+ 
+ use IO::Socket::INET;
+-use Socket qw( inet_aton inet_ntoa pack_sockaddr_in unpack_sockaddr_in );
++use Socket qw( inet_aton inet_ntoa pack_sockaddr_in unpack_sockaddr_in AI_NUMERICHOST );
+ use Errno qw( EINPROGRESS EWOULDBLOCK );
+ 
+ # Some odd locations like BSD jails might not like INADDR_LOOPBACK. We'll
+@@ -27,6 +27,7 @@ my $testserver = IO::Socket::INET->new(
+    Listen    => 1,
+    LocalHost => "127.0.0.1",
+    Type      => SOCK_STREAM,
++   GetAddrInfoFlags => AI_NUMERICHOST,
+ ) or die "Cannot listen on PF_INET - $@";
+ 
+ my $socket = IO::Socket::IP->new(
+@@ -34,6 +35,7 @@ my $socket = IO::Socket::IP->new(
+    PeerService => $testserver->sockport,
+    Type        => SOCK_STREAM,
+    Blocking    => 0,
++   GetAddrInfoFlags => AI_NUMERICHOST,
+ );
+ 
+ ok( defined $socket, 'IO::Socket::IP->new( Blocking => 0 ) constructs a socket' ) or

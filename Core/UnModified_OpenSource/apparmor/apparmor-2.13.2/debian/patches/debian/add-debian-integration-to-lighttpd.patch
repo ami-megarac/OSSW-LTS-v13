@@ -1,0 +1,30 @@
+From: Debian AppArmor Team <pkg-apparmor-team@lists.alioth.debian.org>
+Date: Mon, 29 Jan 2018 12:26:43 +0000
+Subject: Add entries for lighttpd to work in a Debian/Ubuntu install
+
+Forwarded: no (Debian/Ubuntu specific)
+Ubuntu-Bug: https://bugs.launchpad.net/ubuntu/+source/apparmor/+bug/582814
+---
+ profiles/apparmor/profiles/extras/usr.sbin.lighttpd | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
+
+diff --git a/profiles/apparmor/profiles/extras/usr.sbin.lighttpd b/profiles/apparmor/profiles/extras/usr.sbin.lighttpd
+index 7fa27e2..41dfea6 100644
+--- a/profiles/apparmor/profiles/extras/usr.sbin.lighttpd
++++ b/profiles/apparmor/profiles/extras/usr.sbin.lighttpd
+@@ -52,5 +52,15 @@
+   /{usr/,}bin/bash mix,
+   /{usr/,}bin/zsh mix,
+   /{usr/,}bin/cat mix,
++
++  # Debian/Ubuntu integration in default installation
++  #include <abstractions/perl>
++  /etc/mime.types r,
++  /usr/share/lighttpd/ r,
++  /usr/share/lighttpd/*.pl rmix,
++  /etc/lighttpd/conf-available/ r,
++  /etc/lighttpd/conf-available/*.conf r,
++  /etc/lighttpd/conf-enabled/ r,
++  /etc/lighttpd/conf-enabled/*.conf r,
+ }
+ 

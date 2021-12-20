@@ -1,0 +1,18 @@
+#=DESCRIPTION reference auto profile_name variable in rules w/hats
+#=EXRESULT PASS
+
+/test/profile {
+  /test/profile rix,
+
+  /run/@{profile_name}/tmp rwk,
+
+  ^spork {
+    owner /tmp/* r,
+    /spork/@{profile_name}/** rw,
+  }
+
+  ^spelunkk {
+    owner /tmp/* r,
+    /spelunk/@{profile_name}/** rw,
+  }
+}

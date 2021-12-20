@@ -1,0 +1,7 @@
+#
+#=DESCRIPTION simple audit allow other flag test
+#=EXRESULT PASS
+
+profile test {
+  audit allow other /tmp/** rw,
+}

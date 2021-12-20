@@ -1,0 +1,1131 @@
+# Hindi translation for apparmor
+# Copyright (c) 2013 Rosetta Contributors and Canonical Ltd 2013
+# This file is distributed under the same license as the apparmor package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2013.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: apparmor-utils\n"
+"Report-Msgid-Bugs-To: <apparmor@lists.ubuntu.com>\n"
+"POT-Creation-Date: 2014-09-14 19:29+0530\n"
+"PO-Revision-Date: 2013-12-07 11:01+0000\n"
+"Last-Translator: Kshitij Gupta <kgupta8592@gmail.com>\n"
+"Language-Team: Hindi <hi@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Launchpad-Export-Date: 2016-06-01 05:15+0000\n"
+"X-Generator: Launchpad (build 18053)\n"
+"Language: hi\n"
+
+#: ../aa-genprof:56
+msgid "Generate profile for the given program"
+msgstr ""
+
+#: ../aa-genprof:57 ../aa-logprof:25 ../aa-cleanprof:24 ../aa-mergeprof:34
+#: ../aa-autodep:25 ../aa-audit:25 ../aa-complain:24 ../aa-enforce:24
+#: ../aa-disable:24
+msgid "path to profiles"
+msgstr ""
+
+#: ../aa-genprof:58 ../aa-logprof:26
+msgid "path to logfile"
+msgstr ""
+
+#: ../aa-genprof:59
+msgid "name of program to profile"
+msgstr ""
+
+#: ../aa-genprof:69 ../aa-logprof:37
+#, python-format
+msgid "The logfile %s does not exist. Please check the path"
+msgstr ""
+
+#: ../aa-genprof:75 ../aa-logprof:43 ../aa-unconfined:36
+msgid ""
+"It seems AppArmor was not started. Please enable AppArmor and try again."
+msgstr ""
+
+#: ../aa-genprof:80 ../aa-mergeprof:47
+#, python-format
+msgid "%s is not a directory."
+msgstr ""
+
+#: ../aa-genprof:94
+#, python-format
+msgid ""
+"Can't find %(profiling)s in the system path list. If the name of the "
+"application\n"
+"is correct, please run 'which %(profiling)s' as a user with correct PATH\n"
+"environment set up in order to find the fully-qualified path and\n"
+"use the full path as parameter."
+msgstr ""
+
+#: ../aa-genprof:96
+#, python-format
+msgid "%s does not exists, please double-check the path."
+msgstr ""
+
+#: ../aa-genprof:124
+msgid ""
+"\n"
+"Before you begin, you may wish to check if a\n"
+"profile already exists for the application you\n"
+"wish to confine. See the following wiki page for\n"
+"more information:"
+msgstr ""
+
+#: ../aa-genprof:126
+msgid ""
+"Please start the application to be profiled in\n"
+"another window and exercise its functionality now.\n"
+"\n"
+"Once completed, select the \"Scan\" option below in \n"
+"order to scan the system logs for AppArmor events. \n"
+"\n"
+"For each AppArmor event, you will be given the \n"
+"opportunity to choose whether the access should be \n"
+"allowed or denied."
+msgstr ""
+
+#: ../aa-genprof:147
+msgid "Profiling"
+msgstr "प्रोफाइलिंग"
+
+#: ../aa-genprof:165
+msgid ""
+"\n"
+"Reloaded AppArmor profiles in enforce mode."
+msgstr ""
+
+#: ../aa-genprof:166
+msgid ""
+"\n"
+"Please consider contributing your new profile!\n"
+"See the following wiki page for more information:"
+msgstr ""
+
+#: ../aa-genprof:167
+#, python-format
+msgid "Finished generating profile for %s."
+msgstr "%s के लिए प्रोफाइल उत्‍पन्‍न करना पूर्ण हुआ।"
+
+#: ../aa-logprof:24
+msgid "Process log entries to generate profiles"
+msgstr ""
+
+#: ../aa-logprof:27
+msgid "mark in the log to start processing after"
+msgstr ""
+
+#: ../aa-cleanprof:23
+msgid "Cleanup the profiles for the given programs"
+msgstr ""
+
+#: ../aa-cleanprof:25 ../aa-autodep:26 ../aa-audit:27 ../aa-complain:25
+#: ../aa-enforce:25 ../aa-disable:25
+msgid "name of program"
+msgstr ""
+
+#: ../aa-cleanprof:26
+msgid "Silently overwrite with a clean profile"
+msgstr ""
+
+#: ../aa-mergeprof:29
+msgid "Perform a 2-way or 3-way merge on the given profiles"
+msgstr ""
+
+#: ../aa-mergeprof:31
+msgid "your profile"
+msgstr ""
+
+#: ../aa-mergeprof:32
+msgid "base profile"
+msgstr ""
+
+#: ../aa-mergeprof:33
+msgid "other profile"
+msgstr ""
+
+#: ../aa-mergeprof:67 ../apparmor/aa.py:2345
+msgid ""
+"The following local profiles were changed. Would you like to save them?"
+msgstr ""
+
+#: ../aa-mergeprof:148 ../aa-mergeprof:430 ../apparmor/aa.py:1767
+msgid "Path"
+msgstr "पथ"
+
+#: ../aa-mergeprof:149
+msgid "Select the appropriate mode"
+msgstr ""
+
+#: ../aa-mergeprof:166
+msgid "Unknown selection"
+msgstr ""
+
+#: ../aa-mergeprof:183 ../aa-mergeprof:209
+msgid "File includes"
+msgstr ""
+
+#: ../aa-mergeprof:183 ../aa-mergeprof:209
+msgid "Select the ones you wish to add"
+msgstr ""
+
+#: ../aa-mergeprof:195 ../aa-mergeprof:222
+#, python-format
+msgid "Adding %s to the file."
+msgstr ""
+
+#: ../aa-mergeprof:199 ../apparmor/aa.py:2258
+msgid "unknown"
+msgstr ""
+
+#: ../aa-mergeprof:224 ../aa-mergeprof:275 ../aa-mergeprof:516
+#: ../aa-mergeprof:558 ../aa-mergeprof:675 ../apparmor/aa.py:1620
+#: ../apparmor/aa.py:1859 ../apparmor/aa.py:1899 ../apparmor/aa.py:2012
+#, python-format
+msgid "Deleted %s previous matching profile entries."
+msgstr "पुरानी मेल खाने वाली %s प्रोफाइल प्रविष्टियों को हटाया गया।"
+
+#: ../aa-mergeprof:244 ../aa-mergeprof:429 ../aa-mergeprof:629
+#: ../aa-mergeprof:656 ../apparmor/aa.py:992 ../apparmor/aa.py:1252
+#: ../apparmor/aa.py:1562 ../apparmor/aa.py:1603 ../apparmor/aa.py:1766
+#: ../apparmor/aa.py:1958 ../apparmor/aa.py:1994
+msgid "Profile"
+msgstr "प्रोफाइल"
+
+#: ../aa-mergeprof:245 ../apparmor/aa.py:1563 ../apparmor/aa.py:1604
+msgid "Capability"
+msgstr "क्षमता"
+
+#: ../aa-mergeprof:246 ../aa-mergeprof:480 ../apparmor/aa.py:1258
+#: ../apparmor/aa.py:1564 ../apparmor/aa.py:1605 ../apparmor/aa.py:1817
+msgid "Severity"
+msgstr "गंभीरता"
+
+#: ../aa-mergeprof:273 ../aa-mergeprof:514 ../apparmor/aa.py:1618
+#: ../apparmor/aa.py:1857
+#, python-format
+msgid "Adding %s to profile."
+msgstr ""
+
+#: ../aa-mergeprof:282 ../apparmor/aa.py:1627
+#, python-format
+msgid "Adding capability %s to profile."
+msgstr "प्रोफाइल के लिए %s क्षमता जोड़ी जा रही है।"
+
+#: ../aa-mergeprof:289 ../apparmor/aa.py:1634
+#, python-format
+msgid "Denying capability %s to profile."
+msgstr "प्रोफाइल के लिए %s क्षमता से इंकार किया जा रहा है।"
+
+#: ../aa-mergeprof:439 ../aa-mergeprof:470 ../apparmor/aa.py:1776
+#: ../apparmor/aa.py:1807
+msgid "(owner permissions off)"
+msgstr ""
+
+#: ../aa-mergeprof:444 ../apparmor/aa.py:1781
+msgid "(force new perms to owner)"
+msgstr ""
+
+#: ../aa-mergeprof:447 ../apparmor/aa.py:1784
+msgid "(force all rule perms to owner)"
+msgstr ""
+
+#: ../aa-mergeprof:459 ../apparmor/aa.py:1796
+msgid "Old Mode"
+msgstr "पुराना मोड"
+
+#: ../aa-mergeprof:460 ../apparmor/aa.py:1797
+msgid "New Mode"
+msgstr "नया मोड"
+
+#: ../aa-mergeprof:475 ../apparmor/aa.py:1812
+msgid "(force perms to owner)"
+msgstr ""
+
+#: ../aa-mergeprof:478 ../apparmor/aa.py:1815
+msgid "Mode"
+msgstr "मोड"
+
+#: ../aa-mergeprof:556
+#, python-format
+msgid "Adding %(path)s %(mod)s to profile"
+msgstr ""
+
+#: ../aa-mergeprof:574 ../apparmor/aa.py:1915
+msgid "Enter new path: "
+msgstr "नया पथ प्रविष्‍ट करें: "
+
+#: ../aa-mergeprof:630 ../aa-mergeprof:657 ../apparmor/aa.py:1959
+#: ../apparmor/aa.py:1995
+msgid "Network Family"
+msgstr "नेटवर्क फॅमिली"
+
+#: ../aa-mergeprof:631 ../aa-mergeprof:658 ../apparmor/aa.py:1960
+#: ../apparmor/aa.py:1996
+msgid "Socket Type"
+msgstr "सॉकेट प्रकार"
+
+#: ../aa-mergeprof:673 ../apparmor/aa.py:2010
+#, python-format
+msgid "Adding %s to profile"
+msgstr ""
+
+#: ../aa-mergeprof:683 ../apparmor/aa.py:2020
+#, python-format
+msgid "Adding network access %(family)s %(type)s to profile."
+msgstr ""
+
+#: ../aa-mergeprof:689 ../apparmor/aa.py:2026
+#, python-format
+msgid "Denying network access %(family)s %(type)s to profile"
+msgstr ""
+
+#: ../aa-autodep:23
+msgid "Generate a basic AppArmor profile by guessing requirements"
+msgstr ""
+
+#: ../aa-autodep:24
+msgid "overwrite existing profile"
+msgstr ""
+
+#: ../aa-audit:24
+msgid "Switch the given programs to audit mode"
+msgstr ""
+
+#: ../aa-audit:26
+msgid "remove audit mode"
+msgstr ""
+
+#: ../aa-audit:28
+msgid "Show full trace"
+msgstr ""
+
+#: ../aa-complain:23
+msgid "Switch the given program to complain mode"
+msgstr ""
+
+#: ../aa-enforce:23
+msgid "Switch the given program to enforce mode"
+msgstr ""
+
+#: ../aa-disable:23
+msgid "Disable the profile for the given programs"
+msgstr ""
+
+#: ../aa-unconfined:28
+msgid "Lists unconfined processes having tcp or udp ports"
+msgstr ""
+
+#: ../aa-unconfined:29
+msgid "scan all processes from /proc"
+msgstr ""
+
+#: ../aa-unconfined:81
+#, python-format
+msgid "%(pid)s %(program)s (%(commandline)s) not confined"
+msgstr ""
+
+#: ../aa-unconfined:85
+#, python-format
+msgid "%(pid)s %(program)s%(pname)s not confined"
+msgstr ""
+
+#: ../aa-unconfined:90
+#, python-format
+msgid "%(pid)s %(program)s (%(commandline)s) confined by '%(attribute)s'"
+msgstr ""
+
+#: ../aa-unconfined:94
+#, python-format
+msgid "%(pid)s %(program)s%(pname)s confined by '%(attribute)s'"
+msgstr ""
+
+#: ../apparmor/aa.py:196
+#, python-format
+msgid "Followed too many links while resolving %s"
+msgstr ""
+
+#: ../apparmor/aa.py:252 ../apparmor/aa.py:259
+#, python-format
+msgid "Can't find %s"
+msgstr ""
+
+#: ../apparmor/aa.py:264 ../apparmor/aa.py:548
+#, python-format
+msgid "Setting %s to complain mode."
+msgstr ""
+
+#: ../apparmor/aa.py:271
+#, python-format
+msgid "Setting %s to enforce mode."
+msgstr ""
+
+#: ../apparmor/aa.py:286
+#, python-format
+msgid "Unable to find basename for %s."
+msgstr ""
+
+#: ../apparmor/aa.py:301
+#, python-format
+msgid "Could not create %(link)s symlink to %(filename)s."
+msgstr ""
+
+#: ../apparmor/aa.py:314
+#, python-format
+msgid "Unable to read first line from %s: File Not Found"
+msgstr ""
+
+#: ../apparmor/aa.py:328
+#, python-format
+msgid ""
+"Unable to fork: %(program)s\n"
+"\t%(error)s"
+msgstr ""
+
+#: ../apparmor/aa.py:449 ../apparmor/ui.py:303
+msgid ""
+"Are you sure you want to abandon this set of profile changes and exit?"
+msgstr ""
+
+#: ../apparmor/aa.py:451 ../apparmor/ui.py:305
+msgid "Abandoning all changes."
+msgstr ""
+
+#: ../apparmor/aa.py:464
+msgid "Connecting to repository..."
+msgstr ""
+
+#: ../apparmor/aa.py:470
+msgid "WARNING: Error fetching profiles from the repository"
+msgstr ""
+
+#: ../apparmor/aa.py:550
+#, python-format
+msgid "Error activating profiles: %s"
+msgstr ""
+
+#: ../apparmor/aa.py:605
+#, python-format
+msgid "%s contains no profile"
+msgstr ""
+
+#: ../apparmor/aa.py:706
+#, python-format
+msgid ""
+"WARNING: Error synchronizing profiles with the repository:\n"
+"%s\n"
+msgstr ""
+
+#: ../apparmor/aa.py:744
+#, python-format
+msgid ""
+"WARNING: Error synchronizing profiles with the repository\n"
+"%s"
+msgstr ""
+
+#: ../apparmor/aa.py:832 ../apparmor/aa.py:883
+#, python-format
+msgid ""
+"WARNING: An error occurred while uploading the profile %(profile)s\n"
+"%(ret)s"
+msgstr ""
+
+#: ../apparmor/aa.py:833
+msgid "Uploaded changes to repository."
+msgstr ""
+
+#: ../apparmor/aa.py:865
+msgid "Changelog Entry: "
+msgstr ""
+
+#: ../apparmor/aa.py:885
+msgid ""
+"Repository Error\n"
+"Registration or Signin was unsuccessful. User login\n"
+"information is required to upload profiles to the repository.\n"
+"These changes could not be sent."
+msgstr ""
+
+#: ../apparmor/aa.py:995
+msgid "Default Hat"
+msgstr ""
+
+#: ../apparmor/aa.py:997
+msgid "Requested Hat"
+msgstr ""
+
+#: ../apparmor/aa.py:1218
+#, python-format
+msgid "%s has transition name but not transition mode"
+msgstr ""
+
+#: ../apparmor/aa.py:1232
+#, python-format
+msgid "Target profile exists: %s\n"
+msgstr ""
+
+#: ../apparmor/aa.py:1254
+msgid "Program"
+msgstr ""
+
+#: ../apparmor/aa.py:1257
+msgid "Execute"
+msgstr ""
+
+#: ../apparmor/aa.py:1287
+msgid "Are you specifying a transition to a local profile?"
+msgstr ""
+
+#: ../apparmor/aa.py:1299
+msgid "Enter profile name to transition to: "
+msgstr ""
+
+#: ../apparmor/aa.py:1308
+msgid ""
+"Should AppArmor sanitise the environment when\n"
+"switching profiles?\n"
+"\n"
+"Sanitising environment is more secure,\n"
+"but some applications depend on the presence\n"
+"of LD_PRELOAD or LD_LIBRARY_PATH."
+msgstr ""
+
+#: ../apparmor/aa.py:1310
+msgid ""
+"Should AppArmor sanitise the environment when\n"
+"switching profiles?\n"
+"\n"
+"Sanitising environment is more secure,\n"
+"but this application appears to be using LD_PRELOAD\n"
+"or LD_LIBRARY_PATH and sanitising the environment\n"
+"could cause functionality problems."
+msgstr ""
+
+#: ../apparmor/aa.py:1318
+#, python-format
+msgid ""
+"Launching processes in an unconfined state is a very\n"
+"dangerous operation and can cause serious security holes.\n"
+"\n"
+"Are you absolutely certain you wish to remove all\n"
+"AppArmor protection when executing %s ?"
+msgstr ""
+
+#: ../apparmor/aa.py:1320
+msgid ""
+"Should AppArmor sanitise the environment when\n"
+"running this program unconfined?\n"
+"\n"
+"Not sanitising the environment when unconfining\n"
+"a program opens up significant security holes\n"
+"and should be avoided if at all possible."
+msgstr ""
+
+#: ../apparmor/aa.py:1396 ../apparmor/aa.py:1414
+#, python-format
+msgid ""
+"A profile for %s does not exist.\n"
+"Do you want to create one?"
+msgstr ""
+
+#: ../apparmor/aa.py:1523
+msgid "Complain-mode changes:"
+msgstr ""
+
+#: ../apparmor/aa.py:1525
+msgid "Enforce-mode changes:"
+msgstr ""
+
+#: ../apparmor/aa.py:1528
+#, python-format
+msgid "Invalid mode found: %s"
+msgstr ""
+
+#: ../apparmor/aa.py:1897
+#, python-format
+msgid "Adding %(path)s %(mode)s to profile"
+msgstr ""
+
+#: ../apparmor/aa.py:1918
+#, python-format
+msgid ""
+"The specified path does not match this log entry:\n"
+"\n"
+"  Log Entry: %(path)s\n"
+"  Entered Path:  %(ans)s\n"
+"Do you really want to use this path?"
+msgstr ""
+
+#: ../apparmor/aa.py:2251
+#, python-format
+msgid "Reading log entries from %s."
+msgstr ""
+
+#: ../apparmor/aa.py:2254
+#, python-format
+msgid "Updating AppArmor profiles in %s."
+msgstr ""
+
+#: ../apparmor/aa.py:2323
+msgid ""
+"Select which profile changes you would like to save to the\n"
+"local profile set."
+msgstr ""
+
+#: ../apparmor/aa.py:2324
+msgid "Local profile changes"
+msgstr ""
+
+#: ../apparmor/aa.py:2418
+msgid "Profile Changes"
+msgstr ""
+
+#: ../apparmor/aa.py:2428
+#, python-format
+msgid "Can't find existing profile %s to compare changes."
+msgstr ""
+
+#: ../apparmor/aa.py:2566 ../apparmor/aa.py:2581
+#, python-format
+msgid "Can't read AppArmor profiles in %s"
+msgstr ""
+
+#: ../apparmor/aa.py:2677
+#, python-format
+msgid ""
+"%(profile)s profile in %(file)s contains syntax errors in line: %(line)s."
+msgstr ""
+
+#: ../apparmor/aa.py:2734
+#, python-format
+msgid ""
+"Syntax Error: Unexpected End of Profile reached in file: %(file)s line: "
+"%(line)s"
+msgstr ""
+
+#: ../apparmor/aa.py:2749
+#, python-format
+msgid ""
+"Syntax Error: Unexpected capability entry found in file: %(file)s line: "
+"%(line)s"
+msgstr ""
+
+#: ../apparmor/aa.py:2770
+#, python-format
+msgid ""
+"Syntax Error: Unexpected link entry found in file: %(file)s line: %(line)s"
+msgstr ""
+
+#: ../apparmor/aa.py:2798
+#, python-format
+msgid ""
+"Syntax Error: Unexpected change profile entry found in file: %(file)s line: "
+"%(line)s"
+msgstr ""
+
+#: ../apparmor/aa.py:2820
+#, python-format
+msgid ""
+"Syntax Error: Unexpected rlimit entry found in file: %(file)s line: %(line)s"
+msgstr ""
+
+#: ../apparmor/aa.py:2831
+#, python-format
+msgid ""
+"Syntax Error: Unexpected boolean definition found in file: %(file)s line: "
+"%(line)s"
+msgstr ""
+
+#: ../apparmor/aa.py:2871
+#, python-format
+msgid ""
+"Syntax Error: Unexpected bare file rule found in file: %(file)s line: "
+"%(line)s"
+msgstr ""
+
+#: ../apparmor/aa.py:2894
+#, python-format
+msgid ""
+"Syntax Error: Unexpected path entry found in file: %(file)s line: %(line)s"
+msgstr ""
+
+#: ../apparmor/aa.py:2922
+#, python-format
+msgid "Syntax Error: Invalid Regex %(path)s in file: %(file)s line: %(line)s"
+msgstr ""
+
+#: ../apparmor/aa.py:2925
+#, python-format
+msgid "Invalid mode %(mode)s in file: %(file)s line: %(line)s"
+msgstr ""
+
+#: ../apparmor/aa.py:2977
+#, python-format
+msgid ""
+"Syntax Error: Unexpected network entry found in file: %(file)s line: %(line)s"
+msgstr ""
+
+#: ../apparmor/aa.py:3007
+#, python-format
+msgid ""
+"Syntax Error: Unexpected dbus entry found in file: %(file)s line: %(line)s"
+msgstr ""
+
+#: ../apparmor/aa.py:3030
+#, python-format
+msgid ""
+"Syntax Error: Unexpected mount entry found in file: %(file)s line: %(line)s"
+msgstr ""
+
+#: ../apparmor/aa.py:3052
+#, python-format
+msgid ""
+"Syntax Error: Unexpected signal entry found in file: %(file)s line: %(line)s"
+msgstr ""
+
+#: ../apparmor/aa.py:3074
+#, python-format
+msgid ""
+"Syntax Error: Unexpected ptrace entry found in file: %(file)s line: %(line)s"
+msgstr ""
+
+#: ../apparmor/aa.py:3096
+#, python-format
+msgid ""
+"Syntax Error: Unexpected pivot_root entry found in file: %(file)s line: "
+"%(line)s"
+msgstr ""
+
+#: ../apparmor/aa.py:3118
+#, python-format
+msgid ""
+"Syntax Error: Unexpected unix entry found in file: %(file)s line: %(line)s"
+msgstr ""
+
+#: ../apparmor/aa.py:3140
+#, python-format
+msgid ""
+"Syntax Error: Unexpected change hat declaration found in file: %(file)s "
+"line: %(line)s"
+msgstr ""
+
+#: ../apparmor/aa.py:3152
+#, python-format
+msgid ""
+"Syntax Error: Unexpected hat definition found in file: %(file)s line: "
+"%(line)s"
+msgstr ""
+
+#: ../apparmor/aa.py:3168
+#, python-format
+msgid "Error: Multiple definitions for hat %(hat)s in profile %(profile)s."
+msgstr ""
+
+#: ../apparmor/aa.py:3185
+#, python-format
+msgid "Warning: invalid \"REPOSITORY:\" line in %s, ignoring."
+msgstr ""
+
+#: ../apparmor/aa.py:3198
+#, python-format
+msgid "Syntax Error: Unknown line found in file: %(file)s line: %(line)s"
+msgstr ""
+
+#: ../apparmor/aa.py:3211
+#, python-format
+msgid ""
+"Syntax Error: Missing '}' or ','. Reached end of file %(file)s while inside "
+"profile %(profile)s"
+msgstr ""
+
+#: ../apparmor/aa.py:3277
+#, python-format
+msgid "Redefining existing variable %(variable)s: %(value)s in %(file)s"
+msgstr ""
+
+#: ../apparmor/aa.py:3282
+#, python-format
+msgid ""
+"Values added to a non-existing variable %(variable)s: %(value)s in %(file)s"
+msgstr ""
+
+#: ../apparmor/aa.py:3284
+#, python-format
+msgid ""
+"Unknown variable operation %(operation)s for variable %(variable)s in "
+"%(file)s"
+msgstr ""
+
+#: ../apparmor/aa.py:3343
+#, python-format
+msgid "Invalid allow string: %(allow)s"
+msgstr ""
+
+#: ../apparmor/aa.py:3778
+msgid "Can't find existing profile to modify"
+msgstr ""
+
+#: ../apparmor/aa.py:4347
+#, python-format
+msgid "Writing updated profile for %s."
+msgstr ""
+
+#: ../apparmor/aa.py:4481
+#, python-format
+msgid "File Not Found: %s"
+msgstr ""
+
+#: ../apparmor/aa.py:4591
+#, python-format
+msgid ""
+"%s is currently marked as a program that should not have its own\n"
+"profile.  Usually, programs are marked this way if creating a profile for \n"
+"them is likely to break the rest of the system.  If you know what you're\n"
+"doing and are certain you want to create a profile for this program, edit\n"
+"the corresponding entry in the [qualifiers] section in "
+"/etc/apparmor/logprof.conf."
+msgstr ""
+
+#: ../apparmor/logparser.py:127 ../apparmor/logparser.py:132
+#, python-format
+msgid "Log contains unknown mode %s"
+msgstr ""
+
+#: ../apparmor/tools.py:84 ../apparmor/tools.py:126
+#, python-format
+msgid ""
+"Can't find %(program)s in the system path list. If the name of the "
+"application\n"
+"is correct, please run 'which %(program)s' as a user with correct PATH\n"
+"environment set up in order to find the fully-qualified path and\n"
+"use the full path as parameter."
+msgstr ""
+
+#: ../apparmor/tools.py:86 ../apparmor/tools.py:102 ../apparmor/tools.py:128
+#, python-format
+msgid "%s does not exist, please double-check the path."
+msgstr ""
+
+#: ../apparmor/tools.py:100
+msgid ""
+"The given program cannot be found, please try with the fully qualified path "
+"name of the program: "
+msgstr ""
+
+#: ../apparmor/tools.py:113 ../apparmor/tools.py:137 ../apparmor/tools.py:157
+#: ../apparmor/tools.py:175 ../apparmor/tools.py:193
+#, python-format
+msgid "Profile for %s not found, skipping"
+msgstr ""
+
+#: ../apparmor/tools.py:140
+#, python-format
+msgid "Disabling %s."
+msgstr ""
+
+#: ../apparmor/tools.py:198
+#, python-format
+msgid "Setting %s to audit mode."
+msgstr ""
+
+#: ../apparmor/tools.py:200
+#, python-format
+msgid "Removing audit mode from %s."
+msgstr ""
+
+#: ../apparmor/tools.py:212
+#, python-format
+msgid ""
+"Please pass an application to generate a profile for, not a profile itself - "
+"skipping %s."
+msgstr ""
+
+#: ../apparmor/tools.py:220
+#, python-format
+msgid "Profile for %s already exists - skipping."
+msgstr ""
+
+#: ../apparmor/tools.py:232
+#, python-format
+msgid ""
+"\n"
+"Deleted %s rules."
+msgstr ""
+
+#: ../apparmor/tools.py:240
+#, python-format
+msgid ""
+"The local profile for %(program)s in file %(file)s was changed. Would you "
+"like to save it?"
+msgstr ""
+
+#: ../apparmor/tools.py:260
+#, python-format
+msgid "The profile for %s does not exists. Nothing to clean."
+msgstr ""
+
+#: ../apparmor/ui.py:61
+msgid "Invalid hotkey for"
+msgstr ""
+
+#: ../apparmor/ui.py:77 ../apparmor/ui.py:121 ../apparmor/ui.py:275
+msgid "(Y)es"
+msgstr ""
+
+#: ../apparmor/ui.py:78 ../apparmor/ui.py:122 ../apparmor/ui.py:276
+msgid "(N)o"
+msgstr ""
+
+#: ../apparmor/ui.py:123
+msgid "(C)ancel"
+msgstr ""
+
+#: ../apparmor/ui.py:223
+msgid "(A)llow"
+msgstr ""
+
+#: ../apparmor/ui.py:224
+msgid "(M)ore"
+msgstr ""
+
+#: ../apparmor/ui.py:225
+msgid "Audi(t)"
+msgstr ""
+
+#: ../apparmor/ui.py:226
+msgid "Audi(t) off"
+msgstr ""
+
+#: ../apparmor/ui.py:227
+msgid "Audit (A)ll"
+msgstr ""
+
+#: ../apparmor/ui.py:229
+msgid "(O)wner permissions on"
+msgstr ""
+
+#: ../apparmor/ui.py:230
+msgid "(O)wner permissions off"
+msgstr ""
+
+#: ../apparmor/ui.py:231
+msgid "(D)eny"
+msgstr ""
+
+#: ../apparmor/ui.py:232
+msgid "Abo(r)t"
+msgstr ""
+
+#: ../apparmor/ui.py:233
+msgid "(F)inish"
+msgstr ""
+
+#: ../apparmor/ui.py:234
+msgid "(I)nherit"
+msgstr ""
+
+#: ../apparmor/ui.py:235
+msgid "(P)rofile"
+msgstr ""
+
+#: ../apparmor/ui.py:236
+msgid "(P)rofile Clean Exec"
+msgstr ""
+
+#: ../apparmor/ui.py:237
+msgid "(C)hild"
+msgstr ""
+
+#: ../apparmor/ui.py:238
+msgid "(C)hild Clean Exec"
+msgstr ""
+
+#: ../apparmor/ui.py:239
+msgid "(N)amed"
+msgstr ""
+
+#: ../apparmor/ui.py:240
+msgid "(N)amed Clean Exec"
+msgstr ""
+
+#: ../apparmor/ui.py:241
+msgid "(U)nconfined"
+msgstr ""
+
+#: ../apparmor/ui.py:242
+msgid "(U)nconfined Clean Exec"
+msgstr ""
+
+#: ../apparmor/ui.py:243
+msgid "(P)rofile Inherit"
+msgstr ""
+
+#: ../apparmor/ui.py:244
+msgid "(P)rofile Inherit Clean Exec"
+msgstr ""
+
+#: ../apparmor/ui.py:245
+msgid "(C)hild Inherit"
+msgstr ""
+
+#: ../apparmor/ui.py:246
+msgid "(C)hild Inherit Clean Exec"
+msgstr ""
+
+#: ../apparmor/ui.py:247
+msgid "(N)amed Inherit"
+msgstr ""
+
+#: ../apparmor/ui.py:248
+msgid "(N)amed Inherit Clean Exec"
+msgstr ""
+
+#: ../apparmor/ui.py:249
+msgid "(X) ix On"
+msgstr ""
+
+#: ../apparmor/ui.py:250
+msgid "(X) ix Off"
+msgstr ""
+
+#: ../apparmor/ui.py:251 ../apparmor/ui.py:265
+msgid "(S)ave Changes"
+msgstr ""
+
+#: ../apparmor/ui.py:252
+msgid "(C)ontinue Profiling"
+msgstr ""
+
+#: ../apparmor/ui.py:253
+msgid "(N)ew"
+msgstr ""
+
+#: ../apparmor/ui.py:254
+msgid "(G)lob"
+msgstr ""
+
+#: ../apparmor/ui.py:255
+msgid "Glob with (E)xtension"
+msgstr ""
+
+#: ../apparmor/ui.py:256
+msgid "(A)dd Requested Hat"
+msgstr ""
+
+#: ../apparmor/ui.py:257
+msgid "(U)se Default Hat"
+msgstr ""
+
+#: ../apparmor/ui.py:258
+msgid "(S)can system log for AppArmor events"
+msgstr ""
+
+#: ../apparmor/ui.py:259
+msgid "(H)elp"
+msgstr ""
+
+#: ../apparmor/ui.py:260
+msgid "(V)iew Profile"
+msgstr ""
+
+#: ../apparmor/ui.py:261
+msgid "(U)se Profile"
+msgstr ""
+
+#: ../apparmor/ui.py:262
+msgid "(C)reate New Profile"
+msgstr ""
+
+#: ../apparmor/ui.py:263
+msgid "(U)pdate Profile"
+msgstr ""
+
+#: ../apparmor/ui.py:264
+msgid "(I)gnore Update"
+msgstr ""
+
+#: ../apparmor/ui.py:266
+msgid "Save Selec(t)ed Profile"
+msgstr ""
+
+#: ../apparmor/ui.py:267
+msgid "(U)pload Changes"
+msgstr ""
+
+#: ../apparmor/ui.py:268
+msgid "(V)iew Changes"
+msgstr ""
+
+#: ../apparmor/ui.py:269
+msgid "View Changes b/w (C)lean profiles"
+msgstr ""
+
+#: ../apparmor/ui.py:270
+msgid "(V)iew"
+msgstr ""
+
+#: ../apparmor/ui.py:271
+msgid "(E)nable Repository"
+msgstr ""
+
+#: ../apparmor/ui.py:272
+msgid "(D)isable Repository"
+msgstr ""
+
+#: ../apparmor/ui.py:273
+msgid "(N)ever Ask Again"
+msgstr ""
+
+#: ../apparmor/ui.py:274
+msgid "Ask Me (L)ater"
+msgstr ""
+
+#: ../apparmor/ui.py:277
+msgid "Allow All (N)etwork"
+msgstr ""
+
+#: ../apparmor/ui.py:278
+msgid "Allow Network Fa(m)ily"
+msgstr ""
+
+#: ../apparmor/ui.py:279
+msgid "(O)verwrite Profile"
+msgstr ""
+
+#: ../apparmor/ui.py:280
+msgid "(K)eep Profile"
+msgstr ""
+
+#: ../apparmor/ui.py:281
+msgid "(C)ontinue"
+msgstr ""
+
+#: ../apparmor/ui.py:282
+msgid "(I)gnore"
+msgstr ""
+
+#: ../apparmor/ui.py:344
+#, python-format
+msgid "PromptUser: Unknown command %s"
+msgstr ""
+
+#: ../apparmor/ui.py:351
+#, python-format
+msgid "PromptUser: Duplicate hotkey for %(command)s: %(menutext)s "
+msgstr ""
+
+#: ../apparmor/ui.py:363
+msgid "PromptUser: Invalid hotkey in default item"
+msgstr ""
+
+#: ../apparmor/ui.py:368
+#, python-format
+msgid "PromptUser: Invalid default %s"
+msgstr ""
+
+#, python-format
+#~ msgid "Adding network access %s %s to profile."
+#~ msgstr "प्रोफाइल में %s %s नेटवर्क के उपयोग को जोड़ा जा रहा है।"

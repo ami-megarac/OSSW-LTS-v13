@@ -1,0 +1,55 @@
+From: Simon McVittie <smcv@debian.org>
+Date: Wed, 21 Oct 2015 11:17:02 +0100
+Subject: session.conf, system.conf: include legacy files as *.dpkg-bak
+
+The Debian maintainer scripts used while upgrading from jessie to stretch
+delete the legacy files if they have not been modified, or move them to
+*.dpkg-bak if they were modified. This allows the plain session.conf and
+system.conf names to be replaced with symbolic links, which is enough
+to let the old dbus-daemon reload its configuration during upgrades in
+most cases.
+
+This patch also avoids circular inclusion of the configuration file
+via those symlinks before they are cleaned up by dbus.postinst.
+
+This change can be removed after Debian 10 is released.
+
+Origin: vendor, Debian
+Forwarded: not-needed, Debian-specific
+---
+ bus/session.conf.in | 5 +++--
+ bus/system.conf.in  | 5 +++--
+ 2 files changed, 6 insertions(+), 4 deletions(-)
+
+diff --git a/bus/session.conf.in b/bus/session.conf.in
+index affa7f1..bd50585 100644
+--- a/bus/session.conf.in
++++ b/bus/session.conf.in
+@@ -35,8 +35,9 @@
+     <allow own="*"/>
+   </policy>
+ 
+-  <!-- Include legacy configuration location -->
+-  <include ignore_missing="yes">@SYSCONFDIR_FROM_PKGDATADIR@/dbus-1/session.conf</include>
++  <!-- Include legacy configuration that was preserved in a Debian upgrade,
++       if any -->
++  <include ignore_missing="yes">@SYSCONFDIR_FROM_PKGDATADIR@/dbus-1/session.conf.dpkg-bak</include>
+ 
+   <!-- Config files are placed here that among other things, 
+        further restrict the above policy for specific services. -->
+diff --git a/bus/system.conf.in b/bus/system.conf.in
+index f139b55..e1025aa 100644
+--- a/bus/system.conf.in
++++ b/bus/system.conf.in
+@@ -99,8 +99,9 @@
+            send_interface="org.freedesktop.DBus.Debug.Stats"/>
+   </policy>
+ 
+-  <!-- Include legacy configuration location -->
+-  <include ignore_missing="yes">@SYSCONFDIR_FROM_PKGDATADIR@/dbus-1/system.conf</include>
++  <!-- Include legacy configuration that was preserved in a Debian upgrade,
++       if any -->
++  <include ignore_missing="yes">@SYSCONFDIR_FROM_PKGDATADIR@/dbus-1/system.conf.dpkg-bak</include>
+ 
+   <!-- The defaults for these limits are hard-coded in dbus-daemon.
+        Some clarifications:

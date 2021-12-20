@@ -1,0 +1,9 @@
+#
+#=DESCRIPTION Require px, ix, or ux, not bare x.
+#=EXRESULT FAIL
+#
+/usr/bin/foo {
+
+  /bin/ls rx,
+}
+

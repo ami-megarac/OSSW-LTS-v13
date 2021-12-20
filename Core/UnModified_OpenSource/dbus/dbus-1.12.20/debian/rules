@@ -1,0 +1,309 @@
+#!/usr/bin/make -f
+# Copyright © 2002,2003 Colin Walters <walters@verbum.org>
+# Copyright © 2003 Daniel Stone <daniels@debian.org>
+# Copyright © 2006 Sjoerd Simons <sjoerd@debian.org>
+# Copyright © 2011 Michael Biebl <biebl@debian.org>
+
+export DEB_BUILD_MAINT_OPTIONS = hardening=+pie,+bindnow
+
+include /usr/share/dpkg/default.mk
+
+%:
+	dh $@ $(dh_options)
+
+libdbusN := $(shell sed -rn 's/Package:[[:space:]]*(libdbus-[0-9-]+)[[:space:]]*$$/\1/p' debian/control | head -n 1)
+libdbus_soname := $(patsubst libdbus-1-%,libdbus-1.so.%,$(libdbusN))
+debug_build_prefix := /usr/lib/dbus-1.0/debug-build
+binaries := $(shell dh_listpackages)
+
+export DEB_LDFLAGS_MAINT_APPEND = \
+	-Wl,--as-needed \
+	-Wl,--gc-sections \
+	$(NULL)
+
+dh_options = \
+	--builddirectory=debian/build-main \
+	$(NULL)
+
+common_configure_flags := \
+		--libexecdir=\$${prefix}/lib/dbus-1.0 \
+		$(NULL)
+
+normal_configure_flags := \
+	--libdir=/usr/lib/$(DEB_HOST_MULTIARCH) \
+	$(NULL)
+
+ifeq ($(filter pkg.dbus.minimal,$(DEB_BUILD_PROFILES)),)
+ifeq ($(DEB_HOST_ARCH_OS),linux)
+# Non-bootstrap build on Linux: add Linux-specifics
+common_configure_flags += \
+		--enable-apparmor \
+		--enable-libaudit \
+		--enable-selinux \
+		--enable-systemd \
+		--with-systemdsystemunitdir=/lib/systemd/system \
+		--with-session-socket-dir=/tmp \
+		--with-test-socket-dir=/tmp \
+		SYSTEMCTL=/bin/systemctl \
+		$(NULL)
+normal_configure_flags += \
+	--enable-user-session \
+	--with-systemduserunitdir='$${prefix}/lib/systemd/user' \
+	$(NULL)
+endif
+endif
+
+debug_configure_flags := \
+	--disable-xml-docs \
+	--disable-doxygen-docs \
+	--disable-ducktype-docs \
+	--enable-asserts \
+	--enable-checks \
+	--enable-verbose-mode \
+	--with-valgrind=auto \
+	--bindir='${debug_build_prefix}/bin' \
+	--libdir='${debug_build_prefix}/lib' \
+	--libexecdir='${debug_build_prefix}/libexec' \
+	$(NULL)
+
+udeb_configure_flags := \
+	$(normal_configure_flags) \
+	--disable-apparmor \
+	--disable-asserts \
+	--disable-checks \
+	--disable-doxygen-docs \
+	--disable-ducktype-docs \
+	--disable-libaudit \
+	--disable-selinux \
+	--disable-stats \
+	--disable-systemd \
+	--disable-installed-tests \
+	--disable-user-session \
+	--disable-verbose-mode \
+	--disable-xml-docs \
+	CFLAGS='$(CFLAGS) -Os' \
+	$(NULL)
+
+ifeq ($(filter pkg.dbus.minimal,$(DEB_BUILD_PROFILES)),)
+common_configure_flags += --enable-installed-tests
+else
+common_configure_flags += --disable-installed-tests
+endif
+
+ifeq ($(filter nocheck pkg.dbus.minimal,$(DEB_BUILD_PROFILES)),)
+common_configure_flags += PYTHON=/usr/bin/python3
+endif
+
+ifeq ($(filter nodoc pkg.dbus.minimal,$(DEB_BUILD_PROFILES)),)
+normal_configure_flags += --enable-xml-docs
+else
+normal_configure_flags += --disable-xml-docs
+endif
+
+ifneq ($(filter dbus-1-doc,$(binaries)),)
+normal_configure_flags += --enable-doxygen-docs
+normal_configure_flags += --enable-ducktype-docs
+else
+normal_configure_flags += --disable-doxygen-docs
+normal_configure_flags += --disable-ducktype-docs
+endif
+
+ifeq ($(filter pkg.dbus.minimal,$(DEB_BUILD_PROFILES)),)
+# not a minimal build - build all the tests
+debug_configure_flags += --enable-embedded-tests
+endif
+
+override_dh_auto_configure:
+	dh_auto_configure \
+		-- \
+		$(common_configure_flags) \
+		$(normal_configure_flags) \
+		$(NULL)
+ifneq ($(filter dbus-tests,$(binaries)),)
+	dh_auto_configure \
+		--builddirectory=debian/build-debug \
+		-- \
+		$(common_configure_flags) \
+		$(debug_configure_flags) \
+		$(NULL)
+endif
+ifneq ($(filter dbus-udeb,$(binaries)),)
+	dh_auto_configure \
+		--builddirectory=debian/build-udeb \
+		-- \
+		$(common_configure_flags) \
+		$(udeb_configure_flags) \
+		$(NULL)
+endif
+
+override_dh_auto_build:
+	dh_auto_build
+ifneq ($(filter dbus-tests,$(binaries)),)
+	dh_auto_build --builddirectory=debian/build-debug
+endif
+ifneq ($(filter dbus-udeb,$(binaries)),)
+	dh_auto_build --builddirectory=debian/build-udeb
+endif
+
+handle-test-failure:
+	@find debian/build-* -name '*.log' \
+		-not -name config.log \
+		-not -name test-suite.log \
+		-print0 | xargs -0 tail -v -c1M
+ifeq ($(DEB_HOST_ARCH_OS),linux)
+	@echo "Build-time tests failed, please debug"
+	@false
+else
+	@echo "Ignoring build-time test failure on non-Linux for now"
+endif
+
+test_env = \
+	-u DISPLAY \
+	HOME=$(CURDIR)/debian/tmp-home \
+	DBUS_TEST_HOMEDIR=$(CURDIR)/debian/tmp-home \
+	DBUS_TEST_MALLOC_FAILURES=0 \
+	LD_PRELOAD=libnss_wrapper.so \
+	NSS_WRAPPER_HOSTS=$(CURDIR)/debian/hosts \
+	$(NULL)
+
+override_dh_auto_test-arch:
+	install -d $(CURDIR)/debian/tmp-home
+	env $(test_env) \
+		dh_auto_test -- -k \
+		|| make -f debian/rules handle-test-failure
+ifneq ($(filter dbus-tests,$(binaries)),)
+	env $(test_env) \
+		dh_auto_test --builddirectory=debian/build-debug --no-parallel -- -k \
+		|| make -f debian/rules handle-test-failure
+endif
+ifneq ($(filter dbus-udeb,$(binaries)),)
+	env $(test_env) \
+		dh_auto_test --builddirectory=debian/build-udeb -- -k \
+		|| make -f debian/rules handle-test-failure
+endif
+	@find debian/build-* -name '*.log' \
+		-not -name config.log \
+		-not -name test-suite.log \
+		-print0 | xargs -0 tail -v -c1M
+
+override_dh_auto_test-indep:
+	:
+
+override_dh_auto_install:
+ifneq ($(filter dbus-udeb,$(binaries)),)
+	# udeb build
+	make -C debian/build-udeb install-exec DESTDIR=$(CURDIR)/debian/tmp-udeb
+	cd $(CURDIR)/debian/tmp-udeb && find | LC_ALL=C sort
+endif
+ifneq ($(filter dbus-tests,$(binaries)),)
+	# debug build
+	make -C debian/build-debug install DESTDIR=$(CURDIR)/debian/tmp
+	rm -rfv debian/tmp/etc
+	rm -rfv debian/tmp/lib/systemd
+	rm -rfv debian/tmp/usr/include
+	rm -rfv debian/tmp/usr/lib/systemd
+	rm -rfv debian/tmp/usr/lib/sysusers.d
+	rm -rfv debian/tmp/usr/share/dbus-1
+	rm -rfv debian/tmp/usr/share/doc
+	rm -rfv debian/tmp/usr/share/man
+	rm -rfv debian/tmp/usr/share/xml
+	mv debian/tmp/usr/share/installed-tests/dbus \
+		debian/tmp/usr/share/installed-tests/dbus-debug-build
+	sed -i -e \
+		"s,^Exec=,Exec=sh -c 'export PATH=/usr/lib/dbus-1.0/debug-build/bin:\$$PATH; exec \"\$$@\"' sh ," \
+		debian/tmp/usr/share/installed-tests/dbus-debug-build/*.test
+	rm -f debian/tmp/${debug_build_prefix}/lib/libdbus-1.la
+	cd $(CURDIR)/debian/tmp && find | LC_ALL=C sort
+endif
+	# normal build (do this last so that it overwrites the others)
+	dh_auto_install
+	rm -f debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)/libdbus-1.la
+ifeq ($(filter nodoc pkg.dbus.minimal,$(DEB_BUILD_PROFILES)),)
+	# Reproducible build: sed out the generated dates from the man pages.
+	sed -i \
+		-e '/^\.\\\" *Date: .*/d' \
+		-e 's/^\(.TH "[^"]*" "[^"]*" \)"[^"]*"/\1""/' \
+		debian/tmp/usr/share/man/man?/*
+endif
+ifeq ($(filter dbus-tests,$(binaries)),)
+	# pkg.dbus.minimal builds dbus-test-tool but not dbus-tests
+	rm -f debian/tmp/usr/bin/dbus-test-tool
+endif
+ifeq ($(filter dbus-x11,$(binaries)),)
+	# pkg.dbus.minimal builds dbus-launch with degraded
+	# functionality, but not dbus-x11
+	rm -f debian/tmp/usr/bin/dbus-launch
+endif
+ifeq ($(filter dbus-1-doc,$(binaries)),)
+	# nodoc or pkg.dbus.minimal builds still install a bit of
+	# documentation
+	rm -fr debian/tmp/usr/share/doc/dbus
+endif
+	# Remove the legacy bus configuration files. We move their old
+	# versions out of the way, include the moved names in the new
+	# bus setup instead of the old names, and replace the old names
+	# with a symlink to the new bus setup so that old dbus-daemons
+	# can still reload their configuration.
+	rm -f debian/tmp/etc/dbus-1/session.conf
+	rm -f debian/tmp/etc/dbus-1/system.conf
+	# Fix up the development symlink for us installing the shared library
+	# in /lib
+	target=$$(readlink "debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)/libdbus-1.so"); \
+	target=$$(basename "$$target"); \
+	ln -fns /lib/$(DEB_HOST_MULTIARCH)/$$target debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)/libdbus-1.so
+
+ifeq ($(DEB_DISTRIBUTION),UNRELEASED)
+# We can't expect the install files to be fully up to date for a snapshot.
+dh_missing_options += --list-missing
+else
+dh_missing_options += --fail-missing
+endif
+
+override_dh_missing:
+	dh_missing $(dh_missing_options)
+
+# Yes, we do need both --no- options here. https://bugs.debian.org/837528
+override_dh_installinit:
+	dh_installinit -pdbus --no-stop-on-upgrade --no-restart-after-upgrade
+
+override_dh_installdocs:
+	dh_installdocs --all AUTHORS NEWS README
+
+override_dh_strip:
+	dh_strip --dbgsym-migration='dbus-1-dbg (<< 1.11.10-2~)'
+
+debian/$(libdbusN).symbols: debian/$(libdbusN).symbols.in
+	sed -e 's/$${DEB_VERSION}/${DEB_VERSION}/g' \
+		< $< > $@
+
+ifeq ($(DEB_DISTRIBUTION),UNRELEASED)
+# We can't expect the symbols file to be fully up to date for a snapshot,
+# so only fail if we broke ABI. This overrides the -c4 below.
+export DPKG_GENSYMBOLS_CHECK_LEVEL = 1
+endif
+
+override_dh_makeshlibs: debian/$(libdbusN).symbols
+	dh_makeshlibs -Ndbus-tests -V --add-udeb=$(libdbusN)-udeb -- -c4
+
+override_dh_autoreconf:
+	cp INSTALL INSTALL.orig
+	dh_autoreconf
+	mv INSTALL.orig INSTALL
+
+override_dh_autoreconf_clean:
+	cp INSTALL INSTALL.orig
+	dh_autoreconf_clean
+	mv INSTALL.orig INSTALL
+
+override_dh_auto_clean:
+	dh_auto_clean
+	dh_auto_clean --builddirectory=debian/build-debug
+	dh_auto_clean --builddirectory=debian/build-udeb
+	rm -f debian/build-*/test/data/valid-config-files/session.conf
+	rm -f debian/build-*/test/data/valid-config-files/system.conf
+	rm -f dbus.devhelp
+
+clean:
+	rm -rf debian/tmp-home
+	rm -rf debian/tmp-udeb
+	dh $@ $(dh_options)

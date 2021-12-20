@@ -1,0 +1,24 @@
+From: John Johansen <john.johansen@canonical.com>
+Date: Tue, 12 Mar 2019 16:17:35 -0700
+Subject: library: fix segfault in overlaydirat_for_each
+
+(cherry picked from commit abbca9435f4ca427f73176e2dd2500819e491662)
+Signed-off-by: John Johansen <john.johansen@canonical.com>
+Acked-by: Tyler Hicks <tyler.hicks@canonical.com>
+---
+ libraries/libapparmor/src/private.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/libraries/libapparmor/src/private.c b/libraries/libapparmor/src/private.c
+index bf14289..225762e 100644
+--- a/libraries/libapparmor/src/private.c
++++ b/libraries/libapparmor/src/private.c
+@@ -401,7 +401,7 @@ int _aa_overlaydirat_for_each(int dirfd[], int n, void *data,
+ 		}
+ 		if (merge(overlay, size, max_size, list, n_list, dirfd[i])) {
+ 			for (k = 0; k < n_list; k++)
+-				free(list[i]);
++				free(list[k]);
+ 			for (k = 0; k < size; k++)
+ 				free(overlay[k].dent);
+ 			return -1;

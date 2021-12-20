@@ -1,0 +1,12 @@
+START
+File: unconfined-change_hat.in
+Event type: AA_RECORD_ALLOWED
+Audit ID: 1487719321.954:218
+Operation: change_hat
+Profile: unconfined
+Command: apache2
+Info: unconfined can not change_hat
+ErrorCode: 1
+PID: 19941
+Epoch: 1487719321
+Audit subid: 218

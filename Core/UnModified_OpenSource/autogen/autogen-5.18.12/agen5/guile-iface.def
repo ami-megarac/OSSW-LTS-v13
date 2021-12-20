@@ -1,0 +1,65 @@
+/* -*- Mode: C -*- */
+/**
+ * \file guile-iface.def
+ *
+ *  This file is part of AutoGen.
+ *  Copyright (C) 1992-2016 Bruce Korb - all rights reserved
+ *
+ * AutoGen is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * AutoGen is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+AutoGen Definitions guile-iface.tpl;
+
+#if 0
+iface = {
+  i-name    = ;
+  i-args    = ;
+  i-impl    = { i-end = ''; i-code = ''; };
+};
+#endif
+
+invalid = '200000-200003',
+         '-106999';
+
+iface = {
+  i-name    = is_proc;
+  i-args    = '_p';
+  i-impl    = { i-end = '201'; i-code = 'scm_is_true( scm_procedure_p(_p))'; };
+};
+
+iface = {
+  i-name    = list_p;
+  i-args    = '_l';
+  i-impl    = { i-end = '201'; i-code = 'scm_is_true( scm_list_p(_l))'; };
+};
+
+iface = {
+  i-name    = pair_p;
+  i-args    = '_p';
+  i-impl    = { i-end = '201'; i-code = 'scm_is_true( scm_pair_p(_p))'; };
+};
+
+iface = {
+  i-name    = to_long;
+  i-args    = '_v';
+  i-impl    = { i-end = '201'; i-code = 'scm_to_long(_v)'; };
+};
+
+iface = {
+  i-name    = to_ulong;
+  i-args    = '_v';
+  i-impl    = { i-end = '201'; i-code = '((unsigned long)scm_to_ulong(_v))'; };
+};
+
+/* end of guile-iface.def */

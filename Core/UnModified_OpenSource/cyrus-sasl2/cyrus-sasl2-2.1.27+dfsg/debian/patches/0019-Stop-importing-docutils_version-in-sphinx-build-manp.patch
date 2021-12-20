@@ -1,0 +1,20 @@
+From: =?utf-8?b?T25kxZllaiBTdXLDvQ==?= <ondrej@sury.org>
+Date: Mon, 21 Jan 2019 15:53:54 +0000
+Subject: Stop importing docutils_version in sphinx-build manpage helper
+
+---
+ docsrc/exts/sphinxlocal/writers/manpage.py | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/docsrc/exts/sphinxlocal/writers/manpage.py b/docsrc/exts/sphinxlocal/writers/manpage.py
+index 463524a..13864e0 100644
+--- a/docsrc/exts/sphinxlocal/writers/manpage.py
++++ b/docsrc/exts/sphinxlocal/writers/manpage.py
+@@ -23,7 +23,6 @@ from sphinx.writers.manpage import (
+ from sphinx import addnodes
+ from sphinx.locale import admonitionlabels, _
+ from sphinx.util.osutil import ustrftime
+-from sphinx.util.compat import docutils_version
+ 
+ class CyrusManualPageWriter(ManualPageWriter):
+ 

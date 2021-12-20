@@ -1,0 +1,10 @@
+#
+#=DESCRIPTION A simple syntax error -- missing hatname + bad parsing
+#=EXRESULT FAIL
+#
+/usr/bin/foo^!!!!!!!!!^BLAH { 
+  /blah rw,
+}
+
+/usr/bin/foo {
+}

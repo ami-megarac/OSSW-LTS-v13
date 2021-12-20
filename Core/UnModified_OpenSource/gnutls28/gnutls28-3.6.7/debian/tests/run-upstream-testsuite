@@ -1,0 +1,44 @@
+#! /bin/sh
+
+set -e
+
+export srcdir=`pwd`/tests
+PKGTDIR=`pwd`/b4deb/pkgtest
+
+rm -rf "$PKGTDIR"
+mkdir -p "$PKGTDIR"
+cd "$PKGTDIR"
+
+export  CLI=/usr/bin/gnutls-cli \
+	SERV=/usr/bin/gnutls-serv \
+	CERTTOOL=/usr/bin/certtool P11TOOL=/usr/bin/p11tool \
+	PSKTOOL=/usr/bin/psktool DANETOOL=/usr/bin/danetool \
+	DCLI=/usr/bin/gnutls-cli-debug \
+	ENABLE_GOST=1
+
+count=1
+for i in $(find ../../tests/ -type f -perm -u+rx | \
+	grep -Ev 'tests/pkgconfig.sh|/tests/scripts/slow/|tests/slow/|tests/dtls/dtls-resume|tests/dtls/dtls$|tests/destructive/|/cbc-record-check.sh') ; do
+	echo "running [$count]$i ..."
+	case $(dirname $i) in
+		*/tests/suite)
+			d=suite;;
+		*/tests/cert-tests)
+			d=cert-tests;;
+		*/tests/slow)
+			d=slow;;
+		*)
+			d="";;
+	esac
+	if env srcdir=../../tests/$d $i ; then
+		echo SUCCESS [$count]$i
+	else
+		if [ $? = 77 ] ; then
+			echo SKIPPED [$count]$i
+		else
+			echo FAIL [$count]$i
+			false
+		fi
+	fi
+	count=$(($count+1))
+done

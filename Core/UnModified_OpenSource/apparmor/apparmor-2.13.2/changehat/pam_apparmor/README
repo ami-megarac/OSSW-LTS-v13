@@ -1,0 +1,77 @@
+pam_apparmor - a (linux specific) PAM module to add support for
+apparmor's subprocess confinement.
+
+An apparmor profile applies to an executable program; if a portion of
+the program needs different access permissions than other portions, the
+program can "change hats" via change_hat(2) to a different role, also
+known as a subprofile. The pam_apparmor PAM module allows applications
+to confine authenticated users into subprofiles based on groupnames,
+usernames, or a default profile. To accomplish this, pam_apparmor needs
+to be registered as a PAM session module.
+
+Compiling pam_apparmor
+----------------------
+The pam-development libraries and libapparmor need to be installed
+on the build system.  'make' should be all that is needed to build
+pam_apparmor.so; 'make rpm' should work on RPM-based systems.
+
+Configuring pam_apparmor
+------------------------
+To add pam_apparmor support to a pam enabled application, add a line
+like the following to the pam configuration file for the application
+(usually stored in /etc/pam.d/):
+
+  session  optional       pam_apparmor.so
+
+Likely you will want add the pam_apparmor after other session management
+modules. If you make the pam_apparmor module 'required' instead of
+'optional', the session will abort if pam_apparmor is not able to
+successfully find a hat to change_hat into. Be careful when making it
+required; it is possible to cause all attempted logins to the service to
+fail if the apparmor policy is insufficient.
+
+By default, pam_apparmor will attempt to change_hat into a hat based
+on the primary group name of the user logging in. If that hat fails to
+exist, the module will attempt to change_hat into a hat named DEFAULT
+(it is recommended to ensure this hat exists in the apparmor profiles
+for applications using pam_apparmor).
+
+However, this is configurable by adding an option to the pam configuration
+line to modify what order and what attributes pam_apparmor will attempt
+to use when attempting to change_hat. To do so, add 'order=' followed by
+a comma separated list of types of hats to try. The type of hats
+available are:
+
+  * 'user' - the username will be used as the hatname
+  * 'group' - the primary group will be used as the hatname
+  * 'default' - the string 'DEFAULT' will be used as the hatname.
+		Generally, this should be the hat of last resort.
+
+The order in the list determines the order the hat will be attempted.
+Some example configurations:
+
+  # the default behavior
+  session  optional       pam_apparmor.so order=group,default
+
+  # attempt to use only the username
+  session  optional       pam_apparmor.so order=user
+
+  # use the username, followed by the primary groupname, followed by
+  # DEFAULT if the prior hats do not exist in the apparmor profile
+  session  optional       pam_apparmor.so order=user,group,default
+
+You can also add a 'debug' flag to the pam_apparmor session line; this
+will cause the pam module to report more of what it is attempting to do
+to syslog.
+
+References
+----------
+Project webpage:
+http://developer.novell.com/wiki/index.php/Novell_AppArmor
+
+To provide feedback or ask questions please contact the
+apparmor-dev@forge.novell.com mail list. This is the development list
+for the AppArmor team.
+
+See also: change_hat(3), and the Linux-PAM online documentation at
+http://www.kernel.org/pub/linux/libs/pam/Linux-PAM-html/

@@ -1,0 +1,19 @@
+#!/usr/bin/make -f
+
+include /usr/share/cdbs/1/rules/debhelper.mk
+include /usr/share/cdbs/1/class/autotools.mk
+
+DEB_CONFIGURE_PATH_ARGS += --libdir=\$${prefix}/lib/$(DEB_HOST_MULTIARCH)
+DEB_CONFIGURE_EXTRA_FLAGS = --enable-shared --disable-libtool-lock
+DEB_INSTALL_CHANGELOGS_ALL = NEWS
+DEB_INSTALL_DOCS_ALL =
+DEB_MAKE_CHECK_TARGET = check test
+DEB_DH_MAKESHLIBS_ARGS = --add-udeb=liblzo2-2-udeb
+CPPFLAGS += -DLZO_CFG_MODERN_C=1
+
+common-install-impl::
+	mkdir -p $(DEB_DESTDIR)/lib/$(DEB_HOST_MULTIARCH)
+	mv $(DEB_DESTDIR)/usr/lib/$(DEB_HOST_MULTIARCH)/*.so.* $(DEB_DESTDIR)/lib/$(DEB_HOST_MULTIARCH)
+	ln -sf /lib/$(DEB_HOST_MULTIARCH)/$$(basename $$(readlink $(DEB_DESTDIR)/usr/lib/$(DEB_HOST_MULTIARCH)/*.so)) $(DEB_DESTDIR)/usr/lib/$(DEB_HOST_MULTIARCH)/*.so
+	mkdir -p $(DEB_DESTDIR)/usr/share/lzo/minilzo
+	install -D -m 644 minilzo/README.LZO minilzo/minilzo.c minilzo/minilzo.h include/lzo/lzoconf.h include/lzo/lzodefs.h $(CURDIR)/debian/tmp/usr/share/lzo/minilzo

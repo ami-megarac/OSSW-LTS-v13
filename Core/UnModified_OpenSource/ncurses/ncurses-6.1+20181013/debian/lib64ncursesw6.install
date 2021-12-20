@@ -1,0 +1,4 @@
+obj-wide-64/lib/libncursesw.so.* lib64
+obj-wide-64/lib/libpanelw.so.* usr/lib64
+obj-wide-64/lib/libformw.so.* usr/lib64
+obj-wide-64/lib/libmenuw.so.* usr/lib64

@@ -1,0 +1,10 @@
+#=DESCRIPTION trailing garbage should trigger an error
+#=EXRESULT FAIL
+
+@{LIBVIRT} = "libvirt
+
+/does/not/exist {
+
+  change_profile ->
+  	@{LIBVIRT}-[0-9a-f]*-[0-9a-f]*-[0-9a-f]*-[0-9a-f]*-[0-9a-f]*,
+}

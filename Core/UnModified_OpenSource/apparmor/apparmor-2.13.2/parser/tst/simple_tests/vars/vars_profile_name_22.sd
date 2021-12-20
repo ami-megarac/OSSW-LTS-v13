@@ -1,0 +1,10 @@
+#=DESCRIPTION all attachment expansions must start with /
+#=EXRESULT FAIL
+#=TODO
+# This test needs check on @{FOO} attachment having leading / post var expansion
+
+@{FOO}=/bar baz
+
+profile /does/not/exist @{FOO} {
+  /does/not/exist r,
+}

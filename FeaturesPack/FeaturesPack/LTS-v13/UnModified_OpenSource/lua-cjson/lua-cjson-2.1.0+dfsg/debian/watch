@@ -1,0 +1,4 @@
+version=3
+opts=dversionmangle=s/\+dfsg// \
+http://www.kyne.com.au/~mark/software/ \
+	download/lua-cjson-(\d+(?:\.\d+)+).tar.gz

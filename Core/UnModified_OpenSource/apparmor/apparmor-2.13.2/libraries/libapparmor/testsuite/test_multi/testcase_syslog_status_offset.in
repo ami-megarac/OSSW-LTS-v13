@@ -1,0 +1,1 @@
+Sep  8 16:42:16 jj-desktop kernel: [ 2143.902340] type=1400 audit(1283989336.064:272335): apparmor="STATUS" info="failed to unpack profile" error=-71 pid=4958 comm="apparmor_parser" name="/home/jj/master/tests/regression/apparmor/net_raw" offset=159

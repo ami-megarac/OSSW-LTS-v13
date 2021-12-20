@@ -1,0 +1,12 @@
+#
+#=DESCRIPTION m and [uUpPi]x do not conflict
+#=EXRESULT PASS
+#
+/usr/bin/foo {
+  file /bin/cat mix,
+  file /bin/true mpx,
+  file /bin/false mux,
+  file /lib/libc.so rwlm,
+  file /bin/less mUx,
+  file /bin/more mPx,
+}

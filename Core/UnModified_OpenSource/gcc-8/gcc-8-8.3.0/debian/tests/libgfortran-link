@@ -1,0 +1,23 @@
+#!/bin/sh
+# autopkgtest check: Build and run a simple program against libgfortran,
+# to verify basic compile-time and run-time linking functionality.
+
+set -e
+
+F95=gfortran-8
+
+WORKDIR=$(mktemp -d)
+trap "rm -rf $WORKDIR" 0 INT QUIT ABRT PIPE TERM
+cd $WORKDIR
+cat <<EOF > libgfortran.f
+       program hello
+          print *, "Hello World!"
+       end program hello
+EOF
+
+$F95 -o ftest libgfortran.f
+echo "build: OK"
+ldd ftest
+[ -x ftest ]
+./ftest
+echo "run: OK"

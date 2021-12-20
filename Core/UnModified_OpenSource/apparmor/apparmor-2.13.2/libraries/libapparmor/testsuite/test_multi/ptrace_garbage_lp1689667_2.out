@@ -1,0 +1,10 @@
+START
+File: ptrace_garbage_lp1689667_2.in
+Event type: AA_RECORD_INVALID
+Audit ID: 1494272099.261:3455
+Operation: ptrace
+Profile: /bin/netstat
+Command: netstat
+PID: 1962
+Epoch: 1494272099
+Audit subid: 3455

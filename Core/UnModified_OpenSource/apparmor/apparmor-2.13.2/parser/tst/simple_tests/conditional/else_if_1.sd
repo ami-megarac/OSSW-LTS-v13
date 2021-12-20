@@ -1,0 +1,27 @@
+#=DESCRIPTION conditional else
+#=EXRESULT PASS
+
+$FOO=true
+$FALSE = false
+
+/bin/true {
+  ^TRUE {
+    if $FOO {
+      /bin/true rix,
+    } else {
+      if $FALSE {
+        /bin/false rix,
+      }
+    }
+  }
+
+  ^FALSE {
+    if not $FOO {
+      /bin/true rix,
+    } else {
+      if not ${FALSE} {
+        /bin/false rix,
+      }
+    }
+  }
+}

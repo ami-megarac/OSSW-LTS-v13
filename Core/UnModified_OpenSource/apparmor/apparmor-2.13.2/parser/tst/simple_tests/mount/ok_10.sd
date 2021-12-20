@@ -1,0 +1,7 @@
+#
+#=Description basic mount rule
+#=EXRESULT PASS
+#
+/usr/bin/foo {
+  mount fstype=(procfs) -> /foo,
+}

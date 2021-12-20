@@ -1,0 +1,28 @@
+From: Tom Lee <debian@tomlee.co>
+Date: Sun, 4 Nov 2018 22:59:09 +0000
+Subject: Fix race creating unix socket in tests.
+
+ There seems to be a race between the Redis server strarting up and
+ the unix socket test. This gives redis a little more time to create
+ the socket file.
+---
+ Makefile | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/Makefile b/Makefile
+index de6d2c5..82a14b3 100644
+--- a/Makefile
++++ b/Makefile
+@@ -147,6 +147,12 @@ test: hiredis-test
+ 
+ check: hiredis-test
+ 	@echo "$$REDIS_TEST_CONFIG" | $(REDIS_SERVER) -
++	for i in 1 2 3 4 5; do \
++		if [ -r /tmp/hiredis-test-redis.sock ]; then \
++			break; \
++		fi; \
++		sleep 1; \
++	done
+ 	$(PRE) ./hiredis-test -h 127.0.0.1 -p $(REDIS_PORT) -s /tmp/hiredis-test-redis.sock || \
+ 			( kill `cat /tmp/hiredis-test-redis.pid` && false )
+ 	kill `cat /tmp/hiredis-test-redis.pid`

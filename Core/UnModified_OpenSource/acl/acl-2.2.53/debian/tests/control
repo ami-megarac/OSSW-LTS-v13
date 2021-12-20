@@ -1,0 +1,11 @@
+Tests: test-build
+Restrictions: superficial
+Depends: build-essential, pkg-config, libacl1-dev
+
+Tests: test-func
+Restrictions: flaky rw-build-tree
+Depends: build-essential, autoconf, automake, autopoint, libtool, libattr1-dev (>= 1:2.4.46-8), acl
+
+Tests: test-func-root
+Restrictions: flaky rw-build-tree needs-root
+Depends: build-essential, autoconf, automake, autopoint, libtool, libattr1-dev (>= 1:2.4.46-8), acl

@@ -1,0 +1,698 @@
+#!/usr/bin/perl
+# ------------------------------------------------------------------
+#
+#    Copyright (C) 2009-2011 Canonical Ltd.
+#
+#    This program is free software; you can redistribute it and/or
+#    modify it under the terms of version 2 of the GNU General Public
+#    License published by the Free Software Foundation.
+#
+# ------------------------------------------------------------------
+#
+# /etc/apparmor/notify.conf:
+# # set to 'yes' to enable AppArmor DENIED notifications
+# show_notifications="yes"
+#
+# # only people in use_group can run this script
+# use_group="admin"
+#
+# $HOME/.apparmor/notify.conf can have:
+# # set to 'yes' to enable AppArmor DENIED notifications
+# show_notifications="yes"
+#
+
+use strict;
+use warnings;
+no warnings qw( once );
+
+require LibAppArmor;
+require POSIX;
+require Time::Local;
+require File::Basename;
+
+use Getopt::Long;
+
+my %prefs;
+my $conf = "/etc/apparmor/notify.conf";
+my $user_conf = "";
+my $notify_exe = "/usr/bin/notify-send";
+my $notify_home = "";
+my $notify_display = "";
+my $last_exe = "/usr/bin/last";
+my $ps_exe = "/bin/ps";
+my $url = "https://wiki.ubuntu.com/DebuggingApparmor";
+my $nobody_user = "nobody";
+my $nobody_group = "nogroup";
+
+sub readconf;
+sub parse_message;
+sub format_message;
+sub format_stats;
+sub kill_running_daemons;
+sub do_notify;
+sub show_since;
+sub do_last;
+sub do_show_messages;
+sub _error;
+sub _warn;
+sub _debug;
+sub exitscript;
+sub usage;
+
+#
+# Main script
+#
+
+# Clean environment
+$ENV{PATH} = "/bin:/usr/bin";
+$ENV{SHELL} = "/bin/sh";
+defined($ENV{IFS}) and $ENV{IFS} = ' \t\n';
+
+my $prog = File::Basename::basename($0);
+
+if ($prog !~ /^[a-zA-Z0-9_\-]+$/) {
+    print STDERR "ERROR: bad programe name '$prog'\n";
+    exitscript(1);
+}
+
+$> == $< or die "Cannot be suid\n";
+$) == $( or die "Cannot be sgid\n";
+
+my $login;
+our $orig_euid = $>;
+
+my $opt_d = '';
+my $opt_display = '';
+my $opt_h = '';
+my $opt_l = '';
+my $opt_p = '';
+my $opt_v = '';
+my $opt_f = '';
+my $opt_s = 0;
+my $opt_u = '';
+my $opt_w = 0;
+GetOptions(
+    'debug|d'        => \$opt_d,
+    'display=s'      => \$opt_display,
+    'help|h'         => \$opt_h,
+    'since-last|l'   => \$opt_l,
+    'poll|p'         => \$opt_p,
+    'verbose|v'      => \$opt_v,
+    'file|f=s'       => \$opt_f,
+    'since-days|s=n' => \$opt_s,
+    'user|u=s'       => \$opt_u,
+    'wait|w=n'       => \$opt_w,
+);
+if ($opt_h) {
+    usage;
+    exitscript(0);
+}
+
+# monitor file specified with -f, else use audit.log if auditd is running,
+# otherwise kern.log
+our $logfile = "/var/log/kern.log";
+if ($opt_f) {
+    -f $opt_f or die "'$opt_f' does not exist. Aborting\n";
+    $logfile = $opt_f;
+} else {
+    -e "/var/run/auditd.pid" and $logfile = "/var/log/audit/audit.log";
+}
+
+-r $logfile or die "Cannot read '$logfile'\n";
+our $logfile_inode = get_logfile_inode($logfile);
+our $logfile_size = get_logfile_size($logfile);
+open (LOGFILE, "<$logfile") or die "Could not open '$logfile'\n";
+# Drop priviliges, if running as root
+if ($< == 0) {
+    $login = "root";
+    if (defined($ENV{SUDO_UID}) and defined($ENV{SUDO_GID})) {
+        $) = "$ENV{SUDO_GID} $ENV{SUDO_GID}" or _error("Could not change egid");
+        $( = $ENV{SUDO_GID} or _error("Could not change gid");
+        $> = $ENV{SUDO_UID} or _error("Could not change euid");
+        defined($ENV{SUDO_USER}) and $login = $ENV{SUDO_USER};
+    } else {
+        my $drop_to = $nobody_user;
+        if ($opt_u) {
+            $drop_to = $opt_u;
+        }
+        # nobody/nogroup
+        my $nam = scalar(getgrnam($nobody_group));
+        $) = "$nam $nam" or _error("Could not change egid");
+        $( = $nam or _error("Could not change gid");
+        $> = scalar(getpwnam($drop_to)) or _error("Could not change euid to '$drop_to'");
+    }
+} else {
+    $login = getlogin();
+    defined $login or $login = $ENV{'USER'};
+}
+
+if (-s $conf) {
+    readconf($conf);
+    if (defined($prefs{use_group})) {
+        my ($name, $passwd, $gid, $members) = getgrnam($prefs{use_group});
+        if (not defined($members) or not defined($login) or (not grep { $_ eq $login } split(/ /, $members) and $login ne "root")) {
+            _error("'$login' must be in '$prefs{use_group}' group. Aborting.\nAsk your admin to add you to this group or to change the group in\n$conf if you want to use aa-notify.");
+        }
+    }
+}
+
+# find user's notify.conf
+if (-e "$ENV{HOME}/.apparmor/notify.conf" ) {
+    # use legacy path if the conf file is there
+    $user_conf = "$ENV{HOME}/.apparmor/notify.conf";
+} elsif (defined $ENV{XDG_CONFIG_HOME}) {
+    # use XDG_CONFIG_HOME if it is defined
+    $user_conf = "$ENV{XDG_CONFIG_HOME}/apparmor/notify.conf";
+} else {
+    # fallback to the default value of XDG_CONFIG_HOME
+    $user_conf = "$ENV{HOME}/.config/apparmor/notify.conf";
+}
+
+if ($opt_p) {
+    # notify-send is packaged in libnotify-bin on Debian/Ubuntu, libnotify-tools on openSUSE
+    -x "$notify_exe" or _error("Could not find '$notify_exe'. Please install it (package libnotify-bin or libnotify-tools). Aborting");
+
+    # we need correct values for $HOME and $DISPLAY environment variables,
+    # otherwise $notify_exe won't be able to connect to DBUS to display the
+    # message. Do this here to avoid excessive lookups.
+    $notify_home = (getpwuid $>)[7]; # homedir of the user
+
+    if ($opt_display ne '') {
+        $notify_display = $opt_display;
+    } elsif (defined($ENV{'DISPLAY'})) {
+        $notify_display = $ENV{'DISPLAY'};
+    }
+
+    if ($notify_display eq '') {
+        my $sudo_warn_msg = '';
+        if (defined($ENV{'SUDO_USER'})) {
+            $sudo_warn_msg = ' (or reset by sudo)';
+        }
+        _warn("Environment variable \$DISPLAY not set$sudo_warn_msg.");
+        _warn ('Desktop notifications will not work.');
+        if ($sudo_warn_msg ne '') { 
+            _warn ('Use   sudo aa-notify -p --display "$DISPLAY"   to set the environment variable.');
+        } else {
+            _warn ('Use something like   aa-notify -p --display :0   to set the environment variable.')
+        }
+    }
+} elsif ($opt_l) {
+    -x "$last_exe" or _error("Could not find '$last_exe'. Aborting");
+}
+if ($opt_s and not $opt_l) {
+    $opt_s =~ /^[0-9]+$/ or _error("-s requires a number");
+}
+
+if ($opt_w) {
+    $opt_w =~ /^[0-9]+$/ or _error("-w requires a number");
+}
+
+if ($opt_p or $opt_l) {
+    if (-s $user_conf) {
+        readconf($user_conf);
+    }
+
+    if (defined($prefs{show_notifications}) and $prefs{show_notifications} ne "yes") {
+        _debug("'show_notifications' is disabled. Exiting");
+        exitscript(0);
+    }
+}
+
+my $now = time();
+if ($opt_p) {
+    do_notify();
+} elsif ($opt_l) {
+    do_last();
+} elsif ($opt_s and not $opt_p) {
+    do_show_messages($opt_s);
+} else {
+    usage;
+    exitscript(1);
+}
+
+exitscript(0);
+
+#
+# Subroutines
+#
+sub readconf {
+    my $cfg = $_[0];
+    -r $cfg or die "'$cfg' does not exist\n";
+
+    open (CFG, "<$cfg") or die "Could not open '$cfg'\n";
+    while (<CFG>) {
+        chomp;
+        s/#.*//;                # no comments
+        s/^\s+//;               # no leading white
+        s/\s+$//;               # no trailing white
+        next unless length;     # anything left?
+        my ($var, $value) = split(/\s*=\s*/, $_, 2);
+        if ($var eq "show_notifications" or $var eq "use_group" or $var eq "message_body" or $var eq "message_title" or $var eq "message_footer") {
+            $value =~ s/^"(.*)"$/$1/g;
+            $prefs{$var} = $value;
+        }
+    }
+    close(CFG);
+}
+
+sub parse_message {
+    my @params = @_;
+    my $msg = $params[0];
+
+    chomp($msg);
+    #_debug("processing: $msg");
+
+    my ($test) = LibAppArmorc::parse_record($msg);
+
+    # Don't show logs before certain date
+    my $date = LibAppArmor::aa_log_record::swig_epoch_get($test);
+    my $since = 0;
+    if (defined($date) and $#params > 0 and $params[1] =~ /^[0-9]+$/) {
+        $since = int($params[1]);
+        int($date) >= $since or goto err;
+    }
+
+    # ignore all but status and denied messages
+    my $type = LibAppArmor::aa_log_record::swig_event_get($test);
+
+    if ($type != $LibAppArmor::AA_RECORD_DENIED and $type != $LibAppArmor::AA_RECORD_ALLOWED) {
+        goto err;
+    }
+
+    my $profile = LibAppArmor::aa_log_record::swig_profile_get($test);
+    my $operation = LibAppArmor::aa_log_record::swig_operation_get($test);
+    my $name = LibAppArmor::aa_log_record::swig_name_get($test);
+    my $denied = LibAppArmor::aa_log_record::swig_denied_mask_get($test);
+    my $family = LibAppArmor::aa_log_record::swig_net_family_get($test);
+    my $sock_type = LibAppArmor::aa_log_record::swig_net_sock_type_get($test);
+    LibAppArmorc::free_record($test);
+
+    return ($profile, $operation, $name, $denied, $family, $sock_type, $date);
+
+err:
+    LibAppArmorc::free_record($test);
+    return ();
+}
+
+sub format_message {
+    my ($profile, $operation, $name, $denied, $family, $sock_type, $date) = @_;
+
+    my $formatted = "";
+    if (defined($prefs{message_body})) {
+        $formatted .= $prefs{message_body};
+    } else {
+        defined($profile) and $formatted .= "Profile: $profile\n";
+        defined($operation) and $formatted .= "Operation: $operation\n";
+        defined($name) and $formatted .= "Name: $name\n";
+        defined($denied) and $formatted .= "Denied: $denied\n";
+        defined($family) and defined ($sock_type) and $formatted .= "Family: $family\nSocket type: $sock_type\n";
+        $formatted .= "Logfile: $logfile\n";
+    }
+
+    return $formatted;
+}
+
+sub format_stats {
+    my $num = $_[0];
+    my $time = $_[1];
+    if ($num > 0) {
+        print "AppArmor denial";
+        $num > 1 and print "s";
+        print ": $num (since " . scalar(localtime($time)) . ")\n";
+        $opt_v and print "For more information, please see: $url\n";
+    }
+}
+
+sub kill_running_daemons {
+    # Look for other daemon instances of this script and kill them. This
+    # can happen on logout and back in (in which case $notify_exe fails
+    # anyway). 'ps xw' should output something like:
+    #  9987 ?        Ss     0:01 /usr/bin/perl ./bin/aa-notify -p
+    # 10170 ?        Ss     0:00 /usr/bin/perl ./bin/aa-notify -p
+    open(PS,"$ps_exe xw|") or die "Unable to run '$ps_exe':$!\n";
+    while(<PS>) {
+        chomp;
+        /$prog -[ps]/ or next;
+        s/^\s+//;
+        my @line = split(/\s+/, $_);
+        if ($line[5] =~ /$prog$/ and ($line[6] eq "-p" or $line[6] eq "-s")) {
+            if ($line[0] != $$) {
+                _warn("killing old daemon '$line[0]'");
+                kill 15, ($line[0]);
+            }
+        }
+    }
+    close(PS);
+}
+
+sub send_message {
+    my $msg = $_[0];
+
+    my $pid = fork();
+    if ($pid == 0) { 	# child
+        # notify-send needs $< to be the unprivileged user
+        $< = $>;
+
+        $notify_home ne "" and $ENV{'HOME'} = $notify_home;
+        $notify_display ne "" and $ENV{'DISPLAY'} = $notify_display;
+        if (not defined($ENV{'DBUS_SESSION_BUS_ADDRESS'})) {
+            $ENV{'DBUS_SESSION_BUS_ADDRESS'} = "unix:path=/run/user/$>/bus";
+        }
+
+        # 'system' uses execvp() so no shell metacharacters here.
+        # $notify_exe is an absolute path so execvp won't search PATH.
+        system "$notify_exe", "-i", "gtk-dialog-warning", "-u", "normal", "--", "AppArmor Message", "$msg";
+        my $exit_code = $? >> 8;
+        exit($exit_code);
+    }
+
+    # parent
+    waitpid($pid, 0);
+    return $?;
+}
+
+sub do_notify {
+    my %seen;
+    my $seconds = 5;
+    our $time_to_die = 0;
+
+    print "Starting aa-notify\n";
+    kill_running_daemons();
+
+    # Daemonize, but not if in debug mode
+    if (not $opt_d) {
+        chdir('/') or die "Can't chdir to /: $!";
+        umask 0;
+        open STDIN, '/dev/null' or die "Can't read /dev/null: $!";
+        open STDOUT, '>/dev/null' or die "Can't write to /dev/null: $!";
+        #open STDERR, '>/dev/null' or die "Can't write to /dev/null: $!";
+        my $pid = fork();
+        exit if $pid;
+        die "Couldn't fork: $!" unless defined($pid);
+        POSIX::setsid() or die "Can't start a new session: $!";
+    }
+
+    sub signal_handler {
+        $time_to_die = 1;
+    }
+    $SIG{INT} = $SIG{TERM} = $SIG{HUP} = \&signal_handler;
+    $SIG{'PIPE'} = 'IGNORE';
+
+    if ($opt_w) {
+        sleep($opt_w);
+    }
+
+    my $count = 0;
+    my $footer = exists $prefs{message_footer} ? $prefs{message_footer} : "For more information, please see:\n$url";
+    my $first_run = 1;
+    my $since = $now;
+    if ($opt_s and int($opt_s) > 0) {
+       $since = $since - (int($opt_s) * 60 * 60 * 24);
+    }
+    for (my $i=0; $time_to_die == 0; $i++) {
+        if ($logfile_inode != get_logfile_inode($logfile)) {
+            _warn("$logfile changed inodes, reopening");
+            reopen_logfile();
+        } elsif (get_logfile_size($logfile) < $logfile_size) {
+            _warn("$logfile is smaller, reopening");
+            reopen_logfile();
+        }
+        while(my $msg = <LOGFILE>) {
+            my @attrib;
+            if ($first_run == 1) {
+                if ($since != $now) {
+                    @attrib = parse_message($msg, $since);
+                }
+            } else {
+                @attrib = parse_message($msg);
+            }
+            $#attrib > 0 or next;
+            if ($first_run == 1) {
+               $count++;
+               next;
+            }
+
+            my ($profile, $operation, $name, $denied, $family, $sock_type, $date) = @attrib;
+
+            # Rate limit messages by creating a hash whose keys are:
+            # - for files: $profile|$name|$denied|
+            # - for everything else: $profile|$operation|$name|$denied|$family|$sock_type| (as available)
+            # The value for the key is a timestamp (epoch) and we won't show
+            # messages whose key has a timestamp from less than 5 seconds afo
+            my $k = "";
+            defined($profile) and $k .= "$profile|";
+            if (defined($name) and defined($denied)) {
+                $k .= "$name|$denied|";		# for file access, don't worry about operation
+            } else {
+                defined($operation) and $k .= "$operation|";
+                defined($name) and $k .= "$name|";
+                defined($denied) and $k .= "$denied|";
+                defined($family) and defined ($sock_type) and $k .= "$family|$sock_type|";
+            }
+
+            # don't display same message if seen in last 5 seconds
+            if (not defined($seen{$k})) {
+                $seen{$k} = time();
+            } else {
+                my $now = time();
+                $now - $seen{$k} < $seconds and next;
+                $seen{$k} = $now;
+            }
+
+            my $m = format_message(@attrib);
+            $m ne "" or next;
+
+            $m .= $footer;
+
+            my $rc = send_message($m);
+            if ($rc != 0) {
+                _warn("'$notify_exe' exited with error '$rc'");
+                $time_to_die = 1;
+                last;
+            }
+        }
+        # from seek() in Programming Perl
+        seek(LOGFILE, 0, 1);
+        sleep(1);
+
+        if ($first_run) {
+            if ($count > 0) {
+                my $m = "$logfile contains $count denied message";
+                $count > 1 and $m .= "s";
+                if ($opt_s) {
+                    $m .= " in the last ";
+                    if ($opt_s > 1) {
+                        $m .= "$opt_s days";
+                    } else {
+                        $m .= "day";
+                    }
+                }
+                $m .= ". ";
+                $m .= $footer;
+                send_message($m);
+            }
+            $first_run = 0;
+        }
+
+        # clean out the %seen database every 30 seconds
+        if ($i > 30) {
+            foreach my $k (keys %seen) {
+                my $now = time();
+                $now - $seen{$k} > $seconds and delete $seen{$k} and _debug("deleted $k");
+            }
+            $i = 0;
+            _debug("done purging");
+            foreach my $k (keys %seen) {
+                _debug("remaining key: $k: $seen{$k}");
+            }
+        }
+    }
+    print STDERR "Stopping aa-notify\n";
+}
+
+sub show_since {
+    my %msg_hash;
+    my %last_date;
+    my @msg_list;
+    my $count = 0;
+    while(my $msg = <LOGFILE>) {
+        my @attrib = parse_message($msg, $_[0]);
+        $#attrib > 0 or next;
+
+        my $m = format_message(@attrib);
+        $m ne "" or next;
+        my $date = $attrib[6];
+        if ($opt_v) {
+            if (exists($msg_hash{$m})) {
+                $msg_hash{$m}++;
+                defined($date) and $last_date{$m} = scalar(localtime($date));
+            } else {
+                $msg_hash{$m} = 1;
+                push(@msg_list, $m);
+            }
+        }
+        $count++;
+    }
+    if ($opt_v) {
+        foreach my $m (@msg_list) {
+            print "$m";
+            if ($msg_hash{$m} gt 1) {
+                print "($msg_hash{$m} found";
+                if (exists($last_date{$m})) {
+                    print ", most recent from '$last_date{$m}'";
+                }
+                print ")\n";
+            }
+            print "\n";
+        }
+    }
+    return $count;
+}
+
+sub do_last {
+    open(LAST,"$last_exe -F -a $login|") or die "Unable to run $last_exe:$!\n";
+    my $time = 0;
+    while(my $line = <LAST>) {
+        _debug("Checking '$line'");
+        $line =~ /^$login/ or next;
+        $line !~ /^$login\s+pts.*\s+:[0-9]+\.[0-9]+$/ or next; # ignore xterm and friends
+        my @entry = split(/\s+/, $line);
+        my ($hour, $min, $sec) = (split(/:/, $entry[5]))[0,1,2];
+        $time = Time::Local::timelocal($sec, $min, $hour, $entry[4], $entry[3], $entry[6]);
+        last;
+    }
+    close(LAST);
+    $time > 0 or _error("Couldn't find last login");
+
+    format_stats(show_since($time), $time);
+}
+
+sub do_show_messages {
+    my $since = $now - (int($_[0]) * 60 * 60 * 24);
+    format_stats(show_since($since), $since);
+}
+
+sub _warn {
+    my $msg = $_[0];
+    print STDERR "aa-notify: WARN: $msg\n";
+}
+sub _error {
+    my $msg = $_[0];
+    print STDERR "aa-notify: ERROR: $msg\n";
+    exitscript(1);
+}
+
+sub _debug {
+    $opt_d or return;
+    my $msg = $_[0];
+    print STDERR "aa-notify: DEBUG: $msg\n";
+}
+
+sub exitscript {
+    my $rc = $_[0];
+    close(LOGFILE);
+    exit $rc;
+}
+
+sub usage {
+    my $s = <<'EOF';
+USAGE: aa-notify [OPTIONS]
+
+Display AppArmor notifications or messages for DENIED entries.
+
+OPTIONS:
+  -p, --poll			poll AppArmor logs and display notifications
+  --display $DISPLAY		set the DISPLAY environment variable to $DISPLAY
+				(might be needed if sudo resets $DISPLAY)
+  -f FILE, --file=FILE		search FILE for AppArmor messages
+  -l, --since-last		display stats since last login
+  -s NUM, --since-days=NUM	show stats for last NUM days (can be used alone
+				or with -p)
+  -v, --verbose			show messages with stats
+  -h, --help			display this help
+  -u USER, --user=USER		user to drop privileges to when not using sudo
+  -w NUM, --wait=NUM		wait NUM seconds before displaying
+				notifications (with -p)
+EOF
+    print $s;
+}
+
+sub raise_privileges {
+    my $old_euid = -1;
+
+    if ($> != $<) {
+        _debug("raising privileges to '$orig_euid'");
+        $old_euid = $>;
+        $> = $orig_euid;
+        $> == $orig_euid or die "Could not raise privileges\n";
+    }
+
+    return $old_euid;
+}
+
+sub drop_privileges {
+    my $old_euid = $_[0];
+
+    # Just exit if we didn't raise privileges
+    $old_euid == -1 and return;
+
+    _debug("dropping privileges to '$old_euid'");
+    $> = $old_euid;
+    $> == $old_euid or die "Could not drop privileges\n";
+}
+
+sub reopen_logfile {
+    # reopen the logfile, temporarily switching back to starting euid for
+    # file permissions.
+    close(LOGFILE);
+
+    my $old_euid = raise_privileges();
+
+    $logfile_inode = get_logfile_inode($logfile);
+    $logfile_size = get_logfile_size($logfile);
+    open (LOGFILE, "<$logfile") or die "Could not open '$logfile'\n";
+
+    drop_privileges($old_euid);
+}
+
+sub get_logfile_size {
+    my $fn = $_[0];
+    my $size;
+    my $dir = File::Basename::dirname($fn);
+
+    # If we can't access the file, then raise privs. This can happen when
+    # using auditd and /var/log/audit/ is 700.
+    my $old_euid = -1;
+    if (! -x $dir) {
+        $old_euid = raise_privileges();
+    }
+
+    defined(($size = (stat($fn))[7])) or (sleep(10) and defined(($size = (stat($fn))[7])) or die "'$fn' disappeared. Aborting\n");
+
+    drop_privileges($old_euid);
+
+    return $size;
+}
+
+sub get_logfile_inode {
+    my $fn = $_[0];
+    my $inode;
+    my $dir = File::Basename::dirname($fn);
+
+    # If we can't access the file, then raise privs. This can happen when
+    # using auditd and /var/log/audit/ is 700.
+    my $old_euid = -1;
+    if (! -x $dir) {
+        $old_euid = raise_privileges();
+    }
+
+    defined(($inode = (stat($fn))[1])) or (sleep(10) and defined(($inode = (stat($fn))[1])) or die "'$fn' disappeared. Aborting\n");
+
+    drop_privileges($old_euid);
+
+    return $inode;
+}
+
+#
+# end Subroutines
+#

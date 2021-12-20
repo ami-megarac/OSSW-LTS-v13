@@ -1,0 +1,13 @@
+#
+#=DESCRIPTION m and [uUpPi]x do not conflict
+#=EXRESULT PASS
+# vim:syntax=apparmor
+#
+/usr/bin/foo {
+  allow /{usr/,}bin/cat mix,
+  allow /{usr/,}bin/true mpx,
+  allow /{usr/,}bin/false mux,
+  allow /lib/libc.so rwlm,
+  allow /{usr/,}bin/less mUx,
+  allow /{usr/,}bin/more mPx,
+}

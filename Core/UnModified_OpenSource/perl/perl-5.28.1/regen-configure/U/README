@@ -1,0 +1,187 @@
+
+		     Perl5 Metaconfig Units
+
+	     Copyright (c) 1996-1998, Andy Dougherty
+	     Copyright (c) 1999-2011, H.Merijn Brand
+			All rights reserved.
+
+These units are the ones used to build Configure and config_h.SH
+in the Perl5 distribution.
+
+metaconfig will first look in its standard locations (specified when you 
+installed dist).  It will then recurse through the 'U' subdirectory
+and find any additional "private" units.  Private units override
+standard ones supplied with metaconfig.
+
+Files in this directory:
+
+README
+    This file.
+
+Glossary.patch
+    The standard dist units contain some strings that make pod2man
+    complain.  This patch silences those warnings.  As new units are
+    added and Configure is regenerated, this patch may need more and more
+    'fuzz' to be applied.  It should be freshly regenerated every once
+    in a while. See also mkgloss.pl
+
+ln-all.pl
+    Re-generate the all/ folder
+
+mkglossary
+    A script to regenerate Porting/Glossary.  You have to manually
+    edit the top of the script to point the location of your metaconfig 
+    units.  It is called automatically by 'mksample'. See also mkgloss.pl
+
+mkgloss.pl
+    A perl script that calls U/mkglossary from the perl source tree, sorts
+    the list of symbols, and applies the patch mentioned in Glossary.patch.
+    When called on its own, redirect the output to a temporary file,  and
+    compare that file to Porting/Glossary before applying.
+
+mksample
+    A script to regenerate Porting/config.sh and Porting/config.H.
+    It also calls mkglossary, if necessary.
+
+Subdirectories:
+
+The units and other related files have been broken up into the following
+directories.
+
+a_dvisory/
+    These are units that have to go first in the generated config_h.SH.
+    A word of explanation:  Configure and config_h.SH are generated from 'Units'
+    (the *.U files).  Files indicate dependencies (using make(1)), and 
+    Configure is built to follow those dependencies.  However, config_h.SH
+    is simply built by putting all the units in alphabetical order and
+    extracting the relevant lines.  (This could be fixed, I suppose, but
+    it wasn't trivial the one time I looked.)
+    The a_dvisory/ directory, then, is a place to put units that need
+    to be early in config_h.SH.  (Most units are self-contained
+    and ought to be able to go anywhere.  However, some things, like 
+    byteorder, need to have the #defines from multiarch available.)
+
+acl/
+    This is an old patch to begin to detect and use ACL (access
+    control list) file protection schemes.
+
+all/
+    A folder that conveniently holds symbolic links to all the modules
+    that are used to build the current Configure and config_h.SH.
+
+compline/
+    These are similar to the standard units, but I have modified them
+    to have a more uniform compile command line, usually using the
+    new Compile.U unit.  (The ccflags.U unit is perl-specific since it
+    mentions -DDEBUGGING and -DPOSIX_SOURCE, but that's the only place
+    it is perl-specific.)
+
+dist_patches/
+    These are patches to dist that must be applied before it is built
+    and installed.  I have submitted these for inclusion in the
+    regular dist distribution.  They have already been applied
+    to the ../dist-3.0at70b directory. 
+
+ebcdic/
+    These are units that had to be specially modified to work under
+    either EBCDIC or ASCII.
+
+installdirs/
+    These are units to handle perl's installation directories and
+    related issues.
+
+modified/
+    These are modified versions of the standard units.  Also included in
+    this directory are new units that are clearly derived from existing
+    units.  I have submitted these for inclusion in the regular dist
+    distribution.
+
+nullified/
+    These are null units that replace units in the standard
+    distribution.  Typically they are there because some part of the
+    perl source accidentally uses a symbol that metaconfig thinks means we
+    want the corresponding unit.
+
+perl/
+    These are specific to perl.  Some are heavily derived from
+    original dist units, and are marked as such.  Others are original.
+
+perl_patches/
+    These are patches to the perl source.  This directory
+    should ordinarily be empty, but there may have been drift between
+    the standard version of perl and the one associated with these
+    units.
+
+protos/
+    These are units modified to use the new Hasproto.U or Protochk.U
+    units to check for prototypes.
+
+threads/
+    These are specific to threading perl.
+
+typedefs/
+    These are standard units modified to use the modified Typedef.U
+    unit to check for typedefs.  (The modified Typdef.U includes a
+    function to avoid unnecessary prompts if the typdef being searched
+    for exists.)
+ 
+
+Where appropriate, I submitted these units for inclusion into the
+regular dist distribution.  However, since dist is no longer actively
+maintained, and the alternative is for *me* to actively maintain it,
+the units just sit here.
+
+Copyright Information:
+
+Unless otherwise indicated, the files contained in this
+distribution are:
+
+    Copyright (c) 1996-1998, Andy Dougherty
+
+The following licensing terms apply to all files contained in
+this distribution:
+
+You may distribute the files contained in this distribution
+under the terms of either
+
+    a) the "Artistic License" which comes with Perl, or
+
+    b) the "Artistic License" which comes with dist, or
+
+    c) the GNU General Public License as published by the Free
+    Software Foundation; either version 1, or (at your option) any
+    later version (see the file "Copying" that comes with the
+    Perl distribution).
+
+Which one to use is your choice.
+
+The units in the "modified" directory have been derived from units
+associated with the metaconfig program of Raphael Manfredi's "dist"
+distribution.  These units list Raphael Manfredi as the Copyright holder.
+dist is distributed under a modified version of the Perl Artistic License.
+Clause 7 of this modified license as contained in dist-3.0-pl60 provides:
+
+    7. You may reuse parts of this Package in your own programs, provided
+    that you explicitly state where you got them from, in the source code
+    (and, left to your courtesy, in the documentation), duplicating
+    all the associated copyright notices and disclaimers. Besides
+    your changes, if any, must be clearly marked as such. Parts reused
+    that way will no longer fall under this license if, and only if,
+    the name of your program(s) have no immediate connection with the
+    name of the Package itself or its associated programs.  You may then
+    apply whatever restrictions you wish on the reused parts or choose
+    to place them in the Public Domain--this will apply only within the
+    context of your package.
+
+In accordance with this clause, the versions of these units
+contained here are made available under the same terms as the
+rest of the units.
+
+If you have any questions about the use of these units or about
+the differences between these units and the standard versions, please
+feel free to ask.
+
+    Andy Dougherty			doughera@lafayette.edu
+    Dept. of Physics
+    Lafayette College
+    Easton, PA  18042-1782

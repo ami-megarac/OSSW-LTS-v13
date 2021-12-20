@@ -1,0 +1,103 @@
+?RCS: $Id: sitearch.U,v 3.1 1999/07/08 18:32:29 doughera Exp doughera $
+?RCS:
+?RCS: Copyright (c) 1996-1998, Andy Dougherty
+?RCS: Copyright (c) 1991-1993, Raphael Manfredi
+?RCS:
+?RCS: You may redistribute only under the terms of the Artistic License,
+?RCS: as specified in the README file that comes with the distribution.
+?RCS: You may reuse parts of this distribution only within the terms of
+?RCS: that same Artistic License; a copy of which may be found at the root
+?RCS: of the source tree for dist 3.0.
+?RCS:
+?RCS: $Log: sitearch.U,v $
+?RCS: Revision 3.1  1999/07/08 18:32:29  doughera
+?RCS: Updated for perl5.005_5x
+?RCS:
+?RCS: Revision 3.0.1.1  1997/02/28  16:21:30  ram
+?RCS: patch61: created
+?RCS:
+?MAKE:sitearch sitearchexp installsitearch d_sitearch: cat sed Getfile \
+	Oldconfig Setprefixvar Prefixit test archname sitelib
+?MAKE:	-pick add $@ %<
+?Y:TOP
+?D:sitearch=''
+?S:sitearch:
+?S:	This variable contains the eventual value of the SITEARCH symbol,
+?S:	which is the name of the private library for this package.  It may
+?S:	have a ~ on the front. It is up to the makefile to eventually create
+?S:	this directory while performing installation (with ~ substitution).
+?S:	The standard distribution will put nothing in this directory.
+?S:	After perl has been installed, users may install their own local
+?S:	architecture-dependent modules in this directory with
+?S:		MakeMaker Makefile.PL
+?S:	or equivalent.  See INSTALL for details.
+?S:.
+?D:sitearchexp=''
+?S:sitearchexp:
+?S:	This variable is the ~name expanded version of sitearch, so that you
+?S:	may use it directly in Makefiles or shell scripts.
+?S:.
+?D:installsitearch=''
+?S:installsitearch:
+?S:	This variable is really the same as sitearchexp but may differ on
+?S:	those systems using AFS. For extra portability, only this variable
+?S:	should be used in makefiles.
+?S:.
+?D:d_sitearch=''
+?S:d_sitearch:
+?S:	This variable conditionally defines SITEARCH to hold the pathname
+?S:	of architecture-dependent library files for $package.  If
+?S:	$sitearch is the same as $archlib, then this is set to undef.
+?S:.
+?C:SITEARCH:
+?C:	This symbol contains the name of the private library for this package.
+?C:	The library is private in the sense that it needn't be in anyone's
+?C:	execution path, but it should be accessible by the world.  The program
+?C:	should be prepared to do ~ expansion.
+?C:	The standard distribution will put nothing in this directory.
+?C:	After perl has been installed, users may install their own local
+?C:	architecture-dependent modules in this directory with
+?C:		MakeMaker Makefile.PL
+?C:	or equivalent.  See INSTALL for details.
+?C:.
+?C:SITEARCH_EXP:
+?C:	This symbol contains the ~name expanded version of SITEARCH, to be used
+?C:	in programs that are not prepared to deal with ~ expansion at run-time.
+?C:.
+?H:#$d_sitearch SITEARCH "$sitearch"		/**/
+?H:#$d_sitearch SITEARCH_EXP "$sitearchexp"		/**/
+?H:.
+?LINT:change prefixvar
+?LINT:set installsitearch
+?LINT:set sitearch
+?LINT:set sitearchexp
+: determine where site specific architecture-dependent libraries go.
+: sitelib  default is /usr/local/lib/perl5/site_perl/$version
+: sitearch default is /usr/local/lib/perl5/site_perl/$version/$archname
+: sitelib may have an optional trailing /share.
+case "$sitearch" in
+'')	dflt=`echo $sitelib | $sed 's,/share$,,'`
+	dflt="$dflt/$archname"
+	;;
+*)	dflt="$sitearch"
+	;;
+esac
+set sitearch sitearch none
+eval $prefixit
+$cat <<EOM
+
+The installation process will also create a directory for
+architecture-dependent site-specific extensions and modules.
+
+EOM
+fn=d~+
+rp='Pathname for the site-specific architecture-dependent library files?'
+. ./getfile
+prefixvar=sitearch
+. ./setprefixvar
+if $test X"$sitearch" = X"$sitelib"; then
+	d_sitearch="$undef"
+else
+	d_sitearch="$define"
+fi
+

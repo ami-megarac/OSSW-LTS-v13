@@ -1,0 +1,2 @@
+snmpd: non-standard-file-perm etc/snmp/snmpd.conf 0600 != 0644
+snmpd: maintainer-script-should-not-use-recursive-chown-or-chmod postinst:21

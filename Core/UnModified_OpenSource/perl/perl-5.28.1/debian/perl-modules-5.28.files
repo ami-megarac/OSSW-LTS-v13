@@ -1,0 +1,4 @@
+# note that this fallback relies on the order of debian/control:
+# this package needs to come after any other packages with more
+# specific recipes for the directories
+usr/share/perl

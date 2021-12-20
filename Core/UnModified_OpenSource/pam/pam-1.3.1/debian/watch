@@ -1,0 +1,2 @@
+version=4
+  https://github.com/linux-pam/linux-pam/releases .*/\S+-([\d.]+)\.tar\.xz

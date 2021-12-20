@@ -1,0 +1,26 @@
+#
+# Example usage:
+# $ aa-easyprof --policy-groups=user-application /usr/bin/foo
+#
+###ENDUSAGE###
+# vim:syntax=apparmor
+# AppArmor policy for ###NAME###
+# ###AUTHOR###
+# ###COPYRIGHT###
+# ###COMMENT###
+
+#include <tunables/global>
+
+###VAR###
+
+###PROFILEATTACH### {
+  #include <abstractions/base>
+
+  ###ABSTRACTIONS###
+
+  ###POLICYGROUPS###
+
+  ###READS###
+
+  ###WRITES###
+}

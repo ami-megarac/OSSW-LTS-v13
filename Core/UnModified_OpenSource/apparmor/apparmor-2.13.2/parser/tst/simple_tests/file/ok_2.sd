@@ -1,0 +1,7 @@
+#
+#=Description basic uppercase permission file rule (should emit warning)
+#=EXRESULT PASS
+#
+/usr/bin/foo {
+  /usr/bin/foo RWM,
+}

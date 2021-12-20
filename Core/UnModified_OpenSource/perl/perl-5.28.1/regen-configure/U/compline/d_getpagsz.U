@@ -1,0 +1,35 @@
+?RCS: $Id: d_getpagsz.U,v 3.0.1.1 1994/10/29 16:13:10 ram Exp $
+?RCS:
+?RCS: Copyright (c) 1991-1993, Raphael Manfredi
+?RCS:
+?RCS: You may redistribute only under the terms of the Artistic License,
+?RCS: as specified in the README file that comes with the distribution.
+?RCS: You may reuse parts of this distribution only within the terms of
+?RCS: that same Artistic License; a copy of which may be found at the root
+?RCS: of the source tree for dist 3.0.
+?RCS:
+?RCS: $Log: d_getpagsz.U,v $
+?RCS: Revision 3.0.1.1  1994/10/29  16:13:10  ram
+?RCS: patch36: added ?F: line for metalint file checking
+?RCS:
+?RCS: Revision 3.0  1993/08/18  12:06:14  ram
+?RCS: Baseline for dist 3.0 netwide release.
+?RCS:
+?MAKE:d_getpagsz: Compile Oldconfig Myread Inlibc Findhdr
+?MAKE:	-pick add $@ %<
+?S:d_getpagsz:
+?S:	This variable conditionally defines HAS_GETPAGESIZE if getpagesize()
+?S:	is available to get the system page size.
+?S:.
+?C:HAS_GETPAGESIZE (GETPAGESIZE):
+?C:	This symbol, if defined, indicates that the getpagesize system call
+?C:	is available to get system page size, which is the granularity of
+?C:	many memory management calls.
+?C:.
+?H:#$d_getpagsz HAS_GETPAGESIZE		/**/
+?H:.
+?LINT:set d_getpagsz
+: see if getpagesize exists
+set getpagesize d_getpagsz
+eval $inlibc
+

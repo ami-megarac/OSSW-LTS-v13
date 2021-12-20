@@ -1,0 +1,95 @@
+diff -Naur uboot_old/oem/ami/mac_eeprom/macto_eeprom.c uboot/oem/ami/mac_eeprom/macto_eeprom.c
+--- uboot_old/oem/ami/mac_eeprom/macto_eeprom.c	2020-11-23 14:02:16.650893501 +0800
++++ uboot/oem/ami/mac_eeprom/macto_eeprom.c	2020-11-23 17:54:28.676691597 +0800
+@@ -48,7 +48,7 @@
+ 			ret = i2c_set_chip_offset_len(dev, CONFIG_SPX_FEATURE_I2C_EEPROM_ADDR_LEN);
+ 		}
+ #ifdef CONFIG_SPX_FEATURE_I2C_EEPROM_MACADDR_OFFSET
+-		if(id==1)
++		if(id==0)
+ 		{
+ 			if (!ret)
+ 			{
+@@ -57,7 +57,7 @@
+ 		}
+ #endif
+ #ifdef CONFIG_SPX_FEATURE_I2C_EEPROM_MAC1ADDR_OFFSET
+-		if(id==2)
++		if(id==1)
+ 		{
+ 			if (!ret)
+ 			{
+@@ -65,6 +65,25 @@
+ 			}
+ 		}
+ #endif
++#ifdef CONFIG_SPX_FEATURE_I2C_EEPROM_MAC2ADDR_OFFSET
++                if(id==2)
++                {
++                        if (!ret)
++                        {
++                                ret = dm_i2c_read(dev, CONFIG_SPX_FEATURE_I2C_EEPROM_MAC2ADDR_OFFSET, mac_address, 6);
++                        }
++                }
++#endif
++#ifdef CONFIG_SPX_FEATURE_I2C_EEPROM_MAC3ADDR_OFFSET
++                if(id==3)
++                {
++                        if (!ret)
++                        {
++                                ret = dm_i2c_read(dev, CONFIG_SPX_FEATURE_I2C_EEPROM_MAC3ADDR_OFFSET, mac_address, 6);
++                        }
++                }
++
++#endif
+ 	
+ 		valid_mac_addr_in_eeprom = 0;
+ 		/* Even if one index of mac address is non-zero and non-FF, it is valid */
+@@ -80,7 +99,7 @@
+ 			
+ 			sprintf(ethaddr_env, "%0X:%0X:%0X:%0X:%0X:%0X",mac_address[0], mac_address[1], mac_address[2], mac_address[3], mac_address[4], 			mac_address[5]); 
+ 	//:		printf("\nethaddr set to: %s\n", ethaddr_env);
+-			if (id == 1) {
++			if (id == 0) {
+ 				env_set("ethaddr", ethaddr_env);
+ 			}
+ 		}
+@@ -92,11 +111,37 @@
+ 			
+ 			sprintf(ethaddr_env, "%0X:%0X:%0X:%0X:%0X:%0X",mac_address[0], mac_address[1], mac_address[2], mac_address[3], mac_address[4], 			mac_address[5]); 
+ //			printf("\nethaddr set to: %s\n", ethaddr_env);
+-			if (id == 2) {
++			if (id == 1) {
+ 				env_set("eth1addr", ethaddr_env);
+ 			}
+ 		}
+ #endif
++
++#ifdef CONFIG_SPX_FEATURE_I2C_EEPROM_MAC2ADDR_OFFSET
++                if(valid_mac_addr_in_eeprom)
++                {
++
++                        sprintf(ethaddr_env, "%0X:%0X:%0X:%0X:%0X:%0X",mac_address[0], mac_address[1], mac_address[2], mac_address[3], mac_address[4],                  mac_address[5]);
++//                      printf("\nethaddr set to: %s\n", ethaddr_env);
++                        if (id == 2) {
++                                env_set("eth2addr", ethaddr_env);
++                        }
++                }
++#endif
++
++#ifdef CONFIG_SPX_FEATURE_I2C_EEPROM_MAC3ADDR_OFFSET
++                if(valid_mac_addr_in_eeprom)
++                {
++
++                        sprintf(ethaddr_env, "%0X:%0X:%0X:%0X:%0X:%0X",mac_address[0], mac_address[1], mac_address[2], mac_address[3], mac_address[4],                  mac_address[5]);
++//                      printf("\nethaddr set to: %s\n", ethaddr_env);
++                        if (id == 3) {
++                                env_set("eth3addr", ethaddr_env);
++                        }
++                }
++
++
++#endif
+ 	}else
+ 	{
+ 		printf("unable to set bus number\n");

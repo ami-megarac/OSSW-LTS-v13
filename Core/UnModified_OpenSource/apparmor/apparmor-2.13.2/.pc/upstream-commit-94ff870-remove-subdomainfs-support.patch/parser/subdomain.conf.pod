@@ -1,0 +1,104 @@
+# ----------------------------------------------------------------------
+#    Copyright (c) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007,
+#                  2008, 2009
+#    NOVELL (All rights reserved)
+#
+#    Copyright (c) 2010 - 2012
+#    Canonical Ltd. (All rights reserved)
+#
+#    This program is free software; you can redistribute it and/or
+#    modify it under the terms of version 2 of the GNU General Public
+#    License published by the Free Software Foundation.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program; if not, contact Novell, Inc.
+# ----------------------------------------------------------------------
+
+
+=pod
+
+=head1 NAME
+
+/etc/apparmor/subdomain.conf - configuration file for fine-tuning the
+behavior of the AppArmor security tool.
+
+=head1 DESCRIPTION
+
+The AppArmor security tool can be configured to have
+certain default behaviors based on configuration options set
+in subdomain.conf. There are two variables that can be set in
+subdomain.conf: B<SUBDOMAIN_PATH>, and B<SUBDOMAIN_MODULE_PANIC>.
+
+=begin comment
+
+FIXME keep quiet about OWLSM support for now.
+
+=head2 SUBDOMAIN_ENABLE_OWLSM
+
+This veriable is a yes/no toggle and is by default set to I<no>.
+
+This variable determines whether the AppArmor initscript will enable
+or disable the OWLsm security extension to AppArmor when the AppArmor
+security tool is started. When enabled the OWLsm feature prevents programs
+from following symlinks in temporary directories that are not owned by
+the program's UID, and prevents processes from creating hardlinks to
+files not owned by their UID.
+
+=end comment
+
+=head2 SUBDOMAIN_PATH
+
+This variable accepts a string (path), and is by default set to
+'/etc/apparmor.d/' This variable defines where the AppArmor security
+tool looks for its policy definitions (a.k.a. AppArmor profiles).
+
+=head2 SUBDOMAIN_MODULE_PANIC
+
+This variable accepts a string that is one of four values: I<warn>,
+I<build>, I<panic>, or I<build-panic>, and is set by default to I<warn>. 
+
+This setting controls the behavior of the AppArmor initscript if it
+cannot successfully load the AppArmor kernel module on startup. The four
+possible settings are:
+
+=over 4
+
+=item I<warn> 
+
+Log a failure message (the default behavior).
+
+=item I<build> 
+
+Attempt to build the AppArmor module against the currently running
+kernel. If the compilation is successful, the module will be loaded and
+AppArmor started; if the compilation fails, a failure message is logged.
+
+=item I<panic> 
+
+Log a failure message and drop to runlevel 1 (single user).
+
+=item I<build-panic>
+
+Attempt to build the module against the running kernel (like I<build>)
+and if the compilation fails, drop to runlevel 1 (single user).
+
+=back
+
+=head1 BUGS
+
+Setting the initscript to recompile the module will fail on SUSE, as the
+module source is no longer installed by default. However, the module has
+been included with the SUSE kernel, so no rebuilding should be necessary.
+
+If you find any additional bugs, please report them at
+L<https://bugs.launchpad.net/apparmor/+filebug>.
+
+=head1 SEE ALSO
+
+apparmor(7), apparmor_parser(8), and
+L<https://wiki.apparmor.net>.

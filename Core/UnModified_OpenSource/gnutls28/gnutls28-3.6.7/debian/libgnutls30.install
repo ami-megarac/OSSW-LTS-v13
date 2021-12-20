@@ -1,0 +1,2 @@
+debian/tmp/usr/lib/*/libgnutls.so.*
+debian/tmp/usr/share/locale/*

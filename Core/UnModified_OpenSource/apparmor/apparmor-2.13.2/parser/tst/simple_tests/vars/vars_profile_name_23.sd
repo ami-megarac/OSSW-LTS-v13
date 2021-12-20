@@ -1,0 +1,7 @@
+#=DESCRIPTION reference variables in profile name is undefined
+#=EXRESULT FAIL
+
+
+/does/not/exist@{FOO} {
+  /does/not/exist r,
+}

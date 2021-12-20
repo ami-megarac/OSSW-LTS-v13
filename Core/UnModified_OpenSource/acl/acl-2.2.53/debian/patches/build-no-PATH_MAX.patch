@@ -1,0 +1,58 @@
+Description: Remove PATH_MAX usage which does not exist on GNU/Hurd.
+Author: Guillem Jover <guillem@debian.org>
+Origin: vendor
+Forwarded: no
+Last-Update: 2019-02-28
+
+---
+ test/test_group.c  |    6 +-----
+ test/test_passwd.c |    7 +------
+ tools/parse.c      |    9 ++++-----
+ 3 files changed, 6 insertions(+), 16 deletions(-)
+
+--- a/tools/parse.c
++++ b/tools/parse.c
+@@ -413,11 +413,6 @@ read_acl_comments(
+ 	mode_t *flags)
+ {
+ 	int c;
+-	/*
+-	  Max PATH_MAX bytes even for UTF-8 path names and additional 9
+-	  bytes for "# file: ". Not a good solution but for now it is the
+-	  best I can do without too much impact on the code. [tw]
+-	*/
+ 	char *line, *cp, *p;
+ 	int comments_read = 0;
+ 	
+--- a/test/test_group.c
++++ b/test/test_group.c
+@@ -9,12 +9,8 @@
+ #include <grp.h>
+ 
+ #define TEST_GROUP "test/test.group"
+-static char grfile[PATH_MAX];
+-static void setup_grfile() __attribute__((constructor));
++static char grfile[] = BASEDIR "/" TEST_GROUP;
+ 
+-static void setup_grfile() {
+-	snprintf(grfile, sizeof(grfile), "%s/%s", BASEDIR, TEST_GROUP);
+-}
+ 
+ #define ALIGN_MASK(x, mask)    (((x) + (mask)) & ~(mask))
+ #define ALIGN(x, a)            ALIGN_MASK(x, (typeof(x))(a) - 1)
+--- a/test/test_passwd.c
++++ b/test/test_passwd.c
+@@ -9,12 +9,7 @@
+ #include <pwd.h>
+ 
+ #define TEST_PASSWD "test/test.passwd"
+-static char pwfile[PATH_MAX];
+-static void setup_pwfile() __attribute__((constructor));
+-
+-static void setup_pwfile() {
+-	snprintf(pwfile, sizeof(pwfile), "%s/%s", BASEDIR, TEST_PASSWD);
+-}
++static char pwfile[] = BASEDIR "/" TEST_PASSWD;
+ 
+ #define ALIGN_MASK(x, mask)    (((x) + (mask)) & ~(mask))
+ #define ALIGN(x, a)            ALIGN_MASK(x, (typeof(x))(a) - 1)

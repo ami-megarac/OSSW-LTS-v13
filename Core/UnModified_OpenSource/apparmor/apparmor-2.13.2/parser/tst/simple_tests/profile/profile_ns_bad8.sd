@@ -1,0 +1,9 @@
+#
+#=DESCRIPTION no terminating ':' for ns namespace (w/ profile keyword)
+#=EXRESULT FAIL
+# vim:syntax=apparmor
+# Last Modified: Thu Feb 11 00:14:20 2016
+#
+profile :ns/t {
+  /does/not/exist r,
+}

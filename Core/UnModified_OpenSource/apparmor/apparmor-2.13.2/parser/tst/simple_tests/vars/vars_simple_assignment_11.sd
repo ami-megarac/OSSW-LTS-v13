@@ -1,0 +1,9 @@
+#=DESCRIPTION Test for continuation onto newline
+#=EXRESULT PASS
+
+@{FOO} = blah \\
+@{BAR} = baz
+
+/bin/true {
+  /@{BAR} r,
+}

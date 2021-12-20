@@ -1,0 +1,59 @@
+From 84acc6aa6976e62756e14d3a00c5634724cbaa59 Mon Sep 17 00:00:00 2001
+From: Geliang Tang <geliangtang@163.com>
+Date: Mon, 16 Nov 2015 21:46:33 +0800
+Subject: [PATCH 16/27] apparmor: use list_next_entry instead of
+ list_entry_next
+
+list_next_entry has been defined in list.h, so I replace list_entry_next
+with it.
+
+Signed-off-by: Geliang Tang <geliangtang@163.com>
+Acked-by: Serge Hallyn <serge.hallyn@canonical.com>
+Signed-off-by: John Johansen <john.johansen@canonical.com>
+---
+ security/apparmor/apparmorfs.c | 8 +++-----
+ 1 file changed, 3 insertions(+), 5 deletions(-)
+
+diff --git a/security/apparmor/apparmorfs.c b/security/apparmor/apparmorfs.c
+index 0d8dd71..729e595 100644
+--- a/security/apparmor/apparmorfs.c
++++ b/security/apparmor/apparmorfs.c
+@@ -553,8 +553,6 @@ fail2:
+ }
+ 
+ 
+-#define list_entry_next(pos, member) \
+-	list_entry(pos->member.next, typeof(*pos), member)
+ #define list_entry_is_head(pos, head, member) (&pos->member == (head))
+ 
+ /**
+@@ -585,7 +583,7 @@ static struct aa_namespace *__next_namespace(struct aa_namespace *root,
+ 	parent = ns->parent;
+ 	while (ns != root) {
+ 		mutex_unlock(&ns->lock);
+-		next = list_entry_next(ns, base.list);
++		next = list_next_entry(ns, base.list);
+ 		if (!list_entry_is_head(next, &parent->sub_ns, base.list)) {
+ 			mutex_lock(&next->lock);
+ 			return next;
+@@ -639,7 +637,7 @@ static struct aa_profile *__next_profile(struct aa_profile *p)
+ 	parent = rcu_dereference_protected(p->parent,
+ 					   mutex_is_locked(&p->ns->lock));
+ 	while (parent) {
+-		p = list_entry_next(p, base.list);
++		p = list_next_entry(p, base.list);
+ 		if (!list_entry_is_head(p, &parent->base.profiles, base.list))
+ 			return p;
+ 		p = parent;
+@@ -648,7 +646,7 @@ static struct aa_profile *__next_profile(struct aa_profile *p)
+ 	}
+ 
+ 	/* is next another profile in the namespace */
+-	p = list_entry_next(p, base.list);
++	p = list_next_entry(p, base.list);
+ 	if (!list_entry_is_head(p, &ns->base.profiles, base.list))
+ 		return p;
+ 
+-- 
+2.7.4
+

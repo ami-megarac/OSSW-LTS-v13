@@ -1,0 +1,30 @@
+\BOOKMARK [1][-]{section.1}{Introduction}{}% 1
+\BOOKMARK [1][-]{section.2}{Overview}{}% 2
+\BOOKMARK [1][-]{section.3}{The AppArmor Security Model}{}% 3
+\BOOKMARK [2][-]{subsection.3.1}{Symbolic Links}{section.3}% 4
+\BOOKMARK [2][-]{subsection.3.2}{Namespaces}{section.3}% 5
+\BOOKMARK [2][-]{subsection.3.3}{Disconnected Files and Pseudo File Systems}{section.3}% 6
+\BOOKMARK [2][-]{subsection.3.4}{Mount}{section.3}% 7
+\BOOKMARK [2][-]{subsection.3.5}{The Kernel NFS Daemon}{section.3}% 8
+\BOOKMARK [2][-]{subsection.3.6}{Why are the computed pathnames meaningful?}{section.3}% 9
+\BOOKMARK [2][-]{subsection.3.7}{Path Permission Checking}{section.3}% 10
+\BOOKMARK [2][-]{subsection.3.8}{Profile Permissions}{section.3}% 11
+\BOOKMARK [2][-]{subsection.3.9}{System Calls Taking File Handles, At System Calls}{section.3}% 12
+\BOOKMARK [2][-]{subsection.3.10}{File Descriptor Passing and Revalidation}{section.3}% 13
+\BOOKMARK [2][-]{subsection.3.11}{Deleted Files}{section.3}% 14
+\BOOKMARK [2][-]{subsection.3.12}{The access System Call}{section.3}% 15
+\BOOKMARK [2][-]{subsection.3.13}{The ptrace System Call}{section.3}% 16
+\BOOKMARK [2][-]{subsection.3.14}{Secure Execution}{section.3}% 17
+\BOOKMARK [2][-]{subsection.3.15}{Exec Mode Merging in Profiles, Exact Matches}{section.3}% 18
+\BOOKMARK [2][-]{subsection.3.16}{Capabilities}{section.3}% 19
+\BOOKMARK [2][-]{subsection.3.17}{The sysctl System Call and /proc/sys}{section.3}% 20
+\BOOKMARK [2][-]{subsection.3.18}{Subprofiles aka. Hats}{section.3}% 21
+\BOOKMARK [2][-]{subsection.3.19}{Association of Profiles with Processes}{section.3}% 22
+\BOOKMARK [2][-]{subsection.3.20}{Profile Loading, Replacement, and Removal}{section.3}% 23
+\BOOKMARK [1][-]{section.4}{AppArmor Walk-Through}{}% 24
+\BOOKMARK [2][-]{subsection.4.1}{Kernel Patches and Configuration}{section.4}% 25
+\BOOKMARK [2][-]{subsection.4.2}{The securityfs file system}{section.4}% 26
+\BOOKMARK [2][-]{subsection.4.3}{Profile Loading}{section.4}% 27
+\BOOKMARK [2][-]{subsection.4.4}{Anatomy of a Profile}{section.4}% 28
+\BOOKMARK [2][-]{subsection.4.5}{Logging}{section.4}% 29
+\BOOKMARK [2][-]{subsection.4.6}{Generating Profiles By Hand}{section.4}% 30

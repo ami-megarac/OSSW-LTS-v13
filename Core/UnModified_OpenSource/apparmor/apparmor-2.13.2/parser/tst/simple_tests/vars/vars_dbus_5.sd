@@ -1,0 +1,12 @@
+#=DESCRIPTION reference variables in dbus rules, with peers
+#=EXRESULT PASS
+
+@{FOO}=bar baz
+@{BAR}=@{FOO} blort
+
+/does/not/exist {
+  dbus (send, receive)
+       bus=session
+       path="/foo/bar" member="bar"
+       peer=(name="com.@{FOO}" label="/usr/bin/app.@{FOO}"),
+}

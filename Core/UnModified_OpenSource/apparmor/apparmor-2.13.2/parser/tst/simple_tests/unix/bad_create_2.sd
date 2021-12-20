@@ -1,0 +1,7 @@
+#
+#=DESCRIPTION simple unix create acceptance test
+#=EXRESULT FAIL
+
+profile a_profile {
+  unix (create) peer=(addr=@somesuch),
+}

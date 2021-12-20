@@ -1,0 +1,8 @@
+#=DESCRIPTION set var to one value, empty string
+#=EXRESULT PASS
+
+@{FOO}=""
+
+/bin/foo {
+  @{FOO}/bin/foo rix,
+}

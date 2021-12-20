@@ -1,0 +1,8 @@
+bin/bzdiff bin/bzcmp
+bin/bzgrep bin/bzegrep
+bin/bzgrep bin/bzfgrep
+bin/bzmore bin/bzless
+
+usr/share/man/man1/bzip2.1.gz usr/share/man/man1/bunzip2.1.gz
+usr/share/man/man1/bzip2.1.gz usr/share/man/man1/bzcat.1.gz
+usr/share/man/man1/bzip2.1.gz usr/share/man/man1/bzip2recover.1.gz

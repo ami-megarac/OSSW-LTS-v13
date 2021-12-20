@@ -1,0 +1,14 @@
+#=DESCRIPTION Simple test of alias functionality 
+#=EXRESULT PASS
+
+@{MEEP} = meep moop
+alias /etc -> /Etcetera,
+alias /tmp -> /var/tmp,
+alias /usr/lib/ -> /Libraries/,
+alias /usr -> /User,
+@{FOO} = foo bar
+
+/bin/foo {
+  #include <includes/base>
+  /tmp/@{FOO}/@{MEEP} rw,
+}

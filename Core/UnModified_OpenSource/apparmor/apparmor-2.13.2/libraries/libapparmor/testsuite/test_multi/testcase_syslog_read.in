@@ -1,0 +1,1 @@
+Jul 25 15:02:00 redacted kernel: [  296.524447] audit: type=1400 audit(1437850920.403:64): apparmor="ALLOWED" operation="open" profile="/usr/sbin/vsftpd" name="/home/bane/foo" pid=1811 comm="vsftpd" requested_mask="r" denied_mask="r" fsuid=1000 ouid=1000

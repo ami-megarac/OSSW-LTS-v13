@@ -1,0 +1,6 @@
+#=DESCRIPTION valid characters in variable names
+#=EXRESULT PASS
+
+@{ABCDEFGHIJKLMNOPQRSTUVWXYZ_} = bah
+@{a_bcdefghijklmnopqrstuvwxyz} = @{ABCDEFGHIJKLMNOPQRSTUVWXYZ_}/@{ABCDEFGHIJKLMNOPQRSTUVWXYZ_}
+${A1_2_3_4_5_6_7_8_9_0} = False

@@ -1,0 +1,1 @@
+[ 2010.738449] audit: type=1400 audit(1284062308.965:276251): apparmor="DENIED" operation="link" parent=19088 profile="/home/ubuntu/bzr/apparmor/tests/regression/apparmor/link" name="/tmp/sdtest.19088-12382-HWH57d/linkfile" pid=19142 comm="link" requested_mask="l" denied_mask="l" fsuid=0 ouid=0 target="/tmp/sdtest.19088-12382-HWH57d/target"

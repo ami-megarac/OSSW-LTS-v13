@@ -1,0 +1,10 @@
+#
+#=Description basic rules to test the "B" mount option
+#=EXRESULT PASS
+/usr/bin/foo {
+  mount options=B /a -> /1,
+  mount options=(B) /b -> /2,
+  mount options=(rw,B) /c -> /3,
+  mount options in (B) /d -> /4,
+  mount options in (ro,B) /e -> /5,
+}

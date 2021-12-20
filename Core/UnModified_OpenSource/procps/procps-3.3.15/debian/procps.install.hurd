@@ -1,0 +1,4 @@
+# Files to install for hurd systems
+bbin/kill.procps bin
+bbin/ps.procps bin
+bin/* /usr/bin

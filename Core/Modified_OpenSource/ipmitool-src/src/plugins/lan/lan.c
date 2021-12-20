@@ -102,7 +102,7 @@ extern unsigned int local_session;
 extern uint8 UDS_ReceiveData( UDS_CHANNEL_T *UDSInfo, char *szBuffer, uint32* pdwSize, int timeout);
 extern uint32 FillUDSMessagePacket(IPMI20_SESSION_T *pSession, uint8 *Buffer,
                                                         uint8 byNetFnLUN, uint8 byCommand,
-                                                        uint8 *pbyReqData, uint32 dwReqDataLen,INT8U AuthEnable,int timeout);
+                                                        uint8 *pbyReqData, uint32 dwReqDataLen,INT8U AuthEnable);
 
 
 static int ipmi_lan_send_packet(struct ipmi_intf * intf, uint8_t * data, int data_len);
@@ -1055,8 +1055,7 @@ ipmi_lan_send_cmd(struct ipmi_intf * intf, struct ipmi_rq * req)
                             memcpy(&req->msg.data[0],&buffer[0],req->msg.data_len);
                             memset(&buffer[0],0,sizeof(buffer));
                          }
-
-                  length = FillUDSMessagePacket(&hSession, (uint8_t *)&buffer[0], req->msg.netfn << 2, req->msg.cmd, req->msg.data, req->msg.data_len, 0,0);
+		  length = FillUDSMessagePacket(&hSession, (uint8_t *)&buffer[0], req->msg.netfn << 2, req->msg.cmd, req->msg.data, req->msg.data_len, 0);
                   retval = ipmi_lan_send_packet(intf, (uint8_t *)&buffer[0], length);
               }
 		else

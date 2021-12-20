@@ -1,0 +1,7 @@
+version=4
+
+# By default we check for releases only.  If you want to
+# check/download weekly snapshots, use the watch.patchlevel file.
+
+opts=pgpsigurlmangle=s/$/.asc/ \
+ https://invisible-mirror.net/archives/ncurses/ncurses-(.*)\.tar\.gz

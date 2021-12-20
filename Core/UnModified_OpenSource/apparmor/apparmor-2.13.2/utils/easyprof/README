@@ -1,0 +1,44 @@
+AppArmor Easy Profiler
+----------------------
+aa-easyprof is a standalone CLI application which can also be imported into
+developer SDKs. See test/test-aa-easyprof.py for an example of how to import
+this into your SDK.
+
+
+Templates
+---------
+Any number of templates can be used. The user may specify one on the command
+line or use a system-wide template from /usr/share/apparmor/easyprof/templates.
+
+Currently the combination of the user-application and the opt-application and
+user-application policygroups should achieve a working policy for Ubuntu's
+Application Review Board:
+- http://developer.ubuntu.com/publish/my-apps-packages/
+
+Eg:
+$ aa-easyprof --template=user-application \
+              --template-var="@{APPNAME}=foo" \
+              --policy-groups=opt-application,user-application \
+              /opt/foo/bin/foo
+
+Testing
+-------
+Unit tests:
+$ ./test/test-aa-easyprof.py
+
+In source manual testing:
+$ ./aa-easyprof --templates-dir=./easyprof/templates \
+                --policy-groups-dir=./easyprof/policygroups \
+                ... \
+                /opt/foo/bin/foo
+
+Post-install manual testing:
+$ make DESTDIR=/tmp/test PERLDIR=/tmp/test/usr/share/perl5/Immunix install
+$ cd /tmp/test
+$ PYTHONPATH=/tmp/test/usr/local/.../dist-packages ./usr/bin/aa-easyprof \
+    --templates-dir=/tmp/test/usr/share/apparmor/easyprof/templates \
+    --policy-groups-dir=/tmp/test/usr/share/apparmor/easyprof/policygroups \
+    /opt/bin/foo
+
+(you may also adjust /tmp/test/etc/apparmor/easyprof.conf to avoid specifying
+--templates-dir and --policy-groups-dir).

@@ -1,0 +1,127 @@
+# Please add new symbols in a section that corresponds to the upcoming
+# release version, adding a new section if necessary
+#
+# If you update this file please follow the instructions on library
+# versioning in Makefile.am
+
+IMMUNIX_1.0 {
+  global:
+        change_hat;
+  local:
+        *;
+};
+
+APPARMOR_1.0 {
+  global:
+        change_hat;
+        parse_record;
+        free_record;
+  local:
+        *;
+} IMMUNIX_1.0;
+
+APPARMOR_1.1 {
+  global:
+        aa_is_enabled;
+        aa_find_mountpoint;
+        aa_change_hat;
+        aa_change_hatv;
+        aa_change_hat_vargs;
+        aa_change_profile;
+        aa_change_onexec;
+        aa_gettaskcon;
+        aa_getcon;
+        aa_getpeercon_raw;
+        aa_getpeercon;
+        parse_record;
+        free_record;
+        aa_getprocattr_raw;
+        aa_getprocattr;
+        aa_query_label;
+
+	# no more symbols here, please
+
+  local:
+	*;
+} APPARMOR_1.0;
+
+APPARMOR_2.9 {
+  global:
+	aa_query_label;
+  local:
+	*;
+} APPARMOR_1.1;
+
+APPARMOR_2.10 {
+  global:
+        aa_query_file_path;
+        aa_query_file_path_len;
+        aa_query_link_path;
+        aa_query_link_path_len;
+        aa_features_new;
+        aa_features_new_from_string;
+        aa_features_new_from_kernel;
+        aa_features_ref;
+        aa_features_unref;
+        aa_features_write_to_file;
+        aa_features_is_equal;
+        aa_features_supports;
+        aa_kernel_interface_new;
+        aa_kernel_interface_ref;
+        aa_kernel_interface_unref;
+        aa_kernel_interface_load_policy;
+        aa_kernel_interface_load_policy_from_file;
+        aa_kernel_interface_load_policy_from_fd;
+        aa_kernel_interface_replace_policy;
+        aa_kernel_interface_replace_policy_from_file;
+        aa_kernel_interface_replace_policy_from_fd;
+        aa_kernel_interface_remove_policy;
+        aa_kernel_interface_write_policy;
+        aa_policy_cache_new;
+        aa_policy_cache_ref;
+        aa_policy_cache_unref;
+        aa_policy_cache_remove;
+        aa_policy_cache_replace_all;
+        aa_splitcon;
+  local:
+        *;
+} APPARMOR_2.9;
+
+APPARMOR_2.11 {
+  global:
+        aa_stack_profile;
+        aa_stack_onexec;
+  local:
+        *;
+} APPARMOR_2.10;
+
+APPARMOR_2.13 {
+  global:
+        aa_policy_cache_dir_path;
+        aa_policy_cache_dir_path_preview;
+	aa_policy_cache_no_dirs;
+	aa_policy_cache_dirfd;
+	aa_policy_cache_open;
+	aa_policy_cache_filename;
+        aa_features_id;
+  local:
+        *;
+} APPARMOR_2.11;
+
+APPARMOR_2.13.1 {
+  global:
+        aa_policy_cache_add_ro_dir;
+  local:
+        *;
+} APPARMOR_2.13;
+
+PRIVATE {
+	global:
+		_aa_is_blacklisted;
+		_aa_autofree;
+		_aa_autoclose;
+		_aa_autofclose;
+		_aa_dirat_for_each;
+	local:
+		*;
+};

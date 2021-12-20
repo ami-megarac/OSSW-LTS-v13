@@ -1,0 +1,50 @@
+From dc07b8228b4bab83af5bcf7a2efd9d2a0f10f628 Mon Sep 17 00:00:00 2001
+From: Daiki Ueno <ueno@gnu.org>
+Date: Wed, 10 Mar 2021 16:12:23 +0100
+Subject: [PATCH 6/6] str: suppress -Wunused-function if AGGRESSIVE_REALLOC is
+ defined
+
+Signed-off-by: Daiki Ueno <ueno@gnu.org>
+---
+ lib/str.c | 18 +++++++++---------
+ 1 file changed, 9 insertions(+), 9 deletions(-)
+
+diff --git a/lib/str.c b/lib/str.c
+index bc20ebb04f..8007340f1e 100644
+--- a/lib/str.c
++++ b/lib/str.c
+@@ -87,15 +87,6 @@ void _gnutls_buffer_clear(gnutls_buffer_st * str)
+ 
+ #define MIN_CHUNK 1024
+ 
+-static void align_allocd_with_data(gnutls_buffer_st * dest)
+-{
+-	assert(dest->allocd != NULL);
+-	assert(dest->data != NULL);
+-	if (dest->length)
+-		memmove(dest->allocd, dest->data, dest->length);
+-	dest->data = dest->allocd;
+-}
+-
+ /**
+  * gnutls_buffer_append_data:
+  * @dest: the buffer to append to
+@@ -168,6 +159,15 @@ int _gnutls_buffer_resize(gnutls_buffer_st * dest, size_t new_size)
+ 
+ #else
+ 
++static void align_allocd_with_data(gnutls_buffer_st * dest)
++{
++	assert(dest->allocd != NULL);
++	assert(dest->data != NULL);
++	if (dest->length)
++		memmove(dest->allocd, dest->data, dest->length);
++	dest->data = dest->allocd;
++}
++
+ int _gnutls_buffer_resize(gnutls_buffer_st * dest, size_t new_size)
+ {
+ 	if (unlikely(dest->data != NULL && dest->allocd == NULL))
+-- 
+2.30.2
+

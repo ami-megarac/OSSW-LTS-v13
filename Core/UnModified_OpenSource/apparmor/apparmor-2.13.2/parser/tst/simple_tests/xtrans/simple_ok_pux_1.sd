@@ -1,0 +1,35 @@
+#
+#=DESCRIPTION pux is allowed as a multiple x modifier
+#=EXRESULT PASS
+#
+/usr/bin/foo {
+  /bin/ls rpux,
+}
+
+/usr/bin/foo2 {
+  /bin/ls rPux,
+}
+
+/usr/bin/foo3 {
+  /bin/ls rpUx,
+}
+
+/usr/bin/foo4 {
+  /bin/ls rPUx,
+}
+
+/usr/bin/foo5 {
+  rpux /bin/ls,
+}
+
+/usr/bin/foo6 {
+  rPux /bin/ls,
+}
+
+/usr/bin/foo7 {
+  rpUx /bin/ls,
+}
+
+/usr/bin/foo8 {
+  rPUx /bin/ls,
+}

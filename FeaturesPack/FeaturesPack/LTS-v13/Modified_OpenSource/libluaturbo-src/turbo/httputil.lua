@@ -796,18 +796,7 @@ function httputil.StreamingParser:_state_part_body()
     end
     if is_large_body then
         local tmpname = os.tmpname()
-        local file = io.open(tmpname, "w")
-        if not file then
-            local error_msg =
-                string.format("[httputil.lua] open file %s failed.", tmpname)
-            self.error = {
-                type = "open_failed",
-                message = error_msg
-            }
-            error(error_msg)
-        end
         self._tmpname = tmpname
-        self._tmpfile = file
         self._tmplen = 0
         return "large_body"
     elseif nb_start_offset then
@@ -839,14 +828,9 @@ function httputil.StreamingParser:_state_part_large_body()
         tmpname = os.tmpname()
         self._tmpname = tmpname
     end
-    local file = self._tmpfile
-    if not file then
-        file = io.open(tmpname, "a")
-        self._tmpfile = file
-    end
 
     if  nb_start_offset then
-        self:_write_to_file(nb_start_offset, file)
+        self:_write_to_file(nb_start_offset, tmpname)
         self:_push_streaming_multipart_large_body()
         self:shift(nb_start_offset + self.next_boundary_size)
         return "headers"
@@ -854,10 +838,10 @@ function httputil.StreamingParser:_state_part_large_body()
         -- to keep possiblely boundary data in buffer for checking in next reading
         local offset = self:possible_boundary()
         if offset ~= nil then
-            self:_write_to_file(offset, file)
+            self:_write_to_file(offset, tmpname)
             self:shift(offset)
         else
-            self:_write_to_file(self:unused_len(), file)
+            self:_write_to_file(self:unused_len(), tmpname)
             self:shift(self:unused_len())
         end
         return false
@@ -866,9 +850,25 @@ function httputil.StreamingParser:_state_part_large_body()
     end
 end
 
-function httputil.StreamingParser:_write_to_file(len, file)
+function httputil.StreamingParser:_write_to_file(len, tmpname)
+    if not tmpname then
+        tmpname = os.tmpname()
+        self._tmpname = tmpname
+    end
+
+    local file = io.open(tmpname, "a")
+    if not file then
+        local error_msg =
+        string.format("[httputil.lua] open file %s failed.", tmpname)
+        self.error = {
+            type = "open_failed",
+            message = error_msg
+        }
+        error(error_msg)
+    end
+
     local res = ffi.C.fwrite(self:unused(), 1, len, file)
-	if res ~= len then
+    if res ~= len then
         local error_msg =
             string.format("[httputil.lua] write to %s error", self._tmpname)
         self.error = {
@@ -879,6 +879,7 @@ function httputil.StreamingParser:_write_to_file(len, file)
     end
     ffi.C.fflush(file)
     self._tmplen = self._tmplen + len
+    file:close()
 end
 
 
@@ -886,12 +887,10 @@ function httputil.StreamingParser:_push_streaming_multipart_large_body()
     local name = self._name
     local arguments = self.arguments
     local argument = arguments[name][#arguments[name]]
-    self._tmpfile:close()
     argument[1] = string.format("(save in %s)", self._tmpname)
     argument["filepath"] = self._tmpname
     argument["filelen"] = tonumber(self._tmplen)
     self._tmpname = nil
-    self._tmpfile = nil
     self._name = nil
     self._tmplen = nil
 end
@@ -903,10 +902,6 @@ end
 
 function httputil.StreamingParser:_exception_handler(errstr)
     -- close/delete the unfinish file
-    if self._tmpfile then
-        self._tmpfile:close()
-        self._tmpfile = nil
-    end
     if self._tmpname then
         os.remove(self._tmpname)
         self._tmpname = nil

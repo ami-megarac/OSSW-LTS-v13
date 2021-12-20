@@ -1,0 +1,114 @@
+From 30c2b759b4f456e97e859ca550666c8abe84ff3c Mon Sep 17 00:00:00 2001
+From: John Johansen <john.johansen@canonical.com>
+Date: Fri, 25 Jul 2014 04:02:10 -0700
+Subject: [PATCH 07/25] apparmor: internal paths should be treated as
+ disconnected
+
+Internal mounts are not mounted anywhere and as such should be treated
+as disconnected paths.
+
+Signed-off-by: John Johansen <john.johansen@canonical.com>
+Acked-by: Seth Arnold <seth.arnold@canonical.com>
+---
+ security/apparmor/path.c | 64 +++++++++++++++++++++++++++---------------------
+ 1 file changed, 36 insertions(+), 28 deletions(-)
+
+diff --git a/security/apparmor/path.c b/security/apparmor/path.c
+index f261678..a8fc7d0 100644
+--- a/security/apparmor/path.c
++++ b/security/apparmor/path.c
+@@ -25,7 +25,6 @@
+ #include "include/path.h"
+ #include "include/policy.h"
+ 
+-
+ /* modified from dcache.c */
+ static int prepend(char **buffer, int buflen, const char *str, int namelen)
+ {
+@@ -39,6 +38,38 @@ static int prepend(char **buffer, int buflen, const char *str, int namelen)
+ 
+ #define CHROOT_NSCONNECT (PATH_CHROOT_REL | PATH_CHROOT_NSCONNECT)
+ 
++/* If the path is not connected to the expected root,
++ * check if it is a sysctl and handle specially else remove any
++ * leading / that __d_path may have returned.
++ * Unless
++ *     specifically directed to connect the path,
++ * OR
++ *     if in a chroot and doing chroot relative paths and the path
++ *     resolves to the namespace root (would be connected outside
++ *     of chroot) and specifically directed to connect paths to
++ *     namespace root.
++ */
++static int disconnect(const struct path *path, char *buf, char **name,
++		      int flags)
++{
++	int error = 0;
++
++	if (!(flags & PATH_CONNECT_PATH) &&
++	    !(((flags & CHROOT_NSCONNECT) == CHROOT_NSCONNECT) &&
++	      our_mnt(path->mnt))) {
++		/* disconnected path, don't return pathname starting
++		 * with '/'
++		 */
++		error = -EACCES;
++		if (**name == '/')
++			*name = *name + 1;
++	} else if (**name != '/')
++		/* CONNECT_PATH with missing root */
++		error = prepend(name, *name - buf, "/", 1);
++
++	return error;
++}
++
+ /**
+  * d_namespace_path - lookup a name associated with a given path
+  * @path: path to lookup  (NOT NULL)
+@@ -74,7 +105,8 @@ static int d_namespace_path(const struct path *path, char *buf, int buflen,
+ 			 * control instead of hard coded /proc
+ 			 */
+ 			return prepend(name, *name - buf, "/proc", 5);
+-		}
++		} else
++			return disconnect(path, buf, name, flags);
+ 		return 0;
+ 	}
+ 
+@@ -120,32 +152,8 @@ static int d_namespace_path(const struct path *path, char *buf, int buflen,
+ 			goto out;
+ 	}
+ 
+-	/* If the path is not connected to the expected root,
+-	 * check if it is a sysctl and handle specially else remove any
+-	 * leading / that __d_path may have returned.
+-	 * Unless
+-	 *     specifically directed to connect the path,
+-	 * OR
+-	 *     if in a chroot and doing chroot relative paths and the path
+-	 *     resolves to the namespace root (would be connected outside
+-	 *     of chroot) and specifically directed to connect paths to
+-	 *     namespace root.
+-	 */
+-	if (!connected) {
+-		if (!(flags & PATH_CONNECT_PATH) &&
+-			   !(((flags & CHROOT_NSCONNECT) == CHROOT_NSCONNECT) &&
+-			     our_mnt(path->mnt))) {
+-			/* disconnected path, don't return pathname starting
+-			 * with '/'
+-			 */
+-			error = -EACCES;
+-			if (*res == '/')
+-				*name = res + 1;
+-		} else if (*res != '/')
+-			/* CONNECT_PATH with missing root */
+-			error = prepend(name, *name - buf, "/", 1);
+-
+-	}
++	if (!connected)
++		error = disconnect(path, buf, name, flags);
+ 
+ out:
+ 	return error;
+-- 
+2.7.4
+

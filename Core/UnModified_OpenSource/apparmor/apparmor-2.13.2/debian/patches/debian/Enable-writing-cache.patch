@@ -1,0 +1,21 @@
+From: intrigeri <intrigeri@boum.org>
+Date: Fri, 28 Dec 2018 16:20:24 +0000
+Subject: Enable writing cache.
+
+---
+ parser/rc.apparmor.functions | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/parser/rc.apparmor.functions b/parser/rc.apparmor.functions
+index 4ff45f1..09495b9 100644
+--- a/parser/rc.apparmor.functions
++++ b/parser/rc.apparmor.functions
+@@ -33,7 +33,7 @@
+ 
+ MODULE=apparmor
+ PARSER=/sbin/apparmor_parser
+-PARSER_OPTS=
++PARSER_OPTS=--write-cache
+ # Suppress warnings when booting in quiet mode
+ if [ "${QUIET:-no}" = yes ] || [ "${quiet:-n}" = y ]; then
+ 	PARSER_OPTS="$PARSER_OPTS --quiet"

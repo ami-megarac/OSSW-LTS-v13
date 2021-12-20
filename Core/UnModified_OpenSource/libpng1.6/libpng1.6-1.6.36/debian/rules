@@ -1,0 +1,33 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+
+# Uncomment this to turn on verbose mode.
+# export DH_VERBOSE=1
+
+export DEB_BUILD_MAINT_OPTIONS   := hardening=+all
+export DEB_CFLAGS_MAINT_APPEND   := $(shell dpkg-buildflags --get CPPFLAGS)
+export DEB_CXXFLAGS_MAINT_APPEND := $(shell dpkg-buildflags --get CPPFLAGS)
+export DEB_LDFLAGS_MAINT_APPEND  := -Wl,--as-needed
+CC?=gcc
+
+%:
+	dh $@
+
+DEB_HOST_GNU_TYPE   ?= $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
+DEB_BUILD_GNU_TYPE  ?= $(shell dpkg-architecture -qDEB_BUILD_GNU_TYPE)
+
+override_dh_auto_test:
+ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
+	LD_LIBRARY_PATH=".libs:" dh_auto_test
+ifeq ($(DEB_BUILD_GNU_TYPE),$(DEB_HOST_GNU_TYPE))
+	$(CC) $(CFLAGS) $(CPPFLAGS) -Wall -g -O2 -c -o pngtest.o pngtest.c
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) -o pngtest-static -Wall -g -O2  pngtest.o .libs/libpng16.a -lz -lm
+	./pngtest-static
+endif
+endif
+
+override_dh_installexamples:
+	dh_installexamples -plibpng-dev example.c pngtest.c pngtest.png
+
+override_dh_makeshlibs:
+	dh_makeshlibs --add-udeb=libpng16-16-udeb -a

@@ -1,0 +1,13 @@
+START
+File: testcase31.in
+Event type: AA_RECORD_DENIED
+Audit ID: 1190503664.863:27763
+Operation: inode_link
+Mask: mrwIxl
+Denied Mask: l
+Profile: /home/steve/aa-regression-tests/link
+Name: /tmp/sdtest.8236-29816-IN8243/target
+Name2: /tmp/sdtest.8236-29816-IN8243/src
+PID: 8390
+Epoch: 1190503664
+Audit subid: 27763

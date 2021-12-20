@@ -1,0 +1,7 @@
+#
+#=Description basic file rule w/nested alternations
+#=EXRESULT PASS
+#
+/usr/bin/foo {
+  owner /a/b/c/**{cache,data,download,/ext,file{admin,s},images,joomla,moodledata/sessions}/** rw,
+}

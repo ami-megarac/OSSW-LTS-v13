@@ -1,0 +1,218 @@
+# -*- makefile -*-
+# rules to unpack the source tarballs in $(srcdir); if the source dir already
+# exists, the rule exits with an error to prevent deletion of modified
+# source files. It has to be deleted manually.
+
+tarballs = $(gcc_tarball)
+ifeq ($(with_d),yes)
+  tarballs += $(gdc_tarball)
+endif
+ifeq ($(with_offload_nvptx),yes)
+  tarballs += $(nl_nvptx_tarball)
+endif
+
+unpack_stamps = $(foreach i,$(tarballs),$(unpack_stamp)-$(i))
+
+unpack: stamp-dir $(unpack_stamp) debian-chmod
+$(unpack_stamp): $(unpack_stamps)
+$(unpack_stamp): $(foreach p,$(debian_tarballs),unpacked-$(p))
+	echo -e "\nBuilt from Debian source package $(PKGSOURCE)-$(SOURCE_VERSION)" \
+		> pxxx
+	echo -e "Integrated upstream packages in this version:\n" >> pxxx
+	for i in $(tarballs); do echo "  $$i" >> pxxx; done
+	mv -f pxxx $@
+
+debian-chmod:
+	@chmod 755 debian/dh_*
+
+# ---------------------------------------------------------------------------
+
+gfdl_texinfo_files = \
+	gcc/doc/avr-mmcu.texi \
+	gcc/doc/bugreport.texi \
+	gcc/doc/cfg.texi \
+	gcc/doc/collect2.texi \
+	gcc/doc/compat.texi \
+	gcc/doc/configfiles.texi \
+	gcc/doc/configterms.texi \
+	gcc/doc/contrib.texi \
+	gcc/doc/contribute.texi \
+	gcc/doc/cpp.texi \
+	gcc/doc/cppdiropts.texi \
+	gcc/doc/cppenv.texi \
+	gcc/doc/cppinternals.texi \
+	gcc/doc/cppopts.texi \
+	gcc/doc/cppwarnopts.texi \
+	gcc/doc/extend.texi \
+	gcc/doc/fragments.texi \
+	gcc/doc/frontends.texi \
+	gcc/doc/gccint.texi \
+	gcc/doc/gcov.texi \
+	gcc/doc/gcov-dump.texi \
+	gcc/doc/gcov-tool.texi \
+	gcc/doc/generic.texi \
+	gcc/doc/gimple.texi \
+	gcc/doc/gnu.texi \
+	gcc/doc/gty.texi \
+	gcc/doc/headerdirs.texi \
+	gcc/doc/hostconfig.texi \
+	gcc/doc/implement-c.texi \
+	gcc/doc/implement-cxx.texi \
+	gcc/doc/install-old.texi \
+	gcc/doc/install.texi \
+	gcc/doc/interface.texi \
+	gcc/doc/invoke.texi \
+	gcc/doc/languages.texi \
+	gcc/doc/libgcc.texi \
+	gcc/doc/loop.texi \
+	gcc/doc/lto.texi \
+	gcc/doc/makefile.texi \
+	gcc/doc/match-and-simplify.texi \
+	gcc/doc/md.texi \
+	gcc/doc/objc.texi \
+	gcc/doc/optinfo.texi \
+	gcc/doc/options.texi \
+	gcc/doc/passes.texi \
+	gcc/doc/plugins.texi \
+	gcc/doc/poly-int.texi \
+	gcc/doc/portability.texi \
+	gcc/doc/rtl.texi \
+	gcc/doc/service.texi \
+	gcc/doc/sourcebuild.texi \
+	gcc/doc/standards.texi \
+	gcc/doc/tm.texi.in \
+	gcc/doc/tm.texi \
+	gcc/doc/tree-ssa.texi \
+	gcc/doc/trouble.texi \
+	gcc/doc/include/gcc-common.texi \
+	gcc/doc/include/funding.texi \
+	gcc/fortran/gfc-internals.texi \
+	gcc/fortran/invoke.texi \
+	gcc/fortran/intrinsic.texi \
+
+
+gfdl_toplevel_texinfo_files = \
+	gcc/doc/gcc.texi \
+	gcc/ada/gnat-style.texi \
+	gcc/ada/gnat_rm.texi \
+	gcc/ada/gnat_ugn.texi \
+	gcc/fortran/gfortran.texi \
+	gcc/go/gccgo.texi \
+	libgomp/libgomp.texi \
+	libquadmath/libquadmath.texi \
+
+gfdl_manpages = \
+	gcc/doc/cpp.1 \
+	gcc/doc/g++.1 \
+	gcc/doc/gc-analyze.1 \
+	gcc/doc/gcc.1 \
+	gcc/doc/gccgo.1 \
+	gcc/doc/gcov.1 \
+	gcc/doc/gcov-dump.1 \
+	gcc/doc/gcov-tool.1 \
+	gcc/doc/gfortran.1 \
+	gcc/doc/fsf-funding.7 \
+
+# ---------------------------------------------------------------------------
+$(unpack_stamp)-$(gcc_tarball): $(gcc_tarpath)
+	: # unpack gcc tarball
+	mkdir -p $(stampdir)
+	if [ -d $(srcdir) ]; then \
+	  echo >&2 "Source directory $(srcdir) exists. Delete by hand"; \
+	  false; \
+	fi
+	rm -rf $(gcc_srcdir)
+	tar -x -f $(gcc_tarpath)
+	mv $(gcc_srcdir) $(srcdir)
+	ln -sf libsanitizer $(srcdir)/libasan
+ifeq (0,1)
+	cd $(srcdir) && tar cfj ../gcc-4.1.1-doc.tar.bz2 \
+		$(gfdl_texinfo_files) \
+		$(gfdl_toplevel_texinfo_files) \
+		$(gfdl_manpages)
+endif
+ifeq ($(GFDL_INVARIANT_FREE),yes)
+  ifneq ($(single_package),yes)
+	rm -f $(srcdir)/gcc/doc/*.1
+	rm -f $(srcdir)/gcc/doc/fsf-funding.7
+	rm -f $(srcdir)/gcc/doc/*.info
+	rm -f $(srcdir)/gcc/fortran/*.info
+	rm -f $(srcdir)/libgomp/*.info
+	for i in $(gfdl_texinfo_files); do \
+	  if [ -f $(srcdir)/$$i ]; then \
+	    cp $(SOURCE_DIR)debian/dummy.texi $(srcdir)/$$i; \
+	  else \
+	    cp $(SOURCE_DIR)debian/dummy.texi $(srcdir)/$$i; \
+	    echo >&2 "$$i does not exist, fix debian/rules.unpack"; \
+	  fi; \
+	done
+	( \
+	  echo '@include gcc-vers.texi'; \
+	  echo '@macro versionsubtitle'; \
+	  echo '@subtitle For @sc{gcc} version @value{version-GCC}'; \
+	  echo '@vskip 0pt plus 1filll'; \
+	  echo '@end macro'; \
+	) > $(srcdir)/gcc/doc/include/gcc-common.texi
+	for i in $(gfdl_toplevel_texinfo_files); do \
+	  n=$$(basename $$i .texi); \
+	  if [ -f $(srcdir)/$$i ]; then \
+	    sed "s/@name@/$$n/g" $(SOURCE_DIR)debian/gcc-dummy.texi \
+	      > $(srcdir)/$$i; \
+	  else \
+	    sed "s/@name@/$$n/g" $(SOURCE_DIR)debian/gcc-dummy.texi \
+	      > $(srcdir)/$$i; \
+	    echo >&2 "$$i does not exist, fix debian/rules.unpack"; \
+	  fi; \
+	done
+	for i in $(gfdl_manpages); do \
+	  touch $(srcdir)/$$i; \
+	done
+	rm -f $(srcdir)/INSTALL/*.html
+	rm -f $(srcdir)/zlib/contrib/dotzlib/DotZLib.chm
+  endif
+endif
+	echo "$(gcc_tarball) unpacked." > $@
+
+# ---------------------------------------------------------------------------
+ifneq (,$(gdc_tarball))
+$(unpack_stamp)-$(gdc_tarball): $(gdc_tarpath) $(unpack_stamp)-$(gcc_tarball)
+	: # unpack gdc tarball
+	mkdir -p $(stampdir)
+	if [ -d $(srcdir)/gcc/d ]; then \
+	  echo >&2 "Source directory $(srcdir)/gcc/d exists. Delete by hand";\
+	  false; \
+	fi
+	#rm -rf $(gdc_srcdir)
+	rm -rf $(srcdir)/gcc/d
+	rm -rf $(srcdir)/gcc/testsuite/gdc.test
+	rm -f $(srcdir)/gcc/testsuite/lib/gdc*.exp
+	rm -rf $(srcdir)/libphobos
+	tar -x -C $(srcdir) --strip-components=1 -f $(gdc_tarpath)
+ifeq ($(GFDL_INVARIANT_FREE),yes-now-purge-gfdl)
+  ifneq ($(single_package),yes)
+	for i in gcc/d/gdc.texi; do \
+	  n=$$(basename $$i .texi); \
+	  if [ -f $(srcdir)/$$i ]; then \
+	    sed "s/@name@/$$n/g" $(SOURCE_DIR)debian/gcc-dummy.texi \
+	      > $(srcdir)/$$i; \
+	  else \
+	    echo >&2 "$$i does not exist, fix debian/rules.unpack"; \
+	  fi; \
+	done
+	for i in gcc/d/gdc.1; do \
+	  touch $(srcdir)/$$i; \
+	done
+  endif
+endif
+	echo "$(gdc_tarball) unpacked." > $@
+endif
+
+# ---------------------------------------------------------------------------
+ifneq (,$(nl_nvptx_tarball))
+$(unpack_stamp)-$(nl_nvptx_tarball): $(nl_nvptx_tarpath) $(unpack_stamp)-$(gcc_tarball)
+	: # unpack newlib-nvptx tarball
+	mkdir -p $(stampdir)
+	: # rm -rf $(nl_nvptx_srcdir)
+	tar -x -f $(nl_nvptx_tarpath)
+	echo "$(nl_nvptx_tarball) unpacked." > $@
+endif

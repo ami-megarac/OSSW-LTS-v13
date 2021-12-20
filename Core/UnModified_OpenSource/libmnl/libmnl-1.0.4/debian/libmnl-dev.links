@@ -1,0 +1,3 @@
+#! /usr/bin/dh-exec
+
+lib/${DEB_HOST_MULTIARCH}/libmnl.so.${LIBMNL_SO_VER} usr/lib/${DEB_HOST_MULTIARCH}/libmnl.so

@@ -1,0 +1,13 @@
+Commands to regenerate these files, to be run in corresponding chroots
+
+# echo stretch OK | gzip -c > stretch.gz
+
+# echo stretch OK | bzip2 -c > stretch.bz2
+
+# perl -MDB_File -e '$d = shift; tie %h,  q(DB_File), "$d.db", O_WRONLY|O_CREAT , 0640 or die "opening DB file failed: $!"; $h{foo} = "$d OK"; untie %h' stretch
+
+# perl -MGDBM_File -e '$d = shift; tie %h,  q(GDBM_File), "$d.gdbm", &GDBM_WRCREAT, 0640 or die "opening GDBM file failed: $!"; $h{foo} = "$d OK"; untie %h' stretch
+
+# perl -MFcntl -MNDBM_File -e '$d = shift; tie %h,  q(NDBM_File), "$d", O_RDWR|O_CREAT, 0640 or die "opening NDBM file failed: $!"; $h{foo} = "$d OK"; untie %h' stretch
+
+# perl -MStorable=nstore -e '$d=shift; $h{foo}="$d OK"; nstore \%h, "$d.storable"' stretch

@@ -1,0 +1,66 @@
+#
+#=DESCRIPTION allow change_profile @{var} with just res, child profile
+#=EXRESULT PASS
+#
+
+@{var}=/test
+/usr/bin/foo {
+   allow change_profile @{var} -> *//ab,
+}
+
+/usr/bin/foo2 {
+   allow change_profile @{var} -> **//ab,
+}
+
+/usr/bin/foo3 {
+   allow change_profile @{var} -> ?//ab,
+}
+
+/usr/bin/foo4 {
+   allow change_profile @{var} -> [ab]//ab,
+}
+
+/usr/bin/foo5 {
+   allow change_profile @{var} -> [^ab]//ab,
+}
+
+/usr/bin/foo6 {
+   allow change_profile @{var} -> ab//*,
+}
+
+/usr/bin/foo7 {
+   allow change_profile @{var} -> ab//**,
+}
+
+/usr/bin/foo8 {
+   allow change_profile @{var} -> ab//?,
+}
+
+/usr/bin/foo9 {
+   allow change_profile @{var} -> ab//[ab],
+}
+
+/usr/bin/foo10 {
+   allow change_profile @{var} -> ab//[^ab],
+}
+
+/usr/bin/foo11 {
+   allow change_profile @{var} -> *//*,
+}
+
+/usr/bin/foo12 {
+   allow change_profile @{var} -> **//*,
+}
+
+/usr/bin/foo13 {
+   allow change_profile @{var} -> ?//*,
+}
+
+/usr/bin/foo14 {
+   allow change_profile @{var} -> [ab]//*,
+}
+
+/usr/bin/foo15 {
+   allow change_profile @{var} -> [^ab]//*,
+}
+

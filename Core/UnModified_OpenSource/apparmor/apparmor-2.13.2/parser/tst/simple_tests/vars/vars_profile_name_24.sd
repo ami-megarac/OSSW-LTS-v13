@@ -1,0 +1,8 @@
+#=DESCRIPTION reference variables is null
+#=EXRESULT FAIL
+
+@{FOO}=
+
+/does/not/exist@{FOO} {
+  /does/not/exist r,
+}

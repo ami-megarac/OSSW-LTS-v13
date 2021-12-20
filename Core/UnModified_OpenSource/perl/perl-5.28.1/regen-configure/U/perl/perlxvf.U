@@ -1,0 +1,184 @@
+?RCS: $Id$
+?RCS:
+?RCS: Copyright (c) 1999 Jarkko Hietaniemi
+?RCS:
+?RCS: You may distribute under the terms of either the GNU General Public
+?RCS: License or the Artistic License, as specified in the README file.
+?RCS:
+?MAKE:ivdformat uvuformat uvoformat uvxformat uvXUformat \
+	nvEUformat nvFUformat nvGUformat \
+	nveformat nvfformat nvgformat: \
+	ivsize longsize intsize shortsize \
+	sPRId64 sPRIu64 sPRIo64 sPRIx64 sPRIXU64 \
+	uselongdouble d_longdbl usequadmath d_PRIgldbl \
+	sPRIEUldbl sPRIFUldbl sPRIGUldbl sPRIeldbl sPRIfldbl sPRIgldbl \
+	test echo
+?MAKE:	-pick add $@ %<
+?S:ivdformat:
+?S:	This variable contains the format string used for printing
+?S:	a Perl IV as a signed decimal integer.
+?S:.
+?S:uvuformat:
+?S:	This variable contains the format string used for printing
+?S:	a Perl UV as an unsigned decimal integer.
+?S:.
+?S:uvoformat:
+?S:	This variable contains the format string used for printing
+?S:	a Perl UV as an unsigned octal integer.
+?S:.
+?S:uvxformat:
+?S:	This variable contains the format string used for printing
+?S:	a Perl UV as an unsigned hexadecimal integer in lowercase abcdef.
+?S:.
+?S:uvXUformat:
+?S:	This variable contains the format string used for printing
+?S:	a Perl UV as an unsigned hexadecimal integer in uppercase ABCDEF.
+?S:.
+?S:nveformat:
+?S:	This variable contains the format string used for printing
+?S:	a Perl NV using %e-ish floating point format.
+?S:.
+?S:nvfformat:
+?S:	This variable contains the format string used for printing
+?S:	a Perl NV using %f-ish floating point format.
+?S:.
+?S:nvgformat:
+?S:	This variable contains the format string used for printing
+?S:	a Perl NV using %g-ish floating point format.
+?S:.
+?S:nvEUformat:
+?S:	This variable contains the format string used for printing
+?S:	a Perl NV using %E-ish floating point format.
+?S:.
+?S:nvFUformat:
+?S:	This variable contains the format string used for printing
+?S:	a Perl NV using %F-ish floating point format.
+?S:.
+?S:nvGUformat:
+?S:	This variable contains the format string used for printing
+?S:	a Perl NV using %G-ish floating point format.
+?S:.
+?C:IVdf:
+?C:	This symbol defines the format string used for printing a Perl IV
+?C:	as a signed decimal integer.
+?C:.
+?C:UVuf:
+?C:	This symbol defines the format string used for printing a Perl UV
+?C:	as an unsigned decimal integer.
+?C:.
+?C:UVof:
+?C:	This symbol defines the format string used for printing a Perl UV
+?C:	as an unsigned octal integer.
+?C:.
+?C:UVxf:
+?C:	This symbol defines the format string used for printing a Perl UV
+?C:	as an unsigned hexadecimal integer in lowercase abcdef.
+?C:.
+?C:UVXf:
+?C:	This symbol defines the format string used for printing a Perl UV
+?C:	as an unsigned hexadecimal integer in uppercase ABCDEF.
+?C:.
+?C:NVef:
+?C:	This symbol defines the format string used for printing a Perl NV
+?C:	using %e-ish floating point format.
+?C:.
+?C:NVff:
+?C:	This symbol defines the format string used for printing a Perl NV
+?C:	using %f-ish floating point format.
+?C:.
+?C:NVgf:
+?C:	This symbol defines the format string used for printing a Perl NV
+?C:	using %g-ish floating point format.
+?C:.
+?C:NVEf:
+?C:	This symbol defines the format string used for printing a Perl NV
+?C:	using %E-ish floating point format.
+?C:.
+?C:NVFf:
+?C:	This symbol defines the format string used for printing a Perl NV
+?C:	using %F-ish floating point format.
+?C:.
+?C:NVGf:
+?C:	This symbol defines the format string used for printing a Perl NV
+?C:	using %G-ish floating point format.
+?C:.
+?H:#define	IVdf		$ivdformat		/**/
+?H:#define	UVuf		$uvuformat		/**/
+?H:#define	UVof		$uvoformat		/**/
+?H:#define	UVxf		$uvxformat		/**/
+?H:#define	UVXf		$uvXUformat		/**/
+?H:#define	NVef		$nveformat		/**/
+?H:#define	NVff		$nvfformat		/**/
+?H:#define	NVgf		$nvgformat		/**/
+?H:#define	NVEf		$nvEUformat		/**/
+?H:#define	NVFf		$nvFUformat		/**/
+?H:#define	NVGf		$nvGUformat		/**/
+?H:.
+: Check format strings for internal types
+echo " "
+$echo "Checking the format strings to be used for Perl's internal types..." >&4
+
+if $test X"$ivsize" = X8; then
+	ivdformat="$sPRId64"
+	uvuformat="$sPRIu64"
+	uvoformat="$sPRIo64"
+	uvxformat="$sPRIx64"
+	uvXUformat="$sPRIXU64"
+else
+	if $test X"$ivsize" = X"$longsize"; then
+		ivdformat='"ld"'
+		uvuformat='"lu"'
+		uvoformat='"lo"'
+		uvxformat='"lx"'
+		uvXUformat='"lX"'
+	else
+		if $test X"$ivsize" = X"$intsize"; then
+			ivdformat='"d"'
+			uvuformat='"u"'
+			uvoformat='"o"'
+			uvxformat='"x"'
+			uvXUformat='"X"'
+		else
+			: far out
+			if $test X"$ivsize" = X"$shortsize"; then
+				ivdformat='"hd"'
+				uvuformat='"hu"'
+				uvoformat='"ho"'
+				uvxformat='"hx"'
+				uvXUformat='"hX"'
+			fi
+		fi
+	fi
+fi
+
+if $test X"$usequadmath" = X"$define"; then
+    nveformat='"Qe"'
+    nvfformat='"Qf"'
+    nvgformat='"Qg"'
+    nvEUformat='"QE"'
+    nvFUformat='"QF"'
+    nvGUformat='"QG"'
+else
+    if $test X"$uselongdouble" = X"$define" -a X"$d_longdbl" = X"$define" -a X"$d_PRIgldbl" = X"$define"; then
+	nveformat="$sPRIeldbl"
+	nvfformat="$sPRIfldbl"
+	nvgformat="$sPRIgldbl"
+	nvEUformat="$sPRIEUldbl"
+	nvFUformat="$sPRIFUldbl"
+	nvGUformat="$sPRIGUldbl"
+    else
+	nveformat='"e"'
+	nvfformat='"f"'
+	nvgformat='"g"'
+	nvEUformat='"E"'
+	nvFUformat='"F"'
+	nvGUformat='"G"'
+    fi
+fi
+
+case "$ivdformat" in
+'') echo "$0: Fatal: failed to find format strings, cannot continue." >&4
+    exit 1
+    ;;
+esac
+

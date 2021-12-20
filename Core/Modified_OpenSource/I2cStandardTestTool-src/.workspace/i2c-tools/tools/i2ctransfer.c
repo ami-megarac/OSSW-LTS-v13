@@ -174,7 +174,7 @@ int main(int argc, char *argv[])
 		__u8 data, *buf;
 		char *end;
 
-		if (nmsgs > I2C_RDRW_IOCTL_MAX_MSGS) {
+		if (nmsgs >= I2C_RDRW_IOCTL_MAX_MSGS) {
 			fprintf(stderr, "Error: Too many messages (max: %d)\n",
 				I2C_RDRW_IOCTL_MAX_MSGS);
 			goto err_out;
@@ -226,8 +226,7 @@ int main(int argc, char *argv[])
 			}
 
 			msgs[nmsgs].addr = (__u16)address;
-			msgs[nmsgs].flags = flags;/*SCA Fix [Memory - illegal accesses]:: False Positive*/
-			/*Reason for False Positive - parameter value without wrong*/
+			msgs[nmsgs].flags = flags;
 			msgs[nmsgs].len = (__u16)len;	
 			if (len) {
 				buf = malloc(len);
@@ -236,8 +235,7 @@ int main(int argc, char *argv[])
 					goto err_out_with_arg;
 				}
 				memset(buf, 0, len);
-				msgs[nmsgs].buf = buf;/*SCA Fix [Memory - illegal accesses]:: False Positive*/
-			/*Reason for False Positive - parameter value without wrong*/
+				msgs[nmsgs].buf = buf;
 
 			}
 
@@ -260,8 +258,7 @@ int main(int argc, char *argv[])
 			len = (unsigned long)(msgs[nmsgs].len);
 
 			while (buf_idx < len) {
-				msgs[nmsgs].buf[buf_idx++] = data;/*SCA Fix [Memory - illegal accesses]:: False Positive*/
-			/*Reason for False Positive - parameter value without wrong*/
+				msgs[nmsgs].buf[buf_idx++] = data;
 
 				if (!*end)
 					break;
@@ -323,8 +320,7 @@ int main(int argc, char *argv[])
 
 	for (i = 0; i < nmsgs; i++)
 	{
-		free(msgs[i].buf);/*SCA Fix [Memory - illegal accesses]:: False Positive*/
-			/*Reason for False Positive - parameter value without wrong*/
+		free(msgs[i].buf);
 		msgs[i].buf=NULL;
 	}
 	exit(0);
@@ -337,8 +333,7 @@ int main(int argc, char *argv[])
 
 	for (i = 0; i <= nmsgs; i++)
 	{
-		free(msgs[i].buf);/*SCA Fix [Memory - illegal accesses]:: False Positive*/
-			/*Reason for False Positive - parameter value without wrong*/
+		free(msgs[i].buf);
 		msgs[i].buf=NULL;
 	}
 

@@ -1,0 +1,43 @@
+From: Simon Ruderich <simon@ruderich.org>
+Date: Thu, 22 Mar 2012 22:38:42 +0100
+Subject: Use build flags from environment (dpkg-buildflags)
+
+Necessary for hardening flags. Also strip -pie/-fPIE from CFLAGS/LDFLAGS when
+used to link libraries. It conflicts with -fPIC.
+
+Bug-Debian: http://bugs.debian.org/661393
+Forwarded: not-needed
+Last-Update: 2014-05-18
+---
+ Makefile | 12 ++++++++----
+ 1 file changed, 8 insertions(+), 4 deletions(-)
+
+diff --git a/Makefile b/Makefile
+index 304c694..627b11b 100644
+--- a/Makefile
++++ b/Makefile
+@@ -1,5 +1,9 @@
+-CPPFLAGS	:= -I.
+-CFLAGS		:= -g -Wall -Werror
++CPPFLAGS	+= -I.
++CFLAGS		+= -g -Wall -Werror
++# Libraries can't be compiled with -pie/-fPIE. Strip it from CFLAGS/LDFLAGS if
++# used.
++CFLAGS_LIB	:= $(filter-out -fPIE,$(CFLAGS))
++LDFLAGS_LIB	:= $(filter-out -fPIE,$(filter-out -pie,$(LDFLAGS)))
+ INSTALL		:= install
+ DESTDIR		:=
+ SPECFILE	:= keyutils.spec
+@@ -132,10 +136,10 @@ $(SONAME): $(LIBNAME)
+ LIBVERS := -shared -Wl,-soname,$(SONAME) -Wl,--version-script,version.lds
+ 
+ $(LIBNAME): keyutils.os version.lds Makefile
+-	$(CC) $(CFLAGS) -fPIC $(LDFLAGS) $(LIBVERS) -o $@ keyutils.os $(LIBLIBS)
++	$(CC) $(CFLAGS_LIB) -fPIC $(LDFLAGS_LIB) $(LIBVERS) -o $@ keyutils.os $(LIBLIBS)
+ 
+ keyutils.os: keyutils.c keyutils.h Makefile
+-	$(CC) $(CPPFLAGS) $(VCPPFLAGS) $(CFLAGS) -fPIC -o $@ -c $<
++	$(CC) $(CPPFLAGS) $(VCPPFLAGS) $(CFLAGS_LIB) -fPIC -o $@ -c $<
+ LIB_DEPENDENCY	:= $(DEVELLIB)
+ endif
+ 

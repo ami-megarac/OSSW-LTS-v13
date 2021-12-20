@@ -1,0 +1,10 @@
+#
+#=DESCRIPTION change_profile /onexec with a variable (LP: #390810)
+#=EXRESULT PASS
+#
+
+@{LIBVIRT}="libvirt"
+
+/usr/bin/foo {
+   change_profile /onexec -> @{LIBVIRT}-foo,
+}

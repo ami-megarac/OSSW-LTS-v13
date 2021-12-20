@@ -1,0 +1,10 @@
+#
+#=DESCRIPTION abi testing - abi path in profile
+#=EXRESULT PASS
+#
+
+
+/does/not/exist {
+  abi "abi/4.19",
+
+}

@@ -1,0 +1,58 @@
+Source: rtmpdump
+Priority: optional
+Maintainer: Debian Multimedia Maintainers <debian-multimedia@lists.debian.org>
+Uploaders:
+ Reinhard Tartler <siretart@tauware.de>,
+ Sebastian Dröge <slomo@debian.org>,
+ Sebastian Ramacher <sramacher@debian.org>
+Build-Depends:
+ debhelper (>= 11),
+ libgmp-dev,
+ libgnutls28-dev (>= 2.4.1),
+ nettle-dev,
+ zlib1g-dev
+Standards-Version: 4.1.4
+Section: web
+Vcs-Git: https://salsa.debian.org/multimedia-team/rtmpdump.git
+Vcs-Browser: https://salsa.debian.org/multimedia-team/rtmpdump
+Homepage: http://rtmpdump.mplayerhq.hu/
+
+Package: rtmpdump
+Architecture: any
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Description: small dumper for media content streamed over the RTMP protocol
+ A small dumper for media content streamed over the RTMP protocol (like BBC's
+ iPlayer high quality streams). Supplying an RTMP URL will result in a dumped
+ flv file, which can be played/transcoded with standard tools.
+
+Package: librtmp1
+Section: libs
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Architecture: any
+Multi-Arch: same
+Description: toolkit for RTMP streams (shared library)
+ A small dumper for media content streamed over the RTMP protocol (like BBC's
+ iPlayer high quality streams). Supplying an RTMP URL will result in a dumped
+ flv file, which can be played/transcoded with standard tools.
+ .
+ This package contains the shared libraries, header files needed by
+ programs that want to use librtmp.
+
+Package: librtmp-dev
+Section: libdevel
+Depends:
+ librtmp1 (= ${binary:Version}),
+ ${misc:Depends},
+ libgmp-dev,
+ libgnutls28-dev,
+ nettle-dev,
+ zlib1g-dev
+Architecture: any
+Multi-Arch: same
+Description: toolkit for RTMP streams (development files)
+ A small dumper for media content streamed over the RTMP protocol (like BBC's
+ iPlayer high quality streams). Supplying an RTMP URL will result in a dumped
+ flv file, which can be played/transcoded with standard tools.
+ .
+ This package contains the development libraries, header files needed by
+ programs that want to compile with librtmp.

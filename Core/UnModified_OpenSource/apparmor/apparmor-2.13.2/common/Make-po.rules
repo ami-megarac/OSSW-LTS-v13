@@ -1,0 +1,53 @@
+# ------------------------------------------------------------------
+#
+# Copyright (c) 1999-2008 NOVELL (All rights reserved)
+# Copyright 2009-2015 Canonical Ltd.
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of version 2 of the GNU General Public 
+# License published by the Free Software Foundation.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# ------------------------------------------------------------------
+#
+# The including makefile needs to define LANG, which lists the lang
+# files to include; e.g. LANG=en_US de_DE, where en_US.po and de_DE.po
+# exist
+LOCALEDIR=/usr/share/locale
+
+XGETTEXT_ARGS=--copyright-holder="Canonical Ltd" --msgid-bugs-address=apparmor@lists.ubuntu.com -d ${NAME}
+
+# When making the .pot file, it's expected that the parent Makefile will
+# pass in the list of sources in the SOURCES variable
+PARENT_SOURCES=$(foreach source, ${SOURCES}, ../${source})
+
+# Can override by passing LANGS=whatever here
+LANGS?=$(patsubst %.po, %, $(wildcard *.po))
+TARGET_MOS=$(foreach lang, $(filter-out $(DISABLED_LANGS),$(LANGS)), ${lang}.mo)
+
+.PHONY: all
+all: ${TARGET_MOS}
+
+${NAME}.pot: ${PARENT_SOURCES}
+	xgettext ${XGETTEXT_ARGS} ${PARENT_SOURCES} -o $@
+
+%.mo: %.po
+	msgfmt -c -o $@ $<
+
+.PHONY: install
+install: ${TARGET_MOS}
+	mkdir -p $(DESTDIR)/${LOCALEDIR}
+	for lang in ${LANGS} ; do \
+		mkdir -p ${DESTDIR}/${LOCALEDIR}/$${lang}/LC_MESSAGES ; \
+		install -m 644 $${lang}.mo ${DESTDIR}/${LOCALEDIR}/$${lang}/LC_MESSAGES/${NAME}.mo ; \
+	done
+
+.PHONY: clean
+clean:
+	rm -f *.mo Make.rules

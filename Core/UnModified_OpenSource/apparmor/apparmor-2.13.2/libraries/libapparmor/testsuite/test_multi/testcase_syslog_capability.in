@@ -1,0 +1,1 @@
+Sep  9 12:51:50 ubuntu-desktop kernel: [ 1612.746129] type=1400 audit(1284061910.975:672): apparmor="DENIED" operation="capable" parent=2663 profile="/home/ubuntu/bzr/apparmor/tests/regression/apparmor/syscall_setpriority" pid=7292 comm="syscall_setprio" capability=23  capname="sys_nice"

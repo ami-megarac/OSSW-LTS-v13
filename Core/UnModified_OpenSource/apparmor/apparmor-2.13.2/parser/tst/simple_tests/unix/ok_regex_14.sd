@@ -1,0 +1,8 @@
+#
+#=DESCRIPTION unix rule with peer regex expansion that needs escaping
+#=EXRESULT PASS
+#
+
+profile foo {
+  unix peer=(label=splat\!),
+}

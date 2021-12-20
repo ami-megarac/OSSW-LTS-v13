@@ -1,0 +1,1 @@
+type=APPARMOR_DENIED msg=audit(1190305330.060:14638):  type=1503 operation="inode_permission" requested_mask="r" denied_mask="r" name="/etc/passwd" pid=31349 profile="/home/steve/tmp/sh"

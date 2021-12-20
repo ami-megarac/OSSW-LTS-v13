@@ -1,0 +1,16 @@
+START
+File: avc_audit_03.in
+Event type: AA_RECORD_ALLOWED
+Audit ID: 1279968846.035:77
+Operation: open
+Mask: r
+Denied Mask: r
+fsuid: 1000
+ouid: 0
+Profile: /tmp/cat
+Name: /etc/passwd
+Command: cat
+Parent: 7014
+PID: 21645
+Epoch: 1279968846
+Audit subid: 77

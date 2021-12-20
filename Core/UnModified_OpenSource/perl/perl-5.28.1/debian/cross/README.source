@@ -1,0 +1,16 @@
+Notes for the perl package maintainers, and others who need to deal with
+these files. Please read debian/cross/README first.
+
+* by default, we assume that the config.sh files are valid if the current
+  Perl upstream version matches the one in the config.sh
+
+* if the upstream version has changed, debian/config.debian exits with
+  a message indicating the need for refreshing the files
+
+* this can also be triggered by creating debian/cross/<arch>/REFRESH; the
+  contents of this file are then shown when debian/config.debian bails out
+
+* the REFRESH functionality should be used at least when modifying
+  Configure arguments in debian/config.debian
+
+ -- Niko Tyni <ntyni@debian.org>  Fri, 29 Jan 2016 15:25:19 +0200

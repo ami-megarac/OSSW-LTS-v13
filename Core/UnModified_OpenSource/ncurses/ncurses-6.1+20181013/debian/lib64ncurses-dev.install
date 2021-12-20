@@ -1,0 +1,23 @@
+usr/lib64/libncurses.so
+usr/lib64/libncursesw.so
+obj-64/lib/libtic.so usr/lib64
+obj-64/lib/libform.so usr/lib64
+obj-64/lib/libmenu.so usr/lib64
+obj-64/lib/libpanel.so usr/lib64
+obj-64/lib/libtinfo.so usr/lib64
+obj-64/lib/libncurses.a usr/lib64
+obj-64/lib/libncurses++.a usr/lib64
+obj-64/lib/libtic.a usr/lib64
+obj-64/lib/libform.a usr/lib64
+obj-64/lib/libmenu.a usr/lib64
+obj-64/lib/libpanel.a usr/lib64
+obj-64/lib/libtinfo.a usr/lib64
+obj-wide-64/lib/libformw.so usr/lib64
+obj-wide-64/lib/libmenuw.so usr/lib64
+obj-wide-64/lib/libpanelw.so usr/lib64
+obj-wide-64/lib/libncursesw.a usr/lib64
+obj-wide-64/lib/libncurses++w.a usr/lib64
+obj-wide-64/lib/libformw.a usr/lib64
+obj-wide-64/lib/libmenuw.a usr/lib64
+obj-wide-64/lib/libpanelw.a usr/lib64
+debian/libtermcap.so  usr/lib64

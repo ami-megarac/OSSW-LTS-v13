@@ -1,0 +1,5 @@
+#!/bin/sh
+echo "Verifying that perl-base is still self contained"
+
+(cd /; find usr/lib/*/perl-base -name '*.pm') | \
+    perl debian/check-require /

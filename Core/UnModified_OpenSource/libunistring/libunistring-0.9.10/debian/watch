@@ -1,0 +1,5 @@
+# Compulsory line, this is a version 4 file
+version=4
+
+opts=dversionmangle=s/.dfsg\d+$//,pgpsigurlmangle=s/$/.sig/ \
+  https://ftp.gnu.org/gnu/libunistring/libunistring-([\d.]+)\.tar\.(?:gz|bz2|xz|lzma)

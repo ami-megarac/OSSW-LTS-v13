@@ -1,0 +1,21 @@
+Description: Automate upgrades from MySQL with auth_socket to MariaDB with our unix_socket
+Forwarded: https://jira.mariadb.org/browse/MDEV-18768
+Author: Otto Kekäläinen <otto@mariadb.org>
+Last-Update: 2019-04-18
+
+--- a/scripts/mysql_system_tables_fix.sql
++++ b/scripts/mysql_system_tables_fix.sql
+@@ -180,6 +180,13 @@ ALTER TABLE user
+ ALTER TABLE user
+   ADD Password char(41) character set latin1 collate latin1_bin NOT NULL default '' AFTER User;
+ 
++# In MySQL the Unix socket authentication plugin has a different name than in MariaDB
++# and thus the references to if needs to be renamed in the user table.
++UPDATE user
++  SET plugin='unix_socket' WHERE plugin='auth_socket';
++UPDATE plugin
++  SET name='unix_socket', dl='unix_socket.so' WHERE name='auth_socket';
++
+ ALTER TABLE user
+   MODIFY Password char(41) character set latin1 collate latin1_bin NOT NULL default '',
+   MODIFY Select_priv enum('N','Y') COLLATE utf8_general_ci DEFAULT 'N' NOT NULL,

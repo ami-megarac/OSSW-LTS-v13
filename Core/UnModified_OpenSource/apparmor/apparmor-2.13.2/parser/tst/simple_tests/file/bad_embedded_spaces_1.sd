@@ -1,0 +1,6 @@
+#=DESCRIPTION Simple test case for embedded spaces
+#=EXRESULT FAIL
+
+/bin/foo {
+  /abc def r,
+}

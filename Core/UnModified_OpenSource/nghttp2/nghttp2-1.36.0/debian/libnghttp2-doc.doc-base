@@ -1,0 +1,10 @@
+Document: nghttp2
+Title: nghttp2 HTTP 2.0 library Reference Manual
+Author: Tatsuhiro Tsujikawa
+Abstract: A library providing an experimental implementation of the
+ Hypertext Transfer Protocol version 2.0.
+Section: Programming/C
+
+Format: HTML
+Index: /usr/share/doc/libnghttp2-doc/index.html
+Files: /usr/share/doc/libnghttp2-doc/*.html

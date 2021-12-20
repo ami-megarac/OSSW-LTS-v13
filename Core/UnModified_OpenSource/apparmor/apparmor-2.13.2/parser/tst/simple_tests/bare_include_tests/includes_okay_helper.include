@@ -1,0 +1,9 @@
+#
+#=DESCRIPTION A helper for includes_okay.sd
+#
+# if parsed standalone,
+#=EXRESULT FAIL
+#
+  include <includes/fonts>
+
+  /tmp/** r,

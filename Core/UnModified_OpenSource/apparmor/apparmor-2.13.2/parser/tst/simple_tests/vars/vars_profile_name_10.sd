@@ -1,0 +1,9 @@
+#=DESCRIPTION reference variables in rules that also have alternations
+#=EXRESULT PASS
+
+@{FOO}=bar baz
+@{BAR}=baz
+
+profile /does/not@{BAR} /exist@{FOO} {
+  /does/not/exist r,
+}

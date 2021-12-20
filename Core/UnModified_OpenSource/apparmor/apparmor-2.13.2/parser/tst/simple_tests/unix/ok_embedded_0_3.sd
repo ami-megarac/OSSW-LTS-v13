@@ -1,0 +1,8 @@
+#
+#=DESCRIPTION unix rule with embedded \d00
+#=EXRESULT PASS
+#
+
+profile foo {
+  unix addr=@foo\d00bar,
+}

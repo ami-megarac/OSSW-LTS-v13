@@ -1,0 +1,8 @@
+#
+#=DESCRIPTION owner rules must have comma termination
+#=EXRESULT FAIL
+#
+/usr/bin/foo {
+  owner /foo rw
+  /bar rw,
+}

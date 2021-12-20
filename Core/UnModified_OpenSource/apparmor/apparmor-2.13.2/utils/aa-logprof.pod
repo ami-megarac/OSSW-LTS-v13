@@ -1,0 +1,176 @@
+# This publication is intellectual property of Novell Inc. and Canonical
+# Ltd. Its contents can be duplicated, either in part or in whole, provided
+# that a copyright label is visibly located on each copy.
+#
+# All information found in this book has been compiled with utmost
+# attention to detail. However, this does not guarantee complete accuracy.
+# Neither SUSE LINUX GmbH, Canonical Ltd, the authors, nor the translators
+# shall be held liable for possible errors or the consequences thereof.
+#
+# Many of the software and hardware descriptions cited in this book
+# are registered trademarks. All trade names are subject to copyright
+# restrictions and may be registered trade marks. SUSE LINUX GmbH
+# and Canonical Ltd. essentially adhere to the manufacturer's spelling.
+#
+# Names of products and trademarks appearing in this book (with or without
+# specific notation) are likewise subject to trademark and trade protection
+# laws and may thus fall under copyright restrictions.
+#
+
+
+=pod
+
+=head1 NAME
+
+aa-logprof - utility for updating AppArmor security profiles
+
+=head1 SYNOPSIS
+
+B<aa-logprof [I<-d  /path/to/profiles>] [I<-f /path/to/logfile>] [I<-m E<lt>mark in logfileE<gt>>]>
+
+=head1 OPTIONS
+
+B<-d --dir   /path/to/profiles>
+
+   Specifies where to look for the AppArmor security profile set.
+   Defaults to /etc/apparmor.d.
+
+B<-f --file   /path/to/logfile>
+
+    Specifies the location of logfile that contains AppArmor security events.
+	Default locations are read from F</etc/apparmor/logprof.conf>.
+	Typical defaults are:
+		 /var/log/audit/audit.log
+		 /var/log/syslog
+		 /var/log/messages
+
+B< -m --logmark    "mark">
+
+   aa-logprof will ignore all events in the system log before the
+   specified mark is seen.  If the mark contains spaces, it must 
+   be surrounded with quotes to work correctly.
+
+=head1 DESCRIPTION
+
+B<aa-logprof> is an interactive tool used to review AppArmor generated
+messages and update AppArmor security profiles.
+
+Running aa-logprof will scan the log file and if there are new AppArmor
+events that are not covered by the existing profile set, the user will
+be prompted with suggested modifications to augment the profile.
+
+When aa-logprof exits profile changes are saved to disk.  If AppArmor is
+running, the updated profiles are reloaded and if any processes that
+generated AppArmor events are still running in the null-complain-profile,
+those processes are set to run under their proper profiles.
+
+=head2 Responding to AppArmor Events
+
+B<aa-logprof> will generate a list of suggested profile changes that
+the user can choose from, or they can create their own, to modifiy the
+permission set of the profile so that the generated access violation
+will not re-occur.
+
+The user is then presented with info about the access including profile,
+path, old mode if there was a previous entry in the profile for this path,
+new mode, the suggestion list, and given these options:
+
+   (A)llow, (D)eny, (I)gnore, (N)ew, (G)lob last piece, (Q)uit
+
+If the AppArmor profile was in complain mode when the event was generated,
+the default for this option is (A)llow, otherwise, it's (D)eny.
+
+The (D)eny option adds a "deny" rule to the AppArmor profile, which
+silences logging.
+
+The (I)gnore option allows user to ignore the event, without making any 
+changes to the AppArmor profile.
+
+The suggestion list is presented as a numbered list with includes
+at the top, the literal path in the middle, and the suggested globs
+at the bottom.  If any globs are being suggested, the shortest glob
+is the selected option, otherwise, the literal path is selected.
+Picking includes from the list must be done manually.
+
+Hitting a numbered key will change the selected option to the
+corresponding numbered entry in the list.
+
+If the user selects (N)ew, they'll be prompted to enter their own globbed
+entry to match the path.  If the user-entered glob does not match the
+path for this event, they'll be informed and have the option to fix it.
+
+If the user selects (G)lob last piece then, taking the currently selected
+option, aa-logprof will remove the last path element and replace it with /*.
+
+If the last path element already was /*, aa-logprof will go up a directory
+level and replace it with /**.
+
+This new globbed entry is then added to the suggestion list and marked
+as the selected option.
+
+So /usr/share/themes/foo/bar/baz.gif can be turned into
+/usr/share/themes/** by hitting "g" three times.
+
+If the user selects (A)llow, aa-logprof will take the current selection
+and add it to the profile, deleting other entries in the profile that
+are matched by the new entry.
+
+Adding r access to /usr/share/themes/** would delete an entry for r
+access to /usr/share/themes/foo/*.gif if it exists in the profile.
+
+If (Q)uit is selected at this point, aa-logprof will ignore all new pending
+accesses.
+
+After all of the accesses have been handled, logrof will write all
+updated profiles to the disk and reload them if AppArmor is running.
+
+=head2 New Process (Execution) Events
+
+If there are unhandled x accesses generated by the execve(2) of a
+new process, aa-logprof will display the parent profile and the target
+program that's being executed and prompt the user to select an execute
+modifier. These modifiers will allow a choice for the target to: have it's
+own profile (px), inherit the parent's profile (ix), run unconstrained
+(ux), or deny access for the target. See apparmor.d(5) for details.
+
+If there is a corresponding entry for the target in the qualifiers
+section of /etc/apparmor/logprof.conf, the presented list will contain only the
+allowed modes.
+
+The default option for this question is selected using this logic--
+
+  # if px mode is allowed and profile exists for the target
+  #   px is default.
+  # else if ix mode is allowed
+  #   ix is default
+  # else
+  #   deny is default
+
+aa-logprof will never suggest "ux" as the default.
+
+=head2 ChangeHat Events
+
+If unknown aa_change_hat(2) events are found, the user is prompted to add a new
+hat, if the events should go into the default hat for this profile based
+on the corresponding entry in the defaulthat section of logprof.conf,
+or if the following events that run under that hat should be denied
+altogether.
+
+=head2 Capability Events
+
+If there are capability accesses, the user is shown each capability
+access and asked if the capability should be allowed, denied, or if the
+user wants to quit. See capability(7) for details.
+
+=head1 BUGS
+
+If you find any bugs, please report them at
+L<https://bugs.launchpad.net/apparmor/+filebug>.
+
+=head1 SEE ALSO
+
+klogd(8), auditd(8), apparmor(7), apparmor.d(5), aa_change_hat(2),
+logprof.conf(5), aa-genprof(1), aa-enforce(1), aa-complain(1),
+aa-disable(1), and L<https://wiki.apparmor.net>.
+
+=cut

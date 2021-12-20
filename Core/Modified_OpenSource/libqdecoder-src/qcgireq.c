@@ -275,7 +275,11 @@ qentry_t *qcgireq_parse(qentry_t *request, Q_CGI_T method)
             }
         } else if (!strncmp(content_type, "multipart/form-data",
                             CONST_STRLEN("multipart/form-data"))) {
-            _parse_multipart(request);
+            if(_parse_multipart(request) == 0){ //parse mulitpart failure
+                request->free(request);
+                request = NULL;
+                return request;
+            }
         }
     }
 
@@ -375,6 +379,9 @@ static int _parse_multipart(qentry_t *request)
 
     // Force to check the boundary string length to defense overflow attack
     int maxboundarylen = CONST_STRLEN("--");
+	if(strstr(getenv("CONTENT_TYPE"), "boundary=") == NULL){
+		return amount;
+	}
     maxboundarylen += strlen(strstr(getenv("CONTENT_TYPE"), "boundary=")
                              + CONST_STRLEN("boundary="));
     maxboundarylen += CONST_STRLEN("--");

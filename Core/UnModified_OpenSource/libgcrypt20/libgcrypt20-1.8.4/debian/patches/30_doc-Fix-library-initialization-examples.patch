@@ -1,0 +1,49 @@
+From 6faeca72b455541ed6da45c5e71c8eb7b10b8c0b Mon Sep 17 00:00:00 2001
+From: Andreas Metzler <ametzler@bebt.de>
+Date: Sun, 18 Nov 2018 16:01:21 +0100
+Subject: [PATCH] doc: Fix library initialization examples
+
+Signed-off-by: Andreas Metzler <ametzler@bebt.de>
+---
+ doc/gcrypt.texi | 16 ++++++++++------
+ 1 file changed, 10 insertions(+), 6 deletions(-)
+
+diff --git a/doc/gcrypt.texi b/doc/gcrypt.texi
+index c32748ff..be87d2c7 100644
+--- a/doc/gcrypt.texi
++++ b/doc/gcrypt.texi
+@@ -382,10 +382,12 @@ memory is not a problem, you should initialize Libgcrypt this way:
+ 
+ @example
+   /* Version check should be the very first call because it
+-     makes sure that important subsystems are initialized. */
+-  if (!gcry_check_version (GCRYPT_VERSION))
++     makes sure that important subsystems are initialized.
++     #define NEED_LIBGCRYPT_VERSION to the minimum required version. */
++  if (!gcry_check_version (NEED_LIBGCRYPT_VERSION))
+     @{
+-      fputs ("libgcrypt version mismatch\n", stderr);
++      fprintf (stderr, "libgcrypt is too old (need %s, have %s)\n",
++         NEED_LIBGCRYPT_VERSION, gcry_check_version (NULL));
+       exit (2);
+     @}
+ 
+@@ -405,10 +407,12 @@ and freed memory, you need to initialize Libgcrypt this way:
+ 
+ @example
+   /* Version check should be the very first call because it
+-     makes sure that important subsystems are initialized. */
+-  if (!gcry_check_version (GCRYPT_VERSION))
++     makes sure that important subsystems are initialized.
++     #define NEED_LIBGCRYPT_VERSION to the minimum required version. */
++  if (!gcry_check_version (NEED_LIBGCRYPT_VERSION))
+     @{
+-      fputs ("libgcrypt version mismatch\n", stderr);
++      fprintf (stderr, "libgcrypt is too old (need %s, have %s)\n",
++         NEED_LIBGCRYPT_VERSION, gcry_check_version (NULL));
+       exit (2);
+     @}
+ 
+-- 
+2.20.1
+

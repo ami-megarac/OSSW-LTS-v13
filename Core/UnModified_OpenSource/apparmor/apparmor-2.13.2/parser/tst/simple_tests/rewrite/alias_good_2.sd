@@ -1,0 +1,17 @@
+#=DESCRIPTION Simple test of alias functionality after var defn
+#=EXRESULT PASS
+
+alias /etc -> /Etcetera,
+
+@{FOO}= foo bar
+
+alias /tmp -> /var/tmp,
+
+@{MEEP} = meep moop
+
+alias /usr -> /User,
+
+/bin/foo {
+  #include <includes/base>
+  /tmp/@{FOO}/@{MEEP} rw,
+}

@@ -1,0 +1,7 @@
+#
+#=DESCRIPTION unix entry with a bad multivalue modifier
+#=EXRESULT FAIL
+
+profile foo {
+  unix send type=(stream, dgram),
+}

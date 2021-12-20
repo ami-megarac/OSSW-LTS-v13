@@ -1,0 +1,76 @@
+#!/bin/sh
+
+# extract config.sh.* files from binary packages
+#
+# Copyright 2016 Niko Tyni <ntyni@debian.org>
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the same terms as Perl itself.
+
+set -e
+
+if [ $# = 0 ]; then
+    echo "Usage: $0 <file.deb> [...]" 1>&2
+    exit 1
+fi
+
+# sanity check
+if [ ! -d debian/cross ]; then
+    echo "This program is supposed to run in the perl Debian package source directory" 1>&2
+    exit 1
+fi
+
+for deb in "$@"; do
+    arch=$(dpkg-deb -W --showformat '${Architecture}' "$deb")
+    if [ ! -n "$arch" ]; then
+        echo "Could not get Debian architecture of $deb" 1>&2
+        exit 1
+    fi
+    if [ ! -d "debian/cross/$arch" ]; then
+        echo "Unknown architecture: $arch (mkdir debian/cross/$arch first?), skipping" 1>&2
+        continue
+    fi
+
+    archlist="$archlist $arch"
+
+    version=$(dpkg-deb -W --showformat '${Version}' "$deb")
+    if [ ! -n "$version" ]; then
+        echo "Could not get Debian version from $deb" 1>&2
+        exit 1
+    fi
+
+    # shameless reliance on GNU tar fancy functionality
+    #   note that we expand ${arch} in this shell and not the subshell
+    #   so we don't have to export it
+    if ! dpkg-deb --fsys-tarfile "$deb" | tar xf - --wildcards \
+        '*/config.sh.static.gz' \
+        '*/config.sh.debug.gz'  \
+        '*/config.sh.shared.gz' \
+        --to-command='sh -c "gzip -dc > debian/cross/'${arch}'/$(basename $TAR_FILENAME .gz)"'
+    then
+        echo "no config.sh.* files in $deb, skipping" 1>&2
+        continue
+    fi
+
+    echo "# Extracted from Debian package version $version" >> debian/cross/$arch/config.sh.static
+
+    # store debug and shared configs as contextless patches
+    # the idea is to make it as easy (heh) as possible for bootstrappers
+    # so they only have to craft the static one by hand
+    for type in shared debug; do
+        ( cd debian/cross/$arch && \
+          ! diff -u0 config.sh.static config.sh.$type > config.sh.$type.patch && \
+          rm config.sh.$type )
+    done
+
+    if [ -d .git ]; then
+        git add debian/cross/$arch
+    fi
+done
+
+if [ -d .git ]; then
+    debs=$(sha1sum "$@")
+    git commit -m "Refresh cross build support files for$archlist" \
+               -m "Files extracted by $0 from:" \
+               -m "$debs"
+fi

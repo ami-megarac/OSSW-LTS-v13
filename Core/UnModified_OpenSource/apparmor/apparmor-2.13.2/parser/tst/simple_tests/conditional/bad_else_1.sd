@@ -1,0 +1,17 @@
+# taken from codn55.sd
+#=DESCRIPTION improper nesting of hat and conditional block
+#=EXRESULT FAIL
+
+$FOO=true
+
+# indentation screwy to try to best show 'else' in wrong place
+
+/bin/true {
+  if $FOO {
+    ^HAT {
+      /bin/true rix,
+  } else {
+     /bin/bother rix,
+  }
+    }
+}

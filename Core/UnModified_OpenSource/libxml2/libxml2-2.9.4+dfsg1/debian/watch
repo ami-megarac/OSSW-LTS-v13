@@ -1,0 +1,9 @@
+version=4
+opts="\
+repack,\
+compress=xz,\
+repacksuffix=+dfsg,\
+dversionmangle=s/\+(debian|dfsg|ds|deb)\d*$//,\
+uversionmangle=s/(\d)[_\.\-\+]?((RC|rc|pre|dev|BETA|beta|alpha|b|a)[\-\.]?\d*)$/$1~$2/\
+" \
+ftp://xmlsoft.org/libxml2/libxml2-(\d[\d\.]+)@ARCHIVE_EXT@

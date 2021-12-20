@@ -1,0 +1,124 @@
+From 736c9f565eeb4b381acae9ac0d286e0dd83317ff Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Dagfinn=20Ilmari=20Manns=C3=A5ker?= <ilmari@ilmari.org>
+Date: Tue, 13 Nov 2018 16:00:48 +0000
+Subject: Avoid mangling /bin non-perl shebangs on merged-/usr systems
+
+If the shebang is absolute and exists in PATH, but was not the first
+one found, leave it alone if it's actually the same file as first one.
+
+This avoids packages built on merged-/usr systems with /usr/bin before
+/bin in the path breaking when installed on systems without merged
+/usr.  See e.g. https://bugs.debian.org/913637.
+
+Origin: backport, https://github.com/Perl-Toolchain-Gang/ExtUtils-MakeMaker/commit/9766f9c5ffd1ac915d75b309cd18c9f42794b710
+Bug: https://github.com/Perl-Toolchain-Gang/ExtUtils-MakeMaker/pull/330
+Bug-Debian: https://bugs.debian.org/913637
+Patch-Name: fixes/eumm-usrmerge.diff
+---
+ .../lib/ExtUtils/MM_Unix.pm                   | 22 +++++++++++--
+ cpan/ExtUtils-MakeMaker/t/fixin.t             | 33 ++++++++++++++++++-
+ .../t/lib/MakeMaker/Test/Setup/BFD.pm         |  3 ++
+ 3 files changed, 55 insertions(+), 3 deletions(-)
+
+diff --git a/cpan/ExtUtils-MakeMaker/lib/ExtUtils/MM_Unix.pm b/cpan/ExtUtils-MakeMaker/lib/ExtUtils/MM_Unix.pm
+index bb41b274b3..2e33d0a8ae 100644
+--- a/cpan/ExtUtils-MakeMaker/lib/ExtUtils/MM_Unix.pm
++++ b/cpan/ExtUtils-MakeMaker/lib/ExtUtils/MM_Unix.pm
+@@ -1243,8 +1243,8 @@ sub _fixin_replace_shebang {
+     my ( $self, $file, $line ) = @_;
+ 
+     # Now figure out the interpreter name.
+-    my ( $cmd, $arg ) = split ' ', $line, 2;
+-    $cmd =~ s!^.*/!!;
++    my ( $origcmd, $arg ) = split ' ', $line, 2;
++    (my $cmd = $origcmd) =~ s!^.*/!!;
+ 
+     # Now look (in reverse) for interpreter in absolute PATH (unless perl).
+     my $interpreter;
+@@ -1270,6 +1270,24 @@ sub _fixin_replace_shebang {
+                 $interpreter = $maybefile;
+             }
+         }
++
++        # If the shebang is absolute and exists in PATH, but was not
++        # the first one found, leave it alone if it's actually the
++        # same file as first one.  This avoids packages built on
++        # merged-/usr systems with /usr/bin before /bin in the path
++        # breaking when installed on systems without merged /usr
++        if ($origcmd ne $interpreter and $self->file_name_is_absolute($origcmd)) {
++            my $origdir = dirname($origcmd);
++            if ($self->maybe_command($origcmd) && grep { $_ eq $origdir } @absdirs) {
++                my ($odev, $oino) = stat $origcmd;
++                my ($idev, $iino) = stat $interpreter;
++                if ($odev == $idev && $oino == $iino) {
++                    warn "$origcmd is the same as $interpreter, leaving alone"
++                        if $Verbose;
++                    $interpreter = $origcmd;
++                }
++            }
++        }
+     }
+ 
+     # Figure out how to invoke interpreter on this machine.
+diff --git a/cpan/ExtUtils-MakeMaker/t/fixin.t b/cpan/ExtUtils-MakeMaker/t/fixin.t
+index 061e456247..872b023c55 100644
+--- a/cpan/ExtUtils-MakeMaker/t/fixin.t
++++ b/cpan/ExtUtils-MakeMaker/t/fixin.t
+@@ -9,7 +9,7 @@ BEGIN {
+ 
+ use File::Spec;
+ 
+-use Test::More tests => 22;
++use Test::More tests => 30;
+ 
+ use Config;
+ use TieOut;
+@@ -123,3 +123,34 @@ END
+         }
+     );
+ }
++
++SKIP: {
++    eval { chmod(0755, "usrbin/interp") }
++        or skip "no chmod", 8;
++
++    my $dir = getcwd();
++    local $ENV{PATH} = join $Config{path_sep}, map "$dir/$_", qw(usrbin bin);
++
++    test_fixin(<<END,
++#!$dir/bin/interp
++
++blah blah blah
++END
++         sub {
++             is $_[0], "#!$dir/usrbin/interp\n", 'interpreter updated to one found in PATH';
++         }
++     );
++
++    eval { symlink("../usrbin/interp", "bin/interp") }
++        or skip "no symlinks", 4;
++
++    test_fixin(<<END,
++#!$dir/bin/interp
++
++blah blah blah
++END
++         sub {
++             is $_[0], "#!$dir/bin/interp\n", 'symlinked interpreter later in PATH not mangled';
++         }
++     );
++}
+diff --git a/cpan/ExtUtils-MakeMaker/t/lib/MakeMaker/Test/Setup/BFD.pm b/cpan/ExtUtils-MakeMaker/t/lib/MakeMaker/Test/Setup/BFD.pm
+index 3d093fcfbd..cfe49e5465 100644
+--- a/cpan/ExtUtils-MakeMaker/t/lib/MakeMaker/Test/Setup/BFD.pm
++++ b/cpan/ExtUtils-MakeMaker/t/lib/MakeMaker/Test/Setup/BFD.pm
+@@ -53,6 +53,9 @@ program - this is a program
+ =cut
+ 
+ 1;
++END
++             'Big-Dummy/usrbin/interp'       => <<'END',
++This is a dummy interpreter
+ END
+ 
+              'Big-Dummy/test.pl'          => <<'END',

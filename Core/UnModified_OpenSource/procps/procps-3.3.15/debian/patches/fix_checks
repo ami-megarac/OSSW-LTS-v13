@@ -1,0 +1,21 @@
+Description: Fix some of the tests
+ Some of the tests failed in the pbuilder
+ For the ps one, the tty of a process is a bit strange, confusing the testsuite
+ The pgrep one, there is some odd buffering going on, reording makes the tests
+ pass
+Author: Craig Small <csmall@debian.org>
+Origin: Debian
+Reviewed-by: Craig Small <csmall@debian.org>
+Last-Update: 2018-02-10
+--- a/testsuite/config/unix.exp
++++ b/testsuite/config/unix.exp
+@@ -152,5 +152,9 @@
+         return ""
+     }
+     regexp "/dev/(.+)" $raw_tty > tty
++    if { $tty == "tty" } {
++        warning "TTY is tty"
++        return ""
++    }
+     return $tty
+ }

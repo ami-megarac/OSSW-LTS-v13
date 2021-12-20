@@ -1,0 +1,19 @@
+#
+#=Description basic signal w/regex peer
+#=EXRESULT PASS
+#
+
+/usr/bin/signal-test1 {
+  signal (send) peer=/{**/,}bin/{sh,true},
+
+}
+
+/usr/bin/signal-test2 {
+  signal (receive) set=(fpe stop) peer=/sbin/{init,systend,upstart},
+
+}
+
+/usr/bin/signal-test3 {
+  audit deny signal receive set=(stop, int, usr1, usr2) peer=/**.{py,pl,rb},
+  signal receive set=(segv),
+}

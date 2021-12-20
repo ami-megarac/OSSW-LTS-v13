@@ -1,0 +1,364 @@
+From: Simon McVittie <smcv@debian.org>
+Date: Sat, 20 Dec 2014 17:50:27 +0000
+Subject: Conditionally replace reinvention of memcpy() with calls to memcpy()
+
+gcc already knows how to inline memcpy calls with constant n,
+and also gets the alignment constraints right, avoiding incorrect
+unaligned accesses on armel.
+
+Unconditionally define LZO_MEMOPS_GET_NE64 since it's trivial
+to do in terms of LZO_MEMOPS_COPY8.
+
+I've made the "modern C" version conditional since lzo seems to aim
+to be portable to anything and everything, but it would probably
+be better off just requiring a compiler from this century and
+a set of correctly working memwhatever() implementations.
+
+Bug-Debian: https://bugs.debian.org/757037
+---
+ minilzo/minilzo.c | 76 ++++++++++++++++++++++++++++++++++++++++++++++---------
+ src/lzo_conf.h    |  2 --
+ src/lzo_func.h    | 71 +++++++++++++++++++++++++++++++++++++++++++--------
+ 3 files changed, 125 insertions(+), 24 deletions(-)
+
+--- a/minilzo/minilzo.c
++++ b/minilzo/minilzo.c
+@@ -3661,6 +3661,49 @@
+ #endif
+ }
+ 
++/* Modern compilers know that memcpy() and memset() with constant n can be
++ * inlined, and do so without violating alignment constraints on e.g. ARMv5,
++ * unlike the macros below. */
++#if LZO_CFG_MODERN_C+0
++
++/* ISO C says char pointers of any signedness can alias anything
++ * (C11 draft 1570, paragraph 6.5.7) so they are safe for this use */
++typedef unsigned char *lzo_memops_TU1p;
++
++/* Used by powerpc assembler implementations of byteswapping */
++#if (LZO_OPT_UNALIGNED16)
++typedef lzo_uint16_t __lzo_may_alias lzo_memops_TU2;
++typedef lzo_memops_TU2 *lzo_memops_TU2p;
++#endif
++
++/* Used by powerpc assembler implementations of byteswapping */
++#if (LZO_OPT_UNALIGNED32)
++typedef lzo_uint32_t __lzo_may_alias lzo_memops_TU4;
++typedef lzo_memops_TU4 *lzo_memops_TU4p;
++#endif
++
++#define LZO_MEMOPS_SET1(dd,cc) memset(dd, cc, 1)
++#define LZO_MEMOPS_SET2(dd,cc) memset(dd, cc, 2)
++#define LZO_MEMOPS_SET3(dd,cc) memset(dd, cc, 3)
++#define LZO_MEMOPS_SET4(dd,cc) memset(dd, cc, 4)
++/* lzo does not appear to use these macros between overlapping buffers
++ * in practice, so memmove() (which is not inlined by gcc) is unnecessary. */
++#define LZO_MEMOPS_MOVE1(dd,ss) memcpy(dd, ss, 1)
++#define LZO_MEMOPS_MOVE2(dd,ss) memcpy(dd, ss, 2)
++#define LZO_MEMOPS_MOVE3(dd,ss) memcpy(dd, ss, 3)
++#define LZO_MEMOPS_MOVE4(dd,ss) memcpy(dd, ss, 4)
++#define LZO_MEMOPS_MOVE8(dd,ss) memcpy(dd, ss, 8)
++#define LZO_MEMOPS_COPY1(dd,ss) memcpy(dd, ss, 1)
++#define LZO_MEMOPS_COPY2(dd,ss) memcpy(dd, ss, 2)
++#define LZO_MEMOPS_COPY4(dd,ss) memcpy(dd, ss, 4)
++#define LZO_MEMOPS_COPY8(dd,ss) memcpy(dd, ss, 8)
++#define LZO_MEMOPS_COPYN(dd,ss,nn) memcpy(dd, ss, nn)
++
++#else /* !LZO_CFG_MODERN_C */
++
++/* Standard C says a lot of this is undefined behaviour; maybe
++ * you can get away with it in older compilers. */
++
+ #if defined(__lzo_alignof) && !(LZO_CFG_NO_UNALIGNED)
+ #if !defined(lzo_memops_tcheck__) && 0
+ #define lzo_memops_tcheck__(t,a,b) ((void)0, sizeof(t) == (a) && __lzo_alignof(t) == (b))
+@@ -3830,6 +3873,8 @@
+     if ((void)0, n__n > 0) do { *d__n++ = *s__n++; } while (--n__n > 0); \
+     LZO_BLOCK_END
+ 
++#endif /* !LZO_CFG_MODERN_C */
++
+ __lzo_static_forceinline lzo_uint16_t lzo_memops_get_le16(const lzo_voidp ss)
+ {
+     lzo_uint16_t v;
+@@ -3846,7 +3891,7 @@
+ #endif
+     return v;
+ }
+-#if (LZO_OPT_UNALIGNED16) && (LZO_ABI_LITTLE_ENDIAN)
++#if (LZO_OPT_UNALIGNED16) && (LZO_ABI_LITTLE_ENDIAN) && !(LZO_CFG_MODERN_C+0)
+ #define LZO_MEMOPS_GET_LE16(ss)    (* (const lzo_memops_TU2p) (const lzo_memops_TU0p) (ss))
+ #else
+ #define LZO_MEMOPS_GET_LE16(ss)    lzo_memops_get_le16(ss)
+@@ -3868,13 +3913,13 @@
+ #endif
+     return v;
+ }
+-#if (LZO_OPT_UNALIGNED32) && (LZO_ABI_LITTLE_ENDIAN)
++#if (LZO_OPT_UNALIGNED32) && (LZO_ABI_LITTLE_ENDIAN) && !(LZO_CFG_MODERN_C+0)
+ #define LZO_MEMOPS_GET_LE32(ss)    (* (const lzo_memops_TU4p) (const lzo_memops_TU0p) (ss))
+ #else
+ #define LZO_MEMOPS_GET_LE32(ss)    lzo_memops_get_le32(ss)
+ #endif
+ 
+-#if (LZO_OPT_UNALIGNED64) && (LZO_ABI_LITTLE_ENDIAN)
++#if (LZO_OPT_UNALIGNED64) && (LZO_ABI_LITTLE_ENDIAN) && !(LZO_CFG_MODERN_C+0)
+ #define LZO_MEMOPS_GET_LE64(ss)    (* (const lzo_memops_TU8p) (const lzo_memops_TU0p) (ss))
+ #endif
+ 
+@@ -3884,7 +3929,7 @@
+     LZO_MEMOPS_COPY2(&v, ss);
+     return v;
+ }
+-#if (LZO_OPT_UNALIGNED16)
++#if (LZO_OPT_UNALIGNED16) && !(LZO_CFG_MODERN_C+0)
+ LZO_COMPILE_TIME_ASSERT_HEADER(sizeof(*(lzo_memops_TU2p)0)==2)
+ #define LZO_MEMOPS_GET_NE16(ss)    (* (const lzo_memops_TU2p) (const lzo_memops_TU0p) (ss))
+ #else
+@@ -3897,16 +3942,25 @@
+     LZO_MEMOPS_COPY4(&v, ss);
+     return v;
+ }
+-#if (LZO_OPT_UNALIGNED32)
++#if (LZO_OPT_UNALIGNED32) && !(LZO_CFG_MODERN_C+0)
+ LZO_COMPILE_TIME_ASSERT_HEADER(sizeof(*(lzo_memops_TU4p)0)==4)
+ #define LZO_MEMOPS_GET_NE32(ss)    (* (const lzo_memops_TU4p) (const lzo_memops_TU0p) (ss))
+ #else
+ #define LZO_MEMOPS_GET_NE32(ss)    lzo_memops_get_ne32(ss)
+ #endif
+ 
+-#if (LZO_OPT_UNALIGNED64)
++__lzo_static_forceinline lzo_uint64_t lzo_memops_get_ne64(const lzo_voidp ss)
++{
++    lzo_uint64_t v;
++    LZO_MEMOPS_COPY8(&v, ss);
++    return v;
++}
++
++#if (LZO_OPT_UNALIGNED64) && !(LZO_CFG_MODERN_C+0)
+ LZO_COMPILE_TIME_ASSERT_HEADER(sizeof(*(lzo_memops_TU8p)0)==8)
+ #define LZO_MEMOPS_GET_NE64(ss)    (* (const lzo_memops_TU8p) (const lzo_memops_TU0p) (ss))
++#else
++#define LZO_MEMOPS_GET_NE64(ss)    lzo_memops_get_ne64(ss)
+ #endif
+ 
+ __lzo_static_forceinline void lzo_memops_put_le16(lzo_voidp dd, lzo_uint16_t vv)
+@@ -3923,7 +3977,7 @@
+     d[1] = LZO_BYTE((vv >>  8) & 0xff);
+ #endif
+ }
+-#if (LZO_OPT_UNALIGNED16) && (LZO_ABI_LITTLE_ENDIAN)
++#if (LZO_OPT_UNALIGNED16) && (LZO_ABI_LITTLE_ENDIAN) && !(LZO_CFG_MODERN_C+0)
+ #define LZO_MEMOPS_PUT_LE16(dd,vv) (* (lzo_memops_TU2p) (lzo_memops_TU0p) (dd) = (vv))
+ #else
+ #define LZO_MEMOPS_PUT_LE16(dd,vv) lzo_memops_put_le16(dd,vv)
+@@ -3945,7 +3999,7 @@
+     d[3] = LZO_BYTE((vv >> 24) & 0xff);
+ #endif
+ }
+-#if (LZO_OPT_UNALIGNED32) && (LZO_ABI_LITTLE_ENDIAN)
++#if (LZO_OPT_UNALIGNED32) && (LZO_ABI_LITTLE_ENDIAN) && !(LZO_CFG_MODERN_C+0)
+ #define LZO_MEMOPS_PUT_LE32(dd,vv) (* (lzo_memops_TU4p) (lzo_memops_TU0p) (dd) = (vv))
+ #else
+ #define LZO_MEMOPS_PUT_LE32(dd,vv) lzo_memops_put_le32(dd,vv)
+@@ -3955,7 +4009,7 @@
+ {
+     LZO_MEMOPS_COPY2(dd, &vv);
+ }
+-#if (LZO_OPT_UNALIGNED16)
++#if (LZO_OPT_UNALIGNED16) && !(LZO_CFG_MODERN_C+0)
+ #define LZO_MEMOPS_PUT_NE16(dd,vv) (* (lzo_memops_TU2p) (lzo_memops_TU0p) (dd) = (vv))
+ #else
+ #define LZO_MEMOPS_PUT_NE16(dd,vv) lzo_memops_put_ne16(dd,vv)
+@@ -3965,7 +4019,7 @@
+ {
+     LZO_MEMOPS_COPY4(dd, &vv);
+ }
+-#if (LZO_OPT_UNALIGNED32)
++#if (LZO_OPT_UNALIGNED32) && !(LZO_CFG_MODERN_C+0)
+ #define LZO_MEMOPS_PUT_NE32(dd,vv) (* (lzo_memops_TU4p) (lzo_memops_TU0p) (dd) = (vv))
+ #else
+ #define LZO_MEMOPS_PUT_NE32(dd,vv) lzo_memops_put_ne32(dd,vv)
+@@ -4051,11 +4105,9 @@
+ #ifndef UA_GET_NE32
+ #define UA_GET_NE32         LZO_MEMOPS_GET_NE32
+ #endif
+-#ifdef LZO_MEMOPS_GET_NE64
+ #ifndef UA_GET_NE64
+ #define UA_GET_NE64         LZO_MEMOPS_GET_NE64
+ #endif
+-#endif
+ #ifndef UA_PUT_LE16
+ #define UA_PUT_LE16         LZO_MEMOPS_PUT_LE16
+ #endif
+--- a/src/lzo_conf.h
++++ b/src/lzo_conf.h
+@@ -362,11 +362,9 @@
+ #ifndef UA_GET_NE32
+ #define UA_GET_NE32         LZO_MEMOPS_GET_NE32
+ #endif
+-#ifdef LZO_MEMOPS_GET_NE64
+ #ifndef UA_GET_NE64
+ #define UA_GET_NE64         LZO_MEMOPS_GET_NE64
+ #endif
+-#endif
+ #ifndef UA_PUT_LE16
+ #define UA_PUT_LE16         LZO_MEMOPS_PUT_LE16
+ #endif
+--- a/src/lzo_func.h
++++ b/src/lzo_func.h
+@@ -162,6 +162,46 @@
+ // memops
+ ************************************************************************/
+ 
++/* Modern compilers know that memcpy() and memset() with constant n can be
++ * inlined, and do so without violating alignment constraints on e.g. ARMv5,
++ * unlike the macros below. */
++#if LZO_CFG_MODERN_C+0
++
++/* ISO C says char pointers of any signedness can alias anything
++ * (C11 draft 1570, paragraph 6.5.7) so they are safe for this use */
++typedef unsigned char *lzo_memops_TU1p;
++
++/* Used by powerpc assembler implementations of byteswapping */
++#if (LZO_OPT_UNALIGNED16)
++typedef lzo_uint16_t __lzo_may_alias lzo_memops_TU2;
++typedef lzo_memops_TU2 *lzo_memops_TU2p;
++#endif
++
++/* Used by powerpc assembler implementations of byteswapping */
++#if (LZO_OPT_UNALIGNED32)
++typedef lzo_uint32_t __lzo_may_alias lzo_memops_TU4;
++typedef lzo_memops_TU4 *lzo_memops_TU4p;
++#endif
++
++#define LZO_MEMOPS_SET1(dd,cc) memset(dd, cc, 1)
++#define LZO_MEMOPS_SET2(dd,cc) memset(dd, cc, 2)
++#define LZO_MEMOPS_SET3(dd,cc) memset(dd, cc, 3)
++#define LZO_MEMOPS_SET4(dd,cc) memset(dd, cc, 4)
++/* lzo does not appear to use these macros between overlapping buffers
++ * in practice, so memmove() (which is not inlined by gcc) is unnecessary. */
++#define LZO_MEMOPS_MOVE1(dd,ss) memcpy(dd, ss, 1)
++#define LZO_MEMOPS_MOVE2(dd,ss) memcpy(dd, ss, 2)
++#define LZO_MEMOPS_MOVE3(dd,ss) memcpy(dd, ss, 3)
++#define LZO_MEMOPS_MOVE4(dd,ss) memcpy(dd, ss, 4)
++#define LZO_MEMOPS_MOVE8(dd,ss) memcpy(dd, ss, 8)
++#define LZO_MEMOPS_COPY1(dd,ss) memcpy(dd, ss, 1)
++#define LZO_MEMOPS_COPY2(dd,ss) memcpy(dd, ss, 2)
++#define LZO_MEMOPS_COPY4(dd,ss) memcpy(dd, ss, 4)
++#define LZO_MEMOPS_COPY8(dd,ss) memcpy(dd, ss, 8)
++#define LZO_MEMOPS_COPYN(dd,ss,nn) memcpy(dd, ss, nn)
++
++#else /* !LZO_CFG_MODERN_C */
++
+ #if defined(__lzo_alignof) && !(LZO_CFG_NO_UNALIGNED)
+ /* CBUG: disabled because of gcc bug 64516 */
+ #if !defined(lzo_memops_tcheck__) && 0
+@@ -332,6 +372,8 @@
+     if ((void)0, n__n > 0) do { *d__n++ = *s__n++; } while (--n__n > 0); \
+     LZO_BLOCK_END
+ 
++#endif /* !LZO_CFG_MODERN_C */
++
+ __lzo_static_forceinline lzo_uint16_t lzo_memops_get_le16(const lzo_voidp ss)
+ {
+     lzo_uint16_t v;
+@@ -348,7 +390,7 @@
+ #endif
+     return v;
+ }
+-#if (LZO_OPT_UNALIGNED16) && (LZO_ABI_LITTLE_ENDIAN)
++#if (LZO_OPT_UNALIGNED16) && (LZO_ABI_LITTLE_ENDIAN) && !(LZO_CFG_MODERN_C+0)
+ #define LZO_MEMOPS_GET_LE16(ss)    (* (const lzo_memops_TU2p) (const lzo_memops_TU0p) (ss))
+ #else
+ #define LZO_MEMOPS_GET_LE16(ss)    lzo_memops_get_le16(ss)
+@@ -370,13 +412,13 @@
+ #endif
+     return v;
+ }
+-#if (LZO_OPT_UNALIGNED32) && (LZO_ABI_LITTLE_ENDIAN)
++#if (LZO_OPT_UNALIGNED32) && (LZO_ABI_LITTLE_ENDIAN) && !(LZO_CFG_MODERN_C+0)
+ #define LZO_MEMOPS_GET_LE32(ss)    (* (const lzo_memops_TU4p) (const lzo_memops_TU0p) (ss))
+ #else
+ #define LZO_MEMOPS_GET_LE32(ss)    lzo_memops_get_le32(ss)
+ #endif
+ 
+-#if (LZO_OPT_UNALIGNED64) && (LZO_ABI_LITTLE_ENDIAN)
++#if (LZO_OPT_UNALIGNED64) && (LZO_ABI_LITTLE_ENDIAN) && !(LZO_CFG_MODERN_C+0)
+ #define LZO_MEMOPS_GET_LE64(ss)    (* (const lzo_memops_TU8p) (const lzo_memops_TU0p) (ss))
+ #endif
+ 
+@@ -386,7 +428,7 @@
+     LZO_MEMOPS_COPY2(&v, ss);
+     return v;
+ }
+-#if (LZO_OPT_UNALIGNED16)
++#if (LZO_OPT_UNALIGNED16) && !(LZO_CFG_MODERN_C+0)
+ LZO_COMPILE_TIME_ASSERT_HEADER(sizeof(*(lzo_memops_TU2p)0)==2)
+ #define LZO_MEMOPS_GET_NE16(ss)    (* (const lzo_memops_TU2p) (const lzo_memops_TU0p) (ss))
+ #else
+@@ -399,16 +441,25 @@
+     LZO_MEMOPS_COPY4(&v, ss);
+     return v;
+ }
+-#if (LZO_OPT_UNALIGNED32)
++#if (LZO_OPT_UNALIGNED32) && !(LZO_CFG_MODERN_C+0)
+ LZO_COMPILE_TIME_ASSERT_HEADER(sizeof(*(lzo_memops_TU4p)0)==4)
+ #define LZO_MEMOPS_GET_NE32(ss)    (* (const lzo_memops_TU4p) (const lzo_memops_TU0p) (ss))
+ #else
+ #define LZO_MEMOPS_GET_NE32(ss)    lzo_memops_get_ne32(ss)
+ #endif
+ 
+-#if (LZO_OPT_UNALIGNED64)
++__lzo_static_forceinline lzo_uint64_t lzo_memops_get_ne64(const lzo_voidp ss)
++{
++    lzo_uint64_t v;
++    LZO_MEMOPS_COPY8(&v, ss);
++    return v;
++}
++
++#if (LZO_OPT_UNALIGNED64) && !(LZO_CFG_MODERN_C+0)
+ LZO_COMPILE_TIME_ASSERT_HEADER(sizeof(*(lzo_memops_TU8p)0)==8)
+ #define LZO_MEMOPS_GET_NE64(ss)    (* (const lzo_memops_TU8p) (const lzo_memops_TU0p) (ss))
++#else
++#define LZO_MEMOPS_GET_NE64(ss)    lzo_memops_get_ne64(ss)
+ #endif
+ 
+ __lzo_static_forceinline void lzo_memops_put_le16(lzo_voidp dd, lzo_uint16_t vv)
+@@ -425,7 +476,7 @@
+     d[1] = LZO_BYTE((vv >>  8) & 0xff);
+ #endif
+ }
+-#if (LZO_OPT_UNALIGNED16) && (LZO_ABI_LITTLE_ENDIAN)
++#if (LZO_OPT_UNALIGNED16) && (LZO_ABI_LITTLE_ENDIAN) && !(LZO_CFG_MODERN_C+0)
+ #define LZO_MEMOPS_PUT_LE16(dd,vv) (* (lzo_memops_TU2p) (lzo_memops_TU0p) (dd) = (vv))
+ #else
+ #define LZO_MEMOPS_PUT_LE16(dd,vv) lzo_memops_put_le16(dd,vv)
+@@ -447,7 +498,7 @@
+     d[3] = LZO_BYTE((vv >> 24) & 0xff);
+ #endif
+ }
+-#if (LZO_OPT_UNALIGNED32) && (LZO_ABI_LITTLE_ENDIAN)
++#if (LZO_OPT_UNALIGNED32) && (LZO_ABI_LITTLE_ENDIAN) && !(LZO_CFG_MODERN_C+0)
+ #define LZO_MEMOPS_PUT_LE32(dd,vv) (* (lzo_memops_TU4p) (lzo_memops_TU0p) (dd) = (vv))
+ #else
+ #define LZO_MEMOPS_PUT_LE32(dd,vv) lzo_memops_put_le32(dd,vv)
+@@ -457,7 +508,7 @@
+ {
+     LZO_MEMOPS_COPY2(dd, &vv);
+ }
+-#if (LZO_OPT_UNALIGNED16)
++#if (LZO_OPT_UNALIGNED16) && !(LZO_CFG_MODERN_C+0)
+ #define LZO_MEMOPS_PUT_NE16(dd,vv) (* (lzo_memops_TU2p) (lzo_memops_TU0p) (dd) = (vv))
+ #else
+ #define LZO_MEMOPS_PUT_NE16(dd,vv) lzo_memops_put_ne16(dd,vv)
+@@ -467,7 +518,7 @@
+ {
+     LZO_MEMOPS_COPY4(dd, &vv);
+ }
+-#if (LZO_OPT_UNALIGNED32)
++#if (LZO_OPT_UNALIGNED32) && !(LZO_CFG_MODERN_C+0)
+ #define LZO_MEMOPS_PUT_NE32(dd,vv) (* (lzo_memops_TU4p) (lzo_memops_TU0p) (dd) = (vv))
+ #else
+ #define LZO_MEMOPS_PUT_NE32(dd,vv) lzo_memops_put_ne32(dd,vv)

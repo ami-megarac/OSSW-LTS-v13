@@ -1,0 +1,1 @@
+type=APPARMOR msg=audit(1168661976.062:55): LOGPROF-HINT fork pid=27764 child=38229 

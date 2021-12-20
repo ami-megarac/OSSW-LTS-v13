@@ -1,0 +1,8 @@
+#
+#=DESCRIPTION owner not allowed after pathname in forward rule
+#=EXRESULT FAIL
+#
+/usr/bin/foo {
+  rw /foo owner,
+
+}

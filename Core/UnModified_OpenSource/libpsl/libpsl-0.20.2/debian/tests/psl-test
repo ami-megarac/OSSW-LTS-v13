@@ -1,0 +1,10 @@
+#!/bin/bash
+
+set -e
+set +o pipefail
+
+testpsl=/usr/share/doc/publicsuffix/examples/test_psl.txt
+
+diff -u --ignore-case \
+  <(awk -F\' '/^checkPublicSuffix\('\''/{ print $2 ": " $4 }' < $testpsl) \
+  <(psl --print-reg-domain $(awk -F\' '/^checkPublicSuffix/{ print $2 }' < $testpsl) | sed 's/(null)$//')

@@ -1,0 +1,109 @@
+From: Christian Kastner <ckk@debian.org>
+Date: Mon, 26 May 2014 09:54:57 +0200
+Subject: Debian-specific kernel feature tests
+
+Upstream assumes features based on the kernel version, but some of these
+features aren't available in the Debian kernel, or were only enabled at a later
+point. Also, the release number comparison used by upstream breaks with sid's
+non-numeric release number of "unstable".
+
+This adjust the feature tests to reflect Debian's kernels:
+  * Drop $OSRELEASE tests
+  * Drop ancient RedHat-specific test
+  * Debian's kernel generally lacks CONFIG_BIG_KEYS
+  * Debian's kernel has CONFIG_KEY_DH_OPERATIONS since 4.19~exp1
+
+Forwarded: not-needed
+Last-Update: 2019-02-20
+---
+ tests/keyctl/padd/useradd/runtest.sh  |  5 +----
+ tests/keyctl/session/valid/runtest.sh | 15 ---------------
+ tests/keyctl/show/valid/runtest.sh    |  3 +--
+ tests/prepare.inc.sh                  | 12 +++---------
+ 4 files changed, 5 insertions(+), 30 deletions(-)
+
+diff --git a/tests/keyctl/padd/useradd/runtest.sh b/tests/keyctl/padd/useradd/runtest.sh
+index 206a163..22e3fda 100644
+--- a/tests/keyctl/padd/useradd/runtest.sh
++++ b/tests/keyctl/padd/useradd/runtest.sh
+@@ -40,10 +40,7 @@ expect_payload payload "lizard"
+ marker "UNLINK KEY"
+ unlink_key $keyid @s
+ 
+-if [ $skip_root_required = 0 ] && {
+-        [ $OSDIST = RHEL ] && ! version_less_than $OSRELEASE 6.6 ||
+-        keyutils_at_or_later_than 1.5.6 ;
+-        }
++if [ $skip_root_required = 0 ] && keyutils_at_or_later_than 1.5.6
+ then
+     # add keys with huge payloads
+     old_root_quota=`cat /proc/sys/kernel/keys/root_maxbytes`
+diff --git a/tests/keyctl/session/valid/runtest.sh b/tests/keyctl/session/valid/runtest.sh
+index 4c83131..5258b17 100644
+--- a/tests/keyctl/session/valid/runtest.sh
++++ b/tests/keyctl/session/valid/runtest.sh
+@@ -9,21 +9,6 @@
+ result=PASS
+ echo "++++ BEGINNING TEST" >$OUTPUTFILE
+ 
+-# describe the keyring created for an anonymous session
+-if [ $OSDIST = RHEL ] && version_less_than $OSRELEASE 6
+-then
+-    marker "ANON SESSION"
+-    new_session - keyctl rdescribe @s "@"
+-    expect_key_rdesc rdesc "keyring@.*@.*@.*@_ses[^@]*\$"
+-
+-    # check the session keyring ID is shown
+-    seskeyring="`tail -2 $OUTPUTFILE | head -1`"
+-    if ! expr "$seskeyring" : "Joined session keyring: [0-9]*" >&/dev/null
+-    then
+-	failed
+-    fi
+-fi
+-
+ # describe the keyring created for a named session
+ marker "NAMED SESSION"
+ new_session qwerty keyctl rdescribe @s "@"
+diff --git a/tests/keyctl/show/valid/runtest.sh b/tests/keyctl/show/valid/runtest.sh
+index cbdd85f..f7e7c9d 100644
+--- a/tests/keyctl/show/valid/runtest.sh
++++ b/tests/keyctl/show/valid/runtest.sh
+@@ -30,8 +30,7 @@ then
+     failed
+ fi
+ 
+-if [ $OSDIST = RHEL ] && ! version_less_than $OSRELEASE 6.6 ||
+-   keyutils_at_or_later_than 1.5.6
++if keyutils_at_or_later_than 1.5.6
+ then
+     # should be eight lines in the output (banner + session + 6 keyrings)
+     marker "COUNT LINES"
+diff --git a/tests/prepare.inc.sh b/tests/prepare.inc.sh
+index ab9ae4d..3597907 100644
+--- a/tests/prepare.inc.sh
++++ b/tests/prepare.inc.sh
+@@ -82,21 +82,15 @@ fi
+ #
+ # Work out whether the big_key type is supported by the kernel
+ #
++# Debian's kernel is not built with CONFIG_BIG_KEYS
+ have_big_key_type=0
+-if [ $OSDIST = RHEL ] && ! version_less_than $OSRELEASE 7
+-then
+-    # big_key is backported to 3.10 for RHEL-7
+-    have_big_key_type=1
+-elif kernel_at_or_later_than 3.13-rc1
+-then
+-    have_big_key_type=1
+-fi
+ 
+ #
+ # Work out whether Diffie-Hellman is supported by the kernel
+ #
++# Debian's kernel introduced this in 4.19~exp1
+ have_dh_compute=0
+-if keyutils_at_or_later_than 1.5.10 && kernel_at_or_later_than 4.7-rc1
++if keyutils_at_or_later_than 1.5.10 && kernel_at_or_later_than 4.19
+ then
+     have_dh_compute=1
+ fi

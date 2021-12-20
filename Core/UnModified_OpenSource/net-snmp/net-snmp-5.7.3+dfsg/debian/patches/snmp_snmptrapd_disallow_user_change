@@ -1,0 +1,65 @@
+Description: snmpd, snmptrapd: Disallow to change the user / group
+ after it has been set.
+Author: Bart Van Assche <bvanassche@acm.org>
+Origin: upstream, https://github.com/net-snmp/net-snmp/commit/b13410f5b35fd281b9e93113aaa47f9f5c418974
+Reviewed-by: Craig Small <csmall@debian.org>
+Last-Update: 2020-07-23
+--- a/agent/agent_read_config.c
++++ b/agent/agent_read_config.c
+@@ -113,11 +113,25 @@
+ 
+ void netsnmp_set_agent_user_id(int uid)
+ {
++    static int agent_user_id = -1;
++
++    if (agent_user_id != -1 && uid != agent_user_id) {
++        snmp_log(LOG_ERR, "User ID has already been set -- can not change\n");
++        return;
++    }
++    agent_user_id = uid;
+     netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_USERID, uid);
+ }
+ 
+ void netsnmp_set_agent_group_id(int gid)
+ {
++    static int agent_group_id = -1;
++
++    if (agent_group_id != -1 && gid != agent_group_id) {
++        snmp_log(LOG_ERR, "Group ID has already been set -- can not change\n");
++        return;
++    }
++    agent_group_id = gid;
+     netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_GROUPID,
+                        gid);
+ }
+--- a/man/snmpd.8.def
++++ b/man/snmpd.8.def
+@@ -55,9 +55,11 @@
+ Do not fork() from the calling shell.
+ .TP
+ .B \-g \fIGID
+-Change to the numerical group ID
++Change the group ID of the snmpd process into
+ .I GID
+-after opening listening sockets.
++after opening listening sockets. This overrides the
++.I agentgroup
++configuration file parameter.
+ .TP
+ .B \-h, \-\-help
+ Display a brief usage message and then exit.
+@@ -111,10 +113,12 @@
+ opened.
+ .TP
+ .B \-u \fIUID
+-Change to the user ID
++Change the user ID of the snmpd process into
+ .I UID
+ (which can be given in numerical or textual form) after opening
+-listening sockets.
++listening sockets. This overrides the
++.I agentuser
++configuration file parameter.
+ .TP
+ .B \-U
+ Instructs the agent to not remove its pid file (see the

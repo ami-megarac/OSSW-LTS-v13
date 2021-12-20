@@ -1,0 +1,43 @@
+they need to be \-
+
+Index: inotify-tools/man/inotifywait.1
+===================================================================
+--- inotify-tools.orig/man/inotifywait.1	2012-06-18 02:31:38.000000000 -0700
++++ inotify-tools/man/inotifywait.1	2012-06-18 02:37:12.000000000 -0700
+@@ -305,9 +305,9 @@
+ 
+ .nf
+ #!/bin/sh
+-while inotifywait -e modify /var/log/messages; do
+-  if tail -n1 /var/log/messages | grep httpd; then
+-    kdialog --msgbox "Apache needs love!"
++while inotifywait \-e modify /var/log/messages; do
++  if tail \-n1 /var/log/messages | grep httpd; then
++    kdialog \-\-msgbox "Apache needs love!"
+   fi
+ done
+ .fi
+@@ -318,8 +318,8 @@
+ console.
+ 
+ .nf
+-% inotifywait -m -r --format '%:e %f' ~/test
+-Setting up watches.  Beware: since -r was given, this may take a while!
++% inotifywait \-m \-r \-\-format '%:e %f' ~/test
++Setting up watches.  Beware: since \-r was given, this may take a while!
+ Watches established.
+ CREATE badfile
+ OPEN badfile
+Index: inotify-tools/man/inotifywatch.1
+===================================================================
+--- inotify-tools.orig/man/inotifywatch.1	2012-06-18 02:31:38.000000000 -0700
++++ inotify-tools/man/inotifywatch.1	2012-06-18 02:37:12.000000000 -0700
+@@ -231,7 +231,7 @@
+ Watching the `~/.beagle' directory for 60 seconds:
+ 
+ .nf
+-% inotifywatch -v -e access -e modify -t 60 -r ~/.beagle
++% inotifywatch \-v \-e access \-e modify \-t 60 \-r ~/.beagle
+ Establishing watches...
+ Setting up watch(es) on /home/rohan/.beagle
+ OK, /home/rohan/.beagle is now being watched.

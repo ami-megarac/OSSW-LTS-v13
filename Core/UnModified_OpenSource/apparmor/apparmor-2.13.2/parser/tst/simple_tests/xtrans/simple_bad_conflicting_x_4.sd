@@ -1,0 +1,9 @@
+#
+#=DESCRIPTION px and ux conflict, different identical rules
+#=EXRESULT FAIL
+#
+/usr/bin/foo {
+  /bin/cat px,
+  /lib/lib*.so* rix,
+  /bin/cat ux,
+}

@@ -1,0 +1,25 @@
+From 4c4ade07c6eceb41c96bd5ab93a259eda5b94b12 Mon Sep 17 00:00:00 2001
+From: Dominic Hargreaves <dom@earth.li>
+Date: Sat, 30 Apr 2016 22:53:44 +0100
+Subject: Math::Trig: add missing SEE ALSO
+
+Bug: https://rt.cpan.org/Ticket/Display.html?id=114105
+Bug-Debian: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=697568
+Patch-Name: fixes/math_complex_doc_see_also.diff
+---
+ cpan/Math-Complex/lib/Math/Trig.pm | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/cpan/Math-Complex/lib/Math/Trig.pm b/cpan/Math-Complex/lib/Math/Trig.pm
+index efc2ff80ac..acad31ff49 100644
+--- a/cpan/Math-Complex/lib/Math/Trig.pm
++++ b/cpan/Math-Complex/lib/Math/Trig.pm
+@@ -743,6 +743,8 @@ an answer instead of giving a fatal runtime error.
+ 
+ Do not attempt navigation using these formulas.
+ 
++=head1 SEE ALSO
++
+ L<Math::Complex>
+ 
+ =head1 AUTHORS

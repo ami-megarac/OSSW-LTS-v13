@@ -1,0 +1,11 @@
+START
+File: ptrace_no_denied_mask.in
+Event type: AA_RECORD_DENIED
+Audit ID: 1495217772.047:4471
+Operation: ptrace
+Profile: /usr/bin/pidgin
+Peer: unconfined
+Command: pidgin
+PID: 21704
+Epoch: 1495217772
+Audit subid: 4471

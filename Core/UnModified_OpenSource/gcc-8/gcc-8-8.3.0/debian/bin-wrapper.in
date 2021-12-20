@@ -1,0 +1,11 @@
+#! /bin/sh
+
+# some build tools are linked with a new libstdc++ and fail to run
+# when building libstdc++.
+
+if [ -n "$LD_LIBRARY_PATH" ]; then
+  ma=$(dpkg-architecture -qDEB_BUILD_MULTIARCH)
+  export LD_LIBRARY_PATH="/lib/$ma:/usr/lib/$ma:/lib:/usr/lib:$LD_LIBRARY_PATH"
+fi
+
+exec /usr/bin/$(basename $0) "$@"

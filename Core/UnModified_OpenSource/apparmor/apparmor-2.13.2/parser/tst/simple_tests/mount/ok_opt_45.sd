@@ -1,0 +1,10 @@
+#
+#=Description basic rules to test the "rprivate" mount option
+#=EXRESULT PASS
+/usr/bin/foo {
+  mount options=rprivate -> /1,
+  mount options=(rprivate) -> /2,
+  mount options=(rw,rprivate) -> /3,
+  mount options in (rprivate) -> /4,
+  mount options in (ro,rprivate) -> /5,
+}

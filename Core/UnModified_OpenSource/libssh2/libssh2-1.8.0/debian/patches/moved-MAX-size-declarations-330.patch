@@ -1,0 +1,60 @@
+From: Will Cosgrove <will@panic.com>
+Date: Wed, 20 Mar 2019 08:44:37 -0700
+Subject: moved MAX size declarations #330
+Origin: https://github.com/libssh2/libssh2/commit/57e846c8c90cf29e21b927a636593ba5cfb81334
+Bug: https://github.com/libssh2/libssh2/issues/330
+
+---
+ include/libssh2.h  | 12 ------------
+ src/libssh2_priv.h | 12 ++++++++++++
+ 2 files changed, 12 insertions(+), 12 deletions(-)
+
+diff --git a/include/libssh2.h b/include/libssh2.h
+index f4bae24bc511..9ef9ff11dca7 100644
+--- a/include/libssh2.h
++++ b/include/libssh2.h
+@@ -145,18 +145,6 @@ typedef int libssh2_socket_t;
+ #define LIBSSH2_INVALID_SOCKET -1
+ #endif /* WIN32 */
+ 
+-#ifndef SIZE_MAX
+-#if _WIN64
+-#define SIZE_MAX 0xFFFFFFFFFFFFFFFF
+-#else
+-#define SIZE_MAX 0xFFFFFFFF
+-#endif
+-#endif
+-
+-#ifndef UINT_MAX
+-#define UINT_MAX 0xFFFFFFFF
+-#endif
+-
+ /*
+  * Determine whether there is small or large file support on windows.
+  */
+diff --git a/src/libssh2_priv.h b/src/libssh2_priv.h
+index b4296a221a19..bb5d1a50a10f 100644
+--- a/src/libssh2_priv.h
++++ b/src/libssh2_priv.h
+@@ -146,6 +146,18 @@ static inline int writev(int sock, struct iovec *iov, int nvecs)
+ 
+ #endif
+ 
++#ifndef SIZE_MAX
++#if _WIN64
++#define SIZE_MAX 0xFFFFFFFFFFFFFFFF
++#else
++#define SIZE_MAX 0xFFFFFFFF
++#endif
++#endif
++
++#ifndef UINT_MAX
++#define UINT_MAX 0xFFFFFFFF
++#endif
++
+ /* RFC4253 section 6.1 Maximum Packet Length says:
+  *
+  * "All implementations MUST be able to process packets with
+-- 
+2.11.0
+

@@ -1,0 +1,21 @@
+#=DESCRIPTION conditional else in invlaid locations
+#=EXRESULT FAIL
+
+$BAR = false
+$FOO=true
+$FALSE = false
+
+/bin/true {
+  ^TRUE {
+    if $FOO {
+      /bin/true rix,
+    } else if $FALSE {
+      /bin/false rix,
+    } else if $BAR {
+      /dev/null r,
+    }
+  } else {
+    /dev/null w,
+  }
+
+}

@@ -1,0 +1,1 @@
+type=APPARMOR_DENIED msg=audit(1253311255.027:200): operation="open" pid=25588 parent=25587 profile="/home/ubuntu/tmp/aashell" requested_mask="r::" denied_mask="r::" fsuid=1000 ouid=1000 name="/home/ubuntu/"

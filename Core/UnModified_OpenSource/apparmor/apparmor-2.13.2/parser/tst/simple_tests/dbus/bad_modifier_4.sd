@@ -1,0 +1,7 @@
+#
+#=DESCRIPTION dbus entry with a bad multivalue modifier
+#=EXRESULT FAIL
+
+profile foo {
+  dbus send bus=(session, system),
+}

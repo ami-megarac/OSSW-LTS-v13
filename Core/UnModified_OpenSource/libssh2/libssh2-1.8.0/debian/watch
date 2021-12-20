@@ -1,0 +1,3 @@
+version=3
+https://libssh2.org/download/libssh2-(.+)\.tar\.gz
+pgpmode=auto

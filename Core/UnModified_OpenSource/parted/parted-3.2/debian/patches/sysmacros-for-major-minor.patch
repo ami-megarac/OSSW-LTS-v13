@@ -1,0 +1,28 @@
+From e52d4d899edc565a7c3ed5238de91dd9f6a0cb9d Mon Sep 17 00:00:00 2001
+From: "Richard W.M. Jones" <rjones@redhat.com>
+Date: Sat, 24 Mar 2018 17:37:02 +0000
+Subject: linux: Include <sys/sysmacros.h> for major() macro.
+
+Since glibc 2.27 this header is required.
+
+Bug-Debian: https://bugs.debian.org/910326
+Origin: upstream, https://git.savannah.gnu.org/cgit/parted.git/commit/?id=ba5e0451b51c983e40afd123b6e0d3eddb55e610
+Last-Update: 2018-10-05
+
+Patch-Name: sysmacros-for-major-minor.patch
+---
+ libparted/arch/linux.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/libparted/arch/linux.c b/libparted/arch/linux.c
+index 9b319de7..85876778 100644
+--- a/libparted/arch/linux.c
++++ b/libparted/arch/linux.c
+@@ -42,6 +42,7 @@
+ #include <sys/utsname.h>        /* for uname() */
+ #include <scsi/scsi.h>
+ #include <assert.h>
++#include <sys/sysmacros.h>
+ #ifdef ENABLE_DEVICE_MAPPER
+ #include <libdevmapper.h>
+ #endif

@@ -1,0 +1,5 @@
+Porting/pumpkin.pod	perl
+README			perl
+debian/changelog			perl-doc/changelog.Debian
+debian/copyright			perl-doc/copyright
+debian/perl-doc.README.Debian   perl-doc/README.Debian

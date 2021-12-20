@@ -1,0 +1,6 @@
+#
+#=Description mount rule outside of a profile
+#=EXRESULT FAIL
+#
+
+  mount,

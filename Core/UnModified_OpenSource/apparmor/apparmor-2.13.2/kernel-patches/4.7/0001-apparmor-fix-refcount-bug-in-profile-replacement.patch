@@ -1,0 +1,33 @@
+From 5ea33f587f5f7324c40c5986286d0f38307923bb Mon Sep 17 00:00:00 2001
+From: John Johansen <john.johansen@canonical.com>
+Date: Mon, 11 Apr 2016 16:55:10 -0700
+Subject: [PATCH 01/25] apparmor: fix refcount bug in profile replacement
+
+Signed-off-by: John Johansen <john.johansen@canonical.com>
+Acked-by: Seth Arnold <seth.arnold@canonical.com>
+---
+ security/apparmor/policy.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/security/apparmor/policy.c b/security/apparmor/policy.c
+index 705c287..222052f 100644
+--- a/security/apparmor/policy.c
++++ b/security/apparmor/policy.c
+@@ -1189,12 +1189,12 @@ ssize_t aa_replace_profiles(void *udata, size_t size, bool noreplace)
+ 				aa_get_profile(newest);
+ 				aa_put_profile(parent);
+ 				rcu_assign_pointer(ent->new->parent, newest);
+-			} else
+-				aa_put_profile(newest);
++			}
+ 			/* aafs interface uses replacedby */
+ 			rcu_assign_pointer(ent->new->replacedby->profile,
+ 					   aa_get_profile(ent->new));
+ 			__list_add_profile(&parent->base.profiles, ent->new);
++			aa_put_profile(newest);
+ 		} else {
+ 			/* aafs interface uses replacedby */
+ 			rcu_assign_pointer(ent->new->replacedby->profile,
+-- 
+2.7.4
+

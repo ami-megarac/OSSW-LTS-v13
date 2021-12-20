@@ -1,0 +1,45 @@
+From 93439ddb8bc1814d8b7ee96d1fa9c7a849a784aa Mon Sep 17 00:00:00 2001
+From: Colin Watson <cjwatson@ubuntu.com>
+Date: Wed, 6 Aug 2014 16:07:28 +0200
+Subject: Align new partitions created on fresh disks
+
+Commit fa815ad05db248d78ef214ea79a78c22772a9ffe arranged to skip
+partition alignment while reading disks, but also has the effect of
+skipping partition alignment when creating a partition on a fresh disk,
+which is incorrect.
+
+The proper upstream fix probably involves adding a new member to PedDisk
+to keep track of whether we're in the middle of the initial read in
+ped_disk_new or not.  To avoid changing ABI, we instead take this hacky
+approach of overloading an extra bit on PedDisk.needs_clobber.
+
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1352252
+Forwarded: no
+Last-Update: 2014-08-06
+
+Patch-Name: align-new-partitions-on-fresh-disks.patch
+---
+ libparted/disk.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/libparted/disk.c b/libparted/disk.c
+index fe82f449..60e9c440 100644
+--- a/libparted/disk.c
++++ b/libparted/disk.c
+@@ -195,6 +195,7 @@ ped_disk_new (PedDevice* dev)
+ 		goto error_close_dev;
+ 	}
+ 	disk = ped_disk_new_fresh (dev, type);
++	disk->needs_clobber |= 2;
+ 	if (!disk)
+ 		goto error_close_dev;
+ 	if (!type->ops->read (disk))
+@@ -919,7 +920,7 @@ _partition_align (PedPartition* part, const PedConstraint* constraint)
+ 	PED_ASSERT (disk_type->ops->partition_align != NULL);
+ 	PED_ASSERT (part->disk->update_mode);
+ 
+-	if (part->disk->needs_clobber)
++	if ((part->disk->needs_clobber & 2) != 0)
+ 		return 1; /* do not attempt to align partitions while reading them */
+ 	return disk_type->ops->partition_align (part, constraint);
+ }

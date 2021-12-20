@@ -1,0 +1,4 @@
+usr/include/*
+usr/lib/*/lib*.a
+usr/lib/*/lib*.so
+usr/share/doc/libunistring/*.html usr/share/doc/libunistring-dev/html/

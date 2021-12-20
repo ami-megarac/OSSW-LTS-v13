@@ -1,0 +1,68 @@
+?RCS:
+?RCS: $Id$
+?RCS:
+?RCS: Copyright (c) 2000, Jarkko Hietaniemi
+?RCS:
+?X:
+?X: This unit tries to create a symlink tree on a -Dmksymlinks request
+?X: to Configure
+?X:
+?MAKE:Mksymlinks: lns issymlink src
+?MAKE:	-pick add $@ %<
+?T:dir source file
+?LINT:extern mksymlinks
+: Make symlinks util
+case "$mksymlinks" in
+$define|true|[yY]*)
+	case "$src" in
+	''|'.')	echo "Cannot create symlinks in the original directory." >&4
+		exit 1
+		;;
+	*)	case "$lns:$issymlink" in
+		*"ln"*" -s:"*"test -"?)
+			echo "Creating the symbolic links..." >&4
+			cd ..
+			awk '{print $1}' $src/MANIFEST | sed -e 's:/\([^/]*\)$: \1:' |
+			awk 'NF == 1 {
+				dir=".";
+				file=$1 "";
+			     }
+			     NF == 2 {
+				dir=$1 "";
+				file=$2 "";
+			     }
+			     {
+				 print "# dir = ", dir, "file = ", file
+				 mf[dir] = mf[dir]" "source"/"dir"/"file;
+			     } END {
+				 for (d in mf) {
+				     if (d != ".") { print("mkdir -p "d) }
+				     print("ln -sf "mf[d]" "d);
+				 }
+			     }' source="$src" > UU/mksymlinks.$$
+			sh UU/mksymlinks.$$
+			rm UU/mksymlinks.$$
+			# Sanity check 1.
+			if test ! -d t/base; then
+				echo "Failed to create the subdirectories.  Aborting." >&4
+				exit 1
+			fi
+			# Sanity check 2.
+			if test ! -f t/base/lex.t; then
+				echo "Failed to create the symlinks (t/base/lex.t missing).  Aborting." >&4
+				exit 1
+			fi
+			if test ! -f win32/win32.c; then
+				echo "Failed to create the symlinks (win32/win32.c missing).  Aborting." >&4
+				exit 1
+			fi
+			cd UU
+			;;
+		*)	echo "(I cannot figure out how to do symbolic links, ignoring mksymlinks)." >&4
+			;;
+		esac
+		;;
+	esac
+	;;
+esac
+

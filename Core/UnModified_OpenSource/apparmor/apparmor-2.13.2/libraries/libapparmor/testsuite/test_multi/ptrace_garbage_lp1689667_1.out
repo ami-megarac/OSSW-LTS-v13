@@ -1,0 +1,11 @@
+START
+File: ptrace_garbage_lp1689667_1.in
+Event type: AA_RECORD_DENIED
+Audit ID: 1494272099.261:3455
+Operation: ptrace
+Profile: /bin/netstat
+Command: netstat
+Name2: 
+PID: 1962
+Epoch: 1494272099
+Audit subid: 3455

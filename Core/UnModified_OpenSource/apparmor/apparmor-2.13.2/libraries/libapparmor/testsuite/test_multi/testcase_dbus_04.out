@@ -1,0 +1,17 @@
+START
+File: testcase_dbus_04.in
+Event type: AA_RECORD_DENIED
+Audit ID: 1375323372.644:157
+Operation: dbus_method_call
+Denied Mask: send
+Profile: /tmp/apparmor-2.8.0/tests/regression/apparmor/dbus_service
+Peer profile: unconfined
+Name: org.freedesktop.DBus
+Command: /bin/dbus-daemon
+PID: 2833
+DBus bus: system
+DBus path: /org/freedesktop/DBus
+DBus interface: org.freedesktop.DBus
+DBus member: Hello
+Epoch: 1375323372
+Audit subid: 157

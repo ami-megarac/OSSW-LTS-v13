@@ -1,0 +1,159 @@
+# Translation of cyrus-sasl2 debconf templates to Polish.
+# Copyright (C) 2007
+# This file is distributed under the same license as the cyrus-sasl2 package.
+#
+# Michał Kułach <michal.kulach@gmail.com>, 2012.
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: pkg-cyrus-sasl2-debian-devel@lists.alioth.debian.org\n"
+"POT-Creation-Date: 2007-10-02 07:23+0200\n"
+"PO-Revision-Date: 2012-02-25 16:04+0100\n"
+"Last-Translator: Michał Kułach <michal.kulach@gmail.com>\n"
+"Language-Team: Polish <debian-l10n-polish@lists.debian.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: pl\n"
+"X-Generator: Lokalize 1.2\n"
+"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 "
+"|| n%100>=20) ? 1 : 2);\n"
+
+#. Type: boolean
+#. Description
+#: ../sasl2-bin.templates:2001
+msgid "Remove /etc/sasldb2?"
+msgstr "Usunąć /etc/sasldb2?"
+
+#. Type: boolean
+#. Description
+#: ../sasl2-bin.templates:2001
+msgid ""
+"Cyrus SASL can store usernames and passwords in the /etc/sasldb2 database "
+"file."
+msgstr ""
+"Cyrus SASL może przechowywać nazwy użytkowników i hasła w pliku bazy danych "
+"/etc/sasldb2."
+
+#. Type: boolean
+#. Description
+#: ../sasl2-bin.templates:2001
+msgid ""
+"If important data is stored in that file, you should back it up now or "
+"choose not to remove the file."
+msgstr ""
+"Jeśli we wspomnianym pliku przechowywane są istotne dane, należy wykonać "
+"teraz kopię zapasową i nie usuwać pliku."
+
+#. Type: string
+#. Description
+#: ../sasl2-bin.templates:3001
+msgid "Backup file name for /etc/sasldb2:"
+msgstr "Nazwa pliku kopii zapasowej /etc/sasldb2:"
+
+#. Type: string
+#. Description
+#: ../sasl2-bin.templates:3001
+msgid ""
+"Cyrus SASL has stored usernames and passwords in the /etc/sasldb2 database "
+"file."
+msgstr ""
+"Cyrus SASL przechowuje nazwy użytkowników i hasła w pliku bazy danych "
+"/etc/sasldb2."
+
+#. Type: string
+#. Description
+#: ../sasl2-bin.templates:3001
+msgid ""
+"That file has to be upgraded to a newer database format. First, a backup of "
+"the current file will be created. You can use that if you need to manually "
+"downgrade Cyrus SASL. However, automatic downgrades are not supported."
+msgstr ""
+"Plik musi zostać zaktualizowany do nowszego formatu bazy danych. Najpierw "
+"zostanie utworzona kopia zapasowa obecnego pliku. Można jej będzie użyć, "
+"jeśli zajdzie potrzeba ręcznego cofnięcia do starszej wersji Cyrus SASL. "
+"Automatyczne cofnięcie nie jest jednak obsługiwane."
+
+#. Type: string
+#. Description
+#: ../sasl2-bin.templates:3001
+msgid ""
+"Please specify the backup file name. You should check the available disk "
+"space in that location. If the backup file already exists, it will be "
+"overwritten. Leaving this field empty will select the default value (/var/"
+"backups/sasldb2.bak)."
+msgstr ""
+"Proszę podać nazwę pliku kopii zapasowej. Należy sprawdzić, czy w podanej "
+"lokalizacji jest wystarczająco dużo miejsca na dysku. Jeśli plik o podanej "
+"nazwie już istnieje, zostanie nadpisany. Pozostawienie poniższego pola "
+"pustego, spowoduje użycie wartości domyślnej (/var/backups/sasldb2.bak)."
+
+#. Type: error
+#. Description
+#: ../sasl2-bin.templates:4001
+msgid "Failed to back up /etc/sasldb2"
+msgstr "Nie udało się wykonać kopii zapasowej /etc/sasldb2"
+
+#. Type: error
+#. Description
+#: ../sasl2-bin.templates:4001
+msgid ""
+"The /etc/sasldb2 file could not be backed up with the file name you "
+"specified."
+msgstr ""
+"Nie można utworzyć kopii zapasowej pliku /etc/sasldb2 o podanej nazwie."
+
+#. Type: error
+#. Description
+#. Type: error
+#. Description
+#: ../sasl2-bin.templates:4001 ../sasl2-bin.templates:5001
+msgid "This is a fatal error and will cause the package installation to fail."
+msgstr ""
+"Jest to błąd krytyczny, który spowoduje zakończenie instalacji niepowodzeniem."
+
+#. Type: error
+#. Description
+#: ../sasl2-bin.templates:4001
+msgid ""
+"Please eliminate all possible reasons that might lead to this failure, and "
+"try to configure this package again."
+msgstr ""
+"Proszę wyeliminować wszystkie prawdopodobne przyczyny błędu i spróbować "
+"skonfigurować pakiet ponownie."
+
+#. Type: error
+#. Description
+#: ../sasl2-bin.templates:5001
+msgid "Failed to upgrade /etc/sasldb2"
+msgstr "Nie udało się zaktualizować /etc/sasldb2"
+
+#. Type: error
+#. Description
+#: ../sasl2-bin.templates:5001
+msgid "The /etc/sasldb2 file could not be upgraded to the new database format."
+msgstr ""
+"Plik /etc/sasldb2 nie może zostać zaktualizowany do nowego formatu bazy "
+"danych."
+
+#. Type: error
+#. Description
+#: ../sasl2-bin.templates:5001
+msgid ""
+"The configuration process will attempt to restore the backup of this file to "
+"its original location."
+msgstr ""
+"Proces konfiguracji spróbuje odtworzyć kopię zapasową pliku do jego "
+"pierwotnej lokalizacji."
+
+#. Type: error
+#. Description
+#: ../sasl2-bin.templates:5001
+msgid ""
+"Please eliminate all possible reasons that might lead to this failure, then "
+"try to configure this package again."
+msgstr ""
+"Proszę wyeliminować wszystkie prawdopodobne przyczyny błędu, a następnie "
+"spróbować skonfigurować pakiet ponownie."
+
+

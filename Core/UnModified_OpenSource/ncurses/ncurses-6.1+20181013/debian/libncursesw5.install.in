@@ -1,0 +1,4 @@
+obj-wide-legacy/lib/libncursesw.so.*  lib/${DEB_HOST_MULTIARCH}/
+obj-wide-legacy/lib/libpanelw.so.*    usr/lib/${DEB_HOST_MULTIARCH}
+obj-wide-legacy/lib/libformw.so.*     usr/lib/${DEB_HOST_MULTIARCH}
+obj-wide-legacy/lib/libmenuw.so.*     usr/lib/${DEB_HOST_MULTIARCH}

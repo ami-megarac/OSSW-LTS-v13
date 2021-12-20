@@ -1,0 +1,14 @@
+#
+#=DESCRIPTION  validate audit allow of duplicate multiple capabilities.
+#=EXRESULT PASS
+# vim:syntax=apparmor
+# Last Modified: Sun Apr 17 19:44:44 2005
+#
+
+/does/not/exit102 {
+  audit allow capability chown dac_override dac_read_search fowner fsetid kill setgid setuid setpcap linux_immutable net_bind_service net_broadcast net_admin net_raw ipc_lock ipc_owner sys_module sys_rawio sys_chroot sys_ptrace sys_pacct sys_admin sys_boot sys_nice sys_resource sys_time sys_tty_config mknod lease audit_write audit_control,
+
+  audit allow capability chown dac_override dac_read_search fowner fsetid kill setgid setuid setpcap linux_immutable net_bind_service net_broadcast net_admin net_raw ipc_lock ipc_owner sys_module sys_rawio sys_chroot sys_ptrace sys_pacct sys_admin sys_boot sys_nice sys_resource sys_time sys_tty_config mknod lease audit_write audit_control,
+
+}
+

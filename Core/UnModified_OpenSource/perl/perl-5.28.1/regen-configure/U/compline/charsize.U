@@ -1,0 +1,89 @@
+?RCS: $Id: charsize.U,v 3.0.1.1 1994/10/29 16:07:13 ram Exp $
+?RCS:
+?RCS: Copyright (c) 1991-1993, Raphael Manfredi
+?RCS:
+?RCS: You may redistribute only under the terms of the Artistic License,
+?RCS: as specified in the README file that comes with the distribution.
+?RCS: You may reuse parts of this distribution only within the terms of
+?RCS: that same Artistic License; a copy of which may be found at the root
+?RCS: of the source tree for dist 3.0.
+?RCS:
+?RCS: $Log: charsize.U,v $
+?RCS: Revision 3.0.1.1  1994/10/29  16:07:13  ram
+?RCS: patch36: added ?F: line for metalint file checking
+?RCS:
+?RCS: Revision 3.0  1993/08/18  12:05:34  ram
+?RCS: Baseline for dist 3.0 netwide release.
+?RCS:
+?MAKE:charsize charbits: cat rm_try Myread Compile run
+?MAKE:	-pick add $@ %<
+?S:charsize:
+?S:	This variable contains the value of the CHARSIZE symbol, which
+?S:	indicates to the C program how many bytes there are in a character.
+?S:.
+?S:charbits:
+?S:	This variable contains the value of the CHARBITS symbol, which
+?S:	indicates to the C program how many bits there are in a character.
+?S:.
+?C:CHARSIZE:
+?C:	This symbol contains the size of a char, so that the C preprocessor
+?C:	can make decisions based on it.
+?C:.
+?C:CHARBITS:
+?C:	This symbol contains the size of a char, so that the C preprocessor
+?C:	can make decisions based on it.
+?C:.
+?H:#define CHARSIZE $charsize		/**/
+?H:#define CHARBITS $charbits		/**/
+?H:.
+?F:!try
+: length of character in bytes. Is always 1, otherwise it is not C
+: This used to be a test using sizeof
+charsize=1
+
+: Check for the number of bits in a character
+case "$charbits" in
+'')	echo "Checking how long a character is (in bits)..." >&4
+	$cat >try.c <<EOCP
+#include <stdio.h>
+int main ()
+{
+    int n;
+    unsigned char c;
+    for (c = 1, n = 0; c; c <<= 1, n++) ;
+    printf ("%d\n", n);
+    return (0);
+    }
+EOCP
+	set try
+	if eval $compile_ok; then
+		dflt=`$run ./try`
+	else
+		dflt='8'
+		echo "(I can't seem to compile the test program.  Guessing...)"
+	fi
+	;;
+*)
+	dflt="$charbits"
+	;;
+esac
+rp="What is the length of a character (in bits)?"
+. ./myread
+charbits="$ans"
+$rm_try
+case "$charbits" in
+8)	;;
+*)	cat >&4 << EOM
+Your system has an unsigned character size of $charbits bits, which
+is rather unusual (normally it is 8 bits).  Perl likely will not work
+correctly on your system, with subtle bugs in various places.
+EOM
+	rp='Do you really want to continue?'
+	dflt='n'
+	. ./myread
+	case "$ans" in
+		[yY])	echo >&4 "Okay, continuing."	;;
+		*)	exit 1				;;
+	esac
+esac
+

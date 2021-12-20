@@ -1,0 +1,3 @@
+0001-Reformat-obfuscated-javascript-in-sphinx-theme.patch
+0002-Make-fetch-ocsp-response-use-python3.patch
+0003-Fix-CVE-2019-9511-and-CVE-2019-9513.patch

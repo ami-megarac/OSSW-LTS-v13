@@ -1,0 +1,7 @@
+#=DESCRIPTION Simple test case for embedded spaces
+#=EXRESULT PASS
+# vim:syntax=apparmor
+
+/{usr/,}bin/foo {
+  allow "/abc\ def" r,
+}

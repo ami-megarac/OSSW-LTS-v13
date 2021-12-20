@@ -1,0 +1,31 @@
+From: David Cook <divergentdave@gmail.com>
+Date: Fri, 6 Nov 2020 23:42:38 -0600
+Subject: Fix bounds check in p11_rpc_buffer_get_byte_array
+Origin: https://github.com/p11-glue/p11-kit/commit/commit/bda2f543ff8e0195c90e849379ef1585d00677bc
+Bug: https://github.com/p11-glue/p11-kit/security/advisories/GHSA-5wpq-43j2-6qwc
+Bug-Debian-Security: https://security-tracker.debian.org/tracker/CVE-2020-29362
+
+This bounds check should be using off, not *offset, because it has been
+advanced four bytes from reading a uint32 earlier in the function.
+Additionally, the pointer that is returned is computed using off, not
+*offset.
+---
+ p11-kit/rpc-message.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/p11-kit/rpc-message.c b/p11-kit/rpc-message.c
+index be45c185a739..b26b036bdada 100644
+--- a/p11-kit/rpc-message.c
++++ b/p11-kit/rpc-message.c
+@@ -744,7 +744,7 @@ p11_rpc_buffer_get_byte_array (p11_buffer *buf,
+ 		return false;
+ 	}
+ 
+-	if (buf->len < len || *offset > buf->len - len) {
++	if (buf->len < len || off > buf->len - len) {
+ 		p11_buffer_fail (buf);
+ 		return false;
+ 	}
+-- 
+2.30.0.rc2
+

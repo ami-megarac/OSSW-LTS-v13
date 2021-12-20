@@ -15,21 +15,39 @@
 -- limitations under the License.
 
 local ffi = require "ffi"
+local lssl = ffi.load(os.getenv("TURBO_LIBSSL") or "ssl")
+
+ffi.cdef[[
+    const char *OpenSSL_version(int t);
+    const char *SSLeay_version(int t);
+]]
 
 local uname = ""
 local openssl_version = ""
 if not ffi.abi("win") then
     uname = (function()
-        local f = io.popen("uname -a")
-        local l = f:read("*a")
-        f:close()
-        return l
+        return ffi.os
     end)()
     openssl_version = (function()
-        local f = io.popen("openssl version 2> /dev/null")
-        local l = f:read("*a")
-        f:close()
-        return l
+        local version = ""
+        local status = false
+        status, version = pcall(
+            function()
+                -- for the openssl version after 1.1.0
+                return ffi.string(lssl.OpenSSL_version(0))
+            end
+        )
+
+        if not status then
+            status, version = pcall(
+                function()
+                    -- for the openssl version before 1.1.0
+                    return ffi.string(lssl.SSLeay_version(0))
+                end
+            )
+        end
+
+        return version
     end )()
 end
 

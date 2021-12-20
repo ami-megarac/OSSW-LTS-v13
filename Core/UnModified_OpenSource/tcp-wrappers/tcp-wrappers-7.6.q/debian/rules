@@ -1,0 +1,79 @@
+#!/usr/bin/make -f
+SHELL+= -e
+
+D := $(CURDIR)/debian/tcpd
+W := $(CURDIR)/debian/libwrap0
+WD := $(CURDIR)/debian/libwrap0-dev
+
+DEB_BUILD_MAINT_OPTIONS=hardening=+bindnow
+
+CFLAGS=-g -O2
+-include /usr/share/dpkg/buildflags.mk
+
+# for dpkg-cross
+DEB_HOST_GNU_TYPE  ?= $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
+DEB_BUILD_GNU_TYPE ?= $(shell dpkg-architecture -qDEB_BUILD_GNU_TYPE)
+DEB_HOST_MULTIARCH ?= $(shell dpkg-architecture -qDEB_HOST_MULTIARCH)
+ifneq ($(DEB_HOST_GNU_TYPE),$(DEB_BUILD_GNU_TYPE))
+  CROSS := CC=$(DEB_HOST_GNU_TYPE)-gcc
+endif
+
+DEB_BUILD_ARCH ?= $(shell dpkg --print-architecture)
+ifeq ($(filter-out hurd-%,$(DEB_BUILD_ARCH)),)
+  build_target := gnu
+else
+  build_target := linux
+endif
+
+
+clean:
+	dh_testdir
+	rm -rf debian/.stamp-* shared/
+	$(MAKE) clean
+	dh_clean
+
+build: build-arch build-indep
+build-arch: debian/.stamp-build
+build-indep: debian/.stamp-build
+debian/.stamp-build:
+	dh_testdir
+	$(MAKE) $(CROSS) COPTS="$(CFLAGS) $(CPPFLAGS)" LDOPTS="$(LDFLAGS)" $(build_target)
+	touch $@
+
+binary-arch: debian/.stamp-build
+	dh_testdir
+	dh_prep
+
+	dh_installdirs
+	dh_install
+
+	dh_installdocs --link-doc=libwrap0
+	dh_installdocs -p libwrap0 README
+	dh_installchangelogs CHANGES
+	dh_installman -p tcpd *.8
+	dh_installman -p libwrap0 *.5
+	dh_installman -p libwrap0-dev *.3
+	dh_link
+
+	mkdir -p $W/lib/$(DEB_HOST_MULTIARCH)/ $(WD)/usr/lib/$(DEB_HOST_MULTIARCH)/
+	cp shared/libwrap.so.0.7.6 $W/lib/$(DEB_HOST_MULTIARCH)/
+	ln -s libwrap.so.0.7.6 $W/lib/$(DEB_HOST_MULTIARCH)/libwrap.so.0
+	ln -s /lib/$(DEB_HOST_MULTIARCH)/libwrap.so.0 \
+		$(WD)/usr/lib/$(DEB_HOST_MULTIARCH)/libwrap.so
+	mv $(WD)/usr/lib/libwrap.a $(WD)/usr/lib/$(DEB_HOST_MULTIARCH)/
+
+	dh_link
+	dh_strip
+	dh_compress
+	dh_fixperms
+	dh_installdebconf
+	dh_makeshlibs -- -c4
+	dh_installdeb
+	dh_shlibdeps
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+
+binary: binary-arch
+
+.PHONY: build clean binary-indep binary-arch binary

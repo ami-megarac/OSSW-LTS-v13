@@ -1,0 +1,9 @@
+#
+#=Description unix rule with bad 'peer'
+#=EXRESULT FAIL
+#
+
+# path address must be none for anonymous or start with @ for abstract
+profile foo {
+  unix send peer(addr=wat),
+}

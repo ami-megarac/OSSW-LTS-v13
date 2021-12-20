@@ -1,0 +1,10 @@
+#
+#=Description basic rules to test the "relatime" mount option
+#=EXRESULT PASS
+/usr/bin/foo {
+  mount options=relatime /a -> /1,
+  mount options=(relatime) /b -> /2,
+  mount options=(rw,relatime) /c -> /3,
+  mount options in (relatime) /d -> /4,
+  mount options in (ro,relatime) /e -> /5,
+}

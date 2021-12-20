@@ -1,0 +1,8 @@
+mroonga/storage.index_multiple_column_range_all_used_less_than                             : MDEV-16127 - mroonga/storage.* tests fail with GCC 8
+mroonga/storage.index_multiple_column_range_all_used_less_than_or_equal                    : MDEV-16127 - mroonga/storage.* tests fail with GCC 8
+mroonga/storage.index_multiple_column_range_partially_used_have_prefix_less_than           : MDEV-16127 - mroonga/storage.* tests fail with GCC 8
+mroonga/storage.index_multiple_column_range_partially_used_have_prefix_less_than_or_equal  : MDEV-16127 - mroonga/storage.* tests fail with GCC 8
+mroonga/storage.index_multiple_column_range_partially_used_no_prefix_less_than             : MDEV-16127 - mroonga/storage.* tests fail with GCC 8
+mroonga/storage.index_multiple_column_range_partially_used_no_prefix_less_than_or_equal    : MDEV-16127 - mroonga/storage.* tests fail with GCC 8
+mroonga/storage.optimization_order_limit_optimized_datetime_less_than                      : MDEV-16127 - mroonga/storage.* tests fail with GCC 8
+mroonga/storage.optimization_order_limit_optimized_datetime_less_than_or_equal             : MDEV-16127 - mroonga/storage.* tests fail with GCC 8

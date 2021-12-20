@@ -1,0 +1,26 @@
+From 6cd49e79c96c92d10788a0f029e96f171cb961c4 Mon Sep 17 00:00:00 2001
+From: Dominic Hargreaves <dom@earth.li>
+Date: Sat, 30 Apr 2016 23:13:34 +0100
+Subject: CPAN: Add link to main CPAN web site
+
+Bug: https://github.com/andk/cpanpm/pull/96
+Bug-Debian: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=367291
+Patch-Name: fixes/cpan_web_link.diff
+---
+ cpan/CPAN/lib/CPAN.pm | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/cpan/CPAN/lib/CPAN.pm b/cpan/CPAN/lib/CPAN.pm
+index 1f69119e5f..c472effe18 100644
+--- a/cpan/CPAN/lib/CPAN.pm
++++ b/cpan/CPAN/lib/CPAN.pm
+@@ -3990,6 +3990,9 @@ your operating system) then typing C<cpan> in a console window will
+ work for you as well. Above that the utility provides several
+ commandline shortcuts.
+ 
++The main CPAN website, which includes general information about the
++service, is at L<http://www.cpan.org/>.
++
+ melezhik (Alexey) sent me a link where he published a chef recipe to
+ work with CPAN.pm: http://community.opscode.com/cookbooks/cpan.
+ 

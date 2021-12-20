@@ -1,0 +1,7 @@
+#	1
+#	2
+#	3
+/does/not/exist {	# 4
+  /lib/lib*.so rm,	# 5
+  /fail abcdefgh,	# 6
+}			# 7

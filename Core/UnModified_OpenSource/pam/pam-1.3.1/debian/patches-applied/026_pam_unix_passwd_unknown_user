@@ -1,0 +1,33 @@
+Description: distinguish between password manipulation failure and missing user.
+Author: Martin Schwenke <martin@meltin.net>
+
+Index: pam/modules/pam_unix/passverify.c
+===================================================================
+--- pam.orig/modules/pam_unix/passverify.c
++++ pam/modules/pam_unix/passverify.c
+@@ -749,7 +749,7 @@
+     struct passwd *tmpent = NULL;
+     struct stat st;
+     FILE *pwfile, *opwfile;
+-    int err = 1;
++    int err = 1, found = 0;
+     int oldmask;
+ #ifdef WITH_SELINUX
+     security_context_t prev_context=NULL;
+@@ -820,6 +820,7 @@
+ 
+ 	    tmpent->pw_passwd = assigned_passwd.charp;
+ 	    err = 0;
++	    found = 1;
+ 	}
+ 	if (putpwent(tmpent, pwfile)) {
+ 	    D(("error writing entry to password file: %m"));
+@@ -862,7 +863,7 @@
+ 	return PAM_SUCCESS;
+     } else {
+ 	unlink(PW_TMPFILE);
+-	return PAM_AUTHTOK_ERR;
++	return found ? PAM_AUTHTOK_ERR : PAM_USER_UNKNOWN;
+     }
+ }
+ 

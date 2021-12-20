@@ -1,0 +1,380 @@
+# -*- makefile -*-
+# rules to patch the unpacked files in the source directory
+# ---------------------------------------------------------------------------
+# various rules to unpack addons and (un)apply patches.
+# 	- patch / apply-patches
+#	- unpatch / reverse-patches
+
+.NOTPARALLEL:
+
+patchdir	?= debian/patches
+series_file	?= $(patchdir)/series
+
+# which patches should be applied?
+
+debian_patches = \
+	svn-updates \
+	$(if $(with_linaro_branch),gcc-linaro) \
+	$(if $(with_linaro_branch),gcc-linaro-no-macros) \
+
+#	svn-updates \
+
+ifneq ($(GFDL_INVARIANT_FREE),yes)
+  debian_patches += \
+	$(if $(with_linaro_branch),gcc-linaro-doc) \
+	rename-info-files \
+	gcc-fuse-ld-lld-doc \
+
+#	svn-doc-updates \
+#	$(if $(with_linaro_branch),,svn-doc-updates) \
+
+else
+endif
+debian_patches += \
+	gcc-gfdl-build
+
+debian_patches += \
+	gcc-textdomain \
+	gcc-driver-extra-langs$(if $(with_linaro_branch),-linaro)
+
+ifneq (,$(filter $(distrelease),etch lenny squeeze wheezy dapper hardy intrepid jaunty karmic lucid))
+  debian_patches += gcc-hash-style-both
+else
+  debian_patches += gcc-hash-style-gnu
+endif
+
+debian_patches += \
+	libstdc++-pic \
+	libstdc++-doclink \
+	libstdc++-man-3cxx \
+	libstdc++-test-installed \
+	alpha-no-ev4-directive \
+	note-gnu-stack \
+	libgomp-omp_h-multilib \
+	libgo-testsuite \
+	libgo-cleanfiles \
+	gcc-target-include-asm \
+	libgo-revert-timeout-exp \
+	libgo-setcontext-config \
+	gcc-auto-build \
+	kfreebsd-unwind \
+	libitm-no-fortify-source \
+	sparc64-biarch-long-double-128 \
+	pr66368 \
+	pr67590 \
+	libjit-ldflags \
+	libffi-pax \
+	libffi-race-condition \
+	gcc-foffload-default \
+	gcc-fuse-ld-lld \
+	cuda-float128 \
+	libffi-mipsen-r6 \
+	t-libunwind-elf-Wl-z-defs \
+	gcc-alpha-bs-ignore \
+	libffi-riscv \
+	libffi-riscv64-go \
+	gcc-force-cross-layout \
+	kfreebsd-decimal-float \
+ 	powerpcspe_remove_many \
+	ia64-disable-selective-scheduling \
+	pr89412 \
+	pr87808 \
+	pr88419-revert \
+	pr89981 \
+
+# FIXME: see #915194
+#      gcc-search-prefixed-as-ld \
+
+ifeq (,$(filter $(distrelease),trusty stretch jessie wheezy))
+  debian_patches += gcc-as-needed-push-pop
+endif
+
+# TODO:
+#	pr81829 \
+
+#	$(if $(filter yes, $(DEB_CROSS)),,gcc-print-file-name) \
+#	libstdc++-nothumb-check \
+
+hardening_patches =
+ifeq ($(with_ssp)-$(with_ssp_default),yes-yes)
+  hardening_patches += gcc-default-ssp
+  hardening_patches += gcc-default-format-security
+  ifeq (,$(filter $(distrelease),dapper hardy lucid maverick natty oneiric precise quantal raring saucy trusty))
+    hardening_patches += gcc-default-ssp-strong
+  endif
+endif
+ifneq (,$(filter $(derivative),Ubuntu))
+  ifneq (,$(findstring gcc-8, $(PKGSOURCE)))
+    hardening_patches += \
+	gcc-default-fortify-source \
+	gcc-default-relro \
+	testsuite-hardening-format \
+	testsuite-hardening-printf-types \
+	testsuite-hardening-updates \
+	testsuite-glibc-warnings
+    ifeq ($(with_pie),yes)
+      hardening_patches += \
+	bind_now_when_pie
+#    else
+#      hardening_patches += \
+#        ignore-pie-specs-when-not-enabled
+    endif
+  endif
+else ifneq (,$(filter $(derivative),Debian))
+  ifneq (,$(findstring gcc-8, $(PKGSOURCE)))
+#    ifneq ($(with_pie),yes)
+#      hardening_patches += \
+#        ignore-pie-specs-when-not-enabled
+#    endif
+  endif
+endif
+
+# FIXME 4.5: Drop and adjust symbols files
+ifneq (,$(findstring 4.4, $(PKGSOURCE)))
+  debian_patches += pr39491
+endif
+
+# Patches for non-core languages.
+# Most of the time, it would be safe to apply them whether the
+# language is selected or not. But when working on a new GCC version,
+# it is convenient to concentrate on core languages, and refresh them
+# later when working on the specific language.
+ifeq ($(with_ada),yes)
+    debian_patches += ada-arm
+    debian_patches += ada-gcc-name
+    debian_patches += ada-verbose
+  ifeq ($(biarch64),yes)
+    debian_patches += ada-nobiarch-check
+  endif
+    debian_patches += ada-link-lib
+    debian_patches += ada-libgnatvsn
+    debian_patches += ada-gnattools-cross
+    debian_patches += ada-tools-move-ldflags
+    debian_patches += ada-sjlj
+    debian_patches += ada-lib-info-source-date-epoch
+    debian_patches += ada-armel-libatomic
+    debian_patches += ada-kfreebsd
+    debian_patches += ada-drop-termio-h
+    debian_patches += ada-749574
+    debian_patches += ada-lib-info-file-prefix-map
+    debian_patches += ada-perl-shebang
+endif
+
+ifeq ($(with_d),yes)
+  debian_patches += \
+	gdc-8 \
+	gdc-targetdm \
+	gdc-updates \
+	libphobos-zlib \
+	gdc-frontend-posix \
+	gdc-profiledbuild \
+	gdc-sparc-fix \
+	gdc-shared-by-default \
+	gdc-cross-build \
+
+#	gdc-versym-cpu \
+#	gdc-versym-os \
+#	gdc-multiarch
+  ifneq ($(GFDL_INVARIANT_FREE),yes)
+    debian_patches += gdc-8-doc	gdc-targetdm-doc
+  else
+    debian_patches += gdc-texinfo
+  endif
+  ifeq ($(with_phobos),yes)
+    debian_patches += gdc-libphobos-build
+  else
+    debian_patches += gdc-driver-nophobos
+  endif
+  ifeq (,$(filter $(DEB_TARGET_ARCH),amd64 i386))
+    debian_patches += disable-gdc-tests
+  endif
+else
+  debian_patches += gcc-d-lang
+endif
+
+ifeq ($(DEB_TARGET_ARCH),alpha)
+  debian_patches += alpha-ieee
+  ifneq ($(GFDL_INVARIANT_FREE),yes)
+    debian_patches += alpha-ieee-doc
+  endif
+endif
+
+ifeq ($(DEB_TARGET_ARCH),powerpcspe)
+  debian_patches += powerpcspe_nofprs
+endif
+
+# all patches below this line are applied for gcc-snapshot builds as well
+
+ifeq ($(single_package),yes)
+  debian_patches =
+endif
+
+debian_patches += \
+	sys-auxv-header \
+
+ifeq ($(with_ibm_branch),yes)
+  debian_patches += ibm-branch
+endif
+
+ifeq ($(with_softfloat),yes)
+  debian_patches += arm-multilib-soft-float
+else ifeq ($(multilib),yes)
+  ifneq (,$(filter $(distrelease),lucid maverick natty oneiric precise))
+    debian_patches += arm-multilib-softfp$(if $(filter yes,$(DEB_CROSS)),-cross)
+  else
+    debian_patches += arm-multilib-soft$(if $(filter yes,$(DEB_CROSS)),-cross)
+  endif
+endif
+debian_patches += arm-multilib-defaults
+
+ifeq ($(DEB_CROSS),yes)
+  debian_patches += cross-fixes
+  debian_patches += cross-install-location
+  ifeq ($(with_d),yes)
+    debian_patches += gdc-cross-install-location
+  endif
+endif
+
+ifeq ($(DEB_TARGET_ARCH_OS),hurd)
+  debian_patches += hurd-changes
+endif
+
+ifeq ($(DEB_TARGET_ARCH_OS),hurd)
+  debian_patches += \
+    src_gcc_config_i386_gnu.h \
+    src_libgo_build \
+    src_libgo_runtime \
+    src_libgo_go_crypto \
+    src_libgo_go_net \
+    src_libgo_go_os \
+    src_libgo_go_runtime \
+    src_libgo_go_syscall \
+    src_libgo_go_go_build_syslist.go \
+    add-gnu-to-libgo-headers \
+    add-gnu-to-libgo-test-headers \
+    src_libgo_go_syscall_syscall_gnu_test.go \
+    src_libgo_testsuite_gotest
+endif
+
+debian_patches += gcc-ice-dump
+debian_patches += gcc-ice-apport
+debian_patches += skip-bootstrap-multilib
+debian_patches += libffi-ro-eh_frame_sect
+debian_patches += libffi-mips
+
+# sigaction on sparc changed between glibc 2.19 and 2.21
+ifeq (,$(filter 2.1%, $(shell dpkg-query -l libc-bin | awk '/^.i/ {print $$3}')))
+  # keep it, gets remove in GCC from time to time
+  #debian_patches += pr67899
+endif
+
+debian_patches += gcc-multiarch
+debian_patches += config-ml
+ifneq ($(single_package),yes)
+  ifeq ($(with_multiarch_cxxheaders),yes)
+    debian_patches += g++-multiarch-incdir
+    debian_patches += canonical-cpppath
+  endif
+endif
+ifneq (,$(filter $(build_type), build-cross cross-build-cross))
+  debian_patches += cross-no-locale-include
+  debian_patches += cross-biarch
+  ifeq ($(with_phobos),yes)
+    debian_patches += gdc-cross-biarch
+  endif
+endif
+debian_patches += gcc-multilib-multiarch
+
+ifneq (,$(filter $(derivative),Ubuntu))
+  ifeq (,$(filter $(distrelease),dapper hardy intrepid jaunty karmic lucid maverick))
+    debian_patches += gcc-as-needed
+    ifeq (,$(filter $(distrelease),dapper hardy intrepid jaunty karmic lucid maverick precise trusty utopic vivid wily xenial yakkety))
+      debian_patches += gcc-as-needed-gold
+    endif
+  endif
+else # Debian
+    #debian_patches += gcc-as-needed
+endif
+
+debian_patches += libgomp-kfreebsd-testsuite
+debian_patches += go-testsuite
+
+# don't remove, this is regularly overwritten, see PR sanitizer/63958.
+#debian_patches += libasan-sparc
+
+# Has to be refreshed manually as described in the header.
+debian_patches += ada-changes-in-autogen-output
+
+series_stamp = $(stampdir)/02-series-stamp
+series: $(series_stamp)
+$(series_stamp):
+	echo $(strip $(addsuffix .diff,$(debian_patches))) \
+	  | sed -r 's/  +/ /g' | tr " " "\n" > $(series_file)
+ifneq (,$(strip $(hardening_patches)))
+  ifneq ($(trunk_build),yes)
+	echo $(strip $(addsuffix .diff,$(hardening_patches))) \
+	  | sed -r 's/  +/ /g' | tr " " "\n" >> $(series_file)
+  endif
+endif
+	sed -r 's/(.)$$/\1 -p1/' -i $(series_file)
+	touch $@
+
+autoconf_files = $(shell lsdiff --no-filename $(foreach patch,$(debian_patches),$(patchdir)/$(patch).diff) \
+	    | sed -rn '/(configure\.ac|acinclude.m4)$$/s:[^/]+/src/:src/:p' | sort -u)
+autoconf_dirs = $(sort $(dir $(autoconf_files)))
+
+automake_files = $(addprefix ./, $(filter-out none, \
+	  $(shell lsdiff --no-filename $(foreach patch,$(debian_patches),$(patchdir)/$(patch).diff) \
+	    | sed -rn '/Makefile\.(am|in)$$/s:[^/]+/src/:src/:p' | sort -u)))
+
+autoconf_version = 2.64
+ifeq ($(trunk_build),yes)
+  # The actual version depends on the build-dependencies set by
+  # variable AUTO_BUILD_DEP in rules.conf.  Here, we assume the
+  # correct version is installed.
+  #autoconf_version =
+endif
+
+# FIXME: the auto* stuff is done every time for every subdir, which
+# leads to build errors. Idea: record the auto* calls in the patch
+# files (AUTO <dir> <auto-command with options>) and run them separately,
+# maybe only once per directory).
+$(patch_stamp): $(unpack_stamp) $(series_stamp)
+	sync
+	QUILT_PATCHES=$(patchdir) QUILT_PATCH_OPTS='-E' \
+	  quilt --quiltrc /dev/null push -a || test $$? = 2
+
+ifneq (,$(filter svn-updates, $(debian_patches)))
+	awk '/^EOF/ {exit} p==1 {print} /EOF$$/ {p=1}' \
+	  $(patchdir)/svn-updates.diff > src/LAST_UPDATED
+endif
+
+	: # only needed when we have changes, and currently fails with autogen 5.18
+	: #cd $(srcdir)/fixincludes && ./genfixes
+
+	sync
+	echo -n $(autoconf_dirs) | xargs -d ' ' -L 1 -P $(USE_CPUS) -I{} \
+	  sh -c 'echo "Running autoconf$(autoconf_version) in {}..." ; \
+	  cd $(CURDIR)/{} && rm -f configure && \
+	  AUTOM4TE=/usr/bin/autom4te$(autoconf_version) autoconf$(autoconf_version)'
+
+	for i in $(debian_patches) $(hardening_patches); do \
+	  echo -e "\n$$i:" >> pxxx; \
+	  sed -n 's/^# *DP: */  /p' $(patchdir)/$$i.diff >> pxxx; \
+	done
+#	-$(srcdir)/move-if-change pxxx $@
+	mv pxxx $@
+
+unpatch:
+	QUILT_PATCHES=$(patchdir) \
+	  quilt --quiltrc /dev/null pop -a -R || test $$? = 2
+	rm -rf .pc
+
+update-patches: $(series_stamp)
+	export QUILT_PATCHES=$(patchdir); \
+	export QUILT_REFRESH_ARGS="--no-timestamps --no-index -pab"; \
+	export QUILT_DIFF_ARGS="--no-timestamps --no-index -pab"; \
+	while quilt push; do quilt refresh; done
+
+patch: $(patch_stamp)
+.PHONY: patch series quilt autotools

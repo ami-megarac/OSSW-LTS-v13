@@ -1,0 +1,3 @@
+etc/security/*		etc/security
+lib/*/security/*.so
+debian/pam-configs/mkhomedir	usr/share/pam-configs/

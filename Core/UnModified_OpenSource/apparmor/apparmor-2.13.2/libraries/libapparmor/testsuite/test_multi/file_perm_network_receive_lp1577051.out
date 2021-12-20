@@ -1,0 +1,19 @@
+START
+File: file_perm_network_receive_lp1577051.in
+Event type: AA_RECORD_ALLOWED
+Audit ID: 1463403689.381:267599
+Operation: file_perm
+Mask: send
+Denied Mask: send
+Profile: /usr/sbin/apache2//www.xxxxxxxxxx.co.uk
+Command: apache2
+PID: 13215
+Network family: inet6
+Socket type: stream
+Protocol: tcp
+Local addr: ::ffff:192.168.1.100
+Foreign addr: ::ffff:192.168.1.100
+Local port: 80
+Foreign port: 45658
+Epoch: 1463403689
+Audit subid: 267599

@@ -1,0 +1,9 @@
+#
+#=Description basic signal set= inside parens
+#=EXRESULT FAIL
+#
+/usr/bin/signal-test {
+  signal send set=(hup segv set=int),
+
+}
+

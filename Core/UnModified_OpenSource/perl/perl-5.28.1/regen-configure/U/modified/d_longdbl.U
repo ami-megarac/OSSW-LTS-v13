@@ -1,0 +1,365 @@
+?RCS: $Id: d_longdbl.U,v $
+?RCS:
+?RCS: Copyright (c) 1998 Andy Dougherty
+?RCS:
+?RCS: You may distribute under the terms of either the GNU General Public
+?RCS: License or the Artistic License, as specified in the README file.
+?RCS:
+?RCS: $Log: d_longdbl.U,v $
+?RCS:
+?MAKE:d_longdbl longdblsize d_ldexpl longdblkind \
+	d_long_double_style_ieee d_long_double_style_ieee_doubledouble \
+	d_long_double_style_ieee_extended d_long_double_style_ieee_std \
+	d_long_double_style_vax: Compile Setvar Myread \
+	Inlibc run echo cat rm_try test doublesize i_stdlib
+?MAKE:	-pick add $@ %<
+?S:d_longdbl:
+?S:	This variable conditionally defines HAS_LONG_DOUBLE if
+?S:	the long double type is supported.
+?S:.
+?S:d_ldexpl:
+?S:	This variable conditionally defines the HAS_LDEXPL symbol, which
+?S:	indicates to the C program that the ldexpl() routine is available.
+?S:.
+?S:longdblsize:
+?S:	This variable contains the value of the LONG_DOUBLESIZE symbol, which
+?S:	indicates to the C program how many bytes there are in a long double,
+?S:	if this system supports long doubles.  Note that this is
+?S:	sizeof(long double), which may include unused bytes.
+?S:.
+?S:longdblkind:
+?S:	This variable, if defined, encodes the type of a long double:
+?S:	 0 = double,
+?S:	 1 = IEEE 754 128-bit little endian,
+?S:	 2 = IEEE 754 128-bit big endian,
+?S:	 3 = x86 80-bit little endian,
+?S:	 4 = x86 80-bit big endian,
+?S:	 5 = double-double 128-bit little endian,
+?S:	 6 = double-double 128-bit big endian,
+?S:	 7 = 128-bit mixed-endian double-double (64-bit LEs in BE),
+?S:	 8 = 128-bit mixed-endian double-double (64-bit BEs in LE),
+?S:	 9 = 128-bit PDP-style mixed-endian long doubles,
+?S:	-1 = unknown format.
+?S:.
+?S:d_long_double_style_ieee:
+?S:	This variable conditionally defines LONG_DOUBLE_STYLE_IEEE
+?S:	if the long double is any of the IEEE 754 style long doubles:
+?S:	LONG_DOUBLE_STYLE_IEEE_STD, LONG_DOUBLE_STYLE_IEEE_EXTENDED,
+?S:	LONG_DOUBLE_STYLE_IEEE_DOUBLEDOUBLE.
+?S:.
+?S:d_long_double_style_ieee_doubledouble:
+?S:	This variable conditionally defines LONG_DOUBLE_STYLE_IEEE_DOUBLEDOUBLE
+?S:	if the long double is the 128-bit IEEE 754 double-double.
+?S:.
+?S:d_long_double_style_ieee_extended:
+?S:	This variable conditionally defines LONG_DOUBLE_STYLE_IEEE_EXTENDED
+?S:	if the long double is the 80-bit IEEE 754 extended precision.
+?S:	Note that despite the 'extended' this is less than the 'std',
+?S:	since thisis an extension of the double precision.
+?S:.
+?S:d_long_double_style_ieee_std:
+?S:	This variable conditionally defines LONG_DOUBLE_STYLE_IEEE_STD
+?S:	if the long double is the 128-bit IEEE 754.
+?S:.
+?S:d_long_double_style_vax:
+?S:	This variable conditionally defines LONG_DOUBLE_STYLE_VAX
+?S:	if the long double is the 128-bit VAX format H.
+?S:.
+?C:HAS_LONG_DOUBLE:
+?C:	This symbol will be defined if the C compiler supports long
+?C:	doubles.
+?C:.
+?C:LONG_DOUBLESIZE:
+?C:	This symbol contains the size of a long double, so that the
+?C:	C preprocessor can make decisions based on it.  It is only
+?C:	defined if the system supports long doubles.  Note that this
+?C:	is sizeof(long double), which may include unused bytes.
+?C:.
+?C:HAS_LDEXPL:
+?C:	This symbol, if defined, indicates that the ldexpl routine is
+?C:	available to shift a long double floating-point number
+?C:	by an integral power of 2.
+?C:.
+?C:LONG_DOUBLEKIND:
+?C:	LONG_DOUBLEKIND will be one of
+?C:	LONG_DOUBLE_IS_DOUBLE
+?C:	LONG_DOUBLE_IS_IEEE_754_128_BIT_LITTLE_ENDIAN
+?C:	LONG_DOUBLE_IS_IEEE_754_128_BIT_BIG_ENDIAN
+?C:	LONG_DOUBLE_IS_X86_80_BIT_LITTLE_ENDIAN
+?C:	LONG_DOUBLE_IS_X86_80_BIT_BIG_ENDIAN
+?C:	LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_LE_LE
+?C:	LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_BE_BE
+?C:	LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_LE_BE
+?C:	LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_BE_LE
+?C:	LONG_DOUBLE_IS_VAX_H_FLOAT
+?C:	LONG_DOUBLE_IS_UNKNOWN_FORMAT
+?C:	It is only defined if the system supports long doubles.
+?C:.
+?C:LONG_DOUBLE_STYLE_IEEE:
+?C:	This symbol, if defined, indicates that the long double
+?C:	is any of the IEEE 754 style long doubles:
+?C:	LONG_DOUBLE_STYLE_IEEE_STD, LONG_DOUBLE_STYLE_IEEE_EXTENDED,
+?C:	LONG_DOUBLE_STYLE_IEEE_DOUBLEDOUBLE.
+?C:.
+?C:LONG_DOUBLE_STYLE_IEEE_DOUBLEDOUBLE:
+?C:	This symbol, if defined, indicates that the long double is
+?C:	the 128-bit double-double.
+?C:.
+?C:LONG_DOUBLE_STYLE_IEEE_EXTENDED:
+?C:	This symbol, if defined, indicates that the long double is
+?C:	the 80-bit IEEE 754. Note that despite the 'extended' this
+?C:	is less than the 'std', since this is an extension of
+?C:	the double precision.
+?C:.
+?C:LONG_DOUBLE_STYLE_IEEE_STD:
+?C:	This symbol, if defined, indicates that the long double is
+?C:	the 128-bit IEEE 754.
+?C:.
+?C:LONG_DOUBLE_STYLE_VAX:
+?C:	This symbol, if defined, indicates that the long double is
+?C:	the 128-bit VAX format H.
+?C:.
+?H:#$d_ldexpl  HAS_LDEXPL		/**/
+?H:#$d_longdbl HAS_LONG_DOUBLE		/**/
+?H:?LONG_DOUBLESIZE:#ifdef HAS_LONG_DOUBLE
+?H:?LONG_DOUBLESIZE:#define LONG_DOUBLESIZE $longdblsize		/**/
+?H:?LONG_DOUBLESIZE:#define LONG_DOUBLEKIND $longdblkind		/**/
+?H:?LONG_DOUBLESIZE:#define LONG_DOUBLE_IS_DOUBLE				0
+?H:?LONG_DOUBLESIZE:#define LONG_DOUBLE_IS_IEEE_754_128_BIT_LITTLE_ENDIAN	1
+?H:?LONG_DOUBLESIZE:#define LONG_DOUBLE_IS_IEEE_754_128_BIT_BIG_ENDIAN	2
+?H:?LONG_DOUBLESIZE:#define LONG_DOUBLE_IS_X86_80_BIT_LITTLE_ENDIAN		3
+?H:?LONG_DOUBLESIZE:#define LONG_DOUBLE_IS_X86_80_BIT_BIG_ENDIAN		4
+?H:?LONG_DOUBLESIZE:#define LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_LE_LE	5
+?H:?LONG_DOUBLESIZE:#define LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_BE_BE	6
+?H:?LONG_DOUBLESIZE:#define LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_LE_BE	7
+?H:?LONG_DOUBLESIZE:#define LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_BE_LE	8
+?H:?LONG_DOUBLESIZE:#define LONG_DOUBLE_IS_VAX_H_FLOAT			9
+?H:?LONG_DOUBLESIZE:#define LONG_DOUBLE_IS_UNKNOWN_FORMAT			-1
+?H:?LONG_DOUBLESIZE:#define LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_LITTLE_ENDIAN	LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_LE_LE /* back-compat */
+?H:?LONG_DOUBLESIZE:#define LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_BIG_ENDIAN	LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_BE_BE /* back-compat */
+?H:?LONG_DOUBLESIZE:#$d_long_double_style_ieee LONG_DOUBLE_STYLE_IEEE
+?H:?LONG_DOUBLESIZE:#$d_long_double_style_ieee_doubledouble LONG_DOUBLE_STYLE_IEEE_DOUBLEDOUBLE
+?H:?LONG_DOUBLESIZE:#$d_long_double_style_ieee_extended LONG_DOUBLE_STYLE_IEEE_EXTENDED
+?H:?LONG_DOUBLESIZE:#$d_long_double_style_ieee_std LONG_DOUBLE_STYLE_IEEE_STD
+?H:?LONG_DOUBLESIZE:#$d_long_double_style_vax LONG_DOUBLE_STYLE_VAX
+?H:?LONG_DOUBLESIZE:#endif
+?H:.
+?F:!try
+?LINT:known LONG_DOUBLE_IS_DOUBLE LONG_DOUBLE_IS_IEEE_754_128_BIT_LITTLE_ENDIAN
+?LINT:known LONG_DOUBLE_IS_IEEE_754_128_BIT_BIG_ENDIAN LONG_DOUBLE_IS_X86_80_BIT_LITTLE_ENDIAN
+?LINT:known LONG_DOUBLE_IS_X86_80_BIT_BIG_ENDIAN LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_LITTLE_ENDIAN
+?LINT:known LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_BIG_ENDIAN LONG_DOUBLE_IS_UNKNOWN_FORMAT
+?LINT:known LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_LE_LE
+?LINT:known LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_BE_BE
+?LINT:known LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_LE_BE
+?LINT:known LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_BE_LE
+?LINT:known LONG_DOUBLE_IS_VAX_H_FLOAT
+?LINT:set d_longdbl
+?LINT:set d_ldexpl
+: check for long doubles
+echo " "
+echo "Checking to see if you have long double..." >&4
+echo 'int main() { long double x = 7.0; }' > try.c
+set try
+if eval $compile; then
+	val="$define"
+	echo "You have long double."
+else
+	val="$undef"
+	echo "You do not have long double."
+fi
+$rm_try
+set d_longdbl
+eval $setvar
+
+: see if ldexpl exists
+set ldexpl d_ldexpl
+eval $inlibc
+
+@if LONG_DOUBLESIZE || longdblsize
+: check for length of long double
+?X:  Check only if d_longdbl and if longdblsize is not already set.
+case "${d_longdbl}${longdblsize}" in
+$define)
+	echo " "
+	echo "Checking to see how big your long doubles are..." >&4
+	$cat >try.c <<'EOCP'
+#include <stdio.h>
+int main()
+{
+	printf("%d\n", sizeof(long double));
+}
+EOCP
+	set try
+?X:	Don't use compile_ok because some compilers warn you that they have
+?X:	'long double' as just 'double'.
+	set try
+	if eval $compile; then
+		longdblsize=`$run ./try`
+		echo "Your long doubles are $longdblsize bytes long."
+	else
+		dflt='8'
+		echo " "
+		echo "(I can't seem to compile the test program.  Guessing...)" >&4
+		rp="What is the size of a long double (in bytes)?"
+		. ./myread
+		longdblsize="$ans"
+	fi
+	if $test "X$doublesize" = "X$longdblsize"; then
+		echo "That isn't any different from an ordinary double."
+		echo "I'll keep your setting anyway, but you may see some"
+		echo "harmless compilation warnings."
+	fi
+	;;
+esac
+$rm_try
+@end
+
+$echo "Checking the kind of long doubles you have..." >&4
+case "$d_longdbl" in
+define)
+$cat <<EOP >try.c
+#$i_stdlib I_STDLIB
+#define LONGDBLSIZE $longdblsize
+#define DOUBLESIZE $doublesize
+#include <float.h>
+#ifdef I_STDLIB
+#include <stdlib.h>
+#endif
+#include <stdio.h>
+static const long double d = -0.1L;
+int main() {
+  unsigned const char* b = (unsigned const char*)(&d);
+#if DOUBLESIZE == LONGDBLSIZE
+  printf("0\n"); /* if it floats like double */
+  exit(0);
+#endif
+#if (LDBL_MANT_DIG == 113 || FLT128_MANT_DIG == 113) && LONGDBLSIZE == 16
+  if (b[0] == 0x9A && b[1] == 0x99 && b[15] == 0xBF) {
+    /* IEEE 754 128-bit little-endian */
+    printf("1\n");
+    exit(0);
+  }
+  if (b[0] == 0xBF && b[14] == 0x99 && b[15] == 0x9A) {
+    /* IEEE 128-bit big-endian, e.g. solaris sparc */
+    printf("2\n");
+    exit(0);
+  }
+#endif
+/* For alignment 32-bit platforms have the 80 bits in 12 bytes,
+ * while 64-bits platforms have it in 16 bytes.  The trailing bytes
+ * cannot be trusted. */
+#if LDBL_MANT_DIG == 64 && (LONGDBLSIZE == 16 || LONGDBLSIZE == 12)
+  if (b[0] == 0xCD && b[9] == 0xBF) {
+    /* x86 80-bit little-endian, sizeof 12 (ILP32, Solaris x86)
+     * or 16 (LP64, Linux and OS X), 4 or 6 bytes of padding.
+     * Also known as "extended precision". */
+    printf("3\n");
+    exit(0);
+  }
+  if (b[0] == 0xBF && b[9] == 0xCD) {
+    /* Is there ever big-endian 80-bit, really?
+     *
+     * The Motorola 68881 had another "extended precision" format:
+     * sign:1 exp:15 zero:16 integer:1 mantissa:63
+     * for total of 96 bits of bytes.  The zero bits were unused.
+     * See "M68000 FAMILY PROGRAMMER’S REFERENCE MANUAL" for more details.
+     * If it ever becomes relevant, this format should be allocated
+     * a new doublekind code since it's quite different from the Intel x87.
+     */
+    printf("4\n");
+    exit(0);
+  }
+#endif
+#if (LDBL_MANT_DIG == 106 || LDBL_MANT_DIG == 107) && LONGDBLSIZE == 16
+  /* software "double double", the 106 is 53+53.
+   * but irix thinks it is 107. */
+  if (b[0] == 0x9A && b[7] == 0x3C && b[8] == 0x9A && b[15] == 0xBF) {
+    /* double double 128-bit fully little-endian,
+     * little-endian doubles in little-endian order,
+     * 9a 99 99 99 99 99 59 3c 9a 99 99 99 99 99 b9 bf */
+    printf("5\n");
+    exit(0);
+  }
+  if (b[0] == 0xBF && b[7] == 0x9A && b[8] == 0x3C && b[15] == 0x9A) {
+    /* double double 128-bit fully big-endian,
+     * big-endian doubles in big-endian order,
+     * e.g. PPC/Power and MIPS:
+     * bf b9 99 99 99 99 99 9a 3c 59 99 99 99 99 99 9a */
+    printf("6\n");
+    exit(0);
+  }
+  if (b[0] == 0x9A && b[7] == 0xBF && b[8] == 0x9A && b[15] == 0x3C) {
+    /* double double 128-bit mixed endian.
+     * little-endian doubles in big-endian order,
+     * e.g. ppc64el,
+     * 9a 99 99 99 99 99 b9 bf 9a 99 99 99 99 99 59 3c */
+    printf("7\n");
+    exit(0);
+  }
+  if (b[0] == 0x3C && b[7] == 0x9A && b[8] == 0xBF && b[15] == 0x9A) {
+    /* double double 128-bit mixed endian,
+     * big-endian doubles in little-endian order,
+     * 3c 59 99 99 99 99 99 9a bf b9 99 99 99 99 99 9a */
+    printf("8\n");
+    exit(0);
+  }
+#endif
+/* We are largely making this up because it may well be
+ * that the VAX format H was never made available to C,
+ * only to Fortran. */
+#if LONGDBLSIZE == 16 && defined(__vax__)
+  if (b[0] == 0xFD && b[15] == 0x99) {
+    /* VAX format H, PDP-11 mixed endian. */
+    printf("9\n");
+    exit(0);
+  }
+#endif
+  printf("-1\n"); /* unknown */
+  exit(0);
+}
+EOP
+set try
+if eval $compile; then
+    longdblkind=`$run ./try`
+else
+    longdblkind=-1
+fi
+;;
+*) longdblkind=0 ;;
+esac
+case "$longdblkind" in
+0) echo "Your long doubles are doubles." >&4 ;;
+1) echo "You have IEEE 754 128-bit little endian long doubles." >&4 ;;
+2) echo "You have IEEE 754 128-bit big endian long doubles." >&4 ;;
+3) echo "You have x86 80-bit little endian long doubles." >& 4 ;;
+4) echo "You have x86 80-bit big endian long doubles." >& 4 ;;
+5) echo "You have 128-bit fully little-endian double-double long doubles (64-bit LEs in LE)." >& 4 ;;
+6) echo "You have 128-bit fully big-endian double-double long doubles (64-bit BEs in BE)." >& 4 ;;
+7) echo "You have 128-bit mixed-endian double-double long doubles (64-bit LEs in BE)." >& 4 ;;
+8) echo "You have 128-bit mixed-endian double-double long doubles (64-bit BEs in LE)." >& 4 ;;
+9) echo "You have 128-bit PDP-style mixed-endian long doubles (VAX format H)." >& 4 ;;
+*) echo "Cannot figure out your long double." >&4 ;;
+esac
+d_long_double_style_ieee=$undef
+d_long_double_style_ieee_std=$undef
+d_long_double_style_ieee_extended=$undef
+d_long_double_style_ieee_doubledouble=$undef
+d_long_double_style_vax=$undef
+case "$longdblkind" in
+1|2|3|4|5|6|7|8) d_long_double_style_ieee=$define ;;
+esac
+case "$longdblkind" in
+1|2) d_long_double_style_ieee_std=$define ;;
+esac
+case "$longdblkind" in
+3|4) d_long_double_style_ieee_extended=$define ;;
+esac
+case "$longdblkind" in
+5|6|7|8) d_long_double_style_ieee_doubledouble=$define ;;
+esac
+case "$longdblkind" in
+9) d_long_double_style_vax=$define ;;
+esac
+$rm_try
+

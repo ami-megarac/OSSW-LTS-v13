@@ -1,0 +1,40 @@
+#
+#=DESCRIPTION simple local (interior) named profile cases
+#=EXRESULT PASS
+#
+/does/not/exist {
+
+  /foo rw,
+  /foo/** rw,
+
+  rw /bar,
+  rw /bar/**,
+
+  profile /bin/grep {
+    /one rw,
+    /one/** rw,
+
+    rw /two,
+    rw /two/**,
+  }
+
+  hat GREP {
+
+    /one r,
+    /one/** r,
+
+    r /two,
+    r /two/**,
+  }
+
+  profile true /bin/true {
+    /three rw,
+    /three/** rw,
+
+    rw /four,
+    rw /four/**,
+  }
+
+  profile false /bin/false {
+  }
+}

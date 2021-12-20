@@ -1,0 +1,193 @@
+#! /bin/bash
+#  -*- Mode: Shell-script -*-
+#
+# bootstrap --- maintainer's bootstrap script
+#
+##  This file is part of AutoGen.
+##  AutoGen Copyright (C) 1992-2015 by Bruce Korb - all rights reserved
+##
+##  AutoGen is free software: you can redistribute it and/or modify it
+##  under the terms of the GNU General Public License as published by the
+##  Free Software Foundation, either version 3 of the License, or
+##  (at your option) any later version.
+##
+##  AutoGen is distributed in the hope that it will be useful, but
+##  WITHOUT ANY WARRANTY; without even the implied warranty of
+##  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+##  See the GNU General Public License for more details.
+##
+##  You should have received a copy of the GNU General Public License along
+##  with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# This script is designed to find any directories which contain a
+# configure.ac in script, and to run the autotools programs from each
+# of those directories to make sure they are in a state ready to
+# 'configure; make; make install'
+#
+# Often this process involves more than `libtoolize; automake; autoconf',
+# so supplementary actions can be placed in a bootstrap.local script
+# in the same directory as this script, and anywhere in the source tree
+# in bootstrap.dir files.  The bootstrap.local script will be sourced
+# twice; first with BOOTSTRAP=pre before the main part is run, and then
+# again with BOOTSTRAP=post after the main part has finished.  This makes
+# it possible to set up any links or temporary files required for this
+# script to work before it has executed, and then remove them when it
+# has finished.  The bootstrap.dir files are also sourced, in a random
+# order, as they are found in the tree just before the BOOTSTRAP=post
+# phase.  This allows a developer to put any peculiar bootstrap actions
+# required by individual directories where they can be seen (and not
+# forgotten!).
+#
+# In an ideal world, running this bootstrap script (including any extra
+# scripts it executes) should leave a freshly checked out repository tree
+# in the same state as a freshly unrolled tarball.  In this way, one
+# no longer has to maintain generated files under source control, they
+# can be generated after checkout using this bootstrap procedure.
+
+PS4='>${FUNCNAME:-bstp}> '
+
+top_srcdir=$(
+    cd $(dirname $0)/.. >/dev/null
+    pwd )
+top_builddir=${top_srcdir}
+
+. config/bootstrap.shlib
+PS4='>bs-${FUNCNAME}> '
+
+config_tools()
+{
+    config_file=configure.ac
+    conf_dir=${top_srcdir}/config
+    test -f "${top_srcdir}/${config_file}.pre" || \
+        die "${config_file}.pre not in ${top_srcdir}"
+
+    #  This missing function is used in many places
+    #
+    export config_file top_srcdir top_builddir
+
+    # ------------------------------------------------------------------
+    # Make sure all of the maintainer tools required for bootstrap are
+    # available on the host machine.
+    # ------------------------------------------------------------------
+    #
+    tools="autoconf autoheader aclocal automake libtoolize"
+    for f in $tools
+    do
+        tool=$(command -v ${f}) > /dev/null || die "No $f found"
+        eval ${f}_reqver=$(
+            set -- $(${tool} --version | sed 1q)
+            eval echo \${$#})
+        eval $(echo $f | tr '[a-z]' '[A-Z]')=${tool}
+    done
+
+    char_mapper=$(command -v char-mapper) 2>/dev/null
+    test -x "${char_mapper}" || {
+        char_mapper=$(
+            cd add-on/char-mapper >&2
+            make char-mapper >&2 || die "cannot make char-mapper"
+            echo ${PWD}/char-mapper)
+    }
+    export char_mapper
+
+    echo bootstrapping in ${PWD}
+    temp_dir=`mktemp -d ${TMPDIR:-/tmp}/bs-XXXXXX`
+    test -d "$temp_dir" || {
+        temp_dir=${TMPDIR:-/tmp}/bs-$$
+        rm -rf ${temp_dir}
+        mkdir ${temp_dir}
+        chmod 700 ${temp_dir}
+    }
+
+    trap "rm -rf ${temp_dir}" 0
+    set +e
+}
+
+# Source any local scripts which add to the bootstrap procedure.
+# The bootstrap.local script should test the value of the BOOTSTRAP
+# environment variable to see whether it should run the sections
+# to be called before the main script, or afterwards.
+#
+source_bs() {
+    file=${2}
+    cd ${file%/*}
+    (
+        PS4=">${1#./}-\${FUNCNAME}> "
+        shift 2
+        . ${file##*/} ${1+"$@"} || die ${file} failed
+    )
+    file=${PWD##*/}
+    cd - >/dev/null
+}
+
+pre_local()
+{
+    BOOTSTRAP=pre REQUEST_METHOD=
+    export BOOTSTRAP
+    unset REQUEST_METHOD
+    source_bs pbs  ${conf_dir}/bootstrap.local pre
+    source_bs aobs autoopts/bootstrap.dir aoconf
+}
+
+post_local()
+{
+    bslist=`find . -name bootstrap.dir`
+    for f in ${bslist}
+    do
+        source_bs ${f%/bootstrap.dir} $f recursive
+    done
+
+    source_bs Abs ${conf_dir}/bootstrap.local post
+}
+
+filter_chaff() {
+    cat > ${temp_dir}/config-log.txt
+    if test -f configure
+    then
+        sedcmd='/configure.ac:.*no .* detected/,/configure.ac:.*top level/d'
+        sed "$sedcmd" ${temp_dir}/config-log.txt
+    else
+        cat ${temp_dir}/config-log.txt
+    fi
+}
+
+run_autotools()
+{
+    cd ${top_builddir}
+    # remove any stale config.cache
+    doit rm -f config.cache
+
+    test -n "$auxdir" || auxdir=${top_srcdir}
+    test -d $auxdir   || auxdir=.
+
+    {
+        doit $LIBTOOLIZE    --force
+        doit $ACLOCAL       -I config
+        doit $AUTOHEADER
+        doit $AUTOMAKE      --gnu --add-missing
+        doit $AUTOCONF
+    } 2>&1 | filter_chaff
+}
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+#
+#    M A I N
+#
+{
+    config_tools
+    pre_local
+    run_autotools 2>&1
+    post_local
+
+    trap '' 0
+    echo 'bootstrap complete'
+    rm -rf ${temp_dir}
+    ( exit 0 ) ; exit
+}
+# Local Variables:
+# mode:shell-script
+# sh-indentation:4
+# sh-basic-offset:4
+# indent-tabs-mode: nil
+# End:
+
+# bootstrap ends here

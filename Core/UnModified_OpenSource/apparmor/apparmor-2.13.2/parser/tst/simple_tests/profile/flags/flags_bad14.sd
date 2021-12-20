@@ -1,0 +1,10 @@
+#
+#=DESCRIPTION fail if flags is not speeled correctly
+#=EXRESULT FAIL
+# vim:syntax=apparmor
+#
+/does/not/exist flogs=(audit) {
+
+  /usr/X11R6/lib/lib*so* r,
+  /does/not/exist r,
+}

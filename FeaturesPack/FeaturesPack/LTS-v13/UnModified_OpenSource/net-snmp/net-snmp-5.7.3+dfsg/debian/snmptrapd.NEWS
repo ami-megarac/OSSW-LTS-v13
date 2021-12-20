@@ -1,0 +1,9 @@
+net-snmp (5.7.3+dfsg-2) unstable; urgency=medium
+
+ The way snmptrapd is enabled to run has been changed to follow the now
+ standard practice. This means having TRAPRUN in the /etc/defaults/snmptrapd
+ file does nothing.
+
+ See update-rc.d(8) manual page to see how to enable/disable this daemon.
+
+ -- Craig Small <csmall@debian.org>  Fri, 30 Mar 2018 16:31:25 +1100

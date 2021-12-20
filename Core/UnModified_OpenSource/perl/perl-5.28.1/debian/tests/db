@@ -1,0 +1,29 @@
+#!/bin/sh
+set -e
+
+DB=$(mktemp).db
+DATA=debian/tests/data
+
+echo "testing DB_File reading..."
+
+msg="current DB file read OK"
+
+printf "%s\n%s\n" foo "$msg" | db_load -T -t hash $DB
+
+# also test with DB files created on jessie and stretch
+for db in $DB $DATA/*.db; do
+    perl -MDB_File -le 'tie %h,  q(DB_File), shift, O_RDONLY, 0640, $DB_HASH or die "opening DB file failed: $!"; die "contents of DB file not found?" if !exists $h{foo}; print $h{foo}' $db | grep OK
+done
+
+rm $DB
+
+echo "testing DB_File writing..."
+
+msg="DB file written OK"
+
+DB=$(mktemp).db
+perl -MDB_File -e 'tie %h,  q(DB_File), shift, O_WRONLY | O_CREAT, 0640, $DB_BTREE or die "opening DB file failed: $!"; $h{foo} = shift; untie %h' $DB "$msg"
+
+db_dump -p $DB | grep OK
+
+rm $DB

@@ -1,0 +1,45 @@
+?RCS: $Id$
+?RCS:
+?RCS: Copyright (c) 1998, Jarkko Hietaniemi
+?RCS:
+?RCS: You may redistribute only under the terms of the Artistic License,
+?RCS: as specified in the README file that comes with the distribution.
+?RCS: You may reuse parts of this distribution only within the terms of
+?RCS: that same Artistic License; a copy of which may be found at the root
+?RCS: of the source tree for dist 3.0.
+?RCS:
+?MAKE:i_inttypes: Inhdr cat rm_try Setvar Compile
+?MAKE:	-pick add $@ %<
+?S:i_inttypes:
+?S:	This variable conditionally defines the I_INTTYPES symbol,
+?S:	and indicates whether a C program should include <inttypes.h>.
+?S:.
+?C:I_INTTYPES:
+?C:	This symbol, if defined, indicates to the C program that it should
+?C:	include <inttypes.h>.
+?C:.
+?H:#$i_inttypes   I_INTTYPES                /**/
+?H:.
+?LINT:set i_inttypes
+: see if inttypes.h is available
+: we want a real compile instead of Inhdr because some systems
+: have an inttypes.h which includes non-existent headers
+echo " "
+$cat >try.c <<EOCP
+#include <inttypes.h>
+int main() {
+	static int32_t foo32 = 0x12345678;
+}
+EOCP
+set try
+if eval $compile; then
+	echo "<inttypes.h> found." >&4
+	val="$define"
+else
+	echo "<inttypes.h> NOT found." >&4
+	val="$undef"
+fi
+$rm_try
+set i_inttypes
+eval $setvar
+

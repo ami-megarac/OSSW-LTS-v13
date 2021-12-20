@@ -1,0 +1,83 @@
+?RCS: $Id: otherlibdirs.U,v 1.1 1999/07/08 18:32:57 doughera Exp doughera $
+?RCS:
+?RCS: Copyright (c) 1999-2000, Andy Dougherty
+?RCS:
+?RCS: You may redistribute only under the terms of the Artistic License,
+?RCS: as specified in the README file that comes with the distribution.
+?RCS: You may reuse parts of this distribution only within the terms of
+?RCS: that same Artistic License; a copy of which may be found at the root
+?RCS: of the source tree for dist 3.0.
+?RCS:
+?RCS: $Log: otherlibdirs.U,v $
+?RCS: Revision 1.1  1999/07/08 18:32:57  doughera
+?RCS: Initial revision
+?RCS:
+?RCS: Revision 1.1  1999/07/08 18:20:26  doughera
+?RCS: Initial revision
+?RCS:
+?RCS:
+?MAKE:otherlibdirs d_perl_otherlibdirs: Myread cat sitelib sitearch \
+	vendorarch vendorlib Setvar
+?MAKE:	-pick add $@ %<
+?Y:TOP
+?S:otherlibdirs:
+?S:	This variable contains a colon-separated set of paths for the perl
+?S:	binary to search for additional library files or modules.
+?S:	These directories will be tacked to the end of @INC.
+?S:	Perl will automatically search below each path for version-
+?S:	and architecture-specific directories.  See inc_version_list
+?S:	for more details.
+?S:	A value of ' ' means 'none' and is used to preserve this value
+?S:	for the next run through Configure.
+?S:.
+?S:d_perl_otherlibdirs:
+?S:	This variable conditionally defines PERL_OTHERLIBDIRS, which
+?S:	contains a colon-separated set of paths for the perl binary to
+?S:	include in @INC.  See also otherlibdirs.
+?S:.
+?C:PERL_OTHERLIBDIRS:
+?C:	This variable contains a colon-separated set of paths for the perl
+?C:	binary to search for additional library files or modules.
+?C:	These directories will be tacked to the end of @INC.
+?C:	Perl will automatically search below each path for version-
+?C:	and architecture-specific directories.  See PERL_INC_VERSION_LIST
+?C:	for more details.
+?C:.
+?H:#$d_perl_otherlibdirs PERL_OTHERLIBDIRS "$otherlibdirs"		/**/
+?H:.
+?LINT: set d_perl_otherlibdirs
+: Final catch-all directories to search
+$cat <<EOM
+
+Lastly, you can have perl look in other directories for extensions and
+modules in addition to those already specified.
+These directories will be searched after
+	$sitearch
+	$sitelib
+EOM
+test X"$vendorlib" != "X" && echo '	' $vendorlib
+test X"$vendorarch" != "X" && echo '	' $vendorarch
+echo ' '
+case "$otherlibdirs" in
+''|' ') dflt='none' ;;
+*)	dflt="$otherlibdirs" ;;
+esac
+$cat <<EOM
+Enter a colon-separated set of extra paths to include in perl's @INC
+search path, or enter 'none' for no extra paths.
+
+EOM
+
+rp='Colon-separated list of additional directories for perl to search?'
+. ./myread
+case "$ans" in
+' '|''|none)	otherlibdirs=' ' ;;
+*)	otherlibdirs="$ans" ;;
+esac
+case "$otherlibdirs" in
+' ') val=$undef ;;
+*)	val=$define ;;
+esac
+set d_perl_otherlibdirs
+eval $setvar
+

@@ -1,0 +1,12 @@
+START
+File: testcase14.in
+Event type: AA_RECORD_DENIED
+Audit ID: 1189201672.746:537
+Operation: file_lock
+Mask: k
+Denied Mask: k
+Profile: /usr/sbin/nmbd
+Name: /var/run/samba/unexpected.tdb
+PID: 4316
+Epoch: 1189201672
+Audit subid: 537

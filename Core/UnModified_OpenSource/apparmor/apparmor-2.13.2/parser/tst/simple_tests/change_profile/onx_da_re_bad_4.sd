@@ -1,0 +1,11 @@
+#
+#=DESCRIPTION deny audit in wrong order
+#=EXRESULT FAIL
+#
+
+@{LIBVIRT}="libvirt"
+@{LIBVIRT_RE}="libvirt*"
+
+/usr/bin/foo {
+   deny audit change_profile /onexec -> @{LIBVIRT}-fo*,
+}

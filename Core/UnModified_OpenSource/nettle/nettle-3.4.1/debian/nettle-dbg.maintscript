@@ -1,0 +1,1 @@
+dir_to_symlink /usr/share/doc/nettle-dbg libnettle6 2.7.1-5~ nettle-dbg

@@ -1,0 +1,258 @@
+#! /bin/echo This_file_must_be_sourced,_not_executed
+##  This file is part of AutoOpts, a companion to AutoGen.
+##  AutoOpts is free software.
+##  AutoOpts is Copyright (C) 1992-2016 by Bruce Korb - all rights reserved
+##
+##  AutoOpts is available under any one of two licenses.  The license
+##  in use must be one of these two and the choice is under the control
+##  of the user of the license.
+##
+##   The GNU Lesser General Public License, version 3 or later
+##      See the files "COPYING.lgplv3" and "COPYING.gplv3"
+##
+##   The Modified Berkeley Software Distribution License
+##      See the file "COPYING.mbsd"
+##
+##  These files have the following sha256 sums:
+##
+##  8584710e9b04216a394078dc156b781d0b47e1729104d666658aecef8ee32e95  COPYING.gplv3
+##  4379e7444a0e2ce2b12dd6f5a52a27a4d02d39d247901d3285c88cf0d37f477b  COPYING.lgplv3
+##  13aa749a5b0a454917a944ed8fffc530b784f5ead522b1aacaf4ec8aa55a6239  COPYING.mbsd
+
+burn_aover() {
+    agvars=$(egrep '^A[GO]_' ../VERSION)
+    eval "${agvars}"
+    vers_curr=$(expr '(' $AO_CURRENT   '*' 4096 ')' + $AO_REVISION)
+
+    cd tpl
+    for f in *.sh *.pl *.pm
+    do  g=${f%.sh} ; g=${g%.pl}
+        test "$f" = "$g" || {
+            cat $f > $g
+            chmod +x $g
+        }
+    done
+    cd -
+}
+
+add_files_to_mf() {
+    #  Regenerate the "genshell.h" 'cuz we just altered the template to
+    #  contain the header version number.
+    #
+    ${ag_aopts} -Tagman3.tpl funcs.def || \
+        die "FAILED: ${ag_aopts} -Tagman3.tpl funcs.def"
+
+    local tmpl=$(
+        ndst=""
+        sfil=''
+        pdta="autoopts.m4${nl}tpl/usage.tlib${nl}"
+        edta="bootstrap.dir${nl}autoopts-config.in${nl}autogen.map${nl}"
+        edta="${edta}mk-tpl-config.sh${nl}mk-autoopts-pc.in${nl}"
+        edta="${edta}install-hook.sh${nl}po${nl}"
+
+        for f in man mdoc texi
+        do
+            for g in man mdoc texi
+            do
+                sfil=${sfil}tpl/${f}2${g}${nl}
+            done
+        done
+
+        for f in tpl/*.*
+        do
+            case $f in
+            ( tpl-config* ) : ;;
+
+            ( *.in | *.pl | *.sh )
+                g=${f%.??}
+                g=${g//-tlib/.tlib}
+                ndst+=${g}${nl}    # installed file
+                edta+=${f}${nl}    # distributed file
+                ;;
+
+            ( *tpl-config.tlib | *tpl/usage* ) : ;;
+
+            ( *.tlib | *.tpl | *.def | *.lic | *.pm )
+                pdta=${pdta}${f}${nl} ;; # installed & distributed file
+            esac
+        done
+
+        echo "local ndst='${ndst%${nl}}'"
+        echo "local pdta='${pdta%${nl}}'"
+        echo "local edta='${edta%${nl}}'"
+        echo "local sfil='${sfil%${nl}}'"
+    )
+
+    eval "$tmpl"
+
+    {
+        ls -1 *.3 | \
+            sed '/^pathfind.3$/d' | \
+            columns -I4 --spread=1 --line=' \'
+
+        printf '\nnodist_pkgdata_DATA = $(libsrc) \\\n'
+        echo "${ndst}" | sort -u | columns -I4 --spread=1 --line=' \'
+
+        printf '\nnodist_libdata_DATA = %s\n' tpl/tpl-config.tlib
+
+        printf '\npkgdata_DATA    = \\\n'
+        echo "${pdta}" | sort -u | columns -I4 --spread=1 --line=' \'
+
+        printf '\nEXTRA_DATA      = $(pkgdata_DATA) \\\n'
+        echo "${edta}" | sort -u | columns -I4 --spread=1 --line=' \'
+
+        printf '\nGENSCRIPTS      = $(srcdir)/funcs.def \\\n'
+        echo "${sfil}" | columns -I4 --spread=1 --line=' \'
+        echo
+
+        sed -n '/^## begin/,/^## end/{
+		s/^##.*//
+		/^$/d
+		p
+	    }' gnulib.mk
+
+    } > Makefile.lists
+
+    sed '/^GENMAN /r Makefile.lists' Makefile.am.pre > Makefile.am
+    rm -f Makefile.lists gnulib.mk *.3
+}
+
+make_funcs_def()
+{
+    ${char_mapper:-char-mapper} autogen.map || die "FAILED: char-mapper"
+    ${ag_aopts} ao-strs.def || die "cannot make strings - exited $?"
+
+    declare cmd_list=$(
+        sed -n '/case *XAT_CMD_/{;s/.*XAT_CMD_/cmd = /;s/:/;/;p;}' \
+            configfile.c | tr '[A-Z_]' '[a-z-]')
+
+    ${ag_aopts} <<- _EOF_
+	AutoGen Definitions str2enum;
+	base-name = option-xat-attribute;
+	prefix    = xat;
+	no-name;
+	$cmd_list
+	_EOF_
+    test $? -eq 0 || \
+        die "FAILED: option-xat-attribute enumeration"
+
+    cmd_list=$(
+        sed -n '/case *VTP_CMD_/{;s/.*VTP_CMD_/cmd = /;s/:/;/;p;}' \
+            configfile.c | tr '[A-Z_]' '[a-z-]')
+    ${ag_aopts} <<- _EOF_
+	AutoGen Definitions str2enum;
+	base-name = option-value-type;
+	prefix    = vtp;
+	no-name;
+	$cmd_list
+	_EOF_
+    test $? -eq 0 || \
+        die "FAILED: ${s2enum} --base-name=option-value-type"
+    burn_aover
+
+    test -d autoopts || mkdir autoopts
+    test -d po       || mkdir po
+    ${ag_aopts} genshell.def  || \
+        die "FAILED: ${ag_aopts} genshell.def"
+
+    ${ag_aopts} usage-txt.def || \
+        die "FAILED: ${ag_aopts} usage-txt.def"
+    mv -f usage-txt.h   autoopts/.
+    mv -f usage-txt.pot po/.
+
+    files=$(sed -n '/^CSRC/,/\.c$/p' Makefile.am.pre | \
+        sed '/^CSRC/d;s/[=\\]//'
+    )
+
+    getdefs linenum srcfile template=options_h output=funcs.def $files
+    chmod u+w funcs.def
+    vers_min=$(expr '(' $AO_CURRENT - $AO_AGE ')' '*' 4096)
+    cat >> funcs.def <<-  _END_VERS_INFO_
+	vers-curr       = "${vers_curr}";
+	vers-min        = "${vers_min}";
+	vers-min-str    = "$(expr $AO_CURRENT - $AO_AGE):0:0";
+	vers-sovers     = "${AO_SOVERS}";
+	display-ver     = "${AO_CURRENT}.${AO_REVISION}";
+	library         = opts;
+
+	/*
+	 *  THIS FILE IS DISTRIBUTED
+	 *
+	 *  This file is used to construct options.h + doc files.  Because it is
+	 *  such a nuisance to get the build ordering correct, we distribute
+	 *  this.  It should be constructed after all binaries are built.
+	 */
+	_END_VERS_INFO_
+
+    ${ag_aopts} funcs.def || \
+        die "FAILED: ${ag_aopts} funcs.def"
+    test -f options.h || \
+        die "options.h not created"
+    mv -f options.h autoopts/.
+    cp project.h autoopts/.
+
+    add_files_to_mf
+    make_proto
+
+    ${ag_aopts} aoconf.def || \
+        die "FAILED: ${ag_aopts} aoconf.def"
+}
+
+test "X${mainpid}" = X && {
+    echo SOURCING BOOTSTRAP.SHLIB
+    \cd ${top_srcdir-..}
+    top_srcdir=`pwd`
+    . config/bootstrap.shlib
+    cd autoopts
+    free_trap=true
+    echo DONE SOURCING BOOTSTRAP.SHLIB
+} || {
+    free_trap=false
+}
+
+${skip_gen} || \
+    export ag_aopts=${AGexe-autogen}\ -L${top_srcdir}/autoopts/tpl
+
+case "$1" in
+*genshell.c )
+    if ${skip_gen}
+    then
+        test -f ${top_srcdir}/autoopts/genshell.c || \
+            die "No autogen for building genshell.c"
+    else
+        ${ag_aopts} genshell.def || \
+            die "FAILED: ${ag_aopts} genshell.def"
+    fi
+    ;;
+
+*libopts.texi )
+    if ${skip_gen}
+    then
+        test -f ${top_srcdir}/autoopts/libopts.texi || \
+            die "No autogen for building libopts.texi"
+    else
+        agopts='-Taginfo3.tpl -DLEVEL=subsection -blibopts funcs.def'
+        ${ag_aopts} ${agopts} || \
+            die "FAILED: ${ag_aopts} ${agopts}"
+    fi
+    ;;
+
+aoconf )
+    if ${skip_gen}
+    then untar_touch gen-src.tgz
+    else make_funcs_def
+    fi || die "could not rebuild files in $PWD"
+    ;;
+esac
+
+${free_trap} && trap '' 0
+true
+
+# Local Variables:
+# mode:shell-script
+# sh-indentation:4
+# sh-basic-offset:4
+# indent-tabs-mode: nil
+# End:
+
+# bootstrap.dir ends here

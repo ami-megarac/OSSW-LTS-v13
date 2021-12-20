@@ -1,0 +1,7 @@
+#
+#=Description basic file rule
+#=EXRESULT PASS
+#
+/usr/bin/foo {
+  file /usr/bin/foo r,
+}

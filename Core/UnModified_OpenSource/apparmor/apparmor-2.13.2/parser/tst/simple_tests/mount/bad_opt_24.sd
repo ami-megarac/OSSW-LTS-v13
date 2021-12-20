@@ -1,0 +1,6 @@
+#
+#=Description basic rule to test the valid "make-rshared" mount opt and an invalid src
+#=EXRESULT FAIL
+/usr/bin/foo {
+  mount options=(make-rshared) /a -> /1,
+  }

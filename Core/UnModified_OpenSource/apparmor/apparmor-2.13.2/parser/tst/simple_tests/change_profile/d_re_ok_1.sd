@@ -1,0 +1,24 @@
+#
+#=DESCRIPTION deny change_profile
+#=EXRESULT PASS
+#
+/usr/bin/foo {
+   deny change_profile -> /bin/*,
+}
+
+/usr/bin/foo2 {
+   deny change_profile -> /bin/**,
+}
+
+/usr/bin/foo3 {
+   deny change_profile -> /bin/?,
+}
+
+/usr/bin/foo4 {
+   deny change_profile -> /bin/[ab],
+}
+
+/usr/bin/foo5 {
+   deny change_profile -> /bin/[^ab],
+}
+

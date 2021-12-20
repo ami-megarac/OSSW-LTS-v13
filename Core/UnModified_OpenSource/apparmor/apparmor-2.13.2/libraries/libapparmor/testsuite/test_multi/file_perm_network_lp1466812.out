@@ -1,0 +1,17 @@
+START
+File: file_perm_network_lp1466812.in
+Event type: AA_RECORD_ALLOWED
+Audit ID: 1434708055.676:19629
+Operation: file_perm
+Profile: /usr/sbin/apache2
+Command: apache2
+PID: 3512
+Network family: inet6
+Socket type: stream
+Protocol: tcp
+Local addr: ::ffff:192.168.236.159
+Foreign addr: ::ffff:192.168.103.80
+Local port: 80
+Foreign port: 61985
+Epoch: 1434708055
+Audit subid: 19629

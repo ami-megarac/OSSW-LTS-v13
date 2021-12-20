@@ -1,0 +1,10 @@
+START
+File: testcase25.in
+Event type: AA_RECORD_HINT
+Audit ID: 1190503291.842:27382
+Operation: clone
+Profile: null-complain-profile
+Task: 20401
+PID: 20400
+Epoch: 1190503291
+Audit subid: 27382

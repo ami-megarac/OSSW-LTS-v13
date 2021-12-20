@@ -1,0 +1,12 @@
+#=DESCRIPTION Simple boolean assignment parsing test
+#=EXRESULT PASS
+
+$VAR = True
+${BOOLEAN} = fALsE
+$GUH = true
+$HO_HUM=TRUE
+$MEEP                            =                                                                                                                                                                                                         true
+
+/bin/foo {
+  #include <includes/base>
+}

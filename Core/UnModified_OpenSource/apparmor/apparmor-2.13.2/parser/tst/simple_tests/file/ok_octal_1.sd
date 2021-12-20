@@ -1,0 +1,8 @@
+#
+#=DESCRIPTION simple octal test
+#=EXRESULT PASS
+#
+
+profile ascii {
+  /bin/\141bcde rix,
+}

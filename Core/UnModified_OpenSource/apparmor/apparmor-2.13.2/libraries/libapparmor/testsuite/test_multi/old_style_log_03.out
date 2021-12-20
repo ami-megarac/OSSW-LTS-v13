@@ -1,0 +1,8 @@
+START
+File: old_style_log_03.in
+Event type: AA_RECORD_INVALID
+Audit ID: 1173790298.651:1662
+Operation: APPARMOR
+Info: REJECTING access to syscall 'ptrace' (syscall_ptrace(25210) profile /home/steve/svn/trunk-forge/tests/regression/subdomain/syscall_ptrace active /home/steve/svn/trunk-forge/tests/regression/subdomain/syscall_ptrace)
+Epoch: 1173790298
+Audit subid: 1662

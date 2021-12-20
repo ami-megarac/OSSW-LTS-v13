@@ -1,0 +1,170 @@
+Line	Description
+======= =======================================================================
+
+?MAKE:	The ?MAKE: line records dependencies
+
+    ?MAKE:symbol list: dependency list [+optional]
+
+	This is the first dependency line. The first "symbol list"
+	should list all the symbols built by this unit (i.e. whose
+	value is computed by the shell section of the unit). Symbols
+	should be space separated. If a defined symbol is for internal
+	use only and should not appear in the generated "config.sh"
+	file, then it should be preceded by a '+' (not to be confused
+	with optional dependencies defined hereafter).
+	The second part of the list (after the middle ':') is the unit
+	dependency.  It should list all the needed special units, as
+	well as all the symbols used by the shell implementation. If
+	a symbol is needed but its configuration value is not critical,
+	it can be preceded by a '+', in which case it is called a
+	conditional dependency: its corresponding unit will be loaded
+	if, and only if, that symbol is otherwise really wanted;
+	otherwise the default value will be used.
+
+    ?MAKE: <tab> command
+
+	There can be one or more command lines following the initial
+	dependency lines.  Those commands will be executed when the
+	unit is wanted to load them into "Configure".
+	Note that the leading <tab> character is required before the
+	"command".
+
+?INIT:	Initializations printed verbatim
+
+?LINT:	Hints for metalint
+
+	set		Listed variables are set
+	    ?LINT:set d_getservprotos
+	describe	Listed shell variables are described
+	    ?LINT:describe awk ar bash bison byacc cat chgrp chmod chown
+	create		Listed created files in regular units
+	    ?LINT:create mips
+	known		Listed C variables are described
+	    ?LINT:known StGiFy
+	change		Shell variable ok to be changed
+	    ?LINT:change CONFIG_H
+	extern		Variables known to be externally defined
+	    ?LINT:extern CONFIG_H
+	usefile		Files marked as being used
+	    ?LINT:usefile foobar
+	use		Variables declared as used by unit
+	    ?LINT:use PERL_CONFIG_SH
+	define		Listed variables are defined
+	    ?LINT:define fieldn
+	empty		Empty unit file
+	    ?LINT:empty
+	unclosed	Unclosed here-documents
+	    ?LINT:unclosed EOT
+	nothere		Not a here-document name
+	nocomment	OK if leading unit ': comment' missing
+	    ?LINT:nocomment
+
+?RCS:	RCS comments are ignored
+
+	To be used for RCS comments, at the top of the unit.
+
+?C:	C symbols
+
+	Comments for #defines
+
+?D:	Default value for conditional symbols
+
+	?D:osname=''
+
+?E:	Example of usage
+
+?F:	Produced files
+
+	Defines what files are created by this module
+
+	Files produced in the UU directory and which are identified by the
+	convention ./filename. Files !filename are not produced, i.e. they are
+	temporary or externally provided.
+
+	?F:cppstdin !testcpp.out !testcpp.c
+
+?H:	Process the config.h lines
+
+	Defines the part to be included in the generated config_h.SH
+
+	To get #ifdefs in config_h.SH, you'll need strange constructs like
+
+	?H:?%<:@if USE_SITECUSTOMIZE
+	?H:?%<:#ifndef USE_SITECUSTOMIZE
+	?H:?%<:#$usesitecustomize     USE_SITECUSTOMIZE               /**/
+	?H:?%<:#endif
+	?H:?%<:@end
+
+?I:	Added includes
+
+?L:	Added libraries
+
+?M:	Process the confmagic.h lines
+
+?O:	Unit obsolescence
+
+?P:	Location of PD implementation file
+
+?S:	Shell variables
+
+    ?S:symbol_name (obsolete symbol list)]:
+
+	Introduces a shell symbol. This first line names the symbol,
+	optionally followed by a list enclosed between parenthesis and
+	giving the obsolete equivalent. Those obsolete symbols will be
+	remapped to the new "symbol_name" if the -o option is given to
+	"metaconfig".
+
+    ?S: <tab> any text, for "Porting/Glossary"
+
+	Basically a comment describing the shell symbol, which will be
+	extracted by "makegloss" into the Glossary file.
+
+    ?S:.
+
+	Closes the shell symbol comment.
+
+?T:	Shell temporaries used
+
+	What variables are used as temporary variables
+
+?V:	Visible symbols like 'rp', 'dflt'
+
+	?V:fieldn
+
+?W:	Wanted value for interpreter
+
+?X:	User comment is ignored
+
+	General purpose comments. May appear anywhere in the unit but must be
+	left justfied. For RCS comments, please use the ?RCS: comment form.
+
+?Y:	User-defined layout preference
+
+	Declare a layout directive for this unit. That directive may be one
+	of the strings "top", "default" or "bottom" (case does not matter,
+	recommended style is to spell them out uppercased). If omitted,
+	"default" is assumed.
+
+	This directive is only required if you wish to force a unit at the
+	top or the bottom of the generated "Configure" script, as unit
+	dependencies permit it. Important questions may thus be forced
+	at the beginning. Within the same layout class, units are sorted
+	alphabetically with two special cases for d_* and i_* units, forced
+	respectively at the top and bottom of their classes (but these
+	should belong to the default class).
+
+	It you force at the top a unit whose dependencies require all the
+	other unit to precede it, you achieve nothing interesting. Therefore,
+	that directive should really be used to increase the priority of
+	some interactive units that do not depend on many other user-visible
+	symbols, like path-related questions.
+
+	?Y:TOP
+
+lines can be made conditional (see Config_sh.U)
+
+@if d_portable
+:
+:
+@end

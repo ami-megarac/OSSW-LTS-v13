@@ -1,0 +1,11 @@
+START
+File: testcase26.in
+Event type: AA_RECORD_HINT
+Audit ID: 1188599886.852:8780
+Operation: ptrace
+Profile: null-complain-profile
+Task: 8320
+Parent: 8322
+PID: 8322
+Epoch: 1188599886
+Audit subid: 8780

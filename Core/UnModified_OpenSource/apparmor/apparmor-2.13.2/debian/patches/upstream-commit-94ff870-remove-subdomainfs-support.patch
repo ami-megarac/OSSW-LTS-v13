@@ -1,0 +1,1539 @@
+From: John Johansen <john.johansen@canonical.com>
+Date: Sat, 3 Nov 2018 16:39:49 -0700
+Subject: remove subdomainfs support
+
+It has been over 10 years since transition from subdomainfs to
+using securityfs. Lets drop this deprecated code.
+
+PR: https://gitlab.com/apparmor/apparmor/merge_requests/258
+Signed-off-by: John Johansen <john.johansen@canonical.com>
+Acked-by: seth.arnold@canonical.com
+---
+ changehat/mod_apparmor/mod_apparmor.pod       |   2 +-
+ parser/Makefile                               |   6 +-
+ parser/apparmor.pod                           |   2 +-
+ parser/apparmor_parser.pod                    |   4 +-
+ parser/parser_include.c                       |  68 ++---------------
+ parser/rc.apparmor.functions                  |  98 +-----------------------
+ parser/subdomain.conf                         |  53 -------------
+ parser/subdomain.conf.pod                     | 104 --------------------------
+ tests/stress/apparmor/Makefile                |  24 ++++++
+ tests/stress/apparmor/change_hat.c            |  51 +++++++++++++
+ tests/stress/apparmor/change_hat.profile.pre  |  24 ++++++
+ tests/stress/apparmor/child.c                 |  35 +++++++++
+ tests/stress/apparmor/child.profile.pre       |  12 +++
+ tests/stress/apparmor/kill.sh                 |  19 +++++
+ tests/stress/apparmor/open.c                  |  34 +++++++++
+ tests/stress/apparmor/open.profile.pre        |  15 ++++
+ tests/stress/apparmor/s-2.4.20.sh             |  18 +++++
+ tests/stress/apparmor/s.sh                    |  18 +++++
+ tests/stress/apparmor/sh.profile.pre          |  24 ++++++
+ tests/stress/apparmor/stress.sh               |  20 +++++
+ tests/stress/apparmor/stress.sh-2.4.20        |  18 +++++
+ tests/stress/apparmor/uservars.inc            |  42 +++++++++++
+ tests/stress/subdomain/Makefile               |  24 ------
+ tests/stress/subdomain/change_hat.c           |  51 -------------
+ tests/stress/subdomain/change_hat.profile.pre |  24 ------
+ tests/stress/subdomain/child.c                |  35 ---------
+ tests/stress/subdomain/child.profile.pre      |  12 ---
+ tests/stress/subdomain/kill.sh                |  20 -----
+ tests/stress/subdomain/open.c                 |  34 ---------
+ tests/stress/subdomain/open.profile.pre       |  15 ----
+ tests/stress/subdomain/s-2.4.20.sh            |  19 -----
+ tests/stress/subdomain/s.sh                   |  19 -----
+ tests/stress/subdomain/sh.profile.pre         |  24 ------
+ tests/stress/subdomain/stress.sh              |  21 ------
+ tests/stress/subdomain/stress.sh-2.4.20       |  19 -----
+ tests/stress/subdomain/uservars.inc           |  42 -----------
+ utils/apparmor/config.py                      |   2 +-
+ 37 files changed, 368 insertions(+), 684 deletions(-)
+ delete mode 100644 parser/subdomain.conf
+ delete mode 100644 parser/subdomain.conf.pod
+ create mode 100644 tests/stress/apparmor/Makefile
+ create mode 100644 tests/stress/apparmor/change_hat.c
+ create mode 100644 tests/stress/apparmor/change_hat.profile.pre
+ create mode 100644 tests/stress/apparmor/child.c
+ create mode 100644 tests/stress/apparmor/child.profile.pre
+ create mode 100755 tests/stress/apparmor/kill.sh
+ create mode 100644 tests/stress/apparmor/open.c
+ create mode 100644 tests/stress/apparmor/open.profile.pre
+ create mode 100755 tests/stress/apparmor/s-2.4.20.sh
+ create mode 100755 tests/stress/apparmor/s.sh
+ create mode 100644 tests/stress/apparmor/sh.profile.pre
+ create mode 100755 tests/stress/apparmor/stress.sh
+ create mode 100755 tests/stress/apparmor/stress.sh-2.4.20
+ create mode 100644 tests/stress/apparmor/uservars.inc
+ delete mode 100644 tests/stress/subdomain/Makefile
+ delete mode 100644 tests/stress/subdomain/change_hat.c
+ delete mode 100644 tests/stress/subdomain/change_hat.profile.pre
+ delete mode 100644 tests/stress/subdomain/child.c
+ delete mode 100644 tests/stress/subdomain/child.profile.pre
+ delete mode 100755 tests/stress/subdomain/kill.sh
+ delete mode 100644 tests/stress/subdomain/open.c
+ delete mode 100644 tests/stress/subdomain/open.profile.pre
+ delete mode 100755 tests/stress/subdomain/s-2.4.20.sh
+ delete mode 100755 tests/stress/subdomain/s.sh
+ delete mode 100644 tests/stress/subdomain/sh.profile.pre
+ delete mode 100755 tests/stress/subdomain/stress.sh
+ delete mode 100755 tests/stress/subdomain/stress.sh-2.4.20
+ delete mode 100644 tests/stress/subdomain/uservars.inc
+
+diff --git a/changehat/mod_apparmor/mod_apparmor.pod b/changehat/mod_apparmor/mod_apparmor.pod
+index f9352ee..54f9f36 100644
+--- a/changehat/mod_apparmor/mod_apparmor.pod
++++ b/changehat/mod_apparmor/mod_apparmor.pod
+@@ -139,7 +139,7 @@ them at L<https://bugs.launchpad.net/apparmor/+filebug>.
+ 
+ =head1 SEE ALSO
+ 
+-apparmor(7), subdomain.conf(5), apparmor_parser(8), aa_change_hat(2) and
++apparmor(7), apparmor_parser(8), aa_change_hat(2) and
+ L<https://wiki.apparmor.net>.
+ 
+ =cut
+diff --git a/parser/Makefile b/parser/Makefile
+index 5d799f6..0218e1c 100644
+--- a/parser/Makefile
++++ b/parser/Makefile
+@@ -28,7 +28,7 @@ SYSTEMD_UNIT_DIR=${DESTDIR}/usr/lib/systemd/system
+ CONFDIR=/etc/apparmor
+ INSTALL_CONFDIR=${DESTDIR}${CONFDIR}
+ LOCALEDIR=/usr/share/locale
+-MANPAGES=apparmor.d.5 apparmor.7 apparmor_parser.8 subdomain.conf.5 aa-teardown.8
++MANPAGES=apparmor.d.5 apparmor.7 apparmor_parser.8 aa-teardown.8
+ 
+ YACC	:= bison
+ YFLAGS	:= -d
+@@ -70,9 +70,6 @@ endif
+ # Internationalization support. Define a package and a LOCALEDIR
+ EXTRA_CFLAGS+=-DPACKAGE=\"${NAME}\" -DLOCALEDIR=\"${LOCALEDIR}\"
+ 
+-# Compile-time configuration of the location of the config file
+-EXTRA_CFLAGS+=-DSUBDOMAIN_CONFDIR=\"${CONFDIR}\"
+-
+ SRCS = parser_common.c parser_include.c parser_interface.c parser_lex.c \
+        parser_main.c parser_misc.c parser_merge.c parser_symtab.c \
+        parser_yacc.c parser_regex.c parser_variable.c parser_policy.c \
+@@ -371,7 +368,6 @@ install-arch: $(INSTALLDEPS)
+ .PHONY: install-indep
+ install-indep: indep
+ 	install -m 755 -d $(INSTALL_CONFDIR)
+-	install -m 644 subdomain.conf $(INSTALL_CONFDIR)
+ 	install -m 644 parser.conf $(INSTALL_CONFDIR)
+ 	install -m 755 -d ${DESTDIR}/var/lib/apparmor
+ 	install -m 755 -d $(APPARMOR_BIN_PREFIX)
+diff --git a/parser/apparmor.pod b/parser/apparmor.pod
+index 5752002..4d731f3 100644
+--- a/parser/apparmor.pod
++++ b/parser/apparmor.pod
+@@ -212,7 +212,7 @@ Else, if auditd is running, see auditd(8) and auditd.conf(5).
+ =head1 SEE ALSO
+ 
+ apparmor_parser(8), aa_change_hat(2), apparmor.d(5),
+-subdomain.conf(5), aa-autodep(1), clean(1),
++aa-autodep(1), clean(1),
+ auditd(8),
+ aa-unconfined(8), aa-enforce(1), aa-complain(1), and
+ L<https://wiki.apparmor.net>.
+diff --git a/parser/apparmor_parser.pod b/parser/apparmor_parser.pod
+index 2ea283c..8258189 100644
+--- a/parser/apparmor_parser.pod
++++ b/parser/apparmor_parser.pod
+@@ -179,7 +179,7 @@ defined as relative paths.
+ Add element n to the search path when resolving #include directives
+ defined as an absolute paths.
+ 
+-=item -f n, --subdomainfs n
++=item -f n, --apparmorfs n
+ 
+ Set the location of the apparmor security filesystem (default is
+ "/sys/kernel/security/apparmor").
+@@ -407,7 +407,7 @@ L<https://bugs.launchpad.net/apparmor/+filebug>.
+ 
+ =head1 SEE ALSO
+ 
+-apparmor(7), apparmor.d(5), subdomain.conf(5), aa_change_hat(2), and
++apparmor(7), apparmor.d(5), aa_change_hat(2), and
+ L<https://wiki.apparmor.net>.
+ 
+ =cut
+diff --git a/parser/parser_include.c b/parser/parser_include.c
+index 9fc8b83..d312488 100644
+--- a/parser/parser_include.c
++++ b/parser/parser_include.c
+@@ -17,21 +17,21 @@
+  *   along with this program; if not, contact Canonical, Ltd.
+  */
+ 
+-/* Handle subdomain includes, as a straight forward preprocessing phase.
++/* Handle apparmor includes, as a straight forward preprocessing phase.
+    While we are at it we will strip comments.  Why? because it made it
+    easier.
+ 
+    We support 2 types of includes
+ 
+ #include <name> which searches for the first occurance of name in the
+-   subdomain directory path.
++   apparmor directory path.
+ 
+ #include "name" which will search for a relative or absolute pathed
+    file
+ 
+ -p : preprocess only.  Dump output to stdout
+ -I path : add a path to be search by #include < >
+--b path : set the base path to something other than /etc/subdomain.d
++-b path : set the base path to something other than /etc/apparmor.d
+ 
+ */
+ 
+@@ -57,13 +57,6 @@
+ /* maximum depth of nesting */
+ #define MAX_NEST_LEVEL 100
+ 
+-/* Location of the subdomain.conf file */
+-#ifdef SUBDOMAIN_CONFDIR
+-#define SUBDOMAIN_CONF SUBDOMAIN_CONFDIR "/subdomain.conf"
+-#else	/* !defined SUBDOMAIN_CONFDIR */
+-#define SUBDOMAIN_CONF "/etc/subdomain.conf"
+-#endif	/* SUBDOMAIN_CONFDIR */
+-
+ static char *path[MAX_PATH] = { NULL };
+ static int npath = 0;
+ 
+@@ -71,12 +64,11 @@ static int fgetline(FILE * f, char *buffer, size_t len);
+ static int stripcomment(char *s);
+ static char *stripblanks(char *s);
+ 
+-/* default base directory is /etc/subdomain.d, it can be overriden
++/* default base directory is /etc/apparmor.d, it can be overriden
+    with the -b option. */
+ 
+ const char *basedir;
+ static const char *default_basedir = "/etc/apparmor.d";
+-static const char *old_basedir = "/etc/subdomain.d";
+ 
+ 
+ /* set up basedir so that it can be overridden/used later. */
+@@ -94,12 +86,6 @@ void init_base_dir(void)
+ 		basedir = default_basedir;
+ 		return;
+ 	}
+-
+-	rc = stat(old_basedir, &sbuf);
+-	if (rc == 0 && S_ISDIR(sbuf.st_mode)) {
+-		basedir = old_basedir;
+-		return;
+-	}
+ }
+ 
+ /* Set the base dir.  Used to change default path for relative includes */
+@@ -164,53 +150,9 @@ int add_search_dir(const char *dir)
+ 	return 1;
+ }
+ 
+-/* Parse Subdomain.conf and put the default dirs in place.  
+-
+-   subdomain.conf is a shell sourcable file
+-   we only parse entries starting with
+-   SUBDOMAIN_PATH=
+-
+-   if there are multiple entries with SUBDOMAIN_PATH=
+-   each will get added.
+-
+-   SUBDOMAIN_PATH=/etc/subdomain.d:/etc/subdomain.d/include
+-   is the same as
+-   SUBDOMAIN_PATH=/etc/subdomain.d
+-   SUBDOMAIN_PATH=/etc/subdomain.d/include */
+ void parse_default_paths(void)
+ {
+-	autofclose FILE *f;
+-	char buf[1024];
+-	char *t, *s;
+-	int saved_npath = npath;
+-
+-	f = fopen(SUBDOMAIN_CONF, "r");
+-	if (f == NULL)
+-		goto out;
+-
+-	memset(buf, 0, sizeof(buf));
+-
+-	while (fgetline(f, buf, 1024)) {
+-		if (stripcomment(buf) && (t = strstr(buf, "SUBDOMAIN_PATH="))) {
+-			t += 15;
+-			/* handle : separating path elements */
+-			do {
+-				s = strchr(t, ':');
+-				if (s)
+-					*s = 0;
+-				if (!add_search_dir(stripblanks(t)))
+-					break;
+-				if (s)
+-					t = s + 1;
+-			} while (s != NULL);
+-		}
+-	}
+-
+-	/* if subdomain.conf doesn't set a base search dir set it to this */
+-out:
+-	if (npath - saved_npath == 0) {
+-		add_search_dir(basedir);
+-	}
++	add_search_dir(basedir);
+ }
+ 
+ FILE *search_path(char *filename, char **fullpath)
+diff --git a/parser/rc.apparmor.functions b/parser/rc.apparmor.functions
+index 521cfe7..7295daf 100644
+--- a/parser/rc.apparmor.functions
++++ b/parser/rc.apparmor.functions
+@@ -33,25 +33,12 @@
+ 
+ CONFIG_DIR=/etc/apparmor
+ MODULE=apparmor
+-OLD_MODULE=subdomain
+ if [ -f "${CONFIG_DIR}/${MODULE}.conf" ] ; then
+ 	APPARMOR_CONF="${CONFIG_DIR}/${MODULE}.conf"
+-elif [ -f "${CONFIG_DIR}/${OLD_MODULE}.conf" ] ; then
+-	APPARMOR_CONF="${CONFIG_DIR}/${OLD_MODULE}.conf"
+-elif [ -f "/etc/immunix/subdomain.conf" ] ; then
+-	aa_log_warning_msg "/etc/immunix/subdomain.conf is deprecated, use ${CONFIG_DIR}/subdomain.conf instead"
+-	APPARMOR_CONF="/etc/immunix/subdomain.conf"
+-elif [ -f "/etc/subdomain.conf" ] ; then
+-	aa_log_warning_msg "/etc/subdomain.conf is deprecated, use ${CONFIG_DIR}/subdomain.conf instead"
+-	APPARMOR_CONF="/etc/subdomain.conf"
+ else
+ 	aa_log_warning_msg "Unable to find config file in ${CONFIG_DIR}, installation problem?"
+ fi
+ 
+-# Read configuration options from /etc/subdomain.conf, default is to
+-# warn if subdomain won't load.
+-SUBDOMAIN_MODULE_PANIC="warn"
+-SUBDOMAIN_ENABLE_OWLSM="no"
+ APPARMOR_ENABLE_AAEVENTD="no"
+ 
+ if [ -f "${APPARMOR_CONF}" ] ; then
+@@ -61,28 +48,18 @@ fi
+ 
+ PARSER=/sbin/apparmor_parser
+ 
+-# SUBDOMAIN_DIR and APPARMOR_DIR might be defined in subdomain.conf|apparmor.conf
++# APPARMOR_DIR might be defined in apparmor.conf
+ if [ -d "${APPARMOR_DIR}" ] ; then
+ 	PROFILE_DIR=${APPARMOR_DIR}
+-elif [ -d "${SUBDOMAIN_DIR}" ] ; then
+-	PROFILE_DIR=${SUBDOMAIN_DIR}
+ elif [ -d /etc/apparmor.d ] ; then
+ 	PROFILE_DIR=/etc/apparmor.d
+-elif [ -d /etc/subdomain.d ] ; then
+-	PROFILE_DIR=/etc/subdomain.d
+ fi
+ ABSTRACTIONS="-I${PROFILE_DIR}"
+ AA_EV_BIN=/usr/sbin/aa-eventd
+ AA_EV_PIDFILE=/var/run/aa-eventd.pid
+ AA_STATUS=/usr/sbin/aa-status
+-SD_EV_BIN=/usr/sbin/sd-event-dispatch.pl
+-SD_EV_PIDFILE=/var/run/sd-event-dispatch.init.pid
+-SD_STATUS=/usr/sbin/subdomain_status
+ SECURITYFS=/sys/kernel/security
+ 
+-SUBDOMAINFS_MOUNTPOINT=$(grep subdomainfs /etc/fstab  | \
+-	sed -e 's|^[[:space:]]*[^[:space:]]\+[[:space:]]\+\(/[^[:space:]]*\)[[:space:]]\+subdomainfs.*$|\1|' 2> /dev/null)
+-
+ # keep exit status from parser during profile load.  0 is good, 1 is bad
+ STATUS=0
+ 
+@@ -96,9 +73,6 @@ is_apparmor_present() {
+ 		shift
+ 	done
+ 
+-	# check for subdomainfs version of module
+-	grep -qE "^($modules)[[:space:]]" /proc/modules
+-
+ 	[ $? -ne 0 -a -d /sys/module/apparmor ]
+ 
+ 	return $?
+@@ -251,44 +225,17 @@ failstop_system() {
+ 	return -1
+ }
+ 
+-module_panic() {
+-	# the module failed to load, determine what action should be taken
+-
+-	case "$SUBDOMAIN_MODULE_PANIC" in
+-		"warn"|"WARN")
+-			return 1 ;;
+-		"panic"|"PANIC") failstop_system
+-			rc=$?
+-			return $rc ;;
+-		*) aa_log_failure_msg "- invalid AppArmor module fail option"
+-			return -1 ;;
+-	esac
+-}
+-
+ is_apparmor_loaded() {
+ 	if ! is_securityfs_mounted ; then
+ 		mount_securityfs
+ 	fi
+ 
+-	mount_subdomainfs
+-
+ 	if [ -f "${SECURITYFS}/${MODULE}/profiles" ]; then
+ 		SFS_MOUNTPOINT="${SECURITYFS}/${MODULE}"
+ 		return 0
+ 	fi
+ 
+-	if [ -f "${SECURITYFS}/${OLD_MODULE}/profiles" ]; then
+-		SFS_MOUNTPOINT="${SECURITYFS}/${OLD_MODULE}"
+-		return 0
+-	fi
+-
+-	if [ -f "${SUBDOMAINFS_MOUNTPOINT}/profiles" ]; then
+-		SFS_MOUNTPOINT=${SUBDOMAINFS_MOUNTPOINT}
+-		return 0
+-	fi
+-
+-	# check for subdomainfs version of module
+-	is_apparmor_present apparmor subdomain
++	is_apparmor_present apparmor
+ 
+ 	return $?
+ }
+@@ -307,26 +254,6 @@ mount_securityfs() {
+ 	return 0
+ }
+ 
+-
+-mount_subdomainfs() {
+-	# for backwords compatibility
+-	if grep -q subdomainfs /proc/filesystems && \
+-	   ! grep -q subdomainfs /proc/mounts && \
+-	   [ -n "${SUBDOMAINFS_MOUNTPOINT}" ]; then
+-		aa_action "Mounting subdomainfs on ${SUBDOMAINFS_MOUNTPOINT}" \
+-				mount "${SUBDOMAINFS_MOUNTPOINT}"
+-		return $?
+-	fi
+-	return 0
+-}
+-
+-unmount_subdomainfs() {
+-	SUBDOMAINFS=$(grep subdomainfs /proc/mounts  | cut -d" " -f2 2> /dev/null)
+-	if [ -n "${SUBDOMAINFS}" ]; then
+-		aa_action "Unmounting subdomainfs" umount ${SUBDOMAINFS}
+-	fi
+-}
+-
+ apparmor_start() {
+ 	aa_log_daemon_msg "Starting AppArmor"
+ 	if ! is_apparmor_present ; then
+@@ -360,7 +287,7 @@ apparmor_start() {
+ 
+ remove_profiles() {
+ 
+-	# removing profiles as we directly read from subdomainfs
++	# removing profiles as we directly read from apparmorfs
+ 	# doesn't work, since we are removing entries which screws up
+ 	# our position.  Lets hope there are never enough profiles to
+ 	# overflow the variable
+@@ -408,11 +335,8 @@ apparmor_kill() {
+ 		return 1
+ 	fi
+ 
+-	unmount_subdomainfs
+ 	if is_apparmor_present apparmor ; then
+ 		MODULE=apparmor
+-	elif is_apparmor_present subdomain ; then
+-		MODULE=subdomain
+ 	else
+ 		aa_log_failure_msg "AppArmor is builtin"
+ 		return 1
+@@ -459,27 +383,11 @@ apparmor_try_restart() {
+ 	return $?
+ }
+ 
+-configure_owlsm () {
+-	if [ "${SUBDOMAIN_ENABLE_OWLSM}" = "yes" -a -f ${SFS_MOUNTPOINT}/control/owlsm ] ; then
+-		# Sigh, the "sh -c" is necessary for the SuSE aa_action
+-		# and it can't be abstracted out as a seperate function, as
+-		# that breaks under RedHat's action, which needs a
+-		# binary to invoke.
+-		aa_action "Enabling OWLSM extension" sh -c "echo -n \"1\" > \"${SFS_MOUNTPOINT}/control/owlsm\""
+-	elif [ -f "${SFS_MOUNTPOINT}/control/owlsm" ] ; then
+-		aa_action "Disabling OWLSM extension" sh -c "echo -n \"0\" > \"${SFS_MOUNTPOINT}/control/owlsm\""
+-	fi
+-}
+-
+ apparmor_status () {
+ 	if test -x ${AA_STATUS} ; then
+ 		${AA_STATUS} --verbose
+ 		return $?
+ 	fi
+-	if test -x ${SD_STATUS} ; then
+-		${SD_STATUS} --verbose
+-		return $?
+-	fi
+ 	if ! is_apparmor_loaded ; then
+ 		echo "AppArmor is not loaded."
+ 		rc=1
+diff --git a/parser/subdomain.conf b/parser/subdomain.conf
+deleted file mode 100644
+index 20e7cab..0000000
+--- a/parser/subdomain.conf
++++ /dev/null
+@@ -1,53 +0,0 @@
+-# subdomain.conf is a shared AppArmor configuration file that is sh sourcable.
+-
+-################## AppArmor init.d configuration ################
+-
+-# Move this to /etc/sysconfig/apparmor eventually
+-## Path: 	System/AppArmor
+-## Description: Enable the OWLSM extension to AppArmor
+-## Type: 	yesno
+-## Default:	no
+-#
+-# Enable OWLSM extension to AppArmor?
+-# OWLSM is an extension to AppArmor that prevents processes from
+-# following symlinks they don't own and creating hardlinks to files they
+-# don't own, in an attempt to prevent /tmp race attacks. However, OWLSM
+-# can break some applications, so is disabled by default.
+-SUBDOMAIN_ENABLE_OWLSM="no"
+-
+-## Path: 	System/AppArmor
+-## Description: Enable the AppArmor event daemon for reporting
+-## Type: 	yesno
+-## Default:	no
+-#
+-# Enable the AppArmor event daemon for reporting?
+-APPARMOR_ENABLE_AAEVENTD="no"
+-
+-#SUBDOMAIN_MODULE_PANIC=XXX
+-#This option controls how subdomain behaves when the init script attempts
+-#to load the AppArmor module and fails.  There are 4 options
+-#warn  - log a failure message. (default behavior)
+-#build - attempt to build the AppArmor module is the module can't be loaded.
+-#        If successful
+-#           the module will be built for the running kernel and loaded.
+-#        If the build fails
+-#           a failure message is logged
+-#panic - If the AppArmor module fails to load
+-#           a failure message will be logged
+-#           and the machine will drop to runlevel 1 (single user)
+-#build-panic - If the AppArmor module fails to load
+-#                 attempt to build the module
+-#                 If building the module fails
+-#                    panic (drop to runlevel 1)  
+-
+-#SUBDOMAIN_MODULE_PANIC=warn
+-
+-################## subdomain_parser configuration ################
+-
+-#SUBDOMAIN_PATH=XXXX
+-#This option specifies the include path that the subdomain_parser will
+-#use by default.  If no entry is specified /etc/subdomain.d is used by
+-#default.
+-
+-#SUBDOMAIN_PATH=/etc/subdomain.d
+-
+diff --git a/parser/subdomain.conf.pod b/parser/subdomain.conf.pod
+deleted file mode 100644
+index b38f748..0000000
+--- a/parser/subdomain.conf.pod
++++ /dev/null
+@@ -1,104 +0,0 @@
+-# ----------------------------------------------------------------------
+-#    Copyright (c) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007,
+-#                  2008, 2009
+-#    NOVELL (All rights reserved)
+-#
+-#    Copyright (c) 2010 - 2012
+-#    Canonical Ltd. (All rights reserved)
+-#
+-#    This program is free software; you can redistribute it and/or
+-#    modify it under the terms of version 2 of the GNU General Public
+-#    License published by the Free Software Foundation.
+-#
+-#    This program is distributed in the hope that it will be useful,
+-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+-#    GNU General Public License for more details.
+-#
+-#    You should have received a copy of the GNU General Public License
+-#    along with this program; if not, contact Novell, Inc.
+-# ----------------------------------------------------------------------
+-
+-
+-=pod
+-
+-=head1 NAME
+-
+-/etc/apparmor/subdomain.conf - configuration file for fine-tuning the
+-behavior of the AppArmor security tool.
+-
+-=head1 DESCRIPTION
+-
+-The AppArmor security tool can be configured to have
+-certain default behaviors based on configuration options set
+-in subdomain.conf. There are two variables that can be set in
+-subdomain.conf: B<SUBDOMAIN_PATH>, and B<SUBDOMAIN_MODULE_PANIC>.
+-
+-=begin comment
+-
+-FIXME keep quiet about OWLSM support for now.
+-
+-=head2 SUBDOMAIN_ENABLE_OWLSM
+-
+-This veriable is a yes/no toggle and is by default set to I<no>.
+-
+-This variable determines whether the AppArmor initscript will enable
+-or disable the OWLsm security extension to AppArmor when the AppArmor
+-security tool is started. When enabled the OWLsm feature prevents programs
+-from following symlinks in temporary directories that are not owned by
+-the program's UID, and prevents processes from creating hardlinks to
+-files not owned by their UID.
+-
+-=end comment
+-
+-=head2 SUBDOMAIN_PATH
+-
+-This variable accepts a string (path), and is by default set to
+-'/etc/apparmor.d/' This variable defines where the AppArmor security
+-tool looks for its policy definitions (a.k.a. AppArmor profiles).
+-
+-=head2 SUBDOMAIN_MODULE_PANIC
+-
+-This variable accepts a string that is one of four values: I<warn>,
+-I<build>, I<panic>, or I<build-panic>, and is set by default to I<warn>. 
+-
+-This setting controls the behavior of the AppArmor initscript if it
+-cannot successfully load the AppArmor kernel module on startup. The four
+-possible settings are:
+-
+-=over 4
+-
+-=item I<warn> 
+-
+-Log a failure message (the default behavior).
+-
+-=item I<build> 
+-
+-Attempt to build the AppArmor module against the currently running
+-kernel. If the compilation is successful, the module will be loaded and
+-AppArmor started; if the compilation fails, a failure message is logged.
+-
+-=item I<panic> 
+-
+-Log a failure message and drop to runlevel 1 (single user).
+-
+-=item I<build-panic>
+-
+-Attempt to build the module against the running kernel (like I<build>)
+-and if the compilation fails, drop to runlevel 1 (single user).
+-
+-=back
+-
+-=head1 BUGS
+-
+-Setting the initscript to recompile the module will fail on SUSE, as the
+-module source is no longer installed by default. However, the module has
+-been included with the SUSE kernel, so no rebuilding should be necessary.
+-
+-If you find any additional bugs, please report them at
+-L<https://bugs.launchpad.net/apparmor/+filebug>.
+-
+-=head1 SEE ALSO
+-
+-apparmor(7), apparmor_parser(8), and
+-L<https://wiki.apparmor.net>.
+diff --git a/tests/stress/apparmor/Makefile b/tests/stress/apparmor/Makefile
+new file mode 100644
+index 0000000..59a0053
+--- /dev/null
++++ b/tests/stress/apparmor/Makefile
+@@ -0,0 +1,24 @@
++TARGETS=change_hat child open
++PROFILES=change_hat.profile  child.profile  open.profile  sh.profile
++LIB:=apparmor
++LIBS=-l$(LIB)
++
++all: targets profiles
++
++targets: $(TARGETS)
++
++profiles:
++	for i in $(PROFILES) ;\
++	do \
++		sed "s~BASE~$$PWD~" $$i.pre | sed "s/AA/${LIB}/" > $$i ;\
++	done
++
++change_hat: change_hat.c
++	cc -Wall -o $@ $< $(LIBS)
++child: child.c
++	cc -Wall -o $@ $< $(LIBS)
++open: open.c
++	cc -Wall -o $@ $< $(LIBS)
++
++clean:
++	rm -f $(TARGETS) $(PROFILES)
+diff --git a/tests/stress/apparmor/change_hat.c b/tests/stress/apparmor/change_hat.c
+new file mode 100644
+index 0000000..637a55b
+--- /dev/null
++++ b/tests/stress/apparmor/change_hat.c
+@@ -0,0 +1,51 @@
++#include <unistd.h>
++#include <sys/types.h>
++#include <sys/stat.h>
++#include <fcntl.h>
++#include <errno.h>
++#include <string.h>
++#include <stdio.h>
++#include <linux/unistd.h>
++
++#include "sys/apparmor.h"
++
++#define SD_ID_MAGIC 0xdeadbeef
++
++int main(int argc, char *argv[])
++{
++	int fd, error;
++	char *hat_name;
++	int hat_magic;
++	char *o_file = "/bin/ls";
++
++	while (1) {
++	hat_name = "/subprofile/foo";
++	hat_magic = SD_ID_MAGIC + 1;
++	if (argc > 1)
++		hat_name = argv[1];
++
++	printf("before entering change_hat\n");
++	error = change_hat(hat_name, hat_magic);
++	printf("change_hat(%s, 0x%x): %s\n", hat_name, hat_magic,
++							strerror(errno));
++
++	errno = 0;
++	fd = open(o_file, O_RDONLY);
++	printf("open(%s): %s\n", o_file, strerror(errno));
++	if (fd != -1)
++		close(fd);
++
++	hat_name = NULL;
++	printf("before leaving change_hat\n");
++	errno = 0;
++	error = change_hat(hat_name, hat_magic);
++	printf("change_hat(%s, 0x%x): %s\n", "NULL", hat_magic,
++							strerror(errno));
++
++	errno = 0;
++	fd = open(o_file, O_RDONLY);
++	printf("open(%s): %s\n", o_file, strerror(errno));
++	if (fd != -1)
++		close(fd);
++	}
++}
+diff --git a/tests/stress/apparmor/change_hat.profile.pre b/tests/stress/apparmor/change_hat.profile.pre
+new file mode 100644
+index 0000000..1591e97
+--- /dev/null
++++ b/tests/stress/apparmor/change_hat.profile.pre
+@@ -0,0 +1,24 @@
++BASE/change_hat {
++/lib/lib*.so				rm,
++/usr/lib/lib*.so			rm,
++/lib/lib*.so.*				rm,
++/lib/i[356]86/lib*.so			rm,
++/lib/tls/lib*.*.so			rm,
++/lib/ld-*.so				rix,
++/etc/ld.so.*				r,
++BASE/change_hat 			r,
++/bin/ls					rix,
++/dev/pts/*				rw,
++/dev/tty*				rw,
++/dev/null				rw,
++/dev/urandom                            r,
++
++    ^/subprofile/foo {
++	/bin/bash			rix,
++	/tmp/foobar			r,
++	/bin/ls				rix,
++	/dev/pts/*			rw,
++	/dev/tty*			rw,
++	/dev/null			rw,
++    }
++}
+diff --git a/tests/stress/apparmor/child.c b/tests/stress/apparmor/child.c
+new file mode 100644
+index 0000000..40fba28
+--- /dev/null
++++ b/tests/stress/apparmor/child.c
+@@ -0,0 +1,35 @@
++#include <stdio.h>
++#include <sys/types.h>
++#include <unistd.h>
++#include <errno.h>
++#include <string.h>
++#include <signal.h>
++#include <stdlib.h>
++#include <sys/wait.h>
++
++static int zombies;
++
++void sigchld(int num)
++{
++	zombies++;
++}
++
++int main()
++{
++	pid_t pid;
++	int i;
++
++	signal(SIGCHLD, sigchld);
++again:
++	for (i = 0; i < 500; i++) {
++		pid = fork();
++		if (pid > 0)
++			continue;
++		else if (pid == 0)
++			exit(0);
++		else
++			printf("fork: %s\n", strerror(errno));
++	}
++	while (waitpid(0, NULL, WNOHANG) > 0);
++	goto again;
++}
+diff --git a/tests/stress/apparmor/child.profile.pre b/tests/stress/apparmor/child.profile.pre
+new file mode 100644
+index 0000000..5c2d841
+--- /dev/null
++++ b/tests/stress/apparmor/child.profile.pre
+@@ -0,0 +1,12 @@
++BASE/child {
++/lib/libc-*.so				rm,
++/lib/libc-*.so.*			rm,
++/lib/ld-*.so				rix,
++/lib/ld-*.so.*				rix,
++/{usr/,}lib/libAA*			rm,
++/etc/ld.so.*				r,
++BASE/child				r,
++/bin/ls					r,
++/dev/pts/*				rw,
++/dev/tty*				rw,
++}
+diff --git a/tests/stress/apparmor/kill.sh b/tests/stress/apparmor/kill.sh
+new file mode 100755
+index 0000000..4c4d3d1
+--- /dev/null
++++ b/tests/stress/apparmor/kill.sh
+@@ -0,0 +1,19 @@
++#!/bin/sh
++
++. ./uservars.inc
++
++if [ `whoami` != root ]
++then
++	echo "$0: must be root" >&2
++	exit 1
++fi
++
++$subdomain_parser -R change_hat.profile 2>&1 > /dev/null
++$subdomain_parser change_hat.profile
++
++./change_hat > /dev/null 2>&1 &
++
++while :
++do
++	$subdomain_parser -r change_hat.profile > /dev/null 2>&1 &
++done &
+diff --git a/tests/stress/apparmor/open.c b/tests/stress/apparmor/open.c
+new file mode 100644
+index 0000000..099c14a
+--- /dev/null
++++ b/tests/stress/apparmor/open.c
+@@ -0,0 +1,34 @@
++#include <unistd.h>
++#include <sys/types.h>
++#include <sys/stat.h>
++#include <fcntl.h>
++#include <errno.h>
++#include <string.h>
++#include <stdio.h>
++#include <linux/unistd.h>
++
++#define MAX_LOOP	1000000
++int main(int argc, char *argv[])
++{
++	int fd, i, success, fail;
++	char *o_file = "/bin/ls";
++
++	if (argc > 1)
++		o_file = argv[1];
++
++	for (i=0, success=0, fail=0; i<MAX_LOOP; i++) {
++//	for (i=0, success=0, fail=0; !i; i++) {
++		fd = open(o_file, O_RDONLY);
++		if (fd != -1) {
++			success++;
++			close(fd);
++		} else {
++			printf("open: %s\n", strerror(errno));
++			fail++;
++		}
++	}
++	printf("Iterations: %d\tSuccess: %d\t Fail: %d\n",
++			MAX_LOOP, success, fail);
++
++	return 0;
++}
+diff --git a/tests/stress/apparmor/open.profile.pre b/tests/stress/apparmor/open.profile.pre
+new file mode 100644
+index 0000000..182e131
+--- /dev/null
++++ b/tests/stress/apparmor/open.profile.pre
+@@ -0,0 +1,15 @@
++BASE/open {
++/lib/libc-*.so				rm,
++/lib/libc-*.so.*			rm,
++/lib/ld-*.so				rix,
++/lib/ld-*.so.*				rix,
++/{usr/,}lib/libAA*			rm,
++/etc/ld.so.*				r,
++BASE/open				r,
++/bin/ls					r,
++/dev/pts/*				rw,
++/dev/tty*				rw,
++/tmp/foobar				rw,
++/tmp/baz				rw,
++/tmp/{a,b,c,d,e,f,g}			rw,
++}
+diff --git a/tests/stress/apparmor/s-2.4.20.sh b/tests/stress/apparmor/s-2.4.20.sh
+new file mode 100755
+index 0000000..c7ef30a
+--- /dev/null
++++ b/tests/stress/apparmor/s-2.4.20.sh
+@@ -0,0 +1,18 @@
++#!/bin/sh
++
++subdomain_parser=./subdomain_parser
++
++cat change_hat.profile child.profile open.profile | ${subdomain_parser}
++
++#./open & ./open /tmp/foobar &
++
++#./child & ./child &
++
++#./change_hat > /dev/null 2>&1 & ./change_hat /tmp/foo > /dev/null 2>&1 &
++
++while :
++do
++	cat change_hat.profile | ${subdomain_parser} -r > /dev/null 2>&1 &
++	cat child.profile | ${subdomain_parser} -r > /dev/null 2>&1 &
++	cat open.profile | ${subdomain_parser} -r > /dev/null 2>&1 &
++done &
+diff --git a/tests/stress/apparmor/s.sh b/tests/stress/apparmor/s.sh
+new file mode 100755
+index 0000000..c7ef30a
+--- /dev/null
++++ b/tests/stress/apparmor/s.sh
+@@ -0,0 +1,18 @@
++#!/bin/sh
++
++subdomain_parser=./subdomain_parser
++
++cat change_hat.profile child.profile open.profile | ${subdomain_parser}
++
++#./open & ./open /tmp/foobar &
++
++#./child & ./child &
++
++#./change_hat > /dev/null 2>&1 & ./change_hat /tmp/foo > /dev/null 2>&1 &
++
++while :
++do
++	cat change_hat.profile | ${subdomain_parser} -r > /dev/null 2>&1 &
++	cat child.profile | ${subdomain_parser} -r > /dev/null 2>&1 &
++	cat open.profile | ${subdomain_parser} -r > /dev/null 2>&1 &
++done &
+diff --git a/tests/stress/apparmor/sh.profile.pre b/tests/stress/apparmor/sh.profile.pre
+new file mode 100644
+index 0000000..378dbb0
+--- /dev/null
++++ b/tests/stress/apparmor/sh.profile.pre
+@@ -0,0 +1,24 @@
++BASE/sh {
++/bin/*					rix,
++/dev/tty				rw,
++/dev/pts/*				rw,
++/etc/fstab				r,
++/etc/inputrc				r,
++/etc/ld.so.*				r,
++/etc/mtab				r,
++/etc/nsswitch.conf			r,
++/etc/passwd				r,
++/etc/termcap				r,
++BASE/sh					r,
++BASE/*					rix,
++/lib/libc-*.so				rm,
++/lib/libc-*.so.*			rm,
++/lib/ld-*.so				rix,
++/lib/ld-*.so.*				rix,
++/lib/**					rm,
++/{usr/,}/lib/libAA*			rm,
++/proc/meminfo				r,
++/usr/lib/locale/**			r,
++/usr/share/locale/**			r,
++/**.bash_history			r,
++}
+diff --git a/tests/stress/apparmor/stress.sh b/tests/stress/apparmor/stress.sh
+new file mode 100755
+index 0000000..d8b01e5
+--- /dev/null
++++ b/tests/stress/apparmor/stress.sh
+@@ -0,0 +1,20 @@
++#!/bin/sh
++
++. ./uservars.inc
++
++${subdomain_parser} change_hat.profile child.profile open.profile
++
++rm -f /tmp/foobar && touch /tmp/foobar
++
++./open & ./open /tmp/foobar &
++
++./child & ./child &
++
++./change_hat > /dev/null 2>&1 & ./change_hat /tmp/foo > /dev/null 2>&1 &
++
++while :
++do
++	${subdomain_parser} -r change_hat.profile > /dev/null 2>&1 &
++	${subdomain_parser} -r child.profile > /dev/null 2>&1 &
++	${subdomain_parser} -r open.profile > /dev/null 2>&1 &
++done &
+diff --git a/tests/stress/apparmor/stress.sh-2.4.20 b/tests/stress/apparmor/stress.sh-2.4.20
+new file mode 100755
+index 0000000..ef326d9
+--- /dev/null
++++ b/tests/stress/apparmor/stress.sh-2.4.20
+@@ -0,0 +1,18 @@
++#!/bin/sh
++
++subdomain_parser=./subdomain_parser
++
++cat change_hat.profile child.profile open.profile | ${subdomain_parser}
++
++#./open & ./open /tmp/foobar &
++
++#./child & ./child &
++
++./change_hat > /dev/null 2>&1 & ./change_hat /tmp/foo > /dev/null 2>&1 &
++
++while :
++do
++	cat change_hat.profile | ${subdomain_parser} -r > /dev/null 2>&1 &
++	cat child.profile | ${subdomain_parser} -r > /dev/null 2>&1 &
++	cat open.profile | ${subdomain_parser} -r > /dev/null 2>&1 &
++done &
+diff --git a/tests/stress/apparmor/uservars.inc b/tests/stress/apparmor/uservars.inc
+new file mode 100644
+index 0000000..c0b27a7
+--- /dev/null
++++ b/tests/stress/apparmor/uservars.inc
+@@ -0,0 +1,42 @@
++if [ -e /sbin/subdomain_parser ] ; then
++	subdomain_parser=/sbin/subdomain_parser
++else
++	subdomain_parser=/sbin/apparmor_parser
++fi
++
++if [ -n "`grep subdomainfs /proc/filesystems`" ]
++then
++	subdomainfs=/subdomain
++elif [ -n "`grep securityfs /proc/filesystems`" ]
++then
++	if [ -e /sys/kernel/security/subdomain ] ; then
++		subdomainfs=/sys/kernel/security/subdomain
++	else
++		subdomainfs=/sys/kernel/security/apparmor
++	fi
++else
++	echo "$0: Unable to find subdomainfs" >&2
++	exit 1
++fi
++
++if [ ! -x $subdomain_parser ]
++then
++	echo "$0: $subdomain_parser not executable" >&2
++	exit 1
++fi
++
++if [ -z "`grep '^subdomain ' /proc/modules`" ]
++then
++	if [ -z "`grep '^apparmor ' /proc/modules`" ] ; then
++		if [ ! -d "/sys/module/apparmor" ] ; then
++			echo "$0: apparmor module not loaded" >&2
++			exit 1
++		fi
++	fi
++fi
++
++if [ ! -w $subdomainfs/.load ]
++then
++	echo "$0: $subdomainfs/.load not present" >&2
++	exit 1
++fi
+diff --git a/tests/stress/subdomain/Makefile b/tests/stress/subdomain/Makefile
+deleted file mode 100644
+index 4cbc83f..0000000
+--- a/tests/stress/subdomain/Makefile
++++ /dev/null
+@@ -1,24 +0,0 @@
+-TARGETS=change_hat child open
+-PROFILES=change_hat.profile  child.profile  open.profile  sh.profile
+-LIB:=apparmor
+-LIBS=-l$(LIB)
+-
+-all: targets profiles
+-
+-targets: $(TARGETS)
+-
+-profiles:
+-	for i in $(PROFILES) ;\
+-	do \
+-		sed "s~BASE~$$PWD~" $$i.pre | sed "s/AA/${LIB}/" > $$i ;\
+-	done	
+-
+-change_hat: change_hat.c
+-	cc -Wall -o $@ $< $(LIBS)
+-child: child.c
+-	cc -Wall -o $@ $< $(LIBS)
+-open: open.c
+-	cc -Wall -o $@ $< $(LIBS)
+-
+-clean:
+-	rm -f $(TARGETS) $(PROFILES)
+diff --git a/tests/stress/subdomain/change_hat.c b/tests/stress/subdomain/change_hat.c
+deleted file mode 100644
+index bef0024..0000000
+--- a/tests/stress/subdomain/change_hat.c
++++ /dev/null
+@@ -1,51 +0,0 @@
+-#include <unistd.h>
+-#include <sys/types.h>
+-#include <sys/stat.h>
+-#include <fcntl.h>
+-#include <errno.h>
+-#include <string.h>
+-#include <stdio.h>
+-#include <linux/unistd.h>
+-
+-#include "sys/apparmor.h"
+-
+-#define SD_ID_MAGIC 0xdeadbeef
+-
+-int main(int argc, char *argv[])
+-{
+-	int fd, error;
+-	char *hat_name;
+-	int hat_magic;
+-	char *o_file = "/bin/ls";
+-
+-	while (1) {
+-	hat_name = "/subprofile/foo";
+-	hat_magic = SD_ID_MAGIC + 1;
+-	if (argc > 1)
+-		hat_name = argv[1];
+-
+-	printf("before entering change_hat\n");
+-	error = change_hat(hat_name, hat_magic);
+-	printf("change_hat(%s, 0x%x): %s\n", hat_name, hat_magic,
+-							strerror(errno));
+-
+-	errno = 0;
+-	fd = open(o_file, O_RDONLY);
+-	printf("open(%s): %s\n", o_file, strerror(errno));
+-	if (fd != -1)
+-		close(fd);
+-	
+-	hat_name = NULL;
+-	printf("before leaving change_hat\n");
+-	errno = 0;
+-	error = change_hat(hat_name, hat_magic);
+-	printf("change_hat(%s, 0x%x): %s\n", "NULL", hat_magic,
+-							strerror(errno));
+-
+-	errno = 0;
+-	fd = open(o_file, O_RDONLY);
+-	printf("open(%s): %s\n", o_file, strerror(errno));
+-	if (fd != -1)
+-		close(fd);
+-	}
+-}
+diff --git a/tests/stress/subdomain/change_hat.profile.pre b/tests/stress/subdomain/change_hat.profile.pre
+deleted file mode 100644
+index 1591e97..0000000
+--- a/tests/stress/subdomain/change_hat.profile.pre
++++ /dev/null
+@@ -1,24 +0,0 @@
+-BASE/change_hat {
+-/lib/lib*.so				rm,
+-/usr/lib/lib*.so			rm,
+-/lib/lib*.so.*				rm,
+-/lib/i[356]86/lib*.so			rm,
+-/lib/tls/lib*.*.so			rm,
+-/lib/ld-*.so				rix,
+-/etc/ld.so.*				r,
+-BASE/change_hat 			r,
+-/bin/ls					rix,
+-/dev/pts/*				rw,
+-/dev/tty*				rw,
+-/dev/null				rw,
+-/dev/urandom                            r,
+-
+-    ^/subprofile/foo {
+-	/bin/bash			rix,
+-	/tmp/foobar			r,
+-	/bin/ls				rix,
+-	/dev/pts/*			rw,
+-	/dev/tty*			rw,
+-	/dev/null			rw,
+-    }
+-}
+diff --git a/tests/stress/subdomain/child.c b/tests/stress/subdomain/child.c
+deleted file mode 100644
+index 2f00e5b..0000000
+--- a/tests/stress/subdomain/child.c
++++ /dev/null
+@@ -1,35 +0,0 @@
+-#include <stdio.h>
+-#include <sys/types.h>
+-#include <unistd.h>
+-#include <errno.h>
+-#include <string.h>
+-#include <signal.h>
+-#include <stdlib.h>
+-#include <sys/wait.h>
+-
+-static int zombies;
+-
+-void sigchld(int num)
+-{
+-	zombies++;
+-}
+-
+-int main()
+-{
+-	pid_t pid;
+-	int i;
+-	
+-	signal(SIGCHLD, sigchld);
+-again:
+-	for (i = 0; i < 500; i++) {
+-		pid = fork();
+-		if (pid > 0) 
+-			continue;
+-		else if (pid == 0)
+-			exit(0);
+-		else
+-			printf("fork: %s\n", strerror(errno));
+-	}
+-	while (waitpid(0, NULL, WNOHANG) > 0);
+-	goto again;
+-}
+diff --git a/tests/stress/subdomain/child.profile.pre b/tests/stress/subdomain/child.profile.pre
+deleted file mode 100644
+index 5c2d841..0000000
+--- a/tests/stress/subdomain/child.profile.pre
++++ /dev/null
+@@ -1,12 +0,0 @@
+-BASE/child {
+-/lib/libc-*.so				rm,
+-/lib/libc-*.so.*			rm,
+-/lib/ld-*.so				rix,
+-/lib/ld-*.so.*				rix,
+-/{usr/,}lib/libAA*			rm,
+-/etc/ld.so.*				r,
+-BASE/child				r,
+-/bin/ls					r,
+-/dev/pts/*				rw,
+-/dev/tty*				rw,
+-}
+diff --git a/tests/stress/subdomain/kill.sh b/tests/stress/subdomain/kill.sh
+deleted file mode 100755
+index f41f930..0000000
+--- a/tests/stress/subdomain/kill.sh
++++ /dev/null
+@@ -1,20 +0,0 @@
+-#!/bin/sh
+-
+-. ./uservars.inc
+-
+-if [ `whoami` != root ]
+-then
+-	echo "$0: must be root" >&2
+-	exit 1
+-fi
+-
+-$subdomain_parser -R change_hat.profile 2>&1 > /dev/null
+-$subdomain_parser change_hat.profile 
+-
+-./change_hat > /dev/null 2>&1 &
+-
+-while :
+-do
+-	$subdomain_parser -r change_hat.profile > /dev/null 2>&1 &
+-done &
+-
+diff --git a/tests/stress/subdomain/open.c b/tests/stress/subdomain/open.c
+deleted file mode 100644
+index acf838b..0000000
+--- a/tests/stress/subdomain/open.c
++++ /dev/null
+@@ -1,34 +0,0 @@
+-#include <unistd.h>
+-#include <sys/types.h>
+-#include <sys/stat.h>
+-#include <fcntl.h>
+-#include <errno.h>
+-#include <string.h>
+-#include <stdio.h>
+-#include <linux/unistd.h>
+-
+-#define MAX_LOOP	1000000
+-int main(int argc, char *argv[])
+-{
+-	int fd, i, success, fail;
+-	char *o_file = "/bin/ls";
+-
+-	if (argc > 1)
+-		o_file = argv[1];
+-
+-	for (i=0, success=0, fail=0; i<MAX_LOOP; i++) {
+-//	for (i=0, success=0, fail=0; !i; i++) {
+-		fd = open(o_file, O_RDONLY);
+-		if (fd != -1) {
+-			success++;
+-			close(fd);
+-		} else {
+-			printf("open: %s\n", strerror(errno));
+-			fail++;
+-		}
+-	}
+-	printf("Iterations: %d\tSuccess: %d\t Fail: %d\n",
+-			MAX_LOOP, success, fail);
+-	
+-	return 0;
+-}
+diff --git a/tests/stress/subdomain/open.profile.pre b/tests/stress/subdomain/open.profile.pre
+deleted file mode 100644
+index 182e131..0000000
+--- a/tests/stress/subdomain/open.profile.pre
++++ /dev/null
+@@ -1,15 +0,0 @@
+-BASE/open {
+-/lib/libc-*.so				rm,
+-/lib/libc-*.so.*			rm,
+-/lib/ld-*.so				rix,
+-/lib/ld-*.so.*				rix,
+-/{usr/,}lib/libAA*			rm,
+-/etc/ld.so.*				r,
+-BASE/open				r,
+-/bin/ls					r,
+-/dev/pts/*				rw,
+-/dev/tty*				rw,
+-/tmp/foobar				rw,
+-/tmp/baz				rw,
+-/tmp/{a,b,c,d,e,f,g}			rw,
+-}
+diff --git a/tests/stress/subdomain/s-2.4.20.sh b/tests/stress/subdomain/s-2.4.20.sh
+deleted file mode 100755
+index 7bd049a..0000000
+--- a/tests/stress/subdomain/s-2.4.20.sh
++++ /dev/null
+@@ -1,19 +0,0 @@
+-#!/bin/sh
+-
+-subdomain_parser=./subdomain_parser
+-
+-cat change_hat.profile child.profile open.profile | ${subdomain_parser}
+-
+-#./open & ./open /tmp/foobar &
+-
+-#./child & ./child &
+-
+-#./change_hat > /dev/null 2>&1 & ./change_hat /tmp/foo > /dev/null 2>&1 &
+-
+-while :
+-do
+-	cat change_hat.profile | ${subdomain_parser} -r > /dev/null 2>&1 &
+-	cat child.profile | ${subdomain_parser} -r > /dev/null 2>&1 &
+-	cat open.profile | ${subdomain_parser} -r > /dev/null 2>&1 &
+-done &
+-
+diff --git a/tests/stress/subdomain/s.sh b/tests/stress/subdomain/s.sh
+deleted file mode 100755
+index 7bd049a..0000000
+--- a/tests/stress/subdomain/s.sh
++++ /dev/null
+@@ -1,19 +0,0 @@
+-#!/bin/sh
+-
+-subdomain_parser=./subdomain_parser
+-
+-cat change_hat.profile child.profile open.profile | ${subdomain_parser}
+-
+-#./open & ./open /tmp/foobar &
+-
+-#./child & ./child &
+-
+-#./change_hat > /dev/null 2>&1 & ./change_hat /tmp/foo > /dev/null 2>&1 &
+-
+-while :
+-do
+-	cat change_hat.profile | ${subdomain_parser} -r > /dev/null 2>&1 &
+-	cat child.profile | ${subdomain_parser} -r > /dev/null 2>&1 &
+-	cat open.profile | ${subdomain_parser} -r > /dev/null 2>&1 &
+-done &
+-
+diff --git a/tests/stress/subdomain/sh.profile.pre b/tests/stress/subdomain/sh.profile.pre
+deleted file mode 100644
+index 378dbb0..0000000
+--- a/tests/stress/subdomain/sh.profile.pre
++++ /dev/null
+@@ -1,24 +0,0 @@
+-BASE/sh {
+-/bin/*					rix,
+-/dev/tty				rw,
+-/dev/pts/*				rw,
+-/etc/fstab				r,
+-/etc/inputrc				r,
+-/etc/ld.so.*				r,
+-/etc/mtab				r,
+-/etc/nsswitch.conf			r,
+-/etc/passwd				r,
+-/etc/termcap				r,
+-BASE/sh					r,
+-BASE/*					rix,
+-/lib/libc-*.so				rm,
+-/lib/libc-*.so.*			rm,
+-/lib/ld-*.so				rix,
+-/lib/ld-*.so.*				rix,
+-/lib/**					rm,
+-/{usr/,}/lib/libAA*			rm,
+-/proc/meminfo				r,
+-/usr/lib/locale/**			r,
+-/usr/share/locale/**			r,
+-/**.bash_history			r,
+-}
+diff --git a/tests/stress/subdomain/stress.sh b/tests/stress/subdomain/stress.sh
+deleted file mode 100755
+index 9df71e0..0000000
+--- a/tests/stress/subdomain/stress.sh
++++ /dev/null
+@@ -1,21 +0,0 @@
+-#!/bin/sh
+-
+-. ./uservars.inc
+-
+-${subdomain_parser} change_hat.profile child.profile open.profile 
+-
+-rm -f /tmp/foobar && touch /tmp/foobar
+-
+-./open & ./open /tmp/foobar &
+-
+-./child & ./child &
+-
+-./change_hat > /dev/null 2>&1 & ./change_hat /tmp/foo > /dev/null 2>&1 &
+-
+-while :
+-do
+-	${subdomain_parser} -r change_hat.profile > /dev/null 2>&1 &
+-	${subdomain_parser} -r child.profile > /dev/null 2>&1 &
+-	${subdomain_parser} -r open.profile > /dev/null 2>&1 &
+-done &
+-
+diff --git a/tests/stress/subdomain/stress.sh-2.4.20 b/tests/stress/subdomain/stress.sh-2.4.20
+deleted file mode 100755
+index 66bf731..0000000
+--- a/tests/stress/subdomain/stress.sh-2.4.20
++++ /dev/null
+@@ -1,19 +0,0 @@
+-#!/bin/sh
+-
+-subdomain_parser=./subdomain_parser
+-
+-cat change_hat.profile child.profile open.profile | ${subdomain_parser}
+-
+-#./open & ./open /tmp/foobar &
+-
+-#./child & ./child &
+-
+-./change_hat > /dev/null 2>&1 & ./change_hat /tmp/foo > /dev/null 2>&1 &
+-
+-while :
+-do
+-	cat change_hat.profile | ${subdomain_parser} -r > /dev/null 2>&1 &
+-	cat child.profile | ${subdomain_parser} -r > /dev/null 2>&1 &
+-	cat open.profile | ${subdomain_parser} -r > /dev/null 2>&1 &
+-done &
+-
+diff --git a/tests/stress/subdomain/uservars.inc b/tests/stress/subdomain/uservars.inc
+deleted file mode 100644
+index c0b27a7..0000000
+--- a/tests/stress/subdomain/uservars.inc
++++ /dev/null
+@@ -1,42 +0,0 @@
+-if [ -e /sbin/subdomain_parser ] ; then
+-	subdomain_parser=/sbin/subdomain_parser
+-else
+-	subdomain_parser=/sbin/apparmor_parser
+-fi
+-
+-if [ -n "`grep subdomainfs /proc/filesystems`" ]
+-then
+-	subdomainfs=/subdomain
+-elif [ -n "`grep securityfs /proc/filesystems`" ]
+-then
+-	if [ -e /sys/kernel/security/subdomain ] ; then
+-		subdomainfs=/sys/kernel/security/subdomain
+-	else
+-		subdomainfs=/sys/kernel/security/apparmor
+-	fi
+-else
+-	echo "$0: Unable to find subdomainfs" >&2
+-	exit 1
+-fi
+-
+-if [ ! -x $subdomain_parser ]
+-then
+-	echo "$0: $subdomain_parser not executable" >&2
+-	exit 1
+-fi
+-
+-if [ -z "`grep '^subdomain ' /proc/modules`" ]
+-then
+-	if [ -z "`grep '^apparmor ' /proc/modules`" ] ; then
+-		if [ ! -d "/sys/module/apparmor" ] ; then
+-			echo "$0: apparmor module not loaded" >&2
+-			exit 1
+-		fi
+-	fi
+-fi
+-
+-if [ ! -w $subdomainfs/.load ]
+-then
+-	echo "$0: $subdomainfs/.load not present" >&2
+-	exit 1
+-fi
+diff --git a/utils/apparmor/config.py b/utils/apparmor/config.py
+index 64334c9..b8fcc0d 100644
+--- a/utils/apparmor/config.py
++++ b/utils/apparmor/config.py
+@@ -40,7 +40,7 @@ from apparmor.common import AppArmorException, open_file_read  # , warn, msg,
+ 
+ # CFG = None
+ # REPO_CFG = None
+-# SHELL_FILES = ['easyprof.conf', 'notify.conf', 'parser.conf', 'subdomain.conf']
++# SHELL_FILES = ['easyprof.conf', 'notify.conf', 'parser.conf']
+ class Config(object):
+     def __init__(self, conf_type, conf_dir='/etc/apparmor'):
+         self.CONF_DIR = conf_dir

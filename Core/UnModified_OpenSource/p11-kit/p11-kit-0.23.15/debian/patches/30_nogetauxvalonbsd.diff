@@ -1,0 +1,113 @@
+Description: Do not use getauxval on !linux.
+Origin: vendor
+Bug-Debian: http://bugs.debian.org/718285
+Author: Andreas Metzler <ametzler@debian.org>
+Last-Update: 2018-08-28
+
+--- a/common/compat.c
++++ b/common/compat.c
+@@ -791,7 +791,7 @@ mkdtemp (char *template)
+ #ifndef HAVE_GETAUXVAL
+ 
+ unsigned long
+-getauxval (unsigned long type)
++_p11_getauxval (unsigned long type)
+ {
+ 	static unsigned long secure = 0UL;
+ 	static bool check_secure_initialized = false;
+@@ -839,7 +839,7 @@ getauxval (unsigned long type)
+ char *
+ secure_getenv (const char *name)
+ {
+-	if (getauxval (AT_SECURE))
++	if (_p11_getauxval (AT_SECURE))
+ 		return NULL;
+ 	return getenv (name);
+ }
+--- a/common/compat.h
++++ b/common/compat.h
+@@ -330,10 +330,11 @@ time_t      timegm          (struct tm *
+ #ifdef HAVE_GETAUXVAL
+ 
+ #include <sys/auxv.h>
++#define _p11_getauxval(X) getauxval(X)
+ 
+ #else /* !HAVE_GETAUXVAL */
+ 
+-unsigned long     getauxval (unsigned long type);
++unsigned long     _p11_getauxval (unsigned long type);
+ 
+ #define AT_SECURE 23
+ 
+--- a/common/path.c
++++ b/common/path.c
+@@ -108,7 +108,7 @@ expand_homedir (const char *remainder)
+ {
+ 	const char *env;
+ 
+-	if (getauxval (AT_SECURE)) {
++	if (_p11_getauxval (AT_SECURE)) {
+ 		errno = EPERM;
+ 		return NULL;
+ 	}
+--- a/common/frob-getauxval.c
++++ b/common/frob-getauxval.c
+@@ -55,7 +55,7 @@ main (int argc,
+ 		abort ();
+ 	}
+ 
+-	ret = getauxval (type);
++	ret = _p11_getauxval (type);
+ 	printf ("getauxval(%lu) == %lu\n", type, ret);
+ 	return (int)ret;
+ }
+--- a/configure.ac
++++ b/configure.ac
+@@ -54,6 +54,12 @@ case "$host" in
+ 		os_win32=yes
+ 		os_unix=no
+ 		;;
++	*-*-linux*)
++		AC_DEFINE_UNQUOTED(OS_UNIX, 1, [Building for unix])
++		os_win32=no
++		os_unix=yes
++		os_linux=yes
++		;;
+ 	*)
+ 		AC_DEFINE_UNQUOTED(OS_UNIX, 1, [Building for unix])
+ 		os_win32=no
+@@ -105,7 +111,11 @@ if test "$os_unix" = "yes"; then
+ 	AC_CHECK_HEADERS([sys/resource.h ucred.h])
+ 	AC_CHECK_MEMBERS([struct dirent.d_type],,,[#include <dirent.h>])
+ 	AC_CHECK_FUNCS([getprogname getexecname basename mkstemp mkdtemp])
+-	AC_CHECK_FUNCS([getauxval getresuid secure_getenv])
++	AC_CHECK_FUNCS([getresuid secure_getenv])
++	if test "$os_linux" = "yes"; then
++		# Use getauxval on Linux only.
++		AC_CHECK_FUNCS([getauxval])
++	fi
+ 	AC_CHECK_FUNCS([strnstr memdup strndup strerror_r])
+ 	AC_CHECK_FUNCS([reallocarray])
+ 	AC_CHECK_DECLS([reallocarray], [], [], [[#include <stdlib.h>]])
+--- a/p11-kit/conf.c
++++ b/p11-kit/conf.c
+@@ -229,7 +229,7 @@ _p11_conf_load_globals (const char *syst
+ 	}
+ 
+ 	if (mode != CONF_USER_NONE) {
+-		if (getauxval (AT_SECURE)) {
++		if (_p11_getauxval (AT_SECURE)) {
+ 			p11_debug ("skipping user config in setuid or setgid program");
+ 			mode = CONF_USER_NONE;
+ 		} else if (secure_getenv ("P11_KIT_NO_USER_CONFIG")) {
+--- a/p11-kit/frob-setuid.c
++++ b/p11-kit/frob-setuid.c
+@@ -70,7 +70,7 @@ main (void)
+ 	printf ("'setting' on module 'one': %s\n", field ? field : "(null)");
+ 
+ 	assert (field != NULL);
+-	if (getauxval (AT_SECURE))
++	if (_p11_getauxval (AT_SECURE))
+ 		assert (strcmp (field, "system1") == 0);
+ 	else
+ 		assert (strcmp (field, "user1") == 0);

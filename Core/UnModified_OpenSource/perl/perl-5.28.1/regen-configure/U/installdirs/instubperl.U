@@ -1,0 +1,70 @@
+?RCS: $Id: instubperl.U,v 1.1 1999/07/08 18:32:57 doughera Exp doughera $
+?RCS:
+?RCS: Copyright (c) 1999, Jarkko Hietaniemi
+?RCS:
+?RCS: You may redistribute only under the terms of the Artistic License,
+?RCS: as specified in the README file that comes with the distribution.
+?RCS: You may reuse parts of this distribution only within the terms of
+?RCS: that same Artistic License; a copy of which may be found at the root
+?RCS: of the source tree for dist 3.0.
+?RCS:
+?MAKE:installusrbinperl: installbin cat bin Myread Setvar test Devel
+?MAKE:	-pick add $@ %<
+?LINT:set installusrbinperl
+?Y:TOP
+?S:installusrbinperl:
+?S:	This variable tells whether Perl should be installed also as
+?S:	/usr/bin/perl in addition to
+?S:	$installbin/perl
+?S:.
+?C:INSTALL_USR_BIN_PERL:
+?C:	This symbol, if defined, indicates that Perl is to be installed
+?C:	also as /usr/bin/perl.
+?C:.
+?H:#$installusrbinperl INSTALL_USR_BIN_PERL	/**/
+?H:.
+: determine whether to install perl also as /usr/bin/perl
+
+echo " "
+if $test -d /usr/bin -a "X$installbin" != X/usr/bin; then
+	$cat <<EOM
+Many scripts expect perl to be installed as /usr/bin/perl.
+
+If you want to, I can install the perl you are about to compile
+as /usr/bin/perl (in addition to $bin/perl).
+EOM
+	if test -f /usr/bin/perl; then
+	    $cat <<EOM
+
+However, please note that because you already have a /usr/bin/perl,
+overwriting that with a new Perl would very probably cause problems.
+Therefore I'm assuming you don't want to do that (unless you insist).
+
+EOM
+	    case "$installusrbinperl" in
+	    "$define"|[yY]*)	dflt='y';;
+	    *)			dflt='n';;
+	    esac
+	else
+	    $cat <<EOM
+
+Since you don't have a /usr/bin/perl I'm assuming creating one is okay.
+
+EOM
+	    case "$installusrbinperl" in
+	    "$undef"|[nN]*)	dflt='n';;
+	    *)			dflt='y';;
+	    esac
+	fi
+	rp="Do you want to install perl as /usr/bin/perl?"
+	. ./myread
+	case "$ans" in
+	[yY]*)	val="$define";;
+	*)	val="$undef" ;;
+	esac
+else
+	val="$undef"
+fi
+set installusrbinperl
+eval $setvar
+

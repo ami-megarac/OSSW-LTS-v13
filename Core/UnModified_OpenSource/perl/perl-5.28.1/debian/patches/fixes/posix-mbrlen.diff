@@ -1,0 +1,132 @@
+From c13d09cc35d629482559ef95109cb92e09f6a8e8 Mon Sep 17 00:00:00 2001
+From: Niko Tyni <ntyni@debian.org>
+Date: Sun, 10 Mar 2019 19:40:42 +0200
+Subject: Fix POSIX::mblen mbstate_t initialization on threaded perls with
+ glibc
+
+As reported in https://bugs.launchpad.net/bugs/1818953 POSIX::mblen()
+is broken on threaded perls with glibc.
+
+  % perl -MPOSIX=mblen -e 'mblen("a", 1)'
+  perl: mbrtowc.c:105: __mbrtowc: Assertion `__mbsinit (data.__statep)' failed.
+  zsh: abort (core dumped)  perl -MPOSIX=mblen -e 'mblen("a", 1)'
+
+This broke in v5.27.8-134-g6c9ff7e96e which made the function
+use mbrlen(3) under the hood on threaded perls.
+
+The problem is initialization of the shift state with
+
+  mbrlen(NULL, 0, &ps));
+
+The glibc documentation for mbrlen(3) at
+
+  https://www.gnu.org/software/libc/manual/html_node/Converting-a-Character.html#Converting-a-Character
+
+does not mention initialization by passing in a null pointer for the
+string, only a pointer to a NUL wide character.
+
+   If the next multibyte character corresponds to the NUL wide character,
+   the return value is 0. If the next n bytes form a valid multibyte
+   character, the number of bytes belonging to this multibyte character
+   byte sequence is returned.
+
+Use memset(3) instead for mbstate_t initialization, as suggested in
+
+  https://www.gnu.org/software/libc/manual/html_node/Keeping-the-state.html
+
+with the hope that this is more portable.
+
+While at it, add a few basic test cases. These are in a new file because
+they need fresh_perl_is() from test.pl while the existing ones use
+Test::More (and conversion of at least posix.t looks way too involved.)
+
+Bug: https://rt.perl.org/Ticket/Display.html?id=133928
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1818953
+Bug-Debian: https://bugs.debian.org/924517
+Patch-Name: fixes/posix-mbrlen.diff
+Origin: backport, https://perl5.git.perl.org/perl.git/commit/25d7b7aa379d33ce2e8fe3e2bef4206b35739bc5
+---
+ MANIFEST           |  1 +
+ ext/POSIX/POSIX.xs |  2 +-
+ ext/POSIX/t/mb.t   | 47 ++++++++++++++++++++++++++++++++++++++++++++++
+ 3 files changed, 49 insertions(+), 1 deletion(-)
+ create mode 100644 ext/POSIX/t/mb.t
+
+diff --git a/MANIFEST b/MANIFEST
+index fcf3455b2e..aa5e9b16bd 100644
+--- a/MANIFEST
++++ b/MANIFEST
+@@ -4233,6 +4233,7 @@ ext/POSIX/POSIX.xs		POSIX extension external subroutines
+ ext/POSIX/t/export.t		Test @EXPORT and @EXPORT_OK
+ ext/POSIX/t/iscrash		See if POSIX isxxx() crashes with threads on Win32
+ ext/POSIX/t/math.t		Basic math tests for POSIX
++ext/POSIX/t/mb.t		Multibyte function tests for POSIX
+ ext/POSIX/t/posix.t		See if POSIX works
+ ext/POSIX/t/sigaction.t		See if POSIX::sigaction works
+ ext/POSIX/t/sigset.t		See if POSIX::SigSet works
+diff --git a/ext/POSIX/POSIX.xs b/ext/POSIX/POSIX.xs
+index 7497305841..395025a868 100644
+--- a/ext/POSIX/POSIX.xs
++++ b/ext/POSIX/POSIX.xs
+@@ -3318,7 +3318,7 @@ mblen(s, n)
+ #endif
+     CODE:
+ #if defined(USE_ITHREADS) && defined(HAS_MBRLEN)
+-        PERL_UNUSED_RESULT(mbrlen(NULL, 0, &ps));   /* Initialize state */
++        memset(&ps, 0, sizeof(ps)); /* Initialize state */
+         RETVAL = mbrlen(s, n, &ps); /* Prefer reentrant version */
+ #else
+         RETVAL = mblen(s, n);
+diff --git a/ext/POSIX/t/mb.t b/ext/POSIX/t/mb.t
+new file mode 100644
+index 0000000000..961edf6cf2
+--- /dev/null
++++ b/ext/POSIX/t/mb.t
+@@ -0,0 +1,47 @@
++#!./perl
++
++# These tests are in a separate file, because they use fresh_perl_is()
++# from test.pl.
++
++# The mb* functions use the "underlying locale" that is not affected by
++# the Perl one.  So we run the tests in a separate "fresh_perl" process
++# with the correct LC_CTYPE set in the environment.
++
++BEGIN {
++    require Config; import Config;
++    if ($^O ne 'VMS' and $Config{'extensions'} !~ /\bPOSIX\b/) {
++	print "1..0\n";
++	exit 0;
++    }
++    unshift @INC, "../../t";
++    require 'loc_tools.pl';
++    require 'test.pl';
++}
++
++plan tests => 3;
++
++use POSIX qw();
++
++SKIP: {
++    skip("mblen() not present", 3) unless $Config{d_mblen};
++
++    is(&POSIX::mblen("a", &POSIX::MB_CUR_MAX), 1, 'mblen() basically works');
++
++    skip("LC_CTYPE locale support not available", 2)
++      unless locales_enabled('LC_CTYPE');
++
++    my $utf8_locale = find_utf8_ctype_locale();
++    skip("no utf8 locale available", 2) unless $utf8_locale;
++
++    local $ENV{LC_CTYPE} = $utf8_locale;
++    local $ENV{LC_ALL};
++    delete $ENV{LC_ALL};
++
++    fresh_perl_is(
++      'use POSIX; print &POSIX::mblen("\x{c3}\x{28}", &POSIX::MB_CUR_MAX)',
++      -1, {}, 'mblen() recognizes invalid multibyte characters');
++
++    fresh_perl_is(
++     'use POSIX; print &POSIX::mblen("\N{GREEK SMALL LETTER SIGMA}", &POSIX::MB_CUR_MAX)',
++     2, {}, 'mblen() works on UTF-8 characters');
++}

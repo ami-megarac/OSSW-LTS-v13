@@ -1,0 +1,208 @@
+?RCS: $Id: archname.U,v 3.0.1.3 1997/02/28 15:24:32 ram Exp $
+?RCS:
+?RCS: Copyright (c) 1991-1993, Raphael Manfredi
+?RCS:
+?RCS: You may redistribute only under the terms of the Artistic License,
+?RCS: as specified in the README file that comes with the distribution.
+?RCS: You may reuse parts of this distribution only within the terms of
+?RCS: that same Artistic License; a copy of which may be found at the root
+?RCS: of the source tree for dist 3.0.
+?RCS:
+?RCS: $Log: archname.U,v $
+?RCS: Revision 3.0.1.3  1997/02/28  15:24:32  ram
+?RCS: patch61: changed the way the archname is mangled from uname
+?RCS:
+?RCS: Revision 3.0.1.2  1995/05/12  12:05:24  ram
+?RCS: patch54: protect against spaces in "uname -m" output (ADO)
+?RCS:
+?RCS: Revision 3.0.1.1  1995/02/15  14:14:21  ram
+?RCS: patch51: created
+?RCS:
+?MAKE:archname myarchname useversionedarchname: sed Loc Myread Oldconfig \
+	osname test rm usethreads usemultiplicity use64bitint use64bitall \
+	archname64 uselongdouble longdblsize doublesize targetarch Setvar \
+	api_versionstring usequadmath
+?MAKE:	-pick add $@ %<
+?S:archname:
+?S:	This variable is a short name to characterize the current
+?S:	architecture.  It is used mainly to construct the default archlib.
+?S:.
+?S:myarchname:
+?S:	This variable holds the architecture name computed by Configure in
+?S:	a previous run. It is not intended to be perused by any user and
+?S:	should never be set in a hint file.
+?S:.
+?S:useversionedarchname:
+?S:	This variable indicates whether to include the $api_versionstring
+?S:	as a component of the $archname.
+?S:.
+?C:ARCHNAME:
+?C:	This symbol holds a string representing the architecture name.
+?C:	It may be used to construct an architecture-dependant pathname
+?C:	where library files may be held under a private library, for
+?C:	instance.
+?C:.
+?H:#define ARCHNAME "$archname"		/**/
+?H:.
+?T:xxx tarch
+?F:!archname.cbu
+?INIT:archname=''
+: determine the architecture name
+echo " "
+?X: We always recompute archname in case osname changes. However, we need
+?X: to be careful since, as ADO rightfully pointed out, some systems pick
+?X: silly architecture names (0001307135000-aix on AIX or 9000/715-ux under
+?X: HP-UX). Therefore, we allow hint files to superseed our guess and ask
+?X: the user for confirmation.
+if xxx=`./loc arch blurfl $pth`; $test -f "$xxx"; then
+	tarch=`arch`"-$osname"
+elif xxx=`./loc uname blurfl $pth`; $test -f "$xxx" ; then
+	if uname -m > tmparch 2>&1 ; then
+		tarch=`$sed -e 's/ *$//' -e 's/ /_/g' \
+			-e 's/$/'"-$osname/" tmparch`
+	else
+		tarch="$osname"
+	fi
+	$rm -f tmparch
+else
+	tarch="$osname"
+fi
+case "$myarchname" in
+''|"$tarch") ;;
+*)
+	echo "(Your architecture name used to be $myarchname.)"
+	archname=''
+	;;
+esac
+case "$targetarch" in
+'') ;;
+?X: Very GCCian.
+*)  archname=`echo $targetarch|sed 's,^[^-]*-,,'` ;;
+esac
+myarchname="$tarch"
+case "$archname" in
+'') dflt="$tarch";;
+*) dflt="$archname";;
+esac
+rp='What is your architecture name'
+. ./myread
+archname="$ans"
+
+: optionally add API version to the architecture for versioned archlibs
+case "$useversionedarchname" in
+$define|true|[yY]*) dflt='y';;
+*)                  dflt='n';;
+esac
+rp='Add the Perl API version to your archname?'
+. ./myread
+case "$ans" in
+y|Y)	useversionedarchname="$define" ;;
+*)      useversionedarchname="$undef" ;;
+esac
+case "$useversionedarchname" in
+$define)
+	case "$archname" in
+	*-$api_versionstring)
+		echo "...and architecture name already has -$api_versionstring" >&4
+		;;
+	*)
+		archname="$archname-$api_versionstring"
+		echo "...setting architecture name to $archname." >&4
+		;;
+	esac
+	;;
+esac
+
+@if usethreads
+case "$usethreads" in
+$define)
+	echo "Threads selected." >&4
+	case "$archname" in
+	*-thread*) echo "...and architecture name already has -thread." >&4
+		;;
+	*)      archname="$archname-thread"
+		echo "...setting architecture name to $archname." >&4
+		;;
+	esac
+	;;
+esac
+@end
+@if usemultiplicity
+case "$usemultiplicity" in
+$define)
+	echo "Multiplicity selected." >&4
+	case "$archname" in
+	*-multi*) echo "...and architecture name already has -multi." >&4
+		;;
+	*)      archname="$archname-multi"
+		echo "...setting architecture name to $archname." >&4
+		;;
+	esac
+	;;
+esac
+@end
+@if use64bitint
+case "$use64bitint$use64bitall" in
+*"$define"*)
+	case "$archname64" in
+	'')
+		echo "This architecture is naturally 64-bit, not changing architecture name." >&4
+		;;
+	*)
+		case "$use64bitint" in
+		"$define") echo "64 bit integers selected." >&4 ;;
+		esac
+		case "$use64bitall" in
+		"$define") echo "Maximal 64 bitness selected." >&4 ;;
+		esac
+		case "$archname" in
+		*-$archname64*) echo "...and architecture name already has $archname64." >&4
+			;;
+		*)      archname="$archname-$archname64"
+			echo "...setting architecture name to $archname." >&4
+			;;
+		esac
+		;;
+	esac
+esac
+@end
+@if uselongdouble
+case "$uselongdouble" in
+$define)
+	echo "Long doubles selected." >&4
+	case "$longdblsize" in
+	$doublesize)
+		echo "...but long doubles are equal to doubles, not changing architecture name." >&4
+		;;
+	*)
+		case "$archname" in
+		*-ld*) echo "...and architecture name already has -ld." >&4
+			;;
+		*)      archname="$archname-ld"
+			echo "...setting architecture name to $archname." >&4
+			;;
+		esac
+		;;
+	esac
+	;;
+esac
+@end
+@if usequadmath
+case "$usequadmath" in
+$define)
+	echo "quadmath selected." >&4
+	case "$archname" in
+	*-quadmath*) echo "...and architecture name already has -quadmath." >&4
+		;;
+	*)      archname="$archname-quadmath"
+		echo "...setting architecture name to $archname." >&4
+		;;
+	esac
+	;;
+esac
+@end
+if $test -f archname.cbu; then
+	echo "Your platform has some specific hints for architecture name, using them..."
+	. ./archname.cbu
+fi
+

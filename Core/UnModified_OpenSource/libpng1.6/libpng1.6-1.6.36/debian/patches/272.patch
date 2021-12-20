@@ -1,0 +1,41 @@
+From d0c0f5f96bad2391f62511bf1c92be6ffeaaae41 Mon Sep 17 00:00:00 2001
+From: Richard Townsend <Richard.Townsend@arm.com>
+Date: Fri, 11 Jan 2019 16:55:51 +0000
+Subject: [PATCH 2/2] Free png_structp members after use in gamma_test
+
+Fixes #266
+---
+ contrib/libtests/pngvalid.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+Index: libpng1.6/pngread.c
+===================================================================
+--- libpng1.6.orig/pngread.c
++++ libpng1.6/pngread.c
+@@ -994,6 +994,12 @@
+    png_ptr->chunk_list = NULL;
+ #endif
+ 
++#if defined(PNG_READ_EXPAND_SUPPORTED) && \
++    defined(PNG_ARM_NEON_IMPLEMENTATION)
++   png_free(png_ptr, png_ptr->riffled_palette);
++   png_ptr->riffled_palette = NULL;
++#endif
++
+    /* NOTE: the 'setjmp' buffer may still be allocated and the memory and error
+     * callbacks are still set at this point.  They are required to complete the
+     * destruction of the png_struct itself.
+Index: libpng1.6/contrib/libtests/pngvalid.c
+===================================================================
+--- libpng1.6.orig/contrib/libtests/pngvalid.c
++++ libpng1.6/contrib/libtests/pngvalid.c
+@@ -10472,6 +10472,9 @@
+             d.this.ps->validated = 1;
+       }
+ 
++      /* Clean up png_structp, without destroying the structure itself. */
++      png_destroy_read_struct(&(d.pm->this.pread), &pi, &pi);
++
+       modifier_reset(d.pm);
+ 
+       if (d.pm->log && !d.threshold_test && !d.this.speed)

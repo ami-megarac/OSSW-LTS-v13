@@ -1,0 +1,1 @@
+type=AVC msg=audit(1409700678.384:547594): apparmor="DENIED" operation="pivotroot" profile="/home/ubuntu/bzr/apparmor/tests/regression/apparmor/pivot_root" name="/tmp/sdtest.21082-7446-EeefO6/new_root/" pid=21162 comm="pivot_root" srcname="/tmp/sdtest.21082-7446-EeefO6/new_root/put_old/"

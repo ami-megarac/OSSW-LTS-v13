@@ -1,0 +1,73 @@
+From 2b0f6f3a2ff13153aaa70c764ba7a8b90aef794d Mon Sep 17 00:00:00 2001
+From: Daiki Ueno <ueno@gnu.org>
+Date: Mon, 28 Dec 2020 16:16:53 +0100
+Subject: [PATCH 3/6] testpkcs11: use datefudge to trick certificate expiry
+Origin: https://gitlab.com/gnutls/gnutls/-/commit/2b0f6f3a2ff13153aaa70c764ba7a8b90aef794d
+Bug: https://gitlab.com/gnutls/gnutls/-/issues/1135
+Bug-Debian: https://bugs.debian.org/977552
+
+The certificates stored in tests/testpkcs11-certs expired on
+2020-12-13.  To avoid verification failure due to that, use datefudge
+to set custom date when calling gnutls-cli, gnutls-serv, and certtool.
+
+Based on the patch by Andreas Metzler:
+https://gitlab.com/gnutls/gnutls/-/issues/1135#note_469682121
+
+Signed-off-by: Daiki Ueno <ueno@gnu.org>
+---
+ tests/testpkcs11.sh | 12 +++++++++++-
+ 1 file changed, 11 insertions(+), 1 deletion(-)
+
+--- a/tests/testpkcs11.sh
++++ b/tests/testpkcs11.sh
+@@ -67,6 +67,8 @@ have_ed25519=0
+ P11TOOL="${VALGRIND} ${P11TOOL} --batch"
+ SERV="${SERV} -q"
+ 
++TESTDATE=2020-12-01
++
+ . ${srcdir}/scripts/common.sh
+ 
+ rm -f "${LOGFILE}"
+@@ -79,6 +81,8 @@ exit_error () {
+ 	exit 1
+ }
+ 
++skip_if_no_datefudge
++
+ # $1: token
+ # $2: PIN
+ # $3: filename
+@@ -510,6 +514,7 @@ write_certificate_test () {
+ 	pubkey="$5"
+ 
+ 	echo -n "* Generating client certificate... "
++	datefudge -s "$TESTDATE" \
+ 	"${CERTTOOL}" ${CERTTOOL_PARAM} ${ADDITIONAL_PARAM}  --generate-certificate --load-ca-privkey "${cakey}"  --load-ca-certificate "${cacert}"  \
+ 	--template ${srcdir}/testpkcs11-certs/client-tmpl --load-privkey "${token};object=gnutls-client;object-type=private" \
+ 	--load-pubkey "$pubkey" --outfile tmp-client.crt >>"${LOGFILE}" 2>&1
+@@ -887,6 +892,7 @@ use_certificate_test () {
+ 	echo -n "* Using PKCS #11 with gnutls-cli (${txt})... "
+ 	# start server
+ 	eval "${GETPORT}"
++	SERV="datefudge -s $TESTDATE $SERV" \
+ 	launch_pkcs11_server $$ "${ADDITIONAL_PARAM}" --echo --priority NORMAL --x509certfile="${certfile}" \
+ 		--x509keyfile="$keyfile" --x509cafile="${cafile}" \
+ 		--verify-client-cert --require-client-cert >>"${LOGFILE}" 2>&1
+@@ -895,13 +901,16 @@ use_certificate_test () {
+ 	wait_server ${PID}
+ 
+ 	# connect to server using SC
++	datefudge -s "$TESTDATE" \
+ 	${VALGRIND} "${CLI}" ${ADDITIONAL_PARAM} -p "${PORT}" localhost --priority NORMAL --x509cafile="${cafile}" </dev/null >>"${LOGFILE}" 2>&1 && \
+ 		fail ${PID} "Connection should have failed!"
+ 
++	datefudge -s "$TESTDATE" \
+ 	${VALGRIND} "${CLI}" ${ADDITIONAL_PARAM} -p "${PORT}" localhost --priority NORMAL --x509certfile="${certfile}" \
+ 	--x509keyfile="$keyfile" --x509cafile="${cafile}" </dev/null >>"${LOGFILE}" 2>&1 || \
+ 		fail ${PID} "Connection (with files) should have succeeded!"
+ 
++	datefudge -s "$TESTDATE" \
+ 	${VALGRIND} "${CLI}" ${ADDITIONAL_PARAM} -p "${PORT}" localhost --priority NORMAL --x509certfile="${token};object=gnutls-client;object-type=cert" \
+ 		--x509keyfile="${token};object=gnutls-client;object-type=private" \
+ 		--x509cafile="${cafile}" </dev/null >>"${LOGFILE}" 2>&1 || \

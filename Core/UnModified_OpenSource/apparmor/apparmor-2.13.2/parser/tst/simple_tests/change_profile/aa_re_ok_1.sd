@@ -1,0 +1,24 @@
+#
+#=DESCRIPTION audit allow change_profile
+#=EXRESULT PASS
+#
+/usr/bin/foo {
+   audit allow change_profile -> /bin/*,
+}
+
+/usr/bin/foo2 {
+   audit allow change_profile -> /bin/**,
+}
+
+/usr/bin/foo3 {
+   audit allow change_profile -> /bin/?,
+}
+
+/usr/bin/foo4 {
+   audit allow change_profile -> /bin/[ab],
+}
+
+/usr/bin/foo5 {
+   audit allow change_profile -> /bin/[^ab],
+}
+

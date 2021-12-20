@@ -1,0 +1,9 @@
+#
+#=Description ptrace regex peer rule
+#=EXRESULT PASS
+#
+
+/usr/bin/foo {
+  ptrace read peer=/{**/,}bin/{sh,true},
+
+  }

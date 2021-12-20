@@ -1,0 +1,37 @@
+#! /usr/bin/python3
+# ----------------------------------------------------------------------
+#    Copyright (C) 2013 Kshitij Gupta <kgupta8592@gmail.com>
+#
+#    This program is free software; you can redistribute it and/or
+#    modify it under the terms of version 2 of the GNU General Public
+#    License as published by the Free Software Foundation.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+# ----------------------------------------------------------------------
+import argparse
+
+import apparmor.tools
+
+# setup exception handling
+from apparmor.fail import enable_aa_exception_handler
+enable_aa_exception_handler()
+
+# setup module translations
+from apparmor.translations import init_translation
+_ = init_translation()
+
+parser = argparse.ArgumentParser(description=_('Switch the given programs to audit mode'))
+parser.add_argument('-d', '--dir', type=str, help=_('path to profiles'))
+parser.add_argument('-r', '--remove', action='store_true', help=_('remove audit mode'))
+parser.add_argument('program', type=str, nargs='+', help=_('name of program'))
+parser.add_argument('--no-reload', dest='do_reload', action='store_false', default=True, help=_('Do not reload the profile after modifying it'))
+args = parser.parse_args()
+
+tool = apparmor.tools.aa_tools('audit', args)
+
+tool.cmd_audit()
+

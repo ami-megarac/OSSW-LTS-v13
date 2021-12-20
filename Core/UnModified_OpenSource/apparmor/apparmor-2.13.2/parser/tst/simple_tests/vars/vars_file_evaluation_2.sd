@@ -1,0 +1,7 @@
+#=DESCRIPTION some simple expansions within file rules
+#=EXRESULT PASS
+@{FOO} = foo bar baz biff
+
+/usr/bin/foo {
+  /home/@{FOO}/.foo/@{FOO} r,
+}

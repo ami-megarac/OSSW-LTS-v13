@@ -1,0 +1,23 @@
+From: intrigeri <intrigeri@boum.org>
+Date: Sun, 24 Feb 2019 15:20:17 +0000
+Subject: tunables/share: fix buggy syntax that broke the ~/.local/share part
+ of the @{user_share_dirs} tunable
+
+Fixes regression introduced in a91d199ab1da3004cf3744d7087a32c91097a16e.
+
+Bug: https://bugs.launchpad.net/apparmor/+bug/1816470
+Bug-Debian: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=920833, https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=921888
+---
+ profiles/apparmor.d/tunables/share | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/profiles/apparmor.d/tunables/share b/profiles/apparmor.d/tunables/share
+index fca63ee..f41121c 100644
+--- a/profiles/apparmor.d/tunables/share
++++ b/profiles/apparmor.d/tunables/share
+@@ -12,4 +12,4 @@
+ # These are owned by the user running an application, appear in
+ # XDG_DATA_DIRS or XDG_DATA_HOME, and are the parent directory
+ # for the same subdirectories as @{system_share_dirs}
+-@{user_share_dirs} = @{HOME}/.local/{,share/@{flatpak_exports_root}}/share
++@{user_share_dirs} = @{HOME}/.local{,/share/@{flatpak_exports_root}}/share

@@ -1,0 +1,33 @@
+From: Net-SNMP Packaging Team <pkg-net-snmp-devel@lists.alioth.debian.org>
+Date: Thu, 18 Jun 2015 06:12:04 +0900
+Subject: _statistics
+
+This patch ignores interfaces without statistics.
+---
+ agent/mibgroup/mibII/interfaces.c | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/agent/mibgroup/mibII/interfaces.c b/agent/mibgroup/mibII/interfaces.c
+index 26ffebb..43f7427 100644
+--- a/agent/mibgroup/mibII/interfaces.c
++++ b/agent/mibgroup/mibII/interfaces.c
+@@ -1590,6 +1590,10 @@ Interface_Scan_Init(void)
+         struct ifnet   *nnew;
+         char           *stats, *ifstart = line;
+ 
++	/* Ignore interfaces with no statistics. */
++	if (strstr(line, "No statistics available."))
++	    continue;
++
+         if (line[strlen(line) - 1] == '\n')
+             line[strlen(line) - 1] = '\0';
+ 
+@@ -1622,7 +1626,7 @@ Interface_Scan_Init(void)
+                                                &coll) != 5)) {
+             if ((scan_line_to_use == scan_line_2_2)
+                 && !strstr(line, "No statistics available"))
+-                snmp_log(LOG_ERR,
++                snmp_log(LOG_DEBUG,
+                          "/proc/net/dev data format error, line ==|%s|",
+                          line);
+             continue;

@@ -1,0 +1,2 @@
+# We deliberately don't split the AvahiCore and Avahi typelib files into separate packages as they belong together
+gir1.2-avahi-0.6: typelib-package-name-does-not-match usr/lib/*/girepository-1.0/AvahiCore-0.6.typelib gir1.2-avahicore-0.6

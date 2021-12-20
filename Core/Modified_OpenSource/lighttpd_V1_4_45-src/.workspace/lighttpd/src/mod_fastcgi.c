@@ -49,7 +49,12 @@
 #include <sys/wait.h>
 #endif
 
+#define ENABLED 0x01
+#define LIB_PROC_MANAGER "/usr/local/lib/libprocmanager.so"
 #define NA_SERVICE_PORT_BYTE 0xFFFFFFFF
+
+extern void Proc_manager_handler(int sig);
+
 /*
  *
  * TODO:
@@ -3673,6 +3678,43 @@ TRIGGER_FUNC(mod_fastcgi_handle_trigger) {
 	return HANDLER_GO_ON;
 }
 
+PROCMANAGE_FUNC(proc_manage) {
+    void *handle  = NULL;
+    int (*ProcMonitorRegister_func)() = NULL;
+    
+    UNUSED(srv);
+    UNUSED(p_d);   
+    
+    handle = dlopen (LIB_PROC_MANAGER,RTLD_LAZY);
+    if (handle == NULL) {
+	return HANDLER_ERROR;
+	
+    }
+
+    ProcMonitorRegister_func = dlsym (handle,"ProcMonitorRegister");
+    if (ProcMonitorRegister_func == NULL) {
+	dlclose(handle);
+	return HANDLER_ERROR;
+    
+    }
+    if (g_corefeatures.allow_non_secure_communication == ENABLED) {
+	if(g_serviceconf.SecureAccessPort != NA_SERVICE_PORT_BYTE) {
+	    ProcMonitorRegister_func("/usr/local/sbin/lighttpd", g_serviceconf.NonSecureAccessPort, "lighttpd",Proc_manager_handler,4,"-f","/conf/lighttpd.conf","-m","/usr/local/lib");
+	
+	}
+    
+    }
+
+    if(g_serviceconf.SecureAccessPort != NA_SERVICE_PORT_BYTE) {
+	ProcMonitorRegister_func("/usr/local/sbin/lighttpd", g_serviceconf.SecureAccessPort, "lighttpd",Proc_manager_handler,4,"-f","/conf/lighttpd.conf","-m","/usr/local/lib");
+    
+    }
+    dlclose(handle);
+    return HANDLER_GO_ON;
+
+}
+
+
 int mod_fastcgi_plugin_init(plugin *p);
 int mod_fastcgi_plugin_init(plugin *p) {
 	p->version      = LIGHTTPD_VERSION_ID;
@@ -3681,6 +3723,7 @@ int mod_fastcgi_plugin_init(plugin *p) {
 	p->init         = mod_fastcgi_init;
 	p->cleanup      = mod_fastcgi_free;
 	p->set_defaults = mod_fastcgi_set_defaults;
+	p->handle_procmanage   = proc_manage;
 	p->connection_reset        = fcgi_connection_reset;
 	p->handle_connection_close = fcgi_connection_reset;
 	p->handle_uri_clean        = fcgi_check_extension_1;

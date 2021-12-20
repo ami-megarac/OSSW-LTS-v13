@@ -1,0 +1,73 @@
+#! /usr/bin/make -f
+# Build the libgcrypt package for Debian.
+
+export DEB_BUILD_MAINT_OPTIONS := hardening=+bindnow
+
+include /usr/share/dpkg/pkg-info.mk
+
+WIN_FLAGS=LDFLAGS="-Xlinker --no-insert-timestamp" CFLAGS="-g -Os" CPPFLAGS=
+
+override_dh_auto_configure:
+	# unbreak arch-only builds when texi is patched.
+	if test doc/gcrypt.texi -nt doc/version.texi ; then \
+		touch --reference=doc/version.texi doc/gcrypt.texi ; \
+		fi
+	dh_auto_configure --verbose --builddirectory=build -- \
+		--enable-noexecstack \
+		--enable-ld-version-script --enable-static \
+		--libdir=/lib/$(DEB_HOST_MULTIARCH)
+
+override_dh_makeshlibs:
+	dh_makeshlibs -V 'libgcrypt20 (>=1.8.0-0)' \
+		--add-udeb=libgcrypt20-udeb -- -c4
+
+override_dh_auto_build-indep:
+	# use current version in /usr/share/texmf/tex/texinfo/, see #803081
+	rm -f build-aux/texinfo.tex
+	cd build/doc && $(MAKE) stamp-vti
+	cd build/doc && $(MAKE) pdf html
+	for cpu in i686 x86_64; do \
+	 mkdir -p build-$$cpu-w64-mingw32 && \
+	 cd build-$$cpu-w64-mingw32 && $(WIN_FLAGS) ../configure \
+	    --prefix=/usr/$$cpu-w64-mingw32 \
+	    --with-libgpg-error-prefix=/usr/$$cpu-w64-mingw32 \
+	    --disable-padlock-support --disable-asm \
+	    --enable-static \
+	    --host $$cpu-w64-mingw32 && \
+	  $(WIN_FLAGS) $(MAKE) \
+	  || exit 1 ; \
+	  cd .. ; \
+	done
+
+debian/tmp/usr/include/gcrypt.h:
+	dh_auto_install --verbose --builddirectory=build
+
+override_dh_auto_install-indep:	debian/tmp/usr/include/gcrypt.h
+	for cpu in i686 x86_64; do \
+	  cd build-$$cpu-w64-mingw32 && \
+	  $(MAKE) install DESTDIR=$(shell pwd)/debian/tmp \
+	  || exit 1 ; \
+	  cd .. ; \
+	done
+	find debian/tmp -name libgcrypt.la -type f -delete
+
+override_dh_auto_install-arch:	debian/tmp/usr/include/gcrypt.h
+	mkdir -p -m755 debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)
+	cd debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH) \
+		&& ln -v -s /lib/$(DEB_HOST_MULTIARCH)/`readlink ../../../lib/*/*.so` libgcrypt.so
+	rm -v debian/tmp/lib/$(DEB_HOST_MULTIARCH)/*.so
+	mv -v debian/tmp/lib/$(DEB_HOST_MULTIARCH)/*.a \
+		debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)/
+
+override_dh_installinfo:
+	dh_installinfo
+	if test -e debian/libgcrypt20-doc ; then \
+		cd debian/libgcrypt20-doc/usr/share/info && \
+		sed -i -e 's:image src="\([^"]*.png"\):image src="/usr/share/doc/libgcrypt20-doc/html/\1:g' *.info* ; \
+	fi
+
+override_dh_missing:
+	dh_missing --list-missing
+
+%:
+	dh $@ --builddirectory=build

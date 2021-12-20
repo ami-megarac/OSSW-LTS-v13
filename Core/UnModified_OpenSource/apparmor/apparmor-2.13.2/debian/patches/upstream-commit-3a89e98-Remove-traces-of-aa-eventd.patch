@@ -1,0 +1,27 @@
+From: Christian Boltz <apparmor@cboltz.de>
+Date: Fri, 9 Nov 2018 17:22:17 +0100
+Subject: Remove traces of aa-eventd
+
+aa-eventd and its initscripts have been moved to deprecated/ in 2014 and
+didn't get any serious updates for several more years, so it's most
+probably useless and/or broken nowadays.
+
+This also means we don't need to keep the AA_EV_BIN and AA_EV_PIDFILE
+variables in rc.apparmor.functions anymore.
+---
+ parser/rc.apparmor.functions | 2 --
+ 1 file changed, 2 deletions(-)
+
+diff --git a/parser/rc.apparmor.functions b/parser/rc.apparmor.functions
+index 7295daf..77fda76 100644
+--- a/parser/rc.apparmor.functions
++++ b/parser/rc.apparmor.functions
+@@ -55,8 +55,6 @@ elif [ -d /etc/apparmor.d ] ; then
+ 	PROFILE_DIR=/etc/apparmor.d
+ fi
+ ABSTRACTIONS="-I${PROFILE_DIR}"
+-AA_EV_BIN=/usr/sbin/aa-eventd
+-AA_EV_PIDFILE=/var/run/aa-eventd.pid
+ AA_STATUS=/usr/sbin/aa-status
+ SECURITYFS=/sys/kernel/security
+ 

@@ -1,0 +1,143 @@
+{
+  "_args": [
+    [
+      {
+        "raw": "jszip",
+        "scope": null,
+        "escapedName": "jszip",
+        "name": "jszip",
+        "rawSpec": "",
+        "spec": "latest",
+        "type": "tag"
+      },
+      "/home/web/dk"
+    ]
+  ],
+  "_from": "jszip@latest",
+  "_hasShrinkwrap": false,
+  "_id": "jszip@3.6.0",
+  "_inCache": true,
+  "_location": "/jszip",
+  "_nodeVersion": "14.13.1",
+  "_npmOperationalInternal": {
+    "host": "s3://npm-registry-packages",
+    "tmp": "tmp/jszip_3.6.0_1612931715825_0.47028184888859603"
+  },
+  "_npmUser": {
+    "name": "stuk",
+    "email": "npm@website.stuartk.com"
+  },
+  "_npmVersion": "6.14.8",
+  "_phantomChildren": {},
+  "_requested": {
+    "raw": "jszip",
+    "scope": null,
+    "escapedName": "jszip",
+    "name": "jszip",
+    "rawSpec": "",
+    "spec": "latest",
+    "type": "tag"
+  },
+  "_requiredBy": [
+    "#USER"
+  ],
+  "_resolved": "https://registry.npmjs.org/jszip/-/jszip-3.6.0.tgz",
+  "_shasum": "839b72812e3f97819cc13ac4134ffced95dd6af9",
+  "_shrinkwrap": null,
+  "_spec": "jszip",
+  "_where": "/home/web/dk",
+  "author": {
+    "name": "Stuart Knightley",
+    "email": "stuart@stuartk.com"
+  },
+  "browser": {
+    "readable-stream": "./lib/readable-stream-browser.js",
+    "./lib/index": "./dist/jszip.min.js"
+  },
+  "bugs": {
+    "url": "https://github.com/Stuk/jszip/issues"
+  },
+  "contributors": [
+    {
+      "name": "Franz Buchinger"
+    },
+    {
+      "name": "António Afonso"
+    },
+    {
+      "name": "David Duponchel"
+    },
+    {
+      "name": "yiminghe"
+    }
+  ],
+  "dependencies": {
+    "lie": "~3.3.0",
+    "pako": "~1.0.2",
+    "readable-stream": "~2.3.6",
+    "set-immediate-shim": "~1.0.1"
+  },
+  "description": "Create, read and edit .zip files with JavaScript http://stuartk.com/jszip",
+  "devDependencies": {
+    "browserify": "~13.0.0",
+    "grunt": "~0.4.1",
+    "grunt-browserify": "~5.0.0",
+    "grunt-cli": "~1.1.0",
+    "grunt-contrib-connect": "~2.0.0",
+    "grunt-contrib-jshint": "~1.0.0",
+    "grunt-contrib-uglify": "~4.0.1",
+    "grunt-saucelabs": "github:stuk/grunt-saucelabs#v10.0.0",
+    "jshint": "~2.9.1",
+    "jszip-utils": "~0.0.2",
+    "package-json-versionify": "1.0.2",
+    "qunit": "~2.9.2",
+    "tmp": "0.0.28"
+  },
+  "directories": {},
+  "dist": {
+    "integrity": "sha512-jgnQoG9LKnWO3mnVNBnfhkh0QknICd1FGSrXcgrl67zioyJ4wgx25o9ZqwNtrROSflGBCGYnJfjrIyRIby1OoQ==",
+    "shasum": "839b72812e3f97819cc13ac4134ffced95dd6af9",
+    "tarball": "https://registry.npmjs.org/jszip/-/jszip-3.6.0.tgz",
+    "fileCount": 49,
+    "unpackedSize": 397691,
+    "npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.13\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJgI2KECRA9TVsSAnZWagAA1XIP/i4Aq7lkUiGhEpMdeO2l\nlZgAjLC/KCFSlOHEzMvgObKxvZnc3VXfVDJPRjIf2NKDu6DUh+0ETKKu27rA\nTQQwsbi6VD13WxBFV4neVTg+tSFq9MXqn8xP85ze35KcnRGP4K7ANJ83Pcuj\n0ycnRaDDFFies1HvdnzGyb/uThb82SZWmj09tQMNK+PR9PzuNUKzbcGtjW5g\nSjCV6RAXSbBEaxCMHhFB5Ref7cokAHyTEgVjyK8rP/Rr1j6McA5I2dbwz+yS\neOf0ZCT8UNSkZFJrKa5mfoxby9nbGgNKoopBK979NkiHLr11Jk6gjjtFJ0Bj\nZjyfkcuNCe5IXrAsMpYR2tHpyJnJigzXECKLHFlsAnD9Km9NQTqFw2ji3QjX\nFehCQzNd2659nc38pWW5c2PRVRmmvgWaIOH59xQOP00N7q5NhThc4E8FBnVW\nWHQCzMVaPF9i/+QrpIQOLyV5ookZ21QhbpI3O6c6+21adOYbMBqGCkyMlr/Z\nq+e89v6dMWvCvEh2IpJEGhEQQaiPU7GLRBQL6Epy6p4Yz6hMMkIrLUAcFE9b\nHqXhvEupDxxhLU/Y1ExNEnMFRxYHPHNQdfH2HL1dngJO5i8OTQ0J1Z7ZxsDC\nc3ut9OvjdsRTcEp976TNdI/4YKVkpAmYYWINdj9gZ9GnNDcLB2wzGh8v8Q22\nrYej\r\n=LvJO\r\n-----END PGP SIGNATURE-----\r\n"
+  },
+  "gitHead": "112fcdb9953c6b9a2744afee451d73029f7cd2f8",
+  "homepage": "https://github.com/Stuk/jszip#readme",
+  "keywords": [
+    "zip",
+    "deflate",
+    "inflate"
+  ],
+  "license": "(MIT OR GPL-3.0)",
+  "main": "./lib/index",
+  "maintainers": [
+    {
+      "name": "dduponchel",
+      "email": "d.duponchel@gmail.com"
+    },
+    {
+      "name": "cwmma",
+      "email": "calvin.metcalf@gmail.com"
+    },
+    {
+      "name": "stuk",
+      "email": "npm@website.stuartk.com"
+    }
+  ],
+  "name": "jszip",
+  "optionalDependencies": {},
+  "readme": "ERROR: No README data found!",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Stuk/jszip.git"
+  },
+  "scripts": {
+    "lint": "grunt jshint",
+    "test": "npm run test-node && npm run test-browser",
+    "test-browser": "grunt build && grunt test",
+    "test-node": "qunit --require ./test/helpers/test-utils.js --require ./test/helpers/node-test-utils.js test/asserts/"
+  },
+  "types": "./index.d.ts",
+  "version": "3.6.0"
+}

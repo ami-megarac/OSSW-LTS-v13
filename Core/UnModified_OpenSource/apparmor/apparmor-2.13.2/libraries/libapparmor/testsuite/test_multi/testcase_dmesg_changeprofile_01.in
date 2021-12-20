@@ -1,0 +1,1 @@
+[   97.492562] audit: type=1400 audit(1431116353.523:77): apparmor="DENIED" operation="change_profile" profile="/tests/regression/apparmor/changeprofile" pid=3459 comm="changeprofile" target="/tests/regression/apparmor/rename"

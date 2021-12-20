@@ -1,0 +1,12 @@
+START
+File: testcase21.in
+Event type: AA_RECORD_DENIED
+Audit ID: 1190305330.060:14638
+Operation: inode_permission
+Mask: r
+Denied Mask: r
+Profile: /home/steve/tmp/sh
+Name: /etc/passwd
+PID: 31349
+Epoch: 1190305330
+Audit subid: 14638

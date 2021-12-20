@@ -1,0 +1,131 @@
+Regular Expression Scanner Generator
+====================================
+
+Notes in the scanner File Format
+--------------------------------
+
+The file format used is based on the GNU flex table file format
+(--tables-file option; see Table File Format in the flex info pages and
+the flex sources for documentation). The magic number used in the header
+is set to 0x1B5E783D insted of 0xF13C57B1 though, which is meant to
+indicate that the file format logically is not the same: the YY_ID_CHK
+(check) and YY_ID_DEF (default) tables are used differently.
+
+Flex uses state compression to store only the differences between states
+for states that are similar. The amount of compresion influences the parse
+speed.
+
+The following two states could be stored as in the tables outlined
+below:
+
+States and transitions on specific characters to next states
+------------------------------------------------------------
+ 1: ('a' => 2, 'b' => 3, 'c' => 4)
+ 2: ('a' => 2, 'b' => 3, 'd' => 5)
+
+Flex-like table format
+----------------------
+index: (default, base)
+    0: (      0,    0)  <== dummy state (nonmatching)
+    1: (      0,    0)
+    2: (      1,  256)
+
+  index: (next, check)
+      0: (   0,     0)  <== unused entry
+	 (   0,     1)  <== ord('a') identical entries
+  0+'a': (   2,     1)
+  0+'b': (   3,     1)
+  0+'c': (   4,     1)
+	 (   0,     1)  <== (255 - ord('c')) identical entries
+256+'c': (   0,     2)
+256+'d': (   5,     2)
+
+Here, state 2 is described as ('c' => 0, 'd' => 5), and everything else
+as in state 1. The matching algorithm is as follows.
+
+Flex-like scanner algorithm
+---------------------------
+  /* current state is in <state>, input character <c> */
+  while (check[base[state] + c] != state)
+    state = default[state];
+  state = next[state];
+  /* continue with the next input character */
+
+This state compression algorithm performs well, except when there are
+many inverted or wildcard matches ("[^x]", "."). Each input character
+may cause several iterations in the while loop.
+
+
+We will have many inverted character classes ("[^/]") that wouldn't
+compress very well. Therefore, the regexp matcher uses no state
+compression, and uses the check and default tables differently. The
+above states could be stored as follows:
+
+Regexp table format
+-------------------
+
+index: (default, base)
+    0: (      0,    0)  <== dummy state (nonmatching)
+    1: (      0,    0)
+    2: (      1,    3)
+
+  index: (next, check)
+      0: (   0,     0)  <== unused entry
+	 (   0,     0)  <== ord('a') identical, unused entries
+  0+'a': (   2,     1)
+  0+'b': (   3,     1)
+  0+'c': (   4,     1)
+  3+'a': (   2,     2)
+  3+'b': (   3,     2)
+  3+'c': (   0,     0)  <== entry is unused
+  3+'d': (   5,     2)
+	 (   0,     0)  <== (255 - ord('d')) identical, unused entries
+
+All the entries with 0 in check (except the first entry, which is
+deliberately reserved) are still available for other states that
+fit in there.
+
+Regexp scanner algorithm
+------------------------
+  /* current state is in <state>, matching character <c> */
+  if (check[base[state] + c] == state)
+    state = next[state];
+  else
+    state = default[state];
+  /* continue with the next input character */
+
+This representation and algorithm allows states which match more
+characters than they do not match to be represented as their inverse. 
+For example, a third state that accepts everything other than 'a' can
+be added to the tables as one entry in (default, base) and one entry in
+(next, check):
+
+State
+-----
+ 3: ('a' => 0, everything else => 5)
+
+Regexp tables
+-------------
+index: (default, base)
+    0: (      0,    0)  <== dummy state (nonmatching)
+    1: (      0,    0)
+    2: (      1,    3)
+    3: (      5,    7)
+
+  index: (next, check)
+      0: (   0,     0)  <== unused entry
+	 (   0,     0)  <== ord('a') identical, unused entries
+  0+'a': (   2,     1)
+  0+'b': (   3,     1)
+  0+'c': (   4,     1)
+  3+'a': (   2,     2)
+  3+'b': (   3,     2)
+  3+'c': (   0,     0)  <== entry is unused
+  3+'d': (   5,     2)
+  7+'a': (   0,     3)
+	 (   0,     0)  <== (255 - ord('a')) identical, unused entries
+
+While the current code does not implement any form of state compression,
+the flex state compression representation could be combined by
+remembering (in a bit per state, for example) which default entries
+refer to inverted matches, and which refer to parent states.

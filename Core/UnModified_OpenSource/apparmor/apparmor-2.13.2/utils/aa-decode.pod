@@ -1,0 +1,45 @@
+=pod
+
+=head1 NAME
+
+aa-decode - decode hex-encoded in AppArmor log files
+
+=head1 SYNOPSIS
+
+B<aa-decode> [option] E<lt>HEX STRINGE<gt>
+
+=head1 DESCRIPTION
+
+B<aa-decode> will decode hex-encoded strings as seen in AppArmor log
+output. It will also take an audit log on standard input and convert
+any hex-encoded AppArmor log entries and display them on standard
+output.
+
+=head1 OPTIONS
+
+=over 4
+
+=item --help
+
+displays a short usage statement.
+
+=back
+
+=head1 EXAMPLES
+
+  $ aa-decode 2F746D702F666F6F20626172
+  Decoded: /tmp/foo bar
+
+  $ cat /var/log/kern.log | aa-decode
+  ... denied_mask="r::" fsuid=1000 ouid=1000 name=/tmp/foo bar
+
+=head1 BUGS
+
+None. Please report any you find to Launchpad at
+L<https://bugs.launchpad.net/apparmor/+filebug>.
+
+=head1 SEE ALSO
+
+apparmor(7)
+
+=cut

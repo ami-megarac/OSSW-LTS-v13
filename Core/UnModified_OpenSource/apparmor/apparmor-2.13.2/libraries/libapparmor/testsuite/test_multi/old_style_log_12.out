@@ -1,0 +1,8 @@
+START
+File: old_style_log_12.in
+Event type: AA_RECORD_INVALID
+Audit ID: 1201615421.935:4837
+Operation: APPARMOR
+Info: PERMITTING link access from /home/jj/.fonts.cache-2.LCK to /home/jj/.fonts.cache-2.TMP-IyT7AP (firefox-bin(16844) profile null-complain-profile active null-complain-profile)
+Epoch: 1201615421
+Audit subid: 4837

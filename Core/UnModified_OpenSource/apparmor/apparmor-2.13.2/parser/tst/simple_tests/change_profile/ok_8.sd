@@ -1,0 +1,11 @@
+#
+#=DESCRIPTION change_profile with name space with quotes
+#=EXRESULT PASS
+#
+/usr/bin/foo {
+   change_profile -> ":foo:/bin/foo",
+}
+
+/usr/bin/foo2 {
+   change_profile -> ":foo:/bin/ foo",
+}

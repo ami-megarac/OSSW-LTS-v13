@@ -1,0 +1,119 @@
+# This publication is intellectual property of Canonical Ltd. Its contents
+# can be duplicated, either in part or in whole, provided that a copyright
+# label is visibly located on each copy.
+#
+# All information found in this book has been compiled with utmost
+# attention to detail. However, this does not guarantee complete accuracy.
+# Neither Canonical Ltd, the authors, nor the translators shall be held
+# liable for possible errors or the consequences thereof.
+#
+# Many of the software and hardware descriptions cited in this book
+# are registered trademarks. All trade names are subject to copyright
+# restrictions and may be registered trade marks. Canonical Ltd
+# essentially adheres to the manufacturer's spelling.
+#
+# Names of products and trademarks appearing in this book (with or without
+# specific notation) are likewise subject to trademark and trade protection
+# laws and may thus fall under copyright restrictions.
+#
+
+
+=pod
+
+=head1 NAME
+
+aa-notify - display information about logged AppArmor messages.
+
+=head1 SYNOPSIS
+
+B<aa-notify> [option]
+
+=head1 DESCRIPTION
+
+B<aa-notify> will display a summary or provide desktop notifications
+for AppArmor DENIED messages.
+
+=head1 OPTIONS
+
+B<aa-notify> accepts the following arguments:
+
+=over 4
+
+=item -p, --poll
+
+poll AppArmor logs and display desktop notifications. Can be used with '-s'
+option to display a summary on startup.
+
+=item --display $DISPLAY
+
+set the DISPLAY environment variable to $DISPLAY
+(might be needed if sudo resets $DISPLAY)
+
+=item -f FILE, --file=FILE
+
+search FILE for AppArmor messages
+
+=item -l, --since-last
+
+show summary since last login.
+
+=item -s NUM, --since-days=NUM
+
+show summary for last NUM of days.
+
+=item -u USER, --user=USER
+
+user to drop privileges to when running privileged. When used with the -p
+option, this should be set to the user that will receive desktop notifications.
+This has no effect when running under sudo.
+
+=item -w NUM, --wait=NUM
+
+wait NUM seconds before displaying notifications (for use with -p)
+
+=item -v, --verbose
+
+show messages with summaries.
+
+=item -h, --help
+
+displays a short usage statement.
+
+=back
+
+=head1 CONFIGURATION
+
+System-wide configuration for B<aa-notify> is done via
+/etc/apparmor/notify.conf:
+
+  # set to 'yes' to enable AppArmor DENIED notifications
+  show_notifications="yes"
+
+  # only people in use_group can use aa-notify
+  use_group="admin"
+
+  # OPTIONAL - custom notification message body
+  message_body="This is a custom notification message."
+
+  # OPTIONAL - custom notification message footer
+  message_footer="For more information visit https://foo.com"
+
+Per-user configuration is done via $XDG_CONFIG_HOME/apparmor/notify.conf (or
+the deprecated ~/.apparmor/notify.conf if it exists):
+
+  # set to 'yes' to enable AppArmor DENIED notifications
+  show_notifications="yes"
+
+=head1 BUGS
+
+B<aa-notify> needs to be able to read the logfiles containing the
+AppArmor DENIED messages.
+
+If you find any additional bugs, please report them to Launchpad at
+L<https://bugs.launchpad.net/apparmor/+filebug>.
+
+=head1 SEE ALSO
+
+apparmor(7)
+
+=cut

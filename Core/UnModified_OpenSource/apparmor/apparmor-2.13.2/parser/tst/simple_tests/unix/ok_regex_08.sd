@@ -1,0 +1,8 @@
+#
+#=DESCRIPTION unix rule with regex expansion that is quoted
+#=EXRESULT PASS
+#
+
+profile foo {
+  unix addr="@splat ",
+}

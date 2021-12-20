@@ -1,0 +1,24 @@
+#
+#=DESCRIPTION audit deny change_profile
+#=EXRESULT PASS
+#
+/usr/bin/foo {
+   audit deny change_profile -> /bin/*,
+}
+
+/usr/bin/foo2 {
+   audit deny change_profile -> /bin/**,
+}
+
+/usr/bin/foo3 {
+   audit deny change_profile -> /bin/?,
+}
+
+/usr/bin/foo4 {
+   audit deny change_profile -> /bin/[ab],
+}
+
+/usr/bin/foo5 {
+   audit deny change_profile -> /bin/[^ab],
+}
+

@@ -1,0 +1,7 @@
+#=DESCRIPTION simple expansions within file rules with underscore variable
+#=EXRESULT PASS
+@{F_OO} = /foo /bar /baz /biff
+
+/usr/bin/foo {
+  /@{F_OO}/.foo/* r,
+}

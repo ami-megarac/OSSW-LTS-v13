@@ -1,0 +1,58 @@
+# ----------------------------------------------------------------------
+#    Copyright (c) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007,
+#                  2008, 2009
+#    NOVELL (All rights reserved)
+#
+#    Copyright (c) 2010 - 2012
+#    Canonical Ltd. (All rights reserved)
+#
+#    This program is free software; you can redistribute it and/or
+#    modify it under the terms of version 2 of the GNU General Public
+#    License published by the Free Software Foundation.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program; if not, contact Canonical, Ltd.
+# ----------------------------------------------------------------------
+
+
+=pod
+
+=head1 NAME
+
+apparmor.vim - vim syntax highlighting file for AppArmor profiles
+
+=head1 SYNOPSIS
+
+Your system may be configured to automatically use syntax highlighting
+for installed AppArmor policies. If not, you can enable syntax highlighting in
+a specific vim session by performing:
+
+ :set syntax=apparmor
+
+=head1 DESCRIPTION
+
+B<apparmor.vim> provides syntax highlighting rules for the vim(1) text
+editor; the rules provide an easy visual method to inspect AppArmor
+profiles for syntax correctness and semantics.
+
+The colors indicate the relative severity of granting a specific set of
+privileges. Ranking access with colors is necessarily generic and vague,
+but it may help you understand your profiles better.
+
+=head1 BUGS
+
+B<apparmor.vim> does not properly detect dark versus light backgrounds.
+Patches accepted. If you find any bugs, please report them at
+L<https://bugs.launchpad.net/apparmor/+filebug>.
+
+=head1 SEE ALSO
+
+vim(1), apparmor(7), apparmor.d(5), aa_change_hat(2), and
+L<https://wiki.apparmor.net>.
+
+=cut

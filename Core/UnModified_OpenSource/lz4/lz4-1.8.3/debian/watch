@@ -1,0 +1,3 @@
+version=3
+opts=filenamemangle=s/.+\/v?(\d\S*)\.tar\.gz/lz4-$1.tar.gz/,dversionmangle=s/\+dfsg// \
+  https://github.com/lz4/lz4/tags .*/v?(\d\S*)\.tar\.gz

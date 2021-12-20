@@ -1,0 +1,10 @@
+GENERATING TRANSLATION MESSAGES
+
+To generate the messages.pot file:
+
+Run the following command in Translate.
+python pygettext.py ../apparmor/*.py ../Tools/aa*
+
+It will generate the messages.pot file in the Translate directory.
+
+You might need to provide the full path to pygettext.py from your python installation. It will typically be in the /path/to/python/libs/Tools/i18n/pygettext.py

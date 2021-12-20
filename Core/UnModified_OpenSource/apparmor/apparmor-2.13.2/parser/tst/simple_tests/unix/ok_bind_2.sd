@@ -1,0 +1,7 @@
+#
+#=DESCRIPTION simple unix bind acceptance test
+#=EXRESULT PASS
+
+profile a_profile {
+  unix bind,
+}

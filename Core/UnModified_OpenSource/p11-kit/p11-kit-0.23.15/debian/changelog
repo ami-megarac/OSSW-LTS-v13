@@ -1,0 +1,732 @@
+p11-kit (0.23.15-2+deb10u1) buster-security; urgency=high
+
+  * Non-maintainer upload by the Security Team.
+  * Fix bounds check in p11_rpc_buffer_get_byte_array (CVE-2020-29362)
+  * Check attribute length against buffer size (CVE-2020-29363)
+  * Check for arithmetic overflows before allocating (CVE-2020-29361)
+  * Follow-up to arithmetic overflow fix (CVE-2020-29361)
+
+ -- Salvatore Bonaccorso <carnil@debian.org>  Tue, 29 Dec 2020 15:48:30 +0100
+
+p11-kit (0.23.15-2) unstable; urgency=medium
+
+  * Upload to unstable.
+
+ -- Andreas Metzler <ametzler@debian.org>  Sat, 16 Feb 2019 13:20:53 +0100
+
+p11-kit (0.23.15-1) experimental; urgency=low
+
+  * Run "wrap-and-sort --max-line-length=72 --short-indent".
+  * Drop automake (>= 1.12) from Build-Depends; automake 1.14 is
+    now in oldstable. (And BTW the b-d did not work anyway, automake has an
+    epoch.)
+  * New upstream version.
+    + 45_01-extract-jks-Prefer-_p11_extract_jks_timestamp-to-SOU.patch Post
+      release bugfix from upstream GIT master, fixing a testsuite error when
+      SOURCE_DATE_EPOCH is set.
+    + If the trust file is not parsable in the p11-kit persistent format
+      proceed with the next formats (DER and PEM). Closes: #914199
+  * Use debhelper 11 compat level.
+
+ -- Andreas Metzler <ametzler@debian.org>  Fri, 15 Feb 2019 18:03:48 +0100
+
+p11-kit (0.23.14-2) unstable; urgency=medium
+
+  * Upload to unstable.
+
+ -- Andreas Metzler <ametzler@debian.org>  Thu, 30 Aug 2018 19:26:37 +0200
+
+p11-kit (0.23.14-1) experimental; urgency=medium
+
+  * New upstream version.
+    + Refresh patches.
+
+ -- Andreas Metzler <ametzler@debian.org>  Tue, 28 Aug 2018 19:48:30 +0200
+
+p11-kit (0.23.13-2) unstable; urgency=low
+
+  * Upload to unstable.
+
+ -- Andreas Metzler <ametzler@debian.org>  Wed, 15 Aug 2018 11:06:36 +0200
+
+p11-kit (0.23.13-1) experimental; urgency=low
+
+  * New upstream version.
+    + Refresh patches.
+  * Enable dh_missing.
+  * Set Rules-Requires-Root: no.
+
+ -- Andreas Metzler <ametzler@debian.org>  Sat, 11 Aug 2018 13:58:11 +0200
+
+p11-kit (0.23.12-2) unstable; urgency=medium
+
+  * Upload to unstable.
+
+ -- Andreas Metzler <ametzler@debian.org>  Sat, 09 Jun 2018 19:41:35 +0200
+
+p11-kit (0.23.12-1) experimental; urgency=low
+
+  * New upstream version.
+    + Unfuzz 30_nogetauxvalonbsd.diff, 35_hurd_enable_secure.diff and
+      41_kfreebsd_LOCAL_PEERCRED.diff.
+    + Drop 45_Fix-bashism.patch.
+  * [lintian] Drop dh_strip --ddeb-migration override. - Stable already
+    includes this.
+  * Update upstream homepage location.
+  * Newly added P11_KIT_MODULE_MASK flag, update symbol file.
+
+ -- Andreas Metzler <ametzler@debian.org>  Mon, 04 Jun 2018 19:16:26 +0200
+
+p11-kit (0.23.10-2) unstable; urgency=low
+
+  * Upload to unstable.
+  * Point Vcs* to salsa.
+
+ -- Andreas Metzler <ametzler@debian.org>  Wed, 28 Mar 2018 19:29:26 +0200
+
+p11-kit (0.23.10-1) experimental; urgency=low
+
+  * New upstream version.
+    + 45_Fix-bashism.patch: Fix testsuite error due to bashism.
+    + Update symbol file.
+  * Refer to upstream https URL in control and copyright files.
+  * Sync priorities with override file. (libp11-kit0 standard -> optional)
+  * Use dh v10 compat.
+
+ -- Andreas Metzler <ametzler@debian.org>  Wed, 28 Feb 2018 19:20:54 +0100
+
+p11-kit (0.23.9-2) unstable; urgency=low
+
+  * Upload to unstable.
+
+ -- Andreas Metzler <ametzler@debian.org>  Sat, 14 Oct 2017 07:02:43 +0200
+
+p11-kit (0.23.9-1) experimental; urgency=low
+
+  * New upstream version.
+    + Drop 40_bsd_missinginclude.diff.
+  * Sync priorities with override file (extra -> optional).
+
+ -- Andreas Metzler <ametzler@debian.org>  Fri, 06 Oct 2017 19:14:31 +0200
+
+p11-kit (0.23.8-2) experimental; urgency=low
+
+  * 40_bsd_missinginclude.diff add missing #include <stdint.h> to get SIZE_MAX
+    even on kfreebsd. Other arch seem to include it indirectly via another
+    #included header.
+  * 41_kfreebsd_LOCAL_PEERCRED.diff: On kfreeBSD use getsockopt(...,
+    LOCAL_PEERCRED, ...) since neither SO_PEERCRED nor getpeereid() nor
+    getpeerucred() are available.
+
+ -- Andreas Metzler <ametzler@debian.org>  Sun, 03 Sep 2017 12:47:32 +0200
+
+p11-kit (0.23.8-1) experimental; urgency=low
+
+  * New upstream version.
+    + Unfuzz 30_nogetauxvalonbsd.diff, drop
+      40_test-Fix-failure-on-32-bit-big-endian-platform.patch.
+
+ -- Andreas Metzler <ametzler@debian.org>  Tue, 29 Aug 2017 19:53:04 +0200
+
+p11-kit (0.23.7-3) unstable; urgency=low
+
+  * 40_test-Fix-failure-on-32-bit-big-endian-platform.patch from upstream GIT:
+    Fix test-error on 32-bit big endian platforms. Closes: #866764
+
+ -- Andreas Metzler <ametzler@debian.org>  Fri, 14 Jul 2017 19:13:12 +0200
+
+p11-kit (0.23.7-2) unstable; urgency=low
+
+  * libp11-kit0: Add Breaks: opencryptoki (<= 3.6.1+dfsg-1) to enforce upgrade
+    of opencryptoki to a version without /etc/pkcs11 symlink to private
+    directory. Closes: #860903
+  * p11-kit-extract-trust was renamed to trust-extract-compat in 0.19.4, fix
+    debian/p11-kit.examples.
+  * Upload to unstable.
+
+ -- Andreas Metzler <ametzler@debian.org>  Sat, 01 Jul 2017 13:40:07 +0200
+
+p11-kit (0.23.7-1) experimental; urgency=low
+
+  * New upstream version.
+    + Add p11_kit_remote_serve_tokens to symbol file.
+    + Update debian/copyright.
+
+ -- Andreas Metzler <ametzler@debian.org>  Sat, 03 Jun 2017 11:44:13 +0200
+
+p11-kit (0.23.5-1) experimental; urgency=low
+
+  * New upstream version.
+  * Update debian/copyright.
+
+ -- Andreas Metzler <ametzler@debian.org>  Thu, 02 Mar 2017 18:23:28 +0100
+
+p11-kit (0.23.4-1) experimental; urgency=low
+
+  * New upstream version.
+    + Unfuzz patches.
+    + List new symbols in libp11-kit0.symbols. Bump dependency info on
+      p11_kit_iter_new@Base.
+  * Ship libdir/p11-kit/p11-kit-server and p11-kit/p11-kit-remote in p11-kit
+    package.
+  * Ship client-side p11-kit-client.so for PKCS#11 forwarding through a Unix
+    domain socket.
+
+ -- Andreas Metzler <ametzler@debian.org>  Sun, 26 Feb 2017 15:32:01 +0100
+
+p11-kit (0.23.3-5) unstable; urgency=medium
+
+  * Drop 40_01_uri-fix-the-query-attribute-parsing.patch
+    40_02_uri-fix-producing-the-query-attributes.patch
+    40_03_uri-Avoid-typecasting-confusion-on-s390x.patch, again.
+    Closes: #852227
+
+ -- Andreas Metzler <ametzler@debian.org>  Sat, 28 Jan 2017 15:15:35 +0100
+
+p11-kit (0.23.3-4) unstable; urgency=medium
+
+  * Add 40_03_uri-Avoid-typecasting-confusion-on-s390x.patch from
+    https://github.com/p11-glue/p11-kit/pull/34 to fix testsuite error on
+    s390x.
+
+ -- Andreas Metzler <ametzler@debian.org>  Mon, 16 Jan 2017 18:56:54 +0100
+
+p11-kit (0.23.3-3) unstable; urgency=medium
+
+  * 40_01_uri-fix-the-query-attribute-parsing.patch
+    40_02_uri-fix-producing-the-query-attributes.patch from upstream GIT
+    master.
+  * Stop referencing upstream snapshot 0.23.2-50-geb391c0 in symbol file.
+
+ -- Andreas Metzler <ametzler@debian.org>  Sun, 15 Jan 2017 16:14:36 +0100
+
+p11-kit (0.23.3-2) unstable; urgency=medium
+
+  * Upload to unstable.
+
+ -- Andreas Metzler <ametzler@debian.org>  Thu, 29 Dec 2016 15:59:00 +0100
+
+p11-kit (0.23.3-1) experimental; urgency=medium
+
+  * Add 462225C3B46F34879FC8496CD605848ED7E69871 Daiki Ueno to list of
+    upstream signing keys and move over to ascii armored keyring.
+  * Point watchfile to github.
+  * New upstream version.
+
+ -- Andreas Metzler <ametzler@debian.org>  Sat, 24 Dec 2016 15:44:39 +0100
+
+p11-kit (0.23.2-50-geb391c0-1) experimental; urgency=medium
+
+  * New upstream snapshot.
+  * Update copyright.
+  * Update symbol file.
+
+ -- Andreas Metzler <ametzler@debian.org>  Wed, 14 Dec 2016 19:30:07 +0100
+
+p11-kit (0.23.2-5) unstable; urgency=medium
+
+  * Build and ship upstream manpages. (Thanks, Julien Cristau)
+    + Add b-d on gtk-doc-tools.
+    + Pass --enable-doc to ./configure.
+    + Drop minimal debian/p11-kit.1 manpage.
+    Closes: #834992
+
+ -- Andreas Metzler <ametzler@debian.org>  Sun, 21 Aug 2016 16:03:45 +0200
+
+p11-kit (0.23.2-4) unstable; urgency=medium
+
+  * Move Vcs-* from git/http to https.
+  * Improved package description by Justin B Rye. Closes: #822860
+  * Build with hardening=+all.
+
+ -- Andreas Metzler <ametzler@debian.org>  Sun, 31 Jul 2016 13:17:21 +0200
+
+p11-kit (0.23.2-3) unstable; urgency=medium
+
+  * Migrate from -dbg package to ddebs. dh_strip's --ddeb-migration
+    option was added to debhelper/unstable with version 9.20150628, bump
+    build-dependency accordingly.
+
+ -- Andreas Metzler <ametzler@debian.org>  Sun, 27 Dec 2015 13:15:04 +0100
+
+p11-kit (0.23.2-2) unstable; urgency=medium
+
+  * Upload to unstable.
+
+ -- Andreas Metzler <ametzler@debian.org>  Sun, 20 Dec 2015 13:35:49 +0100
+
+p11-kit (0.23.2-1) experimental; urgency=medium
+
+  * New upstream version.
+    + Refresh patches.
+    + New symbol p11_kit_module_get_filename().
+
+ -- Andreas Metzler <ametzler@debian.org>  Tue, 08 Dec 2015 08:16:19 +0100
+
+p11-kit (0.23.1-3) unstable; urgency=medium
+
+  * Build-fixes for hurd by Pino Toscano:
+    + 30_nogetauxvalonbsd.diff: Always use _p11_getauxval() helper.
+    + 35_hurd_enable_secure.diff: Disable __libc_enable_secure usage on Hurd.
+    Closes: #792095
+
+ -- Andreas Metzler <ametzler@debian.org>  Sat, 11 Jul 2015 11:53:04 +0200
+
+p11-kit (0.23.1-2) unstable; urgency=medium
+
+  * Upload to unstable.
+
+ -- Andreas Metzler <ametzler@debian.org>  Mon, 27 Apr 2015 07:48:19 +0200
+
+p11-kit (0.23.1-1) experimental; urgency=medium
+
+  * Mark libp11-kit-dev Multi-Arch: same.
+  * New upstream release.
+    + Add new functions p11_kit_uri_{get,set}_pin_value to symbol file.
+
+ -- Andreas Metzler <ametzler@debian.org>  Sat, 21 Feb 2015 08:16:47 +0100
+
+p11-kit (0.22.1-2) experimental; urgency=medium
+
+  * Update 30_nogetauxvalonbsd.diff to also use issetugid() instead of
+    getauxval() in p11-kit's version of secure_getenv() on *bsd.
+
+ -- Andreas Metzler <ametzler@debian.org>  Sat, 18 Oct 2014 18:28:18 +0200
+
+p11-kit (0.22.1-1) experimental; urgency=medium
+
+  * New upstream stable release.
+
+ -- Andreas Metzler <ametzler@debian.org>  Sun, 12 Oct 2014 14:01:37 +0200
+
+p11-kit (0.22.0-1) experimental; urgency=medium
+
+  * New upstream stable release.
+    + Refresh 30_nogetauxvalonbsd.diff.
+    + Update debian/copyright.
+  * Avoid refering to upstream unstable releases in Debian package
+    dependencies by bumping symbol dependencies from 0.21.x 0.22.0.
+  * Invoke dpkg-gensymbols with -c4 instead of -c2.
+
+ -- Andreas Metzler <ametzler@debian.org>  Sun, 05 Oct 2014 08:46:11 +0200
+
+p11-kit (0.21.3-1) experimental; urgency=medium
+
+  * New upstream unstable release.
+
+ -- Andreas Metzler <ametzler@debian.org>  Fri, 19 Sep 2014 19:50:21 +0200
+
+p11-kit (0.21.2-1) experimental; urgency=medium
+
+  * New upstream unstable release.
+    + Refresh 30_nogetauxvalonbsd.diff.
+    + Update symbol file. (p11_kit_remote_serve_module newly added).
+
+ -- Andreas Metzler <ametzler@debian.org>  Sun, 07 Sep 2014 15:41:53 +0200
+
+p11-kit (0.20.7-1) unstable; urgency=medium
+
+  * New upstream version.
+
+ -- Andreas Metzler <ametzler@debian.org>  Fri, 19 Sep 2014 19:25:30 +0200
+
+p11-kit (0.20.3-2) unstable; urgency=medium
+
+  * Upload to unstable.
+
+ -- Andreas Metzler <ametzler@debian.org>  Fri, 08 Aug 2014 17:59:21 +0200
+
+p11-kit (0.20.3-1) experimental; urgency=medium
+
+  * Build-Depend on automake (>= 1.12). Closes: #748329
+  * New upstream release.
+
+ -- Andreas Metzler <ametzler@debian.org>  Sat, 05 Jul 2014 08:04:21 +0200
+
+p11-kit (0.20.2-5) unstable; urgency=medium
+
+  [ Manuel A. Fernandez Montecelo ]
+  * Build-Depend on and use dh-autoreconf to regenerate config.{sub,guess} and
+    support new architectures more easily. Closes: #744400
+
+  [ Andreas Metzler ]
+  * Drop 31_autoreconf.diff, and change enable_locale.diff to patch
+    configure.ac instead of configure.
+
+ -- Andreas Metzler <ametzler@debian.org>  Sun, 13 Apr 2014 18:20:40 +0200
+
+p11-kit (0.20.2-4) unstable; urgency=medium
+
+  * Add missing Breaks/Replaces p11-kit to p11-kit-modules. (Thanks, Iain
+    Lane) Closes: #742204
+
+ -- Andreas Metzler <ametzler@debian.org>  Thu, 20 Mar 2014 18:52:42 +0100
+
+p11-kit (0.20.2-3) unstable; urgency=medium
+
+  * Upload to unstable.
+
+ -- Andreas Metzler <ametzler@debian.org>  Thu, 20 Mar 2014 16:42:15 +0100
+
+p11-kit (0.20.2-2) experimental; urgency=medium
+
+  * Split off multiarch:same p11-kit-modules from p11-kit binary package.
+    Closes: #720013 (Patch by Raphael Geissert)
+  * Symlink /usr/share/doc/p11-kit-modules to /usr/share/doc/libp11-kit0.
+
+ -- Andreas Metzler <ametzler@debian.org>  Sun, 16 Mar 2014 08:54:24 +0100
+
+p11-kit (0.20.2-1) unstable; urgency=medium
+
+  * Point vcs* to git.
+  * Add debian/upstream-signing-key.pgp (listed in
+    debian/source/include-binaries) and update watchfile to check
+    upstream signature.
+  * New upstream version.
+    + Drop 20_disablesgidtest.diff, included upstream.
+    + Add newly added symbol p11_kit_iter_get_attributes to symbol file.
+
+ -- Andreas Metzler <ametzler@debian.org>  Sat, 18 Jan 2014 19:49:43 +0100
+
+p11-kit (0.20.1-3) unstable; urgency=low
+
+  * Upload to unstable.
+
+ -- Andreas Metzler <ametzler@debian.org>  Sun, 10 Nov 2013 17:49:39 +0100
+
+p11-kit (0.20.1-2) experimental; urgency=low
+
+  * Re-enable .so-symlink, allowing dynamic linking, since the symbols
+    dropped in 0.20.0 are private, experimental and not used by p11-kit's
+    reverse dependencies. Closes: #726497
+
+ -- Andreas Metzler <ametzler@debian.org>  Sat, 19 Oct 2013 15:32:50 +0200
+
+p11-kit (0.20.1-1) experimental; urgency=low
+
+  * New upstream bugfix release.
+
+ -- Andreas Metzler <ametzler@debian.org>  Sat, 14 Sep 2013 09:11:25 +0200
+
+p11-kit (0.20.0-1) experimental; urgency=low
+
+  * New upstream stable release. Closes: #721842
+    + Requires libffi, add b-d on libffi-dev.
+    + Port/unfuzz patches.
+    + Update symbol file.
+  * Upload to experimental, without .so-symlink since a soname bump might be
+    necessary.
+
+ -- Andreas Metzler <ametzler@debian.org>  Sun, 08 Sep 2013 13:31:39 +0200
+
+p11-kit (0.18.5-3) unstable; urgency=low
+
+  * Upload to unstable.
+
+ -- Andreas Metzler <ametzler@debian.org>  Sat, 07 Sep 2013 08:00:23 +0200
+
+p11-kit (0.18.5-2) experimental; urgency=low
+
+  * 30_nogetauxvalonbsd.diff 31_autoreconf.diff: Do not use getauxval on
+    !linux, prefering issetugid(). Closes: #718285
+  * Upload to experimental.
+
+ -- Andreas Metzler <ametzler@debian.org>  Sat, 31 Aug 2013 15:05:17 +0200
+
+p11-kit (0.18.5-1) unstable; urgency=low
+
+  * New upstream version.
+  * configure with --with-hash-impl=internal.
+  * 20_disablesgidtest.diff - Disable two tests when running under fakeroot.
+
+ -- Andreas Metzler <ametzler@debian.org>  Wed, 24 Jul 2013 18:44:43 +0200
+
+p11-kit (0.18.4-1) unstable; urgency=low
+
+  * New upstream bugfix release.
+
+ -- Andreas Metzler <ametzler@debian.org>  Sat, 29 Jun 2013 08:18:04 +0200
+
+p11-kit (0.18.3-2) unstable; urgency=low
+
+  * Upload to unstable.
+
+ -- Andreas Metzler <ametzler@debian.org>  Sat, 15 Jun 2013 18:29:26 +0200
+
+p11-kit (0.18.3-1) experimental; urgency=low
+
+  * New upstream bugfix release.
+  * Fix vcs-field-not-canonical lintian error by refering to anonscm instead
+    of svn.debian.org.
+
+ -- Andreas Metzler <ametzler@debian.org>  Sun, 09 Jun 2013 13:31:21 +0200
+
+p11-kit (0.18.2-1) experimental; urgency=low
+
+  * New upstream release.
+
+ -- Andreas Metzler <ametzler@debian.org>  Sun, 26 May 2013 18:02:53 +0200
+
+p11-kit (0.18.1-1) experimental; urgency=low
+
+  * New upstream release.
+
+ -- Andreas Metzler <ametzler@debian.org>  Sat, 20 Apr 2013 08:36:17 +0200
+
+p11-kit (0.18.0-1) experimental; urgency=low
+
+  * New upstream version. Drop superfluous patches.
+    (murmurtest_bigendian.diff, update_to_MurmurHash3.diff)
+
+ -- Andreas Metzler <ametzler@debian.org>  Fri, 05 Apr 2013 20:00:31 +0200
+
+p11-kit (0.17.4-3) experimental; urgency=low
+
+  * [update_to_MurmurHash3.diff] fix FTBFS on armel (verified) and sparc.
+
+ -- Andreas Metzler <ametzler@debian.org>  Tue, 02 Apr 2013 19:38:34 +0200
+
+p11-kit (0.17.4-2) experimental; urgency=low
+
+  * murmurtest_bigendian.diff: Fix testsuite error on bigendian systems.
+
+ -- Andreas Metzler <ametzler@debian.org>  Tue, 26 Mar 2013 19:32:44 +0100
+
+p11-kit (0.17.4-1) experimental; urgency=low
+
+  * New upstream release.
+    + Drop noexport_constructor.diff, applied upstream.
+    + configure with --with-trust-paths=.. instead of --with-system-anchors.
+  * After geting permission from Chris Coulson change license of Debian
+    packaging to match upstresm license
+
+ -- Andreas Metzler <ametzler@debian.org>  Sun, 24 Mar 2013 16:06:47 +0100
+
+p11-kit (0.16.4-1) experimental; urgency=low
+
+  * New upstream release. Closes: #702538
+  * Drop relicense_buffer-code.diff.
+  * [noexport_constructor.diff] Make p11_kit_(init|fini) private symbols, it
+    does not seem to be necessary to export (de)constructors.
+    (__attribute__((constructor))).
+
+ -- Andreas Metzler <ametzler@debian.org>  Sat, 16 Mar 2013 17:04:05 +0100
+
+p11-kit (0.15.2-1) experimental; urgency=low
+
+  * New upstream *development* release (second part of version is an odd
+    number). Closes: #700689
+    + Add build-depends on pkg-config and libtasn1-6-dev.
+    + Point --with-system-anchors to /etc/ssl/certs/ca-certificates.crt.
+    + Update symbol file.
+  * Ship system trust policy module in p11-kit package.
+  * Enable (enable_locale.diff) and ship gettext translations.
+    Closes: #641994
+  * relicense_buffer-code.diff (from upstream GIT), relicense two files
+    from GPLv2+ to to BSD.
+  * Symlink html docs from gtk-doc to /usr/share/doc/libp11-kit-dev.
+    Closes: #700668
+  * Add libp11-kit0-dbg (Roughly based on patch by Daniel Kahn Gillmor).
+    Closes: #700655
+
+ -- Andreas Metzler <ametzler@debian.org>  Sat, 16 Feb 2013 16:38:07 +0100
+
+p11-kit (0.14-1) experimental; urgency=low
+
+  * New upstream version.
+    + Drop 01_no_duplicate_symbols.patch.
+    + Requires .module filename extension for module autoloading. This
+      replaces Ubuntu's valid-config-files.patch, which blaclist .dpkg*
+      instead of only whitelisting .module.
+
+ -- Andreas Metzler <ametzler@debian.org>  Thu, 06 Sep 2012 19:35:07 +0200
+
+p11-kit (0.13-1) experimental; urgency=low
+
+  * New upstream version.
+    + Drop patches previously pulled from upstream (10_broken-hashmap-behavior
+      11_crash-when-duplicate).
+  * Invoke dpkg-gensymbols with -c2.
+  * Update symbols file, adding p11_kit_set_progname.
+  * Pulled from upstream: 01_no_duplicate_symbols.patch, fixing a build error
+    with clang.
+
+ -- Andreas Metzler <ametzler@debian.org>  Tue, 17 Jul 2012 14:15:39 +0200
+
+p11-kit (0.12-3) unstable; urgency=low
+
+  * Pull two patches from upstream:
+    + 10_broken-hashmap-behavior: Fix build-error with squeeze gcc. See also
+      #651595.
+    + 11_crash-when-duplicate: Do not crash on duplicate modules. See
+      LP#911436, this replaces Ubuntu's duplicate-module-fix.patch.
+  * Ship p11-kit proxy module with package p11-kit in directory /usr/lib.
+    Closes: #656623
+
+ -- Andreas Metzler <ametzler@debian.org>  Tue, 17 Apr 2012 19:27:46 +0200
+
+p11-kit (0.12-2) unstable; urgency=low
+
+  * Upload to unstable.
+
+ -- Andreas Metzler <ametzler@debian.org>  Wed, 14 Mar 2012 18:10:03 +0100
+
+p11-kit (0.12-1) experimental; urgency=low
+
+  * Drop DEB_CPPFLAGS_MAINT_APPEND = -D_XOPEN_SOURCE=600 -D_BSD_SOURCE,
+    upstream's usage of AC_USE_SYSTEM_EXTENSIONS should make this unnecessary.
+  * Upload to experimental, let 0.11-3 propagate to wheezy.
+
+ -- Andreas Metzler <ametzler@debian.org>  Fri, 09 Mar 2012 19:16:25 +0100
+
+p11-kit (0.11-3) unstable; urgency=low
+
+  * Do not export CPPFLAGS in debian/rules, it disabled the respective
+    hardening-options. (Thanks, Simon Ruderich) Closes: #662100
+
+ -- Andreas Metzler <ametzler@debian.org>  Sun, 04 Mar 2012 08:07:12 +0100
+
+p11-kit (0.11-2) unstable; urgency=low
+
+  * Bump versioning of p11_kit_initialize_registered,
+    p11_kit_initialize_module and p11_kit_load_initialize_module.
+    (Due to upstream change "Remove automatic reinitialization of PKCS#11
+    after fork")
+  * Use debhelper v9 compat to get dpkg-buildflags. Drop --libdir argument to
+    ./configure, bump b-d.
+
+ -- Andreas Metzler <ametzler@debian.org>  Sat, 03 Mar 2012 18:42:52 +0100
+
+p11-kit (0.11-1) unstable; urgency=low
+
+  * New upstream version.
+
+ -- Andreas Metzler <ametzler@debian.org>  Sat, 11 Feb 2012 09:54:47 +0100
+
+p11-kit (0.10-1) unstable; urgency=low
+
+  * New upstream version.
+  * Drop 0001-workaround_gccbug.diff.
+
+ -- Andreas Metzler <ametzler@debian.org>  Wed, 04 Jan 2012 19:35:00 +0100
+
+p11-kit (0.9-3) unstable; urgency=low
+
+  * Brown paper bag release.
+  * Revert module-path change, gnome-keyring *has* switched.
+    Closes: #653033, #653034
+
+ -- Andreas Metzler <ametzler@debian.org>  Fri, 23 Dec 2011 08:40:38 +0100
+
+p11-kit (0.9-2) unstable; urgency=low
+
+  * Upload to unstable.
+  * [0001-workaround_gccbug.diff] pulled from upstream. Work around gcc
+    optimization bug on i386. See #651595.
+  * Don't look for PKCS#11 modules in multiarch dir yet, wait for
+    gnome-keyring to switch. #645959
+
+ -- Andreas Metzler <ametzler@debian.org>  Thu, 22 Dec 2011 14:33:36 +0100
+
+p11-kit (0.9-1) experimental; urgency=low
+
+  * New upstream version.
+  * Test whether building with -D_XOPEN_SOURCE=600 -D_BSD_SOURCE succeeds.
+
+ -- Andreas Metzler <ametzler@debian.org>  Sat, 26 Nov 2011 16:22:40 +0100
+
+p11-kit (0.8-2) unstable; urgency=low
+
+  * Build with -D_GNU_SOURCE on DEB_BUILD_ARCH_OS != linux. Works around
+    647823 and Closes: #647229
+
+ -- Andreas Metzler <ametzler@debian.org>  Sat, 12 Nov 2011 08:58:27 +0100
+
+p11-kit (0.8-1) unstable; urgency=low
+
+  * New upstream version.
+    + Drop 20_path_max.diff, included upstream.
+
+ -- Andreas Metzler <ametzler@debian.org>  Mon, 31 Oct 2011 14:40:56 +0100
+
+p11-kit (0.7-2) unstable; urgency=low
+
+  * 20_path_max.diff Fix FTBFS on GNU/Hurd due to missing PATH_MAX (Thanks,
+    Pino Toscano). Closes: #643601
+
+ -- Andreas Metzler <ametzler@debian.org>  Wed, 28 Sep 2011 19:22:40 +0200
+
+p11-kit (0.7-1) unstable; urgency=low
+
+  * New upstream version.
+    + Expand p11-kit config variables correctly. Closes: #642041
+
+ -- Andreas Metzler <ametzler@debian.org>  Tue, 27 Sep 2011 19:14:47 +0200
+
+p11-kit (0.6-1) unstable; urgency=low
+
+  * New upstream version.
+  * [lintian] Fix syntax error in debian/copyright.
+
+ -- Andreas Metzler <ametzler@debian.org>  Thu, 15 Sep 2011 19:23:23 +0200
+
+p11-kit (0.4-2) unstable; urgency=low
+
+  * Add Build-Depends-Package safeguard to symbol file.
+
+ -- Andreas Metzler <ametzler@debian.org>  Fri, 26 Aug 2011 18:12:25 +0200
+
+p11-kit (0.4-1) experimental; urgency=low
+
+  * Fix typo in package description. (Thanks, Aputsiaq Janussen)
+    Closes: #638226
+  * New upstream version.
+  * Update symbol file.
+  * Ship pkcs11.conf.example in /usr/share/doc/.
+
+ -- Andreas Metzler <ametzler@debian.org>  Fri, 19 Aug 2011 11:23:56 +0200
+
+p11-kit (0.3-2) unstable; urgency=low
+
+  * Upload to unstable.
+
+ -- Andreas Metzler <ametzler@debian.org>  Sun, 14 Aug 2011 13:08:15 +0200
+
+p11-kit (0.3-1) experimental; urgency=low
+
+  * Upload to Debian. (LP: #819939) Closes: #636938
+  * Add watch file.
+  * Convert to multi-arch:
+   + configure with --libdir=\$${prefix}/lib/$(DEB_HOST_MULTIARCH), update
+     *.install accordingly.
+   + Bump debhelper b-d to 8.1.3 (for ${misc:Pre-Depends}).
+   + runtime library is Multi-Arch: same with Pre-Depends:
+     ${misc:Pre-Depends}, -bin is Multi-Arch: foreign, -dev remains
+     unchanged.
+  * Bump libp11-kit0 Priority to standard, libp11-kit-dev Priority to
+    optional, since these are future libgnutls(-dev) rdeps.
+  * [control] Drop Section setting from libp11-kit0 stanza to make lintian
+    --pedantic happy.
+  * Build with --disable-silent-rules.
+  * Add Vcs-Svn and Vcs-Browser fields.
+  * New upstream version, does not contain Apache 2.0 licensed code anymore.
+  * Add info for p11-kit/pkcs11.h to debian/copyright, drop Apache 2.0 license
+    bits.
+
+ -- Andreas Metzler <ametzler@debian.org>  Sun, 07 Aug 2011 18:15:10 +0200
+
+p11-kit (0.2-0ubuntu2) oneiric; urgency=low
+
+  * Ship a symbols file
+    - add debian/libp11-kit0.symbols
+  * Ship the documentation
+    - update debian/libp11-kit-dev.install
+  * Fix a typo in debian/control
+
+ -- Chris Coulson <chris.coulson@canonical.com>  Thu, 28 Jul 2011 14:50:06 +0100
+
+p11-kit (0.2-0ubuntu1) oneiric; urgency=low
+
+  * Initial release
+
+ -- Chris Coulson <chris.coulson@canonical.com>  Thu, 28 Jul 2011 13:13:47 +0100

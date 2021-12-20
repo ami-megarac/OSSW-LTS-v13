@@ -1,0 +1,24 @@
+?RCS: $Id: i_sysuio.U,v $
+?RCS:
+?RCS: Copyright (c) 1998 Jarkko Hietaniemi
+?RCS:
+?RCS: You may distribute under the terms of either the GNU General Public
+?RCS: License or the Artistic License, as specified in the README file.
+?RCS:
+?MAKE:i_sysuio: Inhdr
+?MAKE:	-pick add $@ %<
+?S:i_sysuio:
+?S:	This variable conditionally defines the I_SYSUIO symbol, and indicates
+?S:	whether a C program should include <sys/uio.h>.
+?S:.
+?C:I_SYSUIO:
+?C:	This symbol, if defined, indicates that <sys/uio.h> exists and
+?C:	should be included.
+?C:.
+?H:#$i_sysuio	I_SYSUIO		/**/
+?H:.
+?LINT:set i_sysuio
+: see if this is a sys/uio.h system
+set sys/uio.h i_sysuio
+eval $inhdr
+

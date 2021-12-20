@@ -1,0 +1,9 @@
+#
+#=DESCRIPTION validate some uses of capabilties.
+#=EXRESULT PASS
+# vim:syntax=subdomain
+# Last Modified: Sun Apr 17 19:44:44 2005
+#
+/does/not/exist {
+	capability,
+}

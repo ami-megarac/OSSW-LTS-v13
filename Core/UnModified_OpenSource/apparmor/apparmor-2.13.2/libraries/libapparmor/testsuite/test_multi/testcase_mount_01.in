@@ -1,0 +1,1 @@
+type=AVC msg=audit(1409700640.016:547457): apparmor="DENIED" operation="mount" info="failed mntpnt match" error=-13 profile="/home/ubuntu/bzr/apparmor/tests/regression/apparmor/mount" name="/tmp/sdtest.19033-29001-MPfz98/mountpoint/" pid=19085 comm="mount" fstype="ext2" srcname="/dev/loop0/" flags="rw, mand"

@@ -1,0 +1,4 @@
+#=DESCRIPTION simple set variable assignment
+#=EXRESULT PASS
+
+@{FOO}=bar

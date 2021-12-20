@@ -1,0 +1,174 @@
+diff -Naur uboot/oem/ami/multidtb/Makefile uboot_new/oem/ami/multidtb/Makefile
+--- uboot/oem/ami/multidtb/Makefile	1970-01-01 05:30:00.000000000 +0530
++++ uboot_new/oem/ami/multidtb/Makefile	2021-07-26 18:47:22.733191400 +0530
+@@ -0,0 +1,21 @@
++# (C) Copyright 2013 
++# American Megatrends Inc
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation; either version 2 of
++# the License, or (at your option) any later version.
++#
++# This program is distributed in the hope that it will be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write to the Free Software
++# Foundation, Inc., 59 Temple Place, Suite 330, Boston,
++# MA 02111-1307 USA
++#
++
++
++obj-y	+= multidtb.o
+diff -Naur uboot/oem/ami/multidtb/multidtb.c uboot_new/oem/ami/multidtb/multidtb.c
+--- uboot/oem/ami/multidtb/multidtb.c	1970-01-01 05:30:00.000000000 +0530
++++ uboot_new/oem/ami/multidtb/multidtb.c	2021-08-13 16:33:25.413165500 +0530
+@@ -0,0 +1,124 @@
++#include <common.h>
++#include <errno.h>
++#include <asm/io.h>
++#include <asm/arch/aspeed_scu_info.h>
++
++
++
++#define 	AST2600_A0 		0x0500030305000303
++#define 	AST2600_A1 		0x0501030305010303
++#define 	AST2620_A1 		0x0501020305010203
++#define 	AST2600_A2 		0x0502030305010303
++#define 	AST2620_A2		0x0502020305010203
++#define 	AST2605_A2 		0x0502010305010103
++#define 	AST2600_A3		0x0503030305030303
++
++#define 	DTB_FILE_A0			"ast2600evb"
++#define 	DTB_FILE_A1			"ast2600evb_a1"
++#define 	DTB_FILE_A1_1		"ast2600evb_a1_1"
++#define 	DTB_FILE_A1_DUAL	"ast2600evb_dualspi"
++#define 	DTB_ARCHERCITY		"ArcherCity"
++#define 	DTB_WHITLEY			"Whitley"
++
++#define     CONFIG_SOL_NUMBER	CONFIG_SPX_FEATURE_NUM_SOL_SERIAL_PORTS
++
++int Get_DTB_From_Soc_ID(char *dtbfile)
++{
++	int retval=-1;
++	u64 rev_id;
++
++	rev_id = readl(ASPEED_REVISION_ID0);
++	rev_id = ((u64)readl(ASPEED_REVISION_ID1) << 32) | rev_id;
++
++	if(rev_id == AST2600_A0)
++	{
++		retval = snprintf(dtbfile,128,"%s",DTB_FILE_A0);
++		if(retval < 0 || retval >= 128)
++		{
++			printf("\n error in copying data");
++			return retval;
++		}
++	}
++#ifdef CONFIG_SPX_FEATURE_AST2600EVB_PLATFORM_SUPPORT
++#ifdef CONFIG_SPX_FEATURE_GLOBAL_DUAL_IMAGE_SUPPORT
++#ifdef CONFIG_SPX_FEATURE_HW_FAILSAFE_BOOT
++	if(rev_id == AST2600_A1 || rev_id == AST2620_A1 || rev_id == AST2600_A2 || rev_id == AST2620_A2 || rev_id == AST2605_A2 || rev_id == AST2600_A3)
++	{
++		retval = snprintf(dtbfile,128,"%s",DTB_FILE_A1_DUAL);
++		if(retval < 0 || retval >= 128)
++		{
++			printf("\n error in copying data");
++			return retval;
++		}
++	}
++#else
++if(rev_id == AST2600_A1 || rev_id == AST2620_A1 || rev_id == AST2600_A2 || rev_id == AST2620_A2 || rev_id == AST2605_A2 || rev_id == AST2600_A3)
++	{
++		retval = snprintf(dtbfile,128,"%s",DTB_FILE_A1);
++		if(retval < 0 || retval >= 128)
++		{
++			printf("\n error in copying data");
++			return retval;
++		}
++	}
++#endif
++#else
++if(CONFIG_SOL_NUMBER > 1  )
++{
++#ifdef CONFIG_SPX_FEATURE_HW_EMMC_BOOT	
++	if(rev_id == AST2600_A1 || rev_id == AST2620_A1 || rev_id == AST2600_A2 || rev_id == AST2620_A2 || rev_id == AST2605_A2 || rev_id == AST2600_A3)
++	{
++		retval = snprintf(dtbfile,128,"%s",DTB_FILE_A1);
++		if(retval < 0 || retval >= 128)
++		{
++			printf("\n error in copying data");
++			return retval;
++		}
++	}
++#else
++	if(rev_id == AST2600_A1 || rev_id == AST2620_A1 || rev_id == AST2600_A2 || rev_id == AST2620_A2 || rev_id == AST2605_A2 || rev_id == AST2600_A3)
++	{
++		retval = snprintf(dtbfile,128,"%s",DTB_FILE_A1_1);
++		if(retval < 0 || retval >= 128)
++		{
++			printf("\n error in copying data");
++			return retval;
++		}
++	}
++#endif
++}
++else
++{
++	if(rev_id == AST2600_A1 || rev_id == AST2620_A1 || rev_id == AST2600_A2 || rev_id == AST2620_A2 || rev_id == AST2605_A2 || rev_id == AST2600_A3)
++	{
++		retval = snprintf(dtbfile,128,"%s",DTB_FILE_A1);
++		if(retval < 0 || retval >= 128)
++		{
++			printf("\n error in copying data");
++			return retval;
++		}
++	}
++}
++#endif
++#endif
++
++#ifdef CONFIG_SPX_FEATURE_PLATFORM_ARCHERCITY
++
++		retval = snprintf(dtbfile,128,"%s",DTB_ARCHERCITY);
++		if(retval < 0 || retval >= 128)
++		{
++			printf("\n error in copying data");
++			return retval;
++		}
++#endif
++#ifdef CONFIG_SPX_FEATURE_PLATFORM_WHITLEY 
++
++		retval = snprintf(dtbfile,128,"%s",DTB_WHITLEY);
++		if(retval < 0 || retval >= 128)
++		{
++			printf("\n error in copying data");
++			return retval;
++		}
++#endif
++	return retval;
++}
+diff -Naur uboot/oem/Makefile uboot_new/oem/Makefile
+--- uboot/oem/Makefile	2021-08-18 15:13:14.758646157 +0530
++++ uboot_new/oem/Makefile	2021-08-18 18:37:30.289355144 +0530
+@@ -1,5 +1,6 @@
+ obj-y += ami/fmh/
+ obj-y += ami/ncsi/
++obj-y += ami/multidtb/
+ ifeq ($(CONFIG_SPX_FEATURE_LAN_AND_DRAM_TEST_CMD),"YES")
+ ifndef CONFIG_SANDBOX
+ ifdef FTRACE
+diff -Naur uboot_org/oem/ami/fmh/cmd_fmh.h uboot/oem/ami/fmh/cmd_fmh.h
+--- uboot_org/oem/ami/fmh/cmd_fmh.h	2021-09-21 14:55:05.772126865 +0530
++++ uboot/oem/ami/fmh/cmd_fmh.h	2021-09-21 14:58:23.595289885 +0530
+@@ -20,5 +20,5 @@
+ extern int getMacKb(unsigned char *mac );
+ extern int gets(char * buff,unsigned int size );
+ extern int validateMac( unsigned char *s);
+-
++extern int Get_DTB_From_Soc_ID(char *dtbfile);
+ #endif	
+ 

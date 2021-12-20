@@ -1,0 +1,94 @@
+#!/usr/bin/make -f
+# debian/rules file for building the Debian GNU/Linux package bzip2.
+# Copyright (C) 1999, 2000, 2001, 2002 Philippe Troin
+# Copyright (C) 2004-2007 Anibal Monsalve Salazar <anibal@debian.org>
+# Copyright 2014 Canonical Ltd.
+
+include /usr/share/dpkg/architecture.mk
+ifneq ($(DEB_HOST_GNU_TYPE),$(DEB_BUILD_GNU_TYPE))
+  CC=$(DEB_HOST_GNU_TYPE)-gcc
+else
+  CC=gcc
+endif
+
+DEB_BUILD_MAINT_OPTIONS := hardening=+all
+DEB_CFLAGS_MAINT_APPEND := -Wall -Winline
+DEB_CPPFLAGS_MAINT_APPEND := -D_REENTRANT
+include /usr/share/dpkg/buildflags.mk
+
+include /usr/share/dpkg/pkg-info.mk
+
+lib_pkg := libbz2-1.0
+dev_pkg := libbz2-dev
+
+%:
+	dh $@
+
+.PHONY: override_dh_auto_build-arch
+override_dh_auto_build-arch:
+	dh_auto_build -- libbz2.a bzip2 bzip2recover \
+	  $(foreach v,CC CFLAGS CPPFLAGS LDFLAGS,'$(v)=$($(v))')
+
+.PHONY: override_dh_auto_build-indep
+ifeq (,$(filter nodoc,$(DEB_BUILD_OPTIONS)))
+  override_dh_auto_build-indep: bzip2.info
+endif
+
+bzip2.info: manual.texi
+	makeinfo -o bzip2.info manual.texi
+
+.PHONY: override_dh_auto_test-arch
+ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
+  override_dh_auto_test-arch:
+	dh_auto_test -- \
+	  $(foreach v,CC CFLAGS CPPFLAGS LDFLAGS,'$(v)=$($(v))')
+endif
+
+# Documentation is not tested.
+.PHONY: override_dh_auto_test-indep
+
+# requires: docbook-xml docbook2x
+manual.texi: manual.xml
+	docbook2x-texi \
+	  --string-param directory-category=Development \
+	  --string-param directory-description='A program and library for data compression' \
+	  --string-param output-file=manual \
+	  --to-stdout $< > $@
+
+.PHONY: override_dh_auto_clean
+override_dh_auto_clean:
+	# dh_auto_clean calls `make distclean' which removes manual.{html,ps,pdf},
+	# so we'd need to rebuild them.  Call `make clean' instead.
+	[ -f Makefile ] && $(MAKE) clean
+
+.PHONY: override_dh_auto_install-arch
+override_dh_auto_install-arch:
+	dh_auto_install -- PREFIX=$(CURDIR)/debian/tmp
+
+# Documentation is installed directly, not in debian/tmp.
+.PHONY: override_dh_auto_install-indep
+
+.PHONY: override_dh_link
+override_dh_link:
+	# This isn't the soname, and nothing should be looking for this file,
+	# but leave it alone for now
+	dh_link -p$(lib_pkg) lib/$(DEB_HOST_MULTIARCH)/libbz2.so.1.0.4 \
+	                     lib/$(DEB_HOST_MULTIARCH)/libbz2.so.1
+	dh_link -p$(dev_pkg) lib/$(DEB_HOST_MULTIARCH)/libbz2.so.1.0 \
+	                     usr/lib/$(DEB_HOST_MULTIARCH)/libbz2.so
+	dh_link --remaining-packages
+
+override_dh_install:
+	dh_install -p$(lib_pkg) lib/libbz2.so.* lib/$(DEB_HOST_MULTIARCH)
+	dh_install -p$(dev_pkg) lib/libbz2.a usr/lib/$(DEB_HOST_MULTIARCH)
+	dh_install --remaining-packages
+
+# --fail-missing becomes the default with debhelper 12.
+.PHONY: override_dh_missing
+override_dh_missing:
+	dh_missing --fail-missing
+
+.PHONY: override_dh_installdocs
+override_dh_installdocs:
+	dh_installdocs -plibbz2-dev --link-doc=libbz2-1.0
+	dh_installdocs --remaining-packages

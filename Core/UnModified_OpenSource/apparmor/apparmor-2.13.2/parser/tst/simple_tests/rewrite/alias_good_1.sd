@@ -1,0 +1,10 @@
+#=DESCRIPTION Simple test of alias functionality
+#=EXRESULT PASS
+
+alias /tmp -> /var/tmp,
+
+
+/bin/foo {
+  #include <includes/base>
+  /tmp/meep rw,
+}

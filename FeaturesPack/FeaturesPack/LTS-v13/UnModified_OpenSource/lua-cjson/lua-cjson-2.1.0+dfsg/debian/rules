@@ -1,0 +1,8 @@
+#!/usr/bin/make -f
+
+%:
+	dh $@ --buildsystem=lua --with lua
+
+override_dh_clean:
+	dh_clean
+	rm -f debian/trash

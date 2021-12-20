@@ -1,0 +1,25 @@
+From 661f9f7403e86344f844f0efb8e92a63c4cbe3d2 Mon Sep 17 00:00:00 2001
+From: Adrian Bunk <bunk@debian.org>
+Date: Thu, 30 Aug 2018 18:44:59 +0300
+Subject: [PATCH] auparse/test/: Don't build test programs twice in parallel
+
+Overwriting check: created a race condition that can cause
+parallel builds to fail due to twomake processes in parallel
+building the same files.
+---
+ auparse/test/Makefile.am | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/auparse/test/Makefile.am b/auparse/test/Makefile.am
+index 2b493e8..ffd07ce 100644
+--- a/auparse/test/Makefile.am
++++ b/auparse/test/Makefile.am
+@@ -44,7 +44,7 @@ auparselol_test_LDADD = ${top_builddir}/auparse/libauparse.la \
+ 
+ drop_srcdir = sed 's,$(srcdir)/test,test,'
+ 
+-check: auparse_test auparselol_test lookup_test
++check-local: auparse_test auparselol_test lookup_test
+ 	test "$(top_srcdir)" = "$(top_builddir)" || \
+ 			cp $(top_srcdir)/auparse/test/test*.log .
+ 	LC_ALL=C \

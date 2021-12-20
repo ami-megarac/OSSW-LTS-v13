@@ -1,0 +1,8 @@
+debian/libgpg-error0.install
+debian/libgpg-error-dev.install
+po/*.gmo
+po/stamp-po
+build-x86_64-w64-mingw32/
+build-i686-w64-mingw32/
+build/
+doc/gpgrt.info

@@ -1,0 +1,558 @@
+?RCS: $Id$
+?RCS:
+?RCS: Copyright (c) 1999-2016 Jarkko Hietaniemi
+?RCS:
+?RCS: You may distribute under the terms of either the GNU General Public
+?RCS: License or the Artistic License, as specified in the README file.
+?RCS:
+?MAKE:d_PRIfldbl sPRIfldbl d_PRIgldbl d_PRIFUldbl sPRIGUldbl d_PRIEUldbl \
+	sPRIgldbl d_PRIeldbl sPRIeldbl sPRIFUldbl d_PRIGUldbl sPRIEUldbl \
+	d_SCNfldbl  d_double_style_vax d_double_style_ieee \
+	d_double_style_ibm d_double_style_cray d_double_has_subnormals \
+	d_double_has_inf d_double_has_nan d_double_has_negative_zero \
+	sSCNfldbl doublekind: \
+	d_longdbl longdblsize doublesize uselongdouble test echo cat rm_try \
+	Setvar Compile run i_stdlib osname gccversion ccflags
+?MAKE:	-pick add $@ %<
+?S:doublekind:
+?S:	This variable, if defined, encodes the type of a double:
+?S:	 1 = IEEE 754 32-bit little endian,
+?S:	 2 = IEEE 754 32-bit big endian,
+?S:	 3 = IEEE 754 64-bit little endian,
+?S:	 4 = IEEE 754 64-bit big endian,
+?S:	 5 = IEEE 754 128-bit little endian,
+?S:	 6 = IEEE 754 128-bit big endian,
+?S:	 7 = IEEE 754 64-bit mixed endian le-be,
+?S:	 8 = IEEE 754 64-bit mixed endian be-le,
+?S:	 9 = VAX 32bit little endian F float format
+?S:	10 = VAX 64bit little endian D float format
+?S:	11 = VAX 64bit little endian G float format
+?S:	12 = IBM 32bit format
+?S:	13 = IBM 64bit format
+?S:	14 = Cray 64bit format
+?S:	-1 = unknown format.
+?S:.
+?S:d_PRIfldbl:
+?S:	This variable conditionally defines the PERL_PRIfldbl symbol, which
+?S:	indicates that stdio has a symbol to print long doubles.
+?S:.
+?S:d_PRIgldbl:
+?S:	This variable conditionally defines the PERL_PRIfldbl symbol, which
+?S:	indicates that stdio has a symbol to print long doubles.
+?S:.
+?S:d_PRIeldbl:
+?S:	This variable conditionally defines the PERL_PRIfldbl symbol, which
+?S:	indicates that stdio has a symbol to print long doubles.
+?S:.
+?S:d_PRIFUldbl:
+?S:	This variable conditionally defines the PERL_PRIfldbl symbol, which
+?S:	indicates that stdio has a symbol to print long doubles.
+?S:	The 'U' in the name is to separate this from d_PRIfldbl so that even
+?S:	case-blind systems can see the difference.
+?S:.
+?S:d_PRIGUldbl:
+?S:	This variable conditionally defines the PERL_PRIfldbl symbol, which
+?S:	indicates that stdio has a symbol to print long doubles.
+?S:	The 'U' in the name is to separate this from d_PRIgldbl so that even
+?S:	case-blind systems can see the difference.
+?S:.
+?S:d_PRIEUldbl:
+?S:	This variable conditionally defines the PERL_PRIfldbl symbol, which
+?S:	indicates that stdio has a symbol to print long doubles.
+?S:	The 'U' in the name is to separate this from d_PRIeldbl so that even
+?S:	case-blind systems can see the difference.
+?S:.
+?S:d_SCNfldbl:
+?S:	This variable conditionally defines the PERL_PRIfldbl symbol, which
+?S:	indicates that stdio has a symbol to scan long doubles.
+?S:.
+?S:sPRIfldbl:
+?S:	This variable, if defined, contains the string used by stdio to
+?S:	format long doubles (format 'f') for output.
+?S:.
+?S:sPRIgldbl:
+?S:	This variable, if defined, contains the string used by stdio to
+?S:	format long doubles (format 'g') for output.
+?S:.
+?S:sPRIeldbl:
+?S:	This variable, if defined, contains the string used by stdio to
+?S:	format long doubles (format 'e') for output.
+?S:.
+?S:sPRIFUldbl:
+?S:	This variable, if defined, contains the string used by stdio to
+?S:	format long doubles (format 'F') for output.
+?S:	The 'U' in the name is to separate this from sPRIfldbl so that even
+?S:	case-blind systems can see the difference.
+?S:.
+?S:sPRIGUldbl:
+?S:	This variable, if defined, contains the string used by stdio to
+?S:	format long doubles (format 'G') for output.
+?S:	The 'U' in the name is to separate this from sPRIgldbl so that even
+?S:	case-blind systems can see the difference.
+?S:.
+?S:sPRIEUldbl:
+?S:	This variable, if defined, contains the string used by stdio to
+?S:	format long doubles (format 'E') for output.
+?S:	The 'U' in the name is to separate this from sPRIeldbl so that even
+?S:	case-blind systems can see the difference.
+?S:.
+?S:sSCNfldbl:
+?S:	This variable, if defined, contains the string used by stdio to
+?S:	format long doubles (format 'f') for input.
+?S:.
+?S:d_double_has_inf:
+?S:	This variable conditionally defines the symbol DOUBLE_HAS_INF
+?S:	which indicates that the double type has an infinity.
+?S:.
+?S:d_double_has_nan:
+?S:	This variable conditionally defines the symbol DOUBLE_HAS_NAN
+?S:	which indicates that the double type has a not-a-number.
+?S:.
+?S:d_double_has_negative_zero:
+?S:	This variable conditionally defines the symbol DOUBLE_HAS_NEGATIVE_ZERO
+?S:	which indicates that the double type has a negative zero.
+?S:.
+?S:d_double_has_subnormals:
+?S:	This variable conditionally defines the symbol DOUBLE_HAS_SUBNORMALS
+?S:	which indicates that the double type has subnormals (denormals).
+?S:.
+?S:d_double_style_cray:
+?S:	This variable conditionally defines the symbol DOUBLE_STYLE_CRAY
+?S:	which indicates that the double is the 64-bit CRAY mainframe format.
+?S:.
+?S:d_double_style_ibm:
+?S:	This variable conditionally defines the symbol DOUBLE_STYLE_IBM,
+?S:	which indicates that the double is the 64-bit IBM mainframe format.
+?S:.
+?S:d_double_style_ieee:
+?S:	This variable conditionally defines the symbol DOUBLE_STYLE_IEEE,
+?S:	which indicates that the double is the 64-bit IEEE 754.
+?S:.
+?S:d_double_style_vax:
+?S:	This variable conditionally defines the symbol DOUBLE_STYLE_VAX,
+?S:	which indicates that the double is the 64-bit VAX format D or G.
+?S:.
+?C:PERL_PRIfldbl:
+?C:	This symbol, if defined, contains the string used by stdio to
+?C:	format long doubles (format 'f') for output.
+?C:.
+?C:PERL_PRIgldbl:
+?C:	This symbol, if defined, contains the string used by stdio to
+?C:	format long doubles (format 'g') for output.
+?C:.
+?C:PERL_PRIeldbl:
+?C:	This symbol, if defined, contains the string used by stdio to
+?C:	format long doubles (format 'e') for output.
+?C:.
+?C:PERL_PRIFldbl:
+?C:	This symbol, if defined, contains the string used by stdio to
+?C:	format long doubles (format 'f') for output.
+?C:.
+?C:PERL_PRIGldbl:
+?C:	This symbol, if defined, contains the string used by stdio to
+?C:	format long doubles (format 'g') for output.
+?C:.
+?C:PERL_PRIEldbl:
+?C:	This symbol, if defined, contains the string used by stdio to
+?C:	format long doubles (format 'e') for output.
+?C:.
+?C:PERL_SCNfldbl:
+?C:	This symbol, if defined, contains the string used by stdio to
+?C:	format long doubles (format 'f') for input.
+?C:.
+?C:DOUBLEKIND:
+?C:	DOUBLEKIND will be one of
+?C:	DOUBLE_IS_IEEE_754_32_BIT_LITTLE_ENDIAN
+?C:	DOUBLE_IS_IEEE_754_32_BIT_BIG_ENDIAN
+?C:	DOUBLE_IS_IEEE_754_64_BIT_LITTLE_ENDIAN
+?C:	DOUBLE_IS_IEEE_754_64_BIT_BIG_ENDIAN
+?C:	DOUBLE_IS_IEEE_754_128_BIT_LITTLE_ENDIAN
+?C:	DOUBLE_IS_IEEE_754_128_BIT_BIG_ENDIAN
+?C:	DOUBLE_IS_IEEE_754_64_BIT_MIXED_ENDIAN_LE_BE
+?C:	DOUBLE_IS_IEEE_754_64_BIT_MIXED_ENDIAN_BE_LE
+?C:	DOUBLE_IS_VAX_F_FLOAT
+?C:	DOUBLE_IS_VAX_D_FLOAT
+?C:	DOUBLE_IS_VAX_G_FLOAT
+?C:	DOUBLE_IS_IBM_SINGLE_32_BIT
+?C:	DOUBLE_IS_IBM_DOUBLE_64_BIT
+?C:	DOUBLE_IS_CRAY_SINGLE_64_BIT
+?C:	DOUBLE_IS_UNKNOWN_FORMAT
+?C:.
+?C:DOUBLE_HAS_INF:
+?C:	This symbol, if defined, indicates that the double has
+?C:	the infinity.
+?C:.
+?C:DOUBLE_HAS_NAN:
+?C:	This symbol, if defined, indicates that the double has
+?C:	the not-a-number.
+?C:.
+?C:DOUBLE_HAS_NEGATIVE_ZERO:
+?C:	This symbol, if defined, indicates that the double has
+?C:	the negative_zero.
+?C:.
+?C:DOUBLE_HAS_SUBNORMALS:
+?C:	This symbol, if defined, indicates that the double has
+?C:	the subnormals (denormals).
+?C:.
+?C:DOUBLE_STYLE_CRAY:
+?C:	This symbol, if defined, indicates that the double is
+?C:	the 64-bit CRAY mainframe format.
+?C:.
+?C:DOUBLE_STYLE_IBM:
+?C:	This symbol, if defined, indicates that the double is
+?C:	the 64-bit IBM mainframe format.
+?C:.
+?C:DOUBLE_STYLE_IEEE:
+?C:	This symbol, if defined, indicates that the double is
+?C:	the 64-bit IEEE 754.
+?C:.
+?C:DOUBLE_STYLE_VAX:
+?C:	This symbol, if defined, indicates that the double is
+?C:	the 64-bit VAX format D or G.
+?C:.
+?LINT:known DOUBLE_IS_IEEE_754_32_BIT_LITTLE_ENDIAN
+?LINT:known DOUBLE_IS_IEEE_754_32_BIT_BIG_ENDIAN
+?LINT:known DOUBLE_IS_IEEE_754_64_BIT_LITTLE_ENDIAN
+?LINT:known DOUBLE_IS_IEEE_754_64_BIT_BIG_ENDIAN
+?LINT:known DOUBLE_IS_IEEE_754_128_BIT_LITTLE_ENDIAN
+?LINT:known DOUBLE_IS_IEEE_754_128_BIT_BIG_ENDIAN
+?LINT:known DOUBLE_IS_IEEE_754_64_BIT_MIXED_ENDIAN_LE_BE
+?LINT:known DOUBLE_IS_IEEE_754_64_BIT_MIXED_ENDIAN_BE_LE
+?LINT:known DOUBLE_IS_VAX_F_FLOAT
+?LINT:known DOUBLE_IS_VAX_D_FLOAT
+?LINT:known DOUBLE_IS_VAX_G_FLOAT
+?LINT:known DOUBLE_IS_IBM_SINGLE_32_BIT
+?LINT:known DOUBLE_IS_IBM_DOUBLE_64_BIT
+?LINT:known DOUBLE_IS_CRAY_SINGLE_64_BIT
+?LINT:known DOUBLE_IS_UNKNOWN_FORMAT
+?H:#define DOUBLEKIND $doublekind		/**/
+?H:?DOUBLEKIND:#define DOUBLE_IS_IEEE_754_32_BIT_LITTLE_ENDIAN	1
+?H:?DOUBLEKIND:#define DOUBLE_IS_IEEE_754_32_BIT_BIG_ENDIAN	2
+?H:?DOUBLEKIND:#define DOUBLE_IS_IEEE_754_64_BIT_LITTLE_ENDIAN	3
+?H:?DOUBLEKIND:#define DOUBLE_IS_IEEE_754_64_BIT_BIG_ENDIAN	4
+?H:?DOUBLEKIND:#define DOUBLE_IS_IEEE_754_128_BIT_LITTLE_ENDIAN	5
+?H:?DOUBLEKIND:#define DOUBLE_IS_IEEE_754_128_BIT_BIG_ENDIAN	6
+?H:?DOUBLEKIND:#define DOUBLE_IS_IEEE_754_64_BIT_MIXED_ENDIAN_LE_BE	7
+?H:?DOUBLEKIND:#define DOUBLE_IS_IEEE_754_64_BIT_MIXED_ENDIAN_BE_LE	8
+?H:?DOUBLEKIND:#define DOUBLE_IS_VAX_F_FLOAT	9
+?H:?DOUBLEKIND:#define DOUBLE_IS_VAX_D_FLOAT	10
+?H:?DOUBLEKIND:#define DOUBLE_IS_VAX_G_FLOAT	11
+?H:?DOUBLEKIND:#define DOUBLE_IS_IBM_SINGLE_32_BIT	12
+?H:?DOUBLEKIND:#define DOUBLE_IS_IBM_DOUBLE_64_BIT	13
+?H:?DOUBLEKIND:#define DOUBLE_IS_CRAY_SINGLE_64_BIT	14
+?H:?DOUBLEKIND:#define DOUBLE_IS_UNKNOWN_FORMAT		-1
+?H:#$d_PRIfldbl PERL_PRIfldbl	$sPRIfldbl	/**/
+?H:#$d_PRIgldbl PERL_PRIgldbl	$sPRIgldbl	/**/
+?H:#$d_PRIeldbl PERL_PRIeldbl	$sPRIeldbl	/**/
+?H:#$d_PRIFUldbl PERL_PRIFldbl	$sPRIFUldbl	/**/
+?H:#$d_PRIGUldbl PERL_PRIGldbl	$sPRIGUldbl	/**/
+?H:#$d_PRIEUldbl PERL_PRIEldbl	$sPRIEUldbl	/**/
+?H:#$d_SCNfldbl PERL_SCNfldbl	$sSCNfldbl	/**/
+?H:#$d_double_has_inf DOUBLE_HAS_INF
+?H:#$d_double_has_nan DOUBLE_HAS_NAN
+?H:#$d_double_has_negative_zero DOUBLE_HAS_NEGATIVE_ZERO
+?H:#$d_double_has_subnormals DOUBLE_HAS_SUBNORMALS
+?H:#$d_double_style_cray DOUBLE_STYLE_CRAY
+?H:#$d_double_style_ibm DOUBLE_STYLE_IBM
+?H:#$d_double_style_ieee DOUBLE_STYLE_IEEE
+?H:#$d_double_style_vax DOUBLE_STYLE_VAX
+?H:.
+?T:yyy message saveccflags
+?F:!try
+?LINT:change ccflags
+?LINT:change uselongdouble
+: Check what kind of doubles your system has
+$echo "Checking the kind of doubles you have..." >&4
+$cat >try.c <<EOP
+#$i_stdlib I_STDLIB
+#define DOUBLESIZE $doublesize
+#ifdef I_STDLIB
+#include <stdlib.h>
+#endif
+#include <stdio.h>
+static const double d = -0.1;
+int main() {
+  unsigned const char* b = (unsigned const char*)(&d);
+#if DOUBLESIZE == 4
+  if (b[0] == 0xCD && b[3] == 0xBD) {
+    /* IEEE 754 32-bit little-endian */
+    printf("1\n");
+    exit(0);
+  }
+  if (b[0] == 0xBD && b[3] == 0xCD) {
+    /* IEEE 754 32-bit big-endian */
+    printf("2\n");
+    exit(0);
+  }
+  if (b[0] == 0xCC && b[3] == 0xCC) {
+    /* VAX format F, 32-bit PDP-style mixed endian. */
+    printf("9\n");
+    exit(0);
+  }
+  if (b[0] == 0xC0 && b[3] == 0x9A) {
+    /* IBM single 32-bit */
+    printf("12\n");
+    exit(0);
+  }
+#endif
+#if DOUBLESIZE == 8
+  if (b[0] == 0x9A && b[7] == 0xBF) {
+    /* IEEE 754 64-bit little-endian */
+    printf("3\n");
+    exit(0);
+  }
+  if (b[0] == 0xBF && b[7] == 0x9A) {
+    /* IEEE 754 64-bit big-endian */
+    printf("4\n");
+    exit(0);
+  }
+  if (b[0] == 0x99 && b[3] == 0xBF && b[4] == 0x9A && b[7] == 0x99) {
+   /* ARM mixed endian: two little-endian 32-bit floats, in big endian order:
+    * 4 5 6 7 0 1 2 3 (MSB = 7, LSB = 0)
+    * 99 99 b9 bf 9a 99 99 99 */
+    printf("7\n");
+    exit(0);
+  }
+  if (b[0] == 0x99 && b[3] == 0x9A && b[4] == 0xBF && b[7] == 0x99) {
+   /* The opposite of case 7, mixed endian: two big-endian 32-bit floats,
+    * in little endian order: 3 2 1 0 7 6 5 4 (MSB = 7, LSB = 0)
+    * 99 99 99 9a bf b9 99 99 */
+    printf("8\n");
+    exit(0);
+  }
+  if (b[0] == 0xCC && b[7] == 0xCC) {
+   /* VAX format D, 64-bit PDP-style mixed endian. */
+    printf("10\n");
+    exit(0);
+  }
+  if (b[0] == 0xD9 && b[7] == 0x99) {
+   /* VAX format G, 64-bit PDP-style mixed endian. */
+    printf("11\n");
+    exit(0);
+  }
+  if (b[0] == 0xC0 && b[7] == 0x9A) {
+    /* IBM double 64-bit */
+    printf("13\n");
+    exit(0);
+  }
+  if (b[0] == 0xBF && b[7] == 0xCD) {
+    /* CRAY single 64-bit */
+    printf("14\n");
+    exit(0);
+  }
+#endif
+#if DOUBLESIZE == 16
+  if (b[0] == 0x9A && b[15] == 0xBF) {
+    /* IEEE 754 128-bit little-endian */
+    printf("5\n");
+    exit(0);
+  }
+  if (b[0] == 0xBF && b[15] == 0x9A) {
+    /* IEEE 754 128-bit big-endian */
+    printf("6\n");
+    exit(0);
+  }
+#endif
+  /* Then there are old mainframe/miniframe formats like IBM and CRAY.
+   * Whether those environments can still build Perl is debatable. */
+  printf("-1\n"); /* unknown */
+  exit(0);
+}
+EOP
+set try
+if eval $compile; then
+    doublekind=`$run ./try`
+else
+    doublekind=-1
+fi
+case "$doublekind" in
+1) echo "You have IEEE 754 32-bit little endian doubles." >&4 ;;
+2) echo "You have IEEE 754 32-bit big endian doubles." >&4 ;;
+3) echo "You have IEEE 754 64-bit little endian doubles." >&4 ;;
+4) echo "You have IEEE 754 64-bit big endian doubles." >&4 ;;
+5) echo "You have IEEE 754 128-bit little endian doubles." >&4 ;;
+6) echo "You have IEEE 754 128-bit big endian doubles." >&4 ;;
+7) echo "You have IEEE 754 64-bit mixed endian doubles (32-bit LEs in BE)." >&4 ;;
+8) echo "You have IEEE 754 64-bit mixed endian doubles (32-bit BEs in LE)." >&4 ;;
+9) echo "You have VAX format F 32-bit PDP-style mixed endian doubles." >&4 ;;
+10) echo "You have VAX format D 64-bit PDP-style mixed endian doubles." >&4 ;;
+11) echo "You have VAX format G 64-bit PDP-style mixed endian doubles." >&4 ;;
+12) echo "You have IBM short 32-bit doubles." >&4 ;;
+13) echo "You have IBM long 64-bit doubles." >&4 ;;
+14) echo "You have Cray single 64-bit doubles." >&4 ;;
+*) echo "Cannot figure out your double.  You Cyber, or something?" >&4 ;;
+esac
+d_double_style_ieee=$undef
+d_double_style_vax=$undef
+d_double_style_ibm=$undef
+d_double_style_cray=$undef
+case "$doublekind" in
+1|2|3|4|5|6|7|8) d_double_style_ieee=$define ;;
+9|10|11) d_double_style_vax=$define ;;
+12|13) d_double_style_ibm=$define ;;
+14) d_double_style_cray=$define ;;
+esac
+case "$d_double_style_ieee" in
+$define)
+    d_double_has_inf=$define
+    d_double_has_nan=$define
+    d_double_has_negative_zero=$define
+    d_double_has_subnormals=$define
+    ;;
+*)
+    d_double_has_inf=$undef
+    d_double_has_nan=$undef
+    d_double_has_negative_zero=$undef
+    d_double_has_subnormals=$undef
+    ;;
+esac
+$rm_try
+
+: Check print/scan long double stuff
+echo " "
+
+if $test X"$d_longdbl" = X"$define"; then
+
+echo "Checking how to print long doubles..." >&4
+
+if $test X"$sPRIfldbl" = X -a X"$doublesize" = X"$longdblsize"; then
+	$cat >try.c <<'EOCP'
+#include <sys/types.h>
+#include <stdio.h>
+int main() {
+  double d = 123.456;
+  printf("%.3f\n", d);
+}
+EOCP
+	set try
+	if eval $compile; then
+		yyy=`$run ./try`
+		case "$yyy" in
+		123.456)
+			sPRIfldbl='"f"'; sPRIgldbl='"g"'; sPRIeldbl='"e"';
+			sPRIFUldbl='"F"'; sPRIGUldbl='"G"'; sPRIEUldbl='"E"';
+			echo "We will use %f."
+			;;
+		esac
+	fi
+fi
+
+if $test X"$sPRIfldbl" = X; then
+	$cat >try.c <<'EOCP'
+#include <sys/types.h>
+#include <stdio.h>
+int main() {
+  long double d = 123.456;
+  printf("%.3Lf\n", d);
+}
+EOCP
+	set try
+	if eval $compile; then
+		yyy=`$run ./try`
+		case "$yyy" in
+		123.456)
+			sPRIfldbl='"Lf"'; sPRIgldbl='"Lg"'; sPRIeldbl='"Le"';
+			sPRIFUldbl='"LF"'; sPRIGUldbl='"LG"'; sPRIEUldbl='"LE"';
+			echo "We will use %Lf."
+			;;
+		esac
+	fi
+fi
+
+if $test X"$sPRIfldbl" = X; then
+	$cat >try.c <<'EOCP'
+#include <sys/types.h>
+#include <stdio.h>
+int main() {
+  long double d = 123.456;
+  printf("%.3llf\n", d);
+}
+EOCP
+	set try
+	if eval $compile; then
+		yyy=`$run ./try`
+		case "$yyy" in
+		123.456)
+			sPRIfldbl='"llf"'; sPRIgldbl='"llg"'; sPRIeldbl='"lle"';
+			sPRIFUldbl='"llF"'; sPRIGUldbl='"llG"'; sPRIEUldbl='"llE"';
+			echo "We will use %llf."
+			;;
+		esac
+	fi
+fi
+
+if $test X"$sPRIfldbl" = X; then
+	$cat >try.c <<'EOCP'
+#include <sys/types.h>
+#include <stdio.h>
+int main() {
+  long double d = 123.456;
+  printf("%.3lf\n", d);
+}
+EOCP
+	set try
+	if eval $compile; then
+		yyy=`$run ./try`
+		case "$yyy" in
+		123.456)
+			sPRIfldbl='"lf"'; sPRIgldbl='"lg"'; sPRIeldbl='"le"';
+			sPRIFUldbl='"lF"'; sPRIGUldbl='"lG"'; sPRIEUldbl='"lE"';
+			echo "We will use %lf."
+			;;
+		esac
+	fi
+fi
+
+if $test X"$sPRIfldbl" = X; then
+	echo "Cannot figure out how to print long doubles." >&4
+else
+	sSCNfldbl=$sPRIfldbl	# expect consistency
+fi
+
+$rm_try
+
+fi # d_longdbl
+
+case "$sPRIfldbl" in
+'')	d_PRIfldbl="$undef"; d_PRIgldbl="$undef"; d_PRIeldbl="$undef";
+	d_PRIFUldbl="$undef"; d_PRIGUldbl="$undef"; d_PRIEUldbl="$undef";
+	d_SCNfldbl="$undef";
+	;;
+*)	d_PRIfldbl="$define"; d_PRIgldbl="$define"; d_PRIeldbl="$define";
+	d_PRIFUldbl="$define"; d_PRIGUldbl="$define"; d_PRIEUldbl="$define";
+	d_SCNfldbl="$define";
+	;;
+esac
+
+: Before committing on uselongdouble, see whether that looks sane.
+if $test "$uselongdouble" = "$define"; then
+    message=""
+    echo " "
+    echo "Checking if your long double math functions work right..." >&4
+    $cat > try.c <<EOF
+#include <math.h>
+#include <stdio.h>
+int main() {
+  printf("%"$sPRIgldbl"\n", sqrtl(logl(expl(cosl(sinl(0.0L))))+powl(2.0L, 3.0L)));
+}
+EOF
+    case "$osname:$gccversion" in
+    aix:)	saveccflags="$ccflags"
+		ccflags="$ccflags -qlongdouble" ;; # to avoid core dump
+    esac
+    set try
+    if eval $compile_ok; then
+      yyy=`$run ./try`
+    fi
+    case "$yyy" in
+    3) echo "Your long double math functions are working correctly." >&4 ;;
+    *) echo "Your long double math functions are broken, not using long doubles." >&4
+       uselongdouble=$undef
+       ;;
+    esac
+    $rm_try
+    case "$osname:$gccversion" in
+    aix:)	ccflags="$saveccflags" ;; # restore
+    esac
+fi
+

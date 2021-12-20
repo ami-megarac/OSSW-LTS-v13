@@ -1,0 +1,69 @@
+#
+#=DESCRIPTION deny change_profile to a hat
+#=EXRESULT PASS
+#
+/usr/bin/foo {
+   deny change_profile -> /bin/foo//bar,
+}
+
+/usr/bin/foo2 {
+   deny change_profile -> /bin/foo//ba*,
+}
+
+/usr/bin/foo3 {
+   deny change_profile -> /bin/foo//ba**,
+}
+
+/usr/bin/foo4 {
+   deny change_profile -> /bin/foo//ba?,
+}
+
+/usr/bin/foo5 {
+   deny change_profile -> /bin/foo//ba[ab],
+}
+
+/usr/bin/foo6 {
+   deny change_profile -> /bin/foo//ba[^ab],
+}
+
+/usr/bin/foo7 {
+   deny change_profile -> /bin/fo*//bar,
+}
+
+/usr/bin/foo8 {
+   deny change_profile -> /bin/fo**//bar,
+}
+
+/usr/bin/foo9 {
+   deny change_profile -> /bin/fo?//bar,
+}
+
+/usr/bin/foo10 {
+   deny change_profile -> /bin/fo[ab]//bar,
+}
+
+/usr/bin/foo11 {
+   deny change_profile -> /bin/fo[^ab]//bar,
+}
+
+/usr/bin/foo12 {
+   deny change_profile -> /bin/fo*//ba*,
+}
+
+/usr/bin/foo13 {
+   deny change_profile -> /bin/fo**//ba**,
+}
+
+/usr/bin/foo14 {
+   deny change_profile -> /bin/fo?//ba?,
+}
+
+/usr/bin/foo15 {
+   deny change_profile -> /bin/fo[ab]//ba[ab],
+}
+
+/usr/bin/foo16 {
+   deny change_profile -> /bin/fo[^ab]//ba[^ab],
+}
+
+

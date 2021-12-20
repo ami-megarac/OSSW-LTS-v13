@@ -1,0 +1,3 @@
+doc/examples/*.c
+doc/examples/*.cpp
+doc/examples/*.h

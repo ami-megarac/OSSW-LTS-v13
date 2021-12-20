@@ -1,0 +1,25 @@
+#!/bin/sh
+# autopkgtest check: Build and run a simple program against libgnat,
+# to verify basic compile-time and run-time linking functionality.
+
+set -e
+
+GNATMAKE=gnatmake-8
+
+WORKDIR=$(mktemp -d)
+trap "rm -rf $WORKDIR" 0 INT QUIT ABRT PIPE TERM
+cd $WORKDIR
+cat <<EOF > hello.adb
+with Ada.Text_IO; use Ada.Text_IO;
+procedure Hello is
+begin
+  Put_Line("Hello gnatmake.");
+end Hello;
+EOF
+
+$GNATMAKE -eS -vm -o adatest hello.adb
+echo "build: OK"
+ldd adatest
+[ -x adatest ]
+./adatest
+echo "run: OK"

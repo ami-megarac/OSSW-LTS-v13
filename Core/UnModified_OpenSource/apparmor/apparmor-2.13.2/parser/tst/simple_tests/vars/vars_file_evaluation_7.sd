@@ -1,0 +1,7 @@
+#=DESCRIPTION some simple expansions within file rules
+#=EXRESULT FAIL
+@{FOO} = /foo /bar /baz /biff
+
+/usr/bin/foo {
+  @{FOO}=/.foo/* r,
+}

@@ -1,0 +1,8 @@
+send_ip=127.0.0.1
+send_port=9001
+send_profile=tcp_connect to 127.0.0.1:9200 from 127.0.0.1:9001,
+receive_ip=127.0.0.1
+receive_port=9002
+receive_profile=tcp_accept from 127.0.0.1:9001 to 127.0.0.1:9002,
+message=Test pass
+proto=tcp

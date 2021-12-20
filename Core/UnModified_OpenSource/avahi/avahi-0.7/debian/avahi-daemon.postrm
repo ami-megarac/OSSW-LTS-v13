@@ -1,0 +1,21 @@
+#!/bin/sh
+
+set -e
+
+# drop the temporary mask from prerm
+if [ -d /run/systemd/system ] && [ "$1" = remove ]; then
+    systemctl unmask --runtime avahi-daemon.service
+fi
+
+#DEBHELPER#
+
+if [ "$1" = "purge" ] ; then
+    deluser --quiet --system avahi > /dev/null || true
+    delgroup --quiet --system avahi > /dev/null || true
+    # Cleanup /var/run/avahi-daemon, see #448539
+    f=/var/run/avahi-daemon
+    if [ -d "$f" ]; then
+        rmdir "$f" || { chown root:root "$f" && chmod 00700 "$f"; }
+    fi
+fi
+

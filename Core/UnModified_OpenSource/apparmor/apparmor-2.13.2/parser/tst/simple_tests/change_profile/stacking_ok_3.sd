@@ -1,0 +1,7 @@
+#
+#=DESCRIPTION change_profile w/ stacking
+#=EXRESULT PASS
+#
+/usr/bin/foo {
+   change_profile /bin/foo -> &bar,
+}

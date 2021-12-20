@@ -1,0 +1,22 @@
+Author: Guillem Jover <guillem@debian.org>
+Description: On GNU/kFreeBSD ENODATA is not defined.
+ We need to define it to ENOATTR instead which is defined. This is a
+ regression from the upstream build system modernization.
+
+
+---
+ libacl/libacl.h |    3 +++
+ 1 file changed, 3 insertions(+)
+
+--- a/libacl/libacl.h
++++ b/libacl/libacl.h
+@@ -25,6 +25,9 @@
+ #ifndef ENOATTR
+ # define ENOATTR ENODATA
+ #endif
++#ifndef ENODATA
++# define ENODATA ENOATTR
++#endif
+ 
+ typedef unsigned int permset_t;
+ 

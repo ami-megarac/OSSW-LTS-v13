@@ -1,0 +1,10 @@
+#
+#=DESCRIPTION A simple successful profile
+#=EXRESULT PASS
+# vim:syntax=apparmor
+#
+/usr/bin/foo {
+  allow /usr/bin/foo r,
+  allow /usr/bin/blah rix,
+}
+

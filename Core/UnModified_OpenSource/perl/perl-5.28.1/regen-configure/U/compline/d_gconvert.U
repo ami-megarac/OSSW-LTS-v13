@@ -1,0 +1,311 @@
+?RCS: $Id: d_gconvert.U,v 3.0.1.3 1997/02/28 15:33:38 ram Exp $
+?RCS:
+?RCS: Copyright (c) 1991-1993, Raphael Manfredi
+?RCS:
+?RCS: You may redistribute only under the terms of the Artistic License,
+?RCS: as specified in the README file that comes with the distribution.
+?RCS: You may reuse parts of this distribution only within the terms of
+?RCS: that same Artistic License; a copy of which may be found at the root
+?RCS: of the source tree for dist 3.0.
+?RCS:
+?RCS: Original Author: Andy Dougherty <doughera@lafcol.lafayette.edu>
+?RCS:
+?RCS: $Log: d_gconvert.U,v $
+?RCS: Revision 3.0.1.3	1997/02/28  15:33:38  ram
+?RCS: patch61: integrated new unit from perl5
+?RCS:
+?RCS: Revision 3.0.1.2	1995/07/25  13:55:59  ram
+?RCS: patch56: improved comments about the Gconvert macro (ADO)
+?RCS: patch56: force compile-link test since it may exist but be unusable (ADO)
+?RCS:
+?RCS: Revision 3.0.1.1	1994/10/29  16:12:51  ram
+?RCS: patch36: created by ADO
+?RCS:
+?MAKE:d_Gconvert: \
+	Compile cat Inlibc rm _o rm_try i_stdlib d_qgcvt run \
+	uselongdouble d_longdbl d_PRIgldbl sPRIgldbl
+?MAKE:	-pick add $@ %<
+?S:d_Gconvert:
+?S:	This variable holds what Gconvert is defined as to convert
+?S:	floating point numbers into strings.  By default, Configure
+?S:	sets this macro to use the first of gconvert, gcvt, or sprintf
+?S:	that pass sprintf-%g-like behavior tests.  If perl is using
+?S:	long doubles, the macro uses the first of the following
+?S:	functions that pass Configure's tests: qgcvt, sprintf (if
+?S:	Configure knows how to make sprintf format long doubles--see
+?S:	sPRIgldbl), gconvert, gcvt, and sprintf (casting to double).
+?S:	The gconvert_preference and gconvert_ld_preference variables
+?S:	can be used to alter Configure's preferences, for doubles and
+?S:	long doubles, respectively.  If present, they contain a
+?S:	space-separated list of one or more of the above function
+?S:	names in the order they should be tried.
+?S:
+?S:	d_Gconvert may be set to override Configure with a platform-
+?S:	specific function.  If this function expects a double, a
+?S:	different value may need to be set by the uselongdouble.cbu
+?S:	call-back unit so that long doubles can be formatted without
+?S:	loss of precision.
+?S:.
+?C:Gconvert:
+?C:	This preprocessor macro is defined to convert a floating point
+?C:	number to a string without a trailing decimal point.  This
+?C:	emulates the behavior of sprintf("%g"), but is sometimes much more
+?C:	efficient.  If gconvert() is not available, but gcvt() drops the
+?C:	trailing decimal point, then gcvt() is used.  If all else fails,
+?C:	a macro using sprintf("%g") is used. Arguments for the Gconvert
+?C:	macro are: value, number of digits, whether trailing zeros should
+?C:	be retained, and the output buffer.
+?C:	The usual values are:
+?C:		d_Gconvert='gconvert((x),(n),(t),(b))'
+?C:		d_Gconvert='gcvt((x),(n),(b))'
+?C:		d_Gconvert='sprintf((b),"%.*g",(n),(x))'
+?C:	The last two assume trailing zeros should not be kept.
+?C:.
+?H:#define Gconvert(x,n,t,b) $d_Gconvert
+?H:.
+?T: xxx_list xxx_convert xxx_ld_list
+?F:!try
+?LINT:extern gconvert_preference
+?LINT:extern gconvert_ld_preference
+: Check how to convert floats to strings.
+
+if test "X$d_Gconvert" = X; then
+
+echo " "
+echo "Checking for an efficient way to convert floats to strings."
+echo " " > try.c
+case "$uselongdouble" in
+"$define") echo "#define USE_LONG_DOUBLE" >>try.c ;;
+esac
+case "$d_longdbl" in
+"$define") echo "#define HAS_LONG_DOUBLE" >>try.c ;;
+esac
+case "$d_PRIgldbl" in
+"$define") echo "#define HAS_PRIgldbl"    >>try.c ;;
+esac
+$cat >>try.c <<EOP
+#ifdef TRY_gconvert
+#define Gconvert(x,n,t,b) gconvert((x),(n),(t),(b))
+char *myname = "gconvert";
+#endif
+#ifdef TRY_gcvt
+#define Gconvert(x,n,t,b) gcvt((x),(n),(b))
+char *myname = "gcvt";
+#endif
+#ifdef TRY_qgcvt
+#define Gconvert(x,n,t,b) qgcvt((x),(n),(b))
+char *myname = "qgcvt";
+#define DOUBLETYPE long double
+#endif
+#ifdef TRY_sprintf
+#if defined(USE_LONG_DOUBLE) && defined(HAS_LONG_DOUBLE)
+#ifdef HAS_PRIgldbl
+#define Gconvert(x,n,t,b) sprintf((b),"%.*"$sPRIgldbl,(n),(x))
+#else
+#define Gconvert(x,n,t,b) sprintf((b),"%.*g",(n),(double)(x))
+#endif
+#else
+#define Gconvert(x,n,t,b) sprintf((b),"%.*g",(n),(x))
+#endif
+char *myname = "sprintf";
+#endif
+
+#ifndef DOUBLETYPE
+#if defined(USE_LONG_DOUBLE) && defined(HAS_LONG_DOUBLE)
+#define DOUBLETYPE long double
+#else
+#define DOUBLETYPE double
+#endif
+#endif
+
+#include <stdio.h>
+
+#$i_stdlib I_STDLIB
+#ifdef I_STDLIB
+#include <stdlib.h>
+#endif
+#include <string.h>
+
+int checkit(char *expect, char *got)
+{
+    if (strcmp(expect, got)) {
+		printf("%s oddity:  Expected %s, got %s\n",
+			myname, expect, got);
+		exit(1);
+	}
+}
+
+int main()
+{
+	char buf[64];
+	buf[63] = '\0';
+
+	/* This must be 1st test on (which?) platform */
+	/* Alan Burlison <AlanBurlsin@unn.unisys.com> */
+	Gconvert((DOUBLETYPE)0.1, 8, 0, buf);
+	checkit("0.1", buf);
+
+	Gconvert((DOUBLETYPE)0.01, 8, 0, buf);
+	checkit("0.01", buf);
+
+	Gconvert((DOUBLETYPE)0.001, 8, 0, buf);
+	checkit("0.001", buf);
+
+	Gconvert((DOUBLETYPE)0.0001, 8, 0, buf);
+	checkit("0.0001", buf);
+
+	Gconvert((DOUBLETYPE)0.00009, 8, 0, buf);
+	if (strlen(buf) > 5)
+	    checkit("9e-005", buf); /* for Microsoft ?? */
+	else
+	    checkit("9e-05", buf);
+
+	Gconvert((DOUBLETYPE)1.0, 8, 0, buf);
+	checkit("1", buf);
+
+	Gconvert((DOUBLETYPE)1.1, 8, 0, buf);
+	checkit("1.1", buf);
+
+	Gconvert((DOUBLETYPE)1.01, 8, 0, buf);
+	checkit("1.01", buf);
+
+	Gconvert((DOUBLETYPE)1.001, 8, 0, buf);
+	checkit("1.001", buf);
+
+	Gconvert((DOUBLETYPE)1.0001, 8, 0, buf);
+	checkit("1.0001", buf);
+
+	Gconvert((DOUBLETYPE)1.00001, 8, 0, buf);
+	checkit("1.00001", buf);
+
+	Gconvert((DOUBLETYPE)1.000001, 8, 0, buf);
+	checkit("1.000001", buf);
+
+	Gconvert((DOUBLETYPE)0.0, 8, 0, buf);
+	checkit("0", buf);
+
+	Gconvert((DOUBLETYPE)-1.0, 8, 0, buf);
+	checkit("-1", buf);
+
+	/* Some Linux gcvt's give 1.e+5 here. */
+	Gconvert((DOUBLETYPE)100000.0, 8, 0, buf);
+	checkit("100000", buf);
+
+	/* Some Linux gcvt's give -1.e+5 here. */
+	Gconvert((DOUBLETYPE)-100000.0, 8, 0, buf);
+	checkit("-100000", buf);
+
+	Gconvert((DOUBLETYPE)123.456, 8, 0, buf);
+	checkit("123.456", buf);
+
+	/* Testing of 1e+129 in bigintpm.t must not get extra '.' here. */
+	Gconvert((DOUBLETYPE)1e34, 8, 0, buf);
+	/* 34 should be enough to scare even long double
+	 * places into using the e notation. */
+	if (strlen(buf) > 5)
+	    checkit("1e+034", buf); /* for Microsoft */
+	else
+	    checkit("1e+34", buf);
+
+	/* For Perl, if you add additional tests here, also add them to
+	 * t/base/num.t for benefit of platforms not using Configure or
+	 * overriding d_Gconvert */
+
+	exit(0);
+}
+EOP
+?X: List of order in which to search for functions.
+?X: Usual order of efficiency is gconvert gcvt sprintf
+?X: If a hint file sets a d_Gconvert="gconvert" or "gcvt" or "sprintf",
+?X: then that is taken as a hint for which function to try first.
+?X: (e.g. that function may be in a problematic /usr/ucblib library, and
+?X: the user may or may not choose to use -lucb stuff.)
+?X: Any other hint file (or previous config.sh) setting is left intact.
+: first add preferred functions to our list
+xxx_list=""
+for xxx_convert in $gconvert_preference; do
+    case $xxx_convert in
+    gcvt|gconvert|sprintf) xxx_list="$xxx_list $xxx_convert" ;;
+    *) echo "Discarding unrecognized gconvert_preference $xxx_convert" >&4 ;;
+    esac
+done
+: then add any others
+for xxx_convert in gconvert gcvt sprintf; do
+    case "$xxx_list" in
+    *$xxx_convert*) ;;
+    *) xxx_list="$xxx_list $xxx_convert" ;;
+    esac
+done
+
+case "$d_longdbl$uselongdouble" in
+"$define$define")
+    : again, add preferred functions to our list first
+    xxx_ld_list=""
+    for xxx_convert in $gconvert_ld_preference; do
+        case $xxx_convert in
+        qgcvt|gcvt|gconvert|sprintf) xxx_ld_list="$xxx_ld_list $xxx_convert" ;;
+        *) echo "Discarding unrecognized gconvert_ld_preference $xxx_convert" ;;
+        esac
+    done
+    : then add qgcvt, sprintf--then, in xxx_list order, gconvert and gcvt
+    for xxx_convert in qgcvt sprintf $xxx_list; do
+        case "$xxx_ld_list" in
+        $xxx_convert*|*" $xxx_convert"*) ;;
+        *) xxx_ld_list="$xxx_ld_list $xxx_convert" ;;
+        esac
+    done
+    : if sprintf cannot do long doubles, move it to the end
+    if test "$d_PRIgldbl" != "$define"; then
+        xxx_ld_list="`echo $xxx_ld_list|sed s/sprintf//` sprintf"
+    fi
+    : if no qgcvt, remove it
+    if test "$d_qgcvt" != "$define"; then
+        xxx_ld_list="`echo $xxx_ld_list|sed s/qgcvt//`"
+    fi
+    : use the ld_list
+    xxx_list="$xxx_ld_list"
+    ;;
+esac
+
+for xxx_convert in $xxx_list; do
+	echo "Trying $xxx_convert..."
+?X: Do NOT use $rm_try here, as we need to keep try.c
+	$rm -f try try$_o core
+	set try -DTRY_$xxx_convert
+	if eval $compile; then
+		echo "$xxx_convert() found." >&4
+		if $run ./try; then
+			echo "I'll use $xxx_convert to convert floats into a string." >&4
+			break;
+		else
+			echo "...But $xxx_convert didn't work as I expected."
+			xxx_convert=''
+		fi
+	else
+		echo "$xxx_convert NOT found." >&4
+	fi
+done
+
+if test X$xxx_convert = X; then
+    echo "*** WHOA THERE!!! ***" >&4
+    echo "None of ($xxx_list)  seemed to work properly.  I'll use sprintf." >&4
+    xxx_convert=sprintf
+fi
+
+case "$xxx_convert" in
+gconvert) d_Gconvert='gconvert((x),(n),(t),(b))' ;;
+gcvt) d_Gconvert='gcvt((x),(n),(b))' ;;
+qgcvt) d_Gconvert='qgcvt((x),(n),(b))' ;;
+*) case "$uselongdouble$d_longdbl$d_PRIgldbl" in
+   "$define$define$define")
+      d_Gconvert="sprintf((b),\"%.*\"$sPRIgldbl,(n),(x))" ;;
+   "$define$define$undef")
+      d_Gconvert='sprintf((b),"%.*g",(n),(double)(x))' ;;
+   *) d_Gconvert='sprintf((b),"%.*g",(n),(x))' ;;
+   esac
+   ;;
+esac
+
+fi
+$rm_try
+

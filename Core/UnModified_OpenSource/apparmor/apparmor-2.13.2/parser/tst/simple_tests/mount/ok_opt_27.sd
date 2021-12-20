@@ -1,0 +1,10 @@
+#
+#=Description basic rules to test the "verbose" mount option
+#=EXRESULT PASS
+/usr/bin/foo {
+  mount options=verbose /a -> /1,
+  mount options=(verbose) /b -> /2,
+  mount options=(rw,verbose) /c -> /3,
+  mount options in (verbose) /d -> /4,
+  mount options in (ro,verbose) /e -> /5,
+}

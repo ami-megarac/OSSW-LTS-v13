@@ -1,0 +1,11 @@
+#
+#=DESCRIPTION allow change_profile /onexec to a hat with quotes
+#=EXRESULT PASS
+#
+/usr/bin/foo {
+   allow change_profile /onexec -> "/bin/foo//bar",
+}
+
+/usr/bin/foo2 {
+   allow change_profile /onexec -> "/bin/foo// bar",
+}

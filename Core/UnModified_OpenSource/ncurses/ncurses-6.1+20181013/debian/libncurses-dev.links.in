@@ -1,0 +1,7 @@
+lib/${DEB_HOST_MULTIARCH}/libtinfo.so.6 usr/lib/${DEB_HOST_MULTIARCH}/libtinfo.so
+usr/lib/${DEB_HOST_MULTIARCH}/libncurses.so usr/lib/${DEB_HOST_MULTIARCH}/libcurses.so
+usr/lib/${DEB_HOST_MULTIARCH}/libtinfo.a usr/lib/${DEB_HOST_MULTIARCH}/libtermcap.a
+usr/bin/ncurses6-config usr/bin/ncurses5-config
+usr/bin/ncursesw6-config usr/bin/ncursesw5-config
+usr/share/man/man1/ncurses6-config.1 usr/share/man/man1/ncurses5-config.1
+usr/share/man/man1/ncursesw6-config.1 usr/share/man/man1/ncursesw5-config.1

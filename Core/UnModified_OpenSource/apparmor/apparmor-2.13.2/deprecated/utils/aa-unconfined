@@ -1,0 +1,113 @@
+#!/usr/bin/perl -w
+# ----------------------------------------------------------------------
+#    Copyright (c) 2005 Novell, Inc. All Rights Reserved.
+#
+#    This program is free software; you can redistribute it and/or
+#    modify it under the terms of version 2 of the GNU General Public
+#    License as published by the Free Software Foundation.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program; if not, contact Novell, Inc.
+#
+#    To contact Novell about this file by physical or electronic mail,
+#    you may find current contact information at www.novell.com.
+# ----------------------------------------------------------------------
+#
+#  unconfined -
+#    audit local system for processes listening on network connections
+#    that are not currently running with a profile.
+
+use strict;
+use Getopt::Long;
+
+use Immunix::AppArmor;
+use Locale::gettext;
+use POSIX;
+
+setlocale(LC_MESSAGES, "");
+textdomain("apparmor-utils");
+
+# options variables
+my $paranoid = '';
+my $help     = '';
+
+GetOptions(
+    'paranoid' => \$paranoid,
+    'help|h'   => \$help,
+);
+
+# tell 'em how to use it...
+&usage && exit if $help;
+
+sub usage {
+    printf(gettext("Usage: %s [ --paranoid ]\n"), $0);
+    exit 0;
+}
+
+my $subdomainfs = check_for_subdomain();
+
+die gettext("AppArmor does not appear to be started. Please enable AppArmor and try again.") . "\n"
+  unless $subdomainfs;
+
+my @pids;
+if ($paranoid) {
+    opendir(PROC, "/proc") or die gettext("Can't read /proc\n");
+    @pids = grep { /^\d+$/ } readdir(PROC);
+    closedir(PROC);
+} else {
+    if (open(NETSTAT, "LANG=C /bin/netstat -nlp |")) {
+        while (<NETSTAT>) {
+            chomp;
+            push @pids, $5
+              if /^(tcp|udp)\s+\d+\s+\d+\s+\S+\:(\d+)\s+\S+\:(\*|\d+)\s+(LISTEN|\s+)\s+(\d+)\/(\S+)/;
+        }
+        close(NETSTAT);
+    }
+}
+
+for my $pid (sort { $a <=> $b } @pids) {
+    my $prog = readlink "/proc/$pid/exe" or next;
+    my $attr;
+    if (open(CURRENT, "/proc/$pid/attr/current")) {
+        while (<CURRENT>) {
+            chomp;
+            $attr = $_ if (/^\// || /^null/);
+        }
+        close(CURRENT);
+    }
+    my $cmdline = `cat /proc/$pid/cmdline`;
+    my $pname = (split(/\0/, $cmdline))[0];
+    if ($pname =~ /\// && !($pname eq $prog)) {
+	$pname = "($pname) ";
+    } else {
+	$pname = "";
+    }
+    if (not $attr) {
+        if ($prog =~ m/^(\/usr\/bin\/python|\/usr\/bin\/perl|\/bin\/bash)$/) {
+
+            #my $scriptname = (split(/\0/, `cat /proc/$pid/cmdline`))[1];
+            $cmdline =~ s/\0/ /g;
+            $cmdline =~ s/\s+$//;
+            chomp $cmdline;
+            print "$pid $prog ($cmdline) " . gettext("not confined\n");
+        } else {
+            print "$pid $prog $pname" . gettext("not confined\n");
+        }
+    } else {
+        if ($prog =~ m/^(\/usr\/bin\/python|\/usr\/bin\/perl|\/bin\/bash)$/) {
+
+            #my $scriptname = (split(/\0/, `cat /proc/$pid/cmdline`))[1];
+            $cmdline =~ s/\0/ /g;
+            $cmdline =~ s/\s+$//;
+            chomp $cmdline;
+            print "$pid $prog ($cmdline) " . gettext("confined by") . " '$attr'\n";
+        } else {
+            print "$pid $prog $pname" . gettext("confined by") . " '$attr'\n";
+        }
+    }
+}

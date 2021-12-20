@@ -1,0 +1,11 @@
+#!/bin/sh
+
+set -e
+set -x
+
+# Smoke test some of the tools
+uconv -f utf8 -t latin1 /etc/hostname
+icu-config --unicode-version
+
+echo 'Smoke test of test driver succesful'
+exit 0

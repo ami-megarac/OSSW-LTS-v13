@@ -1,0 +1,73 @@
+#!/usr/bin/make -f
+
+%:
+	dh $@ --with gir,python2
+
+include /usr/share/dpkg/architecture.mk
+
+ifneq (linux,$(DEB_HOST_ARCH_OS))
+CONFFLAGS += \
+	--disable-autoipd
+endif
+
+# Ensure at build time that the library has no dependencies on undefined
+# symbols, and speed up loading.
+export DEB_LDFLAGS_MAINT_APPEND = -Wl,-z,defs -Wl,-O1 -Wl,--as-needed
+
+ifneq ($(filter stage1,$(DEB_BUILD_PROFILES)),)
+CONFFLAGS += \
+	--disable-gtk3 \
+	--disable-pygobject \
+	--disable-python-dbus
+else
+CONFFLAGS += \
+	--enable-gtk3
+endif
+
+override_dh_auto_configure:
+	dh_auto_configure -- $(CONFFLAGS) \
+		--enable-compat-libdns_sd \
+		--disable-mono \
+		--disable-monodoc \
+		--disable-gtk \
+		--disable-qt3 \
+		--disable-qt4 \
+		--enable-introspection \
+		--with-distro=debian \
+		--with-systemdsystemunitdir=/lib/systemd/system
+
+override_dh_auto_build:
+	dh_auto_build
+	# create an up to date PO template
+	cd po; intltool-update -p --verbose
+
+override_dh_auto_clean:
+	dh_auto_clean
+	rm -f po/*.pot
+
+override_dh_auto_install:
+	dh_auto_install
+ifeq (linux,$(DEB_HOST_ARCH_OS))
+	mv debian/tmp/etc/dhcp/dhclient-exit-hooks.d/avahi-autoipd \
+		debian/tmp/etc/dhcp/dhclient-exit-hooks.d/zzz_avahi-autoipd
+endif
+
+override_dh_missing:
+	find debian/tmp -name '*.la' -print -delete
+	rm debian/tmp/etc/init.d/avahi-daemon
+	rm debian/tmp/etc/init.d/avahi-dnsconfd
+	rm debian/tmp/usr/bin/avahi-discover-standalone
+	rm debian/tmp/usr/share/man/man1/avahi-bookmarks.1
+	dh_missing --fail-missing
+
+override_dh_installdocs:
+	dh_installdocs --all docs/NEWS docs/README
+
+override_dh_installchangelogs:
+	dh_installchangelogs -XChangeLog
+
+override_dh_strip:
+	dh_strip --dbgsym-migration='avahi-dbg (<< 0.6.32-1~)'
+
+override_dh_autoreconf:
+	NOCONFIGURE=1 dh_autoreconf --as-needed ./autogen.sh

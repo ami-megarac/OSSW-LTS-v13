@@ -1,0 +1,7 @@
+#
+#=DESCRIPTION unix entry with a bad 'in' keyword
+#=EXRESULT FAIL
+
+profile foo {
+  unix send type in (dgram, stream),
+}

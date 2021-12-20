@@ -1,0 +1,57 @@
+#! /usr/bin/python3
+# ----------------------------------------------------------------------
+#    Copyright (C) 2013 Kshitij Gupta <kgupta8592@gmail.com>
+#
+#    This program is free software; you can redistribute it and/or
+#    modify it under the terms of version 2 of the GNU General Public
+#    License as published by the Free Software Foundation.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+# ----------------------------------------------------------------------
+import argparse
+import os
+
+import apparmor.aa as apparmor
+import apparmor.ui as aaui
+
+# setup exception handling
+from apparmor.fail import enable_aa_exception_handler
+enable_aa_exception_handler()
+
+# setup module translations
+from apparmor.translations import init_translation
+_ = init_translation()
+
+parser = argparse.ArgumentParser(description=_('Process log entries to generate profiles'))
+parser.add_argument('-d', '--dir', type=str, help=_('path to profiles'))
+parser.add_argument('-f', '--file', type=str, help=_('path to logfile'))
+parser.add_argument('-m', '--mark', type=str, help=_('mark in the log to start processing after'))
+parser.add_argument('-j', '--json', action='store_true', help=_('Input and Output in JSON'))
+args = parser.parse_args()
+
+if args.json:
+    aaui.set_json_mode()
+
+profiledir = args.dir
+logmark = args.mark or ''
+
+apparmor.init_aa()
+apparmor.set_logfile(args.file)
+
+aa_mountpoint = apparmor.check_for_apparmor()
+if not aa_mountpoint:
+    raise apparmor.AppArmorException(_('It seems AppArmor was not started. Please enable AppArmor and try again.'))
+
+if profiledir:
+    apparmor.profile_dir = apparmor.get_full_path(profiledir)
+    if not os.path.isdir(apparmor.profile_dir):
+        raise apparmor.AppArmorException("%s is not a directory."%profiledir)
+
+apparmor.loadincludes()
+
+apparmor.do_logprof_pass(logmark)
+

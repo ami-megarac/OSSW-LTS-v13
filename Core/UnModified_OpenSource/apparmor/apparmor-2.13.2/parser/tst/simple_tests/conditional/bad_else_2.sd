@@ -1,0 +1,18 @@
+# taken from cond59.sd
+#=DESCRIPTION improper nesting of hat and conditional
+#=EXRESULT FAIL
+
+$FOO=true
+
+#indentation screwy to try to show crossing levels
+/bin/true {
+  /bin/true rix,
+  if $FOO {
+    ^HATNAME
+  } #endif
+    {
+      /bin/false rix,
+  if $FOO {
+    } #endhat
+  } #endif
+}

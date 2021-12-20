@@ -1,0 +1,135 @@
+#
+#=Description basic signal w/specific signals rule
+#=EXRESULT PASS
+#
+/usr/bin/signal-test1 {
+  signal set=hup,
+}
+
+/usr/bin/signal-test2 {
+  signal set=int,
+}
+
+/usr/bin/signal-test3 {
+  signal set=quit,
+}
+
+/usr/bin/signal-test4 {
+  signal set=ill,
+}
+
+/usr/bin/signal-test5 {
+  signal set=trap,
+}
+
+/usr/bin/signal-test6 {
+  signal set=abrt,
+}
+
+/usr/bin/signal-test7 {
+  signal set=bus,
+}
+
+/usr/bin/signal-test8 {
+  signal set=fpe,
+}
+
+/usr/bin/signal-test9 {
+  signal set=kill,
+}
+
+/usr/bin/signal-test10 {
+  signal set=usr1,
+}
+
+/usr/bin/signal-test11 {
+  signal set=segv,
+}
+
+/usr/bin/signal-test12 {
+  signal set=usr2,
+}
+
+/usr/bin/signal-test13 {
+  signal set=pipe,
+}
+
+/usr/bin/signal-test14 {
+  signal set=alrm,
+}
+
+/usr/bin/signal-test15 {
+  signal set=term,
+}
+
+/usr/bin/signal-test16 {
+  signal set=stkflt,
+}
+
+/usr/bin/signal-test17 {
+  signal set=chld,
+}
+
+/usr/bin/signal-test18 {
+  signal set=cont,
+}
+
+/usr/bin/signal-test19 {
+  signal set=stop,
+}
+
+/usr/bin/signal-test20 {
+  signal set=stp,
+}
+
+/usr/bin/signal-test21 {
+  signal set=ttin,
+}
+
+/usr/bin/signal-test22 {
+  signal set=ttou,
+}
+
+/usr/bin/signal-test23 {
+  signal set=urg,
+}
+
+/usr/bin/signal-test24 {
+  signal set=xcpu,
+}
+
+/usr/bin/signal-test25 {
+  signal set=xfsz,
+}
+
+/usr/bin/signal-test26 {
+  signal set=vtalrm,
+}
+
+/usr/bin/signal-test27 {
+  signal set=prof,
+}
+
+/usr/bin/signal-test28 {
+  signal set=winch,
+}
+
+/usr/bin/signal-test29 {
+  signal set=io,
+}
+
+/usr/bin/signal-test30 {
+  signal set=pwr,
+}
+
+/usr/bin/signal-test31 {
+  signal set=sys,
+}
+
+/usr/bin/signal-test32 {
+  signal set=emt,
+}
+
+/usr/bin/signal-test33 {
+  signal set=exists,
+}

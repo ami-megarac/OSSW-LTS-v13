@@ -1,0 +1,46 @@
+From 1d4615aa650dad1c01452d46396c0307304b0245 Mon Sep 17 00:00:00 2001
+From: rrivers2 <5981058-rrivers2@users.noreply.gitlab.com>
+Date: Sun, 24 May 2020 23:11:01 +0000
+Subject: [PATCH] Update session_ticket.c to add support for zero length
+ session tickets returned from the server
+
+check that ticket_len > 0 prior to calling gnutls_realloc_fast
+
+Signed-off-by: Rod Rivers <5981058-rrivers2@users.noreply.gitlab.com>
+---
+ lib/ext/session_ticket.c | 18 ++++++++++--------
+ 1 file changed, 10 insertions(+), 8 deletions(-)
+
+diff --git a/lib/ext/session_ticket.c b/lib/ext/session_ticket.c
+index c854d9c2a..8d4595821 100644
+--- a/lib/ext/session_ticket.c
++++ b/lib/ext/session_ticket.c
+@@ -787,15 +787,17 @@ int _gnutls_recv_new_session_ticket(gnutls_session_t session)
+ 		ret = GNUTLS_E_MEMORY_ERROR;
+ 		goto error;
+ 	}
+-	priv->session_ticket =
+-	    gnutls_realloc_fast(priv->session_ticket, ticket_len);
+-	if (!priv->session_ticket) {
+-		gnutls_free(priv);
+-		gnutls_assert();
+-		ret = GNUTLS_E_MEMORY_ERROR;
+-		goto error;
++	if (ticket_len > 0) {
++		priv->session_ticket =
++		    gnutls_realloc_fast(priv->session_ticket, ticket_len);
++		if (!priv->session_ticket) {
++			gnutls_free(priv);
++			gnutls_assert();
++			ret = GNUTLS_E_MEMORY_ERROR;
++			goto error;
++		}
++		memcpy(priv->session_ticket, p, ticket_len);
+ 	}
+-	memcpy(priv->session_ticket, p, ticket_len);
+ 	priv->session_ticket_len = ticket_len;
+ 	epriv = priv;
+ 
+-- 
+2.26.2
+

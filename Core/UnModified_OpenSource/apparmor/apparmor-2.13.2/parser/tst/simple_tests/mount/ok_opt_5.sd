@@ -1,0 +1,8 @@
+#
+#=Description basic rules to test the "w" mount option
+#=EXRESULT PASS
+/usr/bin/foo {
+  mount options=w /a -> /1,
+  mount options=(w) /b -> /2,
+  mount options in (w) /d -> /4,
+}

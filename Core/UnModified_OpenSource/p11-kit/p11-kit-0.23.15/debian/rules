@@ -1,0 +1,28 @@
+#!/usr/bin/make -f
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+
+override_dh_auto_configure:
+	dh_auto_configure --verbose -- \
+		--disable-silent-rules \
+		--with-trust-paths=/etc/ssl/certs/ca-certificates.crt \
+		--with-hash-impl=internal --enable-doc
+
+override_dh_makeshlibs:
+	# Force keeping symbol file up to date.
+	dh_makeshlibs \
+		-Xusr/lib/$(DEB_HOST_MULTIARCH)/pkcs11/p11-kit-trust.so -- -c4
+
+override_dh_link:
+	rm -rf debian/libp11-kit0-dbg/usr/share/doc/libp11-kit0-dbg \
+		debian/p11-kit-modules/usr/share/doc/p11-kit-modules
+	dh_link
+
+override_dh_missing:
+	dh_missing --list-missing
+
+%:
+	dh $@

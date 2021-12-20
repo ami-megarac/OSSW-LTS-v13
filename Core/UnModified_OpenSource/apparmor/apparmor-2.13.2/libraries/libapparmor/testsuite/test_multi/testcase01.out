@@ -1,0 +1,21 @@
+START
+File: testcase01.in
+Event type: AA_RECORD_DENIED
+Audit ID: 1181057184.959:7
+Operation: exec
+Mask: rwx
+Denied Mask: x
+Profile: /bin/ping
+Name: /bin/ping
+Name2: ping2
+Attribute: attr
+Task: 1
+Parent: 1
+Token: 29493
+Info: Information
+PID: 31938
+Network family: family
+Socket type: unknown(1234)
+Protocol: tcp
+Epoch: 1181057184
+Audit subid: 7

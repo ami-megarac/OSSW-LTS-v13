@@ -1,0 +1,3 @@
+libitm.so.1 #PACKAGE# #MINVER#
+ (symver)LIBITM_1.0 4.7
+ (symver)LIBITM_1.1 6

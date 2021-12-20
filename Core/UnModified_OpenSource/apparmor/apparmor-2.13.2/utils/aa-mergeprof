@@ -1,0 +1,201 @@
+#! /usr/bin/python3
+# ----------------------------------------------------------------------
+#    Copyright (C) 2013 Kshitij Gupta <kgupta8592@gmail.com>
+#    Copyright (C) 2014-2018 Christian Boltz <apparmor@cboltz.de>
+#
+#    This program is free software; you can redistribute it and/or
+#    modify it under the terms of version 2 of the GNU General Public
+#    License as published by the Free Software Foundation.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+# ----------------------------------------------------------------------
+import argparse
+import os
+
+import apparmor.aa
+import apparmor.aamode
+
+import apparmor.severity
+import apparmor.cleanprofile as cleanprofile
+import apparmor.ui as aaui
+
+from apparmor.common import AppArmorException
+from apparmor.regex import re_match_include
+
+
+# setup exception handling
+from apparmor.fail import enable_aa_exception_handler
+enable_aa_exception_handler()
+
+# setup module translations
+from apparmor.translations import init_translation
+_ = init_translation()
+
+parser = argparse.ArgumentParser(description=_('Merge the given profiles into /etc/apparmor.d/ (or the directory specified with -d)'))
+parser.add_argument('files', nargs='+', type=str, help=_('Profile(s) to merge'))
+parser.add_argument('-d', '--dir', type=str, help=_('path to profiles'))
+#parser.add_argument('-a', '--auto', action='store_true', help=_('Automatically merge profiles, exits incase of *x conflicts'))
+args = parser.parse_args()
+
+args.other = None
+
+apparmor.aa.init_aa()
+
+profiles = args.files
+
+profiledir = args.dir
+if profiledir:
+    apparmor.aa.profile_dir = apparmor.aa.get_full_path(profiledir)
+    if not os.path.isdir(apparmor.aa.profile_dir):
+        raise AppArmorException(_("%s is not a directory.") %profiledir)
+
+def reset_aa():
+    apparmor.aa.aa = apparmor.aa.hasher()
+    apparmor.aa.filelist = apparmor.aa.hasher()
+    apparmor.aa.include = dict()
+    apparmor.aa.active_profiles = apparmor.aa.ProfileList()
+    apparmor.aa.original_aa = apparmor.aa.hasher()
+
+def find_profiles_from_files(files):
+    profile_to_filename = dict()
+    for file_name in files:
+        apparmor.aa.read_profile(file_name, True)
+        for profile_name in apparmor.aa.filelist[file_name]['profiles'].keys():
+            profile_to_filename[profile_name] = file_name
+        reset_aa()
+
+    return profile_to_filename
+
+def find_files_from_profiles(profiles):
+    profile_to_filename = dict()
+    apparmor.aa.read_profiles()
+
+    for profile_name in profiles:
+        profile_to_filename[profile_name] = apparmor.aa.get_profile_filename_from_profile_name(profile_name, True)
+
+    reset_aa()
+
+    return profile_to_filename
+
+def main():
+    base_profile_to_file = find_profiles_from_files(profiles)
+
+    profiles_to_merge = set(base_profile_to_file.keys())
+
+    user_profile_to_file = find_files_from_profiles(profiles_to_merge)
+
+    for profile_name in profiles_to_merge:
+        aaui.UI_Info("\n\n" + _("Merging profile for %s" % profile_name))
+        user_file = user_profile_to_file[profile_name]
+        base_file = base_profile_to_file.get(profile_name, None)
+
+        act([user_file, base_file], profile_name)
+
+        reset_aa()
+
+def act(files, merging_profile):
+    mergeprofiles = Merge(files)
+    #Get rid of common/superfluous stuff
+    mergeprofiles.clear_common()
+
+#    if not args.auto:
+    if 1 == 1:  # workaround to avoid lots of whitespace changes
+        mergeprofiles.ask_merge_questions()
+
+        q = aaui.PromptQuestion()
+        q.title = _('Changed Local Profiles')
+        q.explanation = _('The following local profiles were changed. Would you like to save them?')
+        q.functions = ['CMD_SAVE_CHANGES', 'CMD_VIEW_CHANGES', 'CMD_ABORT', 'CMD_IGNORE_ENTRY']
+        q.default = 'CMD_VIEW_CHANGES'
+        q.options = [merging_profile]
+        q.selected = 0
+
+        ans = ''
+        arg = None
+        programs = list(mergeprofiles.user.aa.keys())
+        program = programs[0]
+        while ans != 'CMD_SAVE_CHANGES':
+            ans, arg = q.promptUser()
+            if ans == 'CMD_SAVE_CHANGES':
+                apparmor.aa.write_profile_ui_feedback(program)
+                apparmor.aa.reload_base(program)
+            elif ans == 'CMD_VIEW_CHANGES':
+                for program in programs:
+                    apparmor.aa.original_aa[program] = apparmor.aa.deepcopy(apparmor.aa.aa[program])
+                #oldprofile = apparmor.serialize_profile(apparmor.original_aa[program], program, '')
+                newprofile = apparmor.aa.serialize_profile(mergeprofiles.user.aa[program], program, '')
+                aaui.UI_Changes(mergeprofiles.user.filename, newprofile, comments=True)
+            elif ans == 'CMD_IGNORE_ENTRY':
+                break
+
+
+class Merge(object):
+    def __init__(self, profiles):
+        user, base = profiles
+
+        #Read and parse base profile and save profile data, include data from it and reset them
+        apparmor.aa.read_profile(base, True)
+        self.base = cleanprofile.Prof(base)
+
+        reset_aa()
+
+        #Read and parse user profile
+        apparmor.aa.read_profile(user, True)
+        self.user = cleanprofile.Prof(user)
+
+    def clear_common(self):
+        deleted = 0
+
+        #Remove off the parts in base profile which are common/superfluous from user profile
+        user_base = cleanprofile.CleanProf(False, self.user, self.base)
+        deleted += user_base.compare_profiles()
+
+    def ask_merge_questions(self):
+        other = self.base
+        log_dict = {'merge': other.aa}
+
+        apparmor.aa.loadincludes()
+        done = False
+
+        #Add the file-wide includes from the other profile to the user profile
+        options = []
+        for inc in other.filelist[other.filename]['include'].keys():
+            if not inc in self.user.filelist[self.user.filename]['include'].keys():
+                if inc.startswith('/'):
+                    options.append('#include "%s"' %inc)
+                else:
+                    options.append('#include <%s>' %inc)
+
+        default_option = 1
+
+        q = aaui.PromptQuestion()
+        q.options = options
+        q.selected = default_option - 1
+        q.headers = [_('File includes'), _('Select the ones you wish to add')]
+        q.functions = ['CMD_ALLOW', 'CMD_IGNORE_ENTRY', 'CMD_ABORT', 'CMD_FINISHED']
+        q.default = 'CMD_ALLOW'
+
+        while not done and options:
+            ans, selected = q.promptUser()
+            if ans == 'CMD_IGNORE_ENTRY':
+                done = True
+            elif ans == 'CMD_ALLOW':
+                selection = options[selected]
+                inc = re_match_include(selection)
+                self.user.filelist[self.user.filename]['include'][inc] = True
+                options.pop(selected)
+                aaui.UI_Info(_('Adding %s to the file.') % selection)
+            elif ans == 'CMD_FINISHED':
+                return
+
+        if not apparmor.aa.sev_db:
+            apparmor.aa.sev_db = apparmor.severity.Severity(apparmor.aa.CONFDIR + '/severity.db', _('unknown'))
+
+        apparmor.aa.ask_the_questions(log_dict)
+
+if __name__ == '__main__':
+    main()

@@ -1,0 +1,2 @@
+read and write of a filedescriptor received over a unix domain socket,
+both inside and outside of a change_hat.

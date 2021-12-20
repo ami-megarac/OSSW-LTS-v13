@@ -1,0 +1,1 @@
+type=AVC msg=audit(1279968846.035:77): apparmor="ALLOWED" operation="open" parent=7014 profile="/tmp/cat" name="/etc/passwd" pid=21645 comm="cat" requested_mask="r" denied_mask="r" fsuid=1000 ouid=0

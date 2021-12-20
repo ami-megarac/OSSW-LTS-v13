@@ -1,0 +1,8 @@
+libpng-config.patch
+#272.patch
+libpng-1.6.36-apng.patch
+70d122aac42933ab8a708c538f973c3307853212.patch
+8439534daa1d3a5705ba92e653eda9251246dd61.patch
+CVE-2019-7317.patch
+82ae623ec9bc3cb5c68aad22596a766e86d593b7.patch
+a627bd26a375f5c41d54f90a47c838157d1bec97.patch

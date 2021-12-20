@@ -1,0 +1,7 @@
+#
+#=DESCRIPTION comma at end of pathname
+#=EXRESULT PASS
+#
+/usr/bin/foo {
+   file "/foobar," r,
+}

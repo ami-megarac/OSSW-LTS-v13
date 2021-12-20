@@ -1,0 +1,11 @@
+START
+File: testcase_changehat_01.in
+Event type: AA_RECORD_ALLOWED
+Audit ID: 1449442292.901:961
+Operation: change_hat
+Profile: /usr/sbin/httpd{,2}-prefork
+Command: httpd-prefork
+Name2: /usr/sbin/httpd{,2}-prefork//HANDLING_UNTRUSTED_INPUT
+PID: 8527
+Epoch: 1449442292
+Audit subid: 961

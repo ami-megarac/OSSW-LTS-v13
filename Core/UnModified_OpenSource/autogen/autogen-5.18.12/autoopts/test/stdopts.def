@@ -1,0 +1,107 @@
+#! /bin/sh
+
+##  This file is part of AutoOpts, a companion to AutoGen.
+##  AutoOpts is free software.
+##  AutoOpts is Copyright (C) 1992-2015 by Bruce Korb - all rights reserved
+##
+##  AutoOpts is available under any one of two licenses.  The license
+##  in use must be one of these two and the choice is under the control
+##  of the user of the license.
+##
+##   The GNU Lesser General Public License, version 3 or later
+##      See the files "COPYING.lgplv3" and "COPYING.gplv3"
+##
+##   The Modified Berkeley Software Distribution License
+##      See the file "COPYING.mbsd"
+##
+##  These files have the following sha256 sums:
+##
+##  8584710e9b04216a394078dc156b781d0b47e1729104d666658aecef8ee32e95  COPYING.gplv3
+##  4379e7444a0e2ce2b12dd6f5a52a27a4d02d39d247901d3285c88cf0d37f477b  COPYING.lgplv3
+##  13aa749a5b0a454917a944ed8fffc530b784f5ead522b1aacaf4ec8aa55a6239  COPYING.mbsd
+
+#  This is the standard set of options for testing option processing
+#  It is expected to be dot
+
+exec 5> $testname.def
+cat >&5 <<- _EOF_
+
+	AutoGen definitions options;
+
+	config-header = 'config.h';
+	prog-name  = "test_${testname}";
+	prog-title = "Test AutoOpts for ${testname}";
+	_EOF_
+
+echo test_main $test_main
+echo argument  $argument
+echo long_opts $long_opts
+
+{
+    test -n "${test_main}" && echo "test-main  = '${test_main}';"
+    test -n "${argument}"  && echo "argument   = '${argument}';"
+    test -n "${long_opts}" && echo "long-opts;"
+} >&5
+
+for flag
+do
+    fname=`echo "${flag}" | ${SED} 's/[^a-zA-Z0-9_-].*//'`
+    flag=`echo "${flag}"  | ${SED} "s/^${fname}//"`
+
+    case "${flag}" in
+    :* )
+        aval=`echo $flag | ${SED} 's/^://'`
+        arg="    arg-type = string;"
+        test -n "${aval}" && arg="${arg} arg_default = '${aval}';"
+        ;;
+
+    =* )
+        aval=`echo $flag | ${SED} 's/=//'`
+        arg="    arg-type = number;"
+        test -n "${aval}" && arg="${arg} arg_default = '${aval}';"
+        ;;
+
+    @* )
+        arg=`echo $flag  | ${SED} 's/@//'`
+        case "${arg}" in
+        *=* ) default=`echo $flag | ${SED} 's/.*=//'`
+              arg=`echo $arg | ${SED} 's/=.*//'`
+              arg="    arg-type = '${arg}'; arg-default='${default}';"
+              ;;
+
+        * )
+              arg="    arg-type = '${arg}';"
+              ;;
+        esac
+        ;;
+
+    * )
+        unset arg
+        ;;
+    esac
+
+    cat <<-_EOF_
+	flag = {
+	    name = "${fname}";
+	    descrip = "The ${fname} option descrip";
+	_EOF_
+
+    ${use_flags} && {
+        fname=`echo ${fname} | ${SED} 's/\(.\).*/\1/'`
+        echo "    value = '${fname}';"
+    }
+    test -n "${arg}" && echo "${arg}"
+    echo "};"
+    echo
+done >&5
+
+exec 5>&-
+ls -l ${testname}.def
+
+## Local Variables:
+## mode: shell-script
+## indent-tabs-mode: nil
+## sh-indentation: 2
+## End:
+
+# end of stdopts.def

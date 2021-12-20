@@ -1,0 +1,25 @@
+#
+#=DESCRIPTION allow change_profile /onexec with just res
+#=EXRESULT PASS
+#
+
+/usr/bin/foo {
+   allow change_profile /onexec -> *,
+}
+
+/usr/bin/foo2 {
+   allow change_profile /onexec -> **,
+}
+
+/usr/bin/foo3 {
+   allow change_profile /onexec -> ?,
+}
+
+/usr/bin/foo4 {
+   allow change_profile /onexec -> [ab],
+}
+
+/usr/bin/foo5 {
+   allow change_profile /onexec -> [^ab],
+}
+

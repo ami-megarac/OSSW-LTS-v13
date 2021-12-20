@@ -1,0 +1,9 @@
+libobjc.so.4 #PACKAGE# #MINVER#
+#include "libobjc.symbols.common"
+ __gnu_objc_personality_v0@Base 4.2.1
+ (arch=armel armhf)__objc_exception_class@Base 4.3.0
+libobjc_gc.so.4 #PACKAGE# #MINVER#
+#include "libobjc.symbols.common"
+(optional)#include "libobjc.symbols.gc"
+ __gnu_objc_personality_v0@Base 4.2.1
+ (arch=armel armhf)__objc_exception_class@Base 4.3.0

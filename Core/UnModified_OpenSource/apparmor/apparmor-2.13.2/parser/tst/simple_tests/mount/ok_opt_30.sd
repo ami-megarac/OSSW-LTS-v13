@@ -1,0 +1,10 @@
+#
+#=Description basic rules to test the "acl" mount option
+#=EXRESULT PASS
+/usr/bin/foo {
+  mount options=acl /a -> /1,
+  mount options=(acl) /b -> /2,
+  mount options=(rw,acl) /c -> /3,
+  mount options in (acl) /d -> /4,
+  mount options in (ro,acl) /e -> /5,
+}

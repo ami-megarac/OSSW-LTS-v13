@@ -1,0 +1,10 @@
+#
+#=Description basic rules to test the "nodev" mount option
+#=EXRESULT PASS
+/usr/bin/foo {
+  mount options=nodev /a -> /1,
+  mount options=(nodev) /b -> /2,
+  mount options=(rw,nodev) /c -> /3,
+  mount options in (nodev) /d -> /4,
+  mount options in (ro,nodev) /e -> /5,
+}

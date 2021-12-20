@@ -1,0 +1,7 @@
+#
+#=DESCRIPTION include if exist testing - non-existent include should pass
+#=EXRESULT PASS
+#
+/does/not/exist {
+  include if exists "does-not-exist/does-not-exist"
+}

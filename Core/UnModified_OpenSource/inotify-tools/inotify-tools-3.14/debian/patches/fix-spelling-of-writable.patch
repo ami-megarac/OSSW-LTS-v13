@@ -1,0 +1,16 @@
+Description: Fix spelling of writable from "writeable"
+Author: Ryan Niebur <ryan@debian.org>
+
+Index: inotify-tools/src/common.c
+===================================================================
+--- inotify-tools.orig/src/common.c	2012-06-18 02:29:38.000000000 -0700
++++ inotify-tools/src/common.c	2012-06-18 02:37:16.000000000 -0700
+@@ -25,7 +25,7 @@
+ 	printf("\tmodify\t\tfile or directory contents were written\n");
+ 	printf("\tattrib\t\tfile or directory attributes changed\n");
+ 	printf("\tclose_write\tfile or directory closed, after being opened in\n"
+-	       "\t           \twriteable mode\n");
++	       "\t           \twritable mode\n");
+ 	printf("\tclose_nowrite\tfile or directory closed, after being opened in\n"
+ 	       "\t           \tread-only mode\n");
+ 	printf("\tclose\t\tfile or directory closed, regardless of read/write "

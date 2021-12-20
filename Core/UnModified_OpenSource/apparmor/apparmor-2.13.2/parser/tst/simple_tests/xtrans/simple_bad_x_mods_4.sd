@@ -1,0 +1,9 @@
+#
+#=DESCRIPTION x modifiers can not appear by themselves
+#=EXRESULT FAIL
+#
+/usr/bin/foo {
+
+  /bin/ls ru,
+}
+

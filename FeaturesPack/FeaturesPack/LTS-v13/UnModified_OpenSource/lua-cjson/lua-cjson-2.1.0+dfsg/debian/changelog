@@ -1,0 +1,20 @@
+lua-cjson (2.1.0+dfsg-2.1) unstable; urgency=medium
+
+  * Non-maintainer upload.
+  * debian/control: Drop explicit Pre-Depends on multiarch-support
+    (Closes: #870548).
+
+ -- Aurelien Jarno <aurel32@debian.org>  Sat, 20 Jan 2018 21:15:36 +0100
+
+lua-cjson (2.1.0+dfsg-2) unstable; urgency=low
+
+  * Add debian/watch file.
+
+ -- Dmitry E. Oboukhov <unera@debian.org>  Mon, 24 Sep 2012 11:50:30 +0400
+
+lua-cjson (2.1.0+dfsg-1) unstable; urgency=low
+
+  * Initial release. (Closes: #685591)
+
+ -- Dmitry E. Oboukhov <unera@debian.org>  Fri, 24 Aug 2012 14:35:49 +0400
+

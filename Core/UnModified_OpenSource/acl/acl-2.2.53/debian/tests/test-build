@@ -1,0 +1,38 @@
+#!/bin/sh
+
+set -e
+exec 2>&1
+set -u
+set -x
+
+cd "$AUTOPKGTEST_TMP"
+cat >example.c <<'EOF'
+#include <sys/types.h>
+#include <sys/acl.h>
+
+#include <err.h>
+#include <stddef.h>
+
+int
+main(void)
+{
+    acl_t acl;
+
+    acl = acl_init(42);
+    if (acl == NULL)
+        err(1, "unable to allocate an ACL");
+
+    if (acl_free(acl) != 0)
+        err(1, "unable to free ACL %p", acl);
+
+    return 0;
+}
+EOF
+
+gcc -o example example.c $(pkg-config --libs libacl)
+test -x ./example
+./example
+
+gcc -o example-static example.c $(pkg-config --static --libs libacl)
+test -x ./example-static
+./example-static

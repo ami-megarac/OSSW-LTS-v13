@@ -1,0 +1,9 @@
+#
+#=Description basic audit signal all rule
+#=EXRESULT PASS
+#
+/usr/bin/signal-test {
+  audit signal,
+
+}
+

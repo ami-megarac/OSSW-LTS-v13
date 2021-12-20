@@ -1,0 +1,9 @@
+#
+#=Description basic signal multiple peer entries
+#=EXRESULT FAIL
+#
+/usr/bin/signal-test {
+  signal send peer=foo peer=bar,
+
+}
+

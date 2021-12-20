@@ -1,0 +1,6 @@
+#!/bin/sh
+set -C -e -f -u
+cd "$ADTTMP"
+echo Hello > hello
+bzip2 -c hello > hello.bz2
+bzip2 -cd hello.bz2 | diff hello -

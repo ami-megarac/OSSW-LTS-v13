@@ -1,0 +1,7 @@
+#
+#=DESCRIPTION simple dbus eavesdrop acceptance test
+#=EXRESULT PASS
+
+profile a_profile {
+  dbus eavesdrop bus=session,
+}

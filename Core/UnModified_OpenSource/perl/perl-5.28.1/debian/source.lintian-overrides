@@ -1,0 +1,2 @@
+# the lintian check doesn't understand diversions
+binaries-have-file-conflict perl perl-doc usr/bin/perldoc

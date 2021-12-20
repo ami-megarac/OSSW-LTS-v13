@@ -1,0 +1,25 @@
+From c094ca84e656d6f219b0ca9a9399439d677057bb Mon Sep 17 00:00:00 2001
+From: Timshel Knoll <timshel@debian.org>
+Date: Fri, 28 Mar 2014 17:09:39 +0000
+Subject: Small documentation fixes
+
+Forwarded: not-needed
+
+Patch-Name: doc-package.patch
+---
+ doc/C/parted.8 | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/doc/C/parted.8 b/doc/C/parted.8
+index 689011c6..e2d864b7 100644
+--- a/doc/C/parted.8
++++ b/doc/C/parted.8
+@@ -134,7 +134,7 @@ The \fIparted\fP program is fully documented in the
+ .BR info(1)
+ format
+ .IR "GNU partitioning software"
+-manual.
++manual which is distributed with the parted-doc Debian package.
+ .SH AUTHOR
+ This manual page was written by Timshel Knoll <timshel@debian.org>,
+ for the Debian GNU/Linux system (but may be used by others).

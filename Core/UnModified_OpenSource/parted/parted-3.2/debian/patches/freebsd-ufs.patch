@@ -1,0 +1,291 @@
+From f37708da67219339ca6979e2c8736c5a4bf4bf74 Mon Sep 17 00:00:00 2001
+From: Aurelien Jarno <aurelien@aurel32.net>
+Date: Fri, 28 Mar 2014 17:09:46 +0000
+Subject: Add FreeBSD UFS support
+
+This patch adds support for detection of FreeBSD UFS file systems and
+creation of the partition on DOS and GPT labels. It doesn't use the
+system of slices used by default on FreeBSD and places the partition
+directly in the dos label. This is something supported by the FreeBSD
+kernel, and the default on Debian GNU/kFreeBSD. Even on plain FreeBSD,
+some persons prefer to not use slices.
+
+This patch is used by debian-installer on Debian GNU/kFreeBSD for some
+months already.
+
+Last-Update: 2014-08-25
+
+Patch-Name: freebsd-ufs.patch
+---
+ libparted/fs/ufs/ufs.c     | 103 ++++++++++++++++++++++++++++++++++---
+ libparted/labels/dos.c     |   3 ++
+ libparted/labels/gpt.c     |   9 ++++
+ tests/Makefile.am          |   1 +
+ tests/t2500-freebsd-ufs.sh |  44 ++++++++++++++++
+ 5 files changed, 153 insertions(+), 7 deletions(-)
+ create mode 100644 tests/t2500-freebsd-ufs.sh
+
+diff --git a/libparted/fs/ufs/ufs.c b/libparted/fs/ufs/ufs.c
+index cf0f4414..54c5bd5c 100644
+--- a/libparted/fs/ufs/ufs.c
++++ b/libparted/fs/ufs/ufs.c
+@@ -44,6 +44,7 @@
+ #define UFS_MAGIC_LFN	0x00095014
+ #define UFS_MAGIC_FEA	0x00195612
+ #define UFS_MAGIC_4GB	0x05231994
++#define UFS2_MAGIC	0x19540119
+ 
+ struct ufs_csum {
+ 	uint32_t	cs_ndir;	/* number of directories */
+@@ -128,13 +129,50 @@ struct ufs_super_block {
+ 	int8_t		fs_clean;	/* file system is clean flag */
+ 	int8_t		fs_ronly;	/* mounted read-only flag */
+ 	int8_t		fs_flags;	/* currently unused flag */
+-	int8_t		fs_fsmnt[UFS_MAXMNTLEN];	/* name mounted on */
+-/* these fields retain the current block allocation info */
+-	uint32_t	fs_cgrotor;	/* last cg searched */
+-	uint32_t	fs_csp[UFS_MAXCSBUFS];	/* list of fs_cs info buffers */
+-	uint32_t	fs_maxcluster;
+-	uint32_t	fs_cpc;		/* cyl per cycle in postbl */
+-	uint16_t	fs_opostbl[16][8];	/* old rotation block list head */
++	union {
++		struct {
++			int8_t		fs_fsmnt[UFS_MAXMNTLEN];	/* name mounted on */
++			/* these fields retain the current block allocation info */
++			uint32_t	fs_cgrotor;	/* last cg searched */
++			uint32_t	fs_csp[UFS_MAXCSBUFS];	/* list of fs_cs info buffers */
++			uint32_t	fs_maxcluster;
++			uint32_t	fs_cpc;		/* cyl per cycle in postbl */
++			uint16_t	fs_opostbl[16][8];	/* old rotation block list head */
++		} fs_u1;
++		struct {
++			int8_t		fs_fsmnt[468];
++			uint8_t		fs_volname[32];
++			uint64_t	fs_swuid;
++			int32_t		fs_pad;
++			uint32_t	fs_cgrotor;
++			uint32_t	fs_ocsp[28];
++			uint32_t	fs_contigdirs;
++			uint32_t	fs_csp;
++			uint32_t	fs_maxcluster;
++			uint32_t	fs_active;
++			int32_t		fs_old_cpc;
++			int32_t		fs_maxbsize;
++			int64_t		fs_sparecon64[17];
++			int64_t		fs_sblockloc;
++			struct ufs2_csum_total {
++				uint64_t	cs_ndir;
++				uint64_t	cs_nbfree;
++				uint64_t	cs_nifree;
++				uint64_t	cs_nffree;
++				uint64_t	cs_numclusters;
++				uint64_t	cs_spare[3];
++			} fs_cstotal;
++			struct ufs_timeval {
++				int32_t	 tv_sec;
++				int32_t	 tv_usec;
++			} fs_time;
++			int64_t		fs_size;
++			int64_t		fs_dsize;
++			uint64_t	fs_csaddr;
++			int64_t		fs_pendingblocks;
++			int32_t		fs_pendinginodes;
++		} __attribute__((packed)) fs_u2;
++	} fs_u11;
+ 	union {
+ 		struct {
+ 			int32_t		fs_sparecon[53];/* reserved for future constants */
+@@ -243,6 +281,45 @@ ufs_probe_hp (PedGeometry* geom)
+ 	return NULL;
+ }
+ 
++static PedGeometry*
++ufs_probe_freebsd (PedGeometry* geom)
++{
++	int offsets[] = { 0, 16, 128, 512 };
++	char *buf = alloca (3 * geom->dev->sector_size);
++	struct ufs_super_block *sb;
++	PedSector block_size;
++	PedSector block_count;
++	int i;
++
++	if (geom->length < 5)
++		return 0;
++
++	/* The UFS superblock could be on four different positions */
++	for (i = 0; i < 4; i++) {
++		if (!ped_geometry_read (geom, buf, offsets[i], 3))
++			return 0;
++
++		sb = (struct ufs_super_block *)buf;
++
++		/* Little endian is more likely on FreeBSD boxes */
++		if (PED_LE32_TO_CPU(sb->fs_magic) == UFS2_MAGIC) {
++			block_size = PED_LE32_TO_CPU(sb->fs_fsize) / geom->dev->sector_size;
++			block_count = PED_LE32_TO_CPU(sb->fs_u11.fs_u2.fs_size);
++			return ped_geometry_new (geom->dev, geom->start,
++						 block_size * block_count);
++		}
++
++		/* Then try big endian */
++		if (PED_BE32_TO_CPU(sb->fs_magic) == UFS2_MAGIC) {
++			block_size = PED_BE32_TO_CPU(sb->fs_fsize) / geom->dev->sector_size;
++			block_count = PED_BE32_TO_CPU(sb->fs_u11.fs_u2.fs_size);
++			return ped_geometry_new (geom->dev, geom->start,
++						 block_size * block_count);
++		}
++	}
++	return NULL;
++}
++
+ static PedFileSystemOps ufs_ops_sun = {
+ 	probe:		ufs_probe_sun,
+ };
+@@ -251,6 +328,10 @@ static PedFileSystemOps ufs_ops_hp = {
+ 	probe:		ufs_probe_hp,
+ };
+ 
++static PedFileSystemOps ufs_ops_freebsd = {
++	probe:		ufs_probe_freebsd,
++};
++
+ static PedFileSystemType ufs_type_sun = {
+ 	next:	NULL,
+ 	ops:	&ufs_ops_sun,
+@@ -263,6 +344,12 @@ static PedFileSystemType ufs_type_hp = {
+ 	name:   "hp-ufs",
+ };
+ 
++static PedFileSystemType ufs_type_freebsd_ufs = {
++	next:   NULL,
++	ops:    &ufs_ops_freebsd,
++	name:   "freebsd-ufs"
++};
++
+ void
+ ped_file_system_ufs_init ()
+ {
+@@ -270,11 +357,13 @@ ped_file_system_ufs_init ()
+ 
+ 	ped_file_system_type_register (&ufs_type_sun);
+ 	ped_file_system_type_register (&ufs_type_hp);
++	ped_file_system_type_register (&ufs_type_freebsd_ufs);
+ }
+ 
+ void
+ ped_file_system_ufs_done ()
+ {
++	ped_file_system_type_unregister (&ufs_type_freebsd_ufs);
+ 	ped_file_system_type_unregister (&ufs_type_hp);
+ 	ped_file_system_type_unregister (&ufs_type_sun);
+ }
+diff --git a/libparted/labels/dos.c b/libparted/labels/dos.c
+index 4781c05f..4b95675d 100644
+--- a/libparted/labels/dos.c
++++ b/libparted/labels/dos.c
+@@ -88,6 +88,7 @@ static const char MBR_BOOT_CODE[] = {
+ #define PARTITION_IRST		0x84
+ #define PARTITION_LINUX_EXT	0x85
+ #define PARTITION_LINUX_LVM	0x8e
++#define PARTITION_FREEBSD_UFS	0xa5
+ #define PARTITION_HFS		0xaf
+ #define PARTITION_SUN_UFS	0xbf
+ #define PARTITION_DELL_DIAG	0xde
+@@ -1505,6 +1506,8 @@ msdos_partition_set_system (PedPartition* part,
+ 		dos_data->system = PARTITION_HFS;
+ 	else if (!strcmp (fs_type->name, "sun-ufs"))
+ 		dos_data->system = PARTITION_SUN_UFS;
++	else if (!strcmp (fs_type->name, "freebsd-ufs"))
++		dos_data->system = PARTITION_FREEBSD_UFS;
+ 	else if (is_linux_swap (fs_type->name))
+ 		dos_data->system = PARTITION_LINUX_SWAP;
+ 	else
+diff --git a/libparted/labels/gpt.c b/libparted/labels/gpt.c
+index d69377a4..fbb57c38 100644
+--- a/libparted/labels/gpt.c
++++ b/libparted/labels/gpt.c
+@@ -156,6 +156,10 @@ typedef struct
+     ((efi_guid_t) { PED_CPU_TO_LE32 (0xD3BFE2DE), PED_CPU_TO_LE16 (0x3DAF), \
+                     PED_CPU_TO_LE16 (0x11DF), 0xba, 0x40, \
+                     { 0xE3, 0xA5, 0x56, 0xD8, 0x95, 0x93 }})
++#define PARTITION_FREEBSD_UFS_GUID \
++    ((efi_guid_t) { PED_CPU_TO_LE32 (0x516e7cb6), PED_CPU_TO_LE16 (0x6ecf), \
++                    PED_CPU_TO_LE16 (0x11d6), 0x8f, 0xf8, \
++                    { 0x00, 0x02, 0x2d, 0x09, 0x71, 0x2b }})
+ 
+ struct __attribute__ ((packed)) _GuidPartitionTableHeader_t
+ {
+@@ -1518,6 +1522,11 @@ gpt_partition_set_system (PedPartition *part,
+           gpt_part_data->type = PARTITION_SWAP_GUID;
+           return 1;
+         }
++      if (strstr (fs_type->name, "freebsd-ufs"))
++        {
++          gpt_part_data->type = PARTITION_FREEBSD_UFS_GUID;
++          return 1;
++        }
+     }
+ 
+   gpt_part_data->type = PARTITION_LINUX_DATA_GUID;
+diff --git a/tests/Makefile.am b/tests/Makefile.am
+index b7263665..f9ec6a5a 100644
+--- a/tests/Makefile.am
++++ b/tests/Makefile.am
+@@ -48,6 +48,7 @@ TESTS = \
+   t2300-dos-label-extended-bootcode.sh \
+   t2310-dos-extended-2-sector-min-offset.sh \
+   t2400-dos-hfs-partition-type.sh \
++  t2500-freebsd-ufs.sh \
+   t2500-probe-corrupt-hfs.sh \
+   t3000-resize-fs.sh \
+   t3200-resize-partition.sh \
+diff --git a/tests/t2500-freebsd-ufs.sh b/tests/t2500-freebsd-ufs.sh
+new file mode 100644
+index 00000000..5a46263d
+--- /dev/null
++++ b/tests/t2500-freebsd-ufs.sh
+@@ -0,0 +1,44 @@
++#!/bin/sh
++# Probe FreeBSD UFS file system
++
++# Copyright (C) 2010 Free Software Foundation, Inc.
++
++# This program is free software; you can redistribute it and/or modify
++# it under the terms of the GNU General Public License as published by
++# the Free Software Foundation; either version 3 of the License, or
++# (at your option) any later version.
++
++# This program is distributed in the hope that it will be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++
++# You should have received a copy of the GNU General Public License
++# along with this program.  If not, see <http://www.gnu.org/licenses/>.
++
++if test "$VERBOSE" = yes; then
++  set -x
++  parted --version
++fi
++
++: ${srcdir=.}
++. $srcdir/t-lib.sh
++require_512_byte_sector_size_
++
++dev=loop-file
++ss=$sector_size_
++n_sectors=8000
++
++fail=0
++
++( type mkfs.ufs ) >/dev/null 2>&1 || skip_test_ "no freebsd-ufs support"
++
++# create a freebsd-ufs file system
++dd if=/dev/zero of=$dev bs=1024 count=4096 >/dev/null || fail=1
++mkfs.ufs `pwd`/$dev >/dev/null || fail=1
++
++# probe the freebsd-ufs file system
++parted -m -s $dev u s print >out 2>&1 || fail=1
++grep '^1:.*:freebsd-ufs::;$' out || fail=1
++
++Exit $fail

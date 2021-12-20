@@ -1,0 +1,9 @@
+#!/bin/sh
+set -e
+
+DATA=debian/tests/data
+
+echo "Testing reading of Storable files..."
+for f in $DATA/*.storable; do
+    perl -MStorable=retrieve -le '$h=retrieve(shift); print $h->{foo}' $f | grep OK
+done

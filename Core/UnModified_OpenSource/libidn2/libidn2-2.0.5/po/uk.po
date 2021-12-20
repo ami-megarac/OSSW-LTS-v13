@@ -1,0 +1,390 @@
+# Ukrainian translation of libidn.
+# Copyright (C) 2011 Free Software Foundation, Inc.
+# This file is distributed under the same license as the libidn package.
+#
+# Yuri Chornoivan <yurchor@ukr.net>, 2011.
+msgid ""
+msgstr ""
+"Project-Id-Version: libidn 1.21\n"
+"Report-Msgid-Bugs-To: bug-libidn2@gnu.org\n"
+"POT-Creation-Date: 2018-05-18 09:59+0200\n"
+"PO-Revision-Date: 2011-04-30 13:44+0300\n"
+"Last-Translator: Yuri Chornoivan <yurchor@ukr.net>\n"
+"Language-Team: Ukrainian <translation-team-uk@lists.sourceforge.net>\n"
+"Language: uk\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Bugs: Report translation errors to the Language-Team address.\n"
+"X-Generator: Lokalize 1.2\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+#: lib/error.c:56
+#, fuzzy
+msgid "success"
+msgstr "Виконано"
+
+#: lib/error.c:60
+#, fuzzy
+msgid "out of memory"
+msgstr "Не вдалося виділити пам’ять"
+
+#: lib/error.c:64
+msgid "could not determine locale encoding format"
+msgstr ""
+
+#: lib/error.c:68
+#, fuzzy
+msgid "could not convert string to UTF-8"
+msgstr "не вдалося перетворити дані з формату %s на UTF-8"
+
+#: lib/error.c:72
+msgid "string encoding error"
+msgstr ""
+
+#: lib/error.c:76
+#, fuzzy
+msgid "string could not be NFC normalized"
+msgstr "не вдалося виконати NFKC-нормалізацію"
+
+#: lib/error.c:80
+msgid "string contains invalid punycode data"
+msgstr ""
+
+#: lib/error.c:84
+msgid "punycode encoded data will be too large"
+msgstr ""
+
+#: lib/error.c:88
+msgid "punycode conversion resulted in overflow"
+msgstr ""
+
+#: lib/error.c:92
+msgid "domain name longer than 255 characters"
+msgstr ""
+
+#: lib/error.c:96
+msgid "domain label longer than 63 characters"
+msgstr ""
+
+#: lib/error.c:100
+msgid "input A-label is not valid"
+msgstr ""
+
+#: lib/error.c:104
+msgid "input A-label and U-label does not match"
+msgstr ""
+
+#: lib/error.c:108
+#, fuzzy
+msgid "string is not in Unicode NFC format"
+msgstr "Рядок не є ідемпотентним після NFKC-нормалізації Unicode"
+
+#: lib/error.c:112
+msgid "string contains forbidden two hyphens pattern"
+msgstr ""
+
+#: lib/error.c:116
+msgid "string start/ends with forbidden hyphen"
+msgstr ""
+
+#: lib/error.c:120
+msgid "string contains a forbidden leading combining character"
+msgstr ""
+
+#: lib/error.c:124
+msgid "string contains a disallowed character"
+msgstr ""
+
+#: lib/error.c:128
+msgid "string contains a forbidden context-j character"
+msgstr ""
+
+#: lib/error.c:132
+msgid "string contains a context-j character with null rule"
+msgstr ""
+
+#: lib/error.c:136
+msgid "string contains a forbidden context-o character"
+msgstr ""
+
+#: lib/error.c:140
+msgid "string contains a context-o character with null rule"
+msgstr ""
+
+#: lib/error.c:144
+#, fuzzy
+msgid "string contains unassigned code point"
+msgstr "Некоректні непов’язані символи коду у вхідних даних"
+
+#: lib/error.c:148
+#, fuzzy
+msgid "string has forbidden bi-directional properties"
+msgstr "Суперечливі двонапрямні властивості у вхідних даних"
+
+#: lib/error.c:152
+msgid "Unknown error"
+msgstr "Невідома помилка"
+
+#: src/idn2.c:59
+#, c-format
+msgid "Try `%s --help' for more information.\n"
+msgstr "Виконайте команду «%s --help», щоб дізнатися більше.\n"
+
+#: src/idn2.c:63
+#, c-format
+msgid "Usage: %s [OPTION]... [STRINGS]...\n"
+msgstr "Використання: %s [ПАРАМЕТР]... [РЯДКИ]...\n"
+
+#: src/idn2.c:66
+#, fuzzy
+msgid ""
+"Internationalized Domain Name (IDNA2008) convert STRINGS, or standard "
+"input.\n"
+"\n"
+msgstr ""
+"Перетворення Internationalized Domain Name (IDN) РЯДКІВ або даних зі "
+"стандартного джерела вхідних даних.\n"
+"\n"
+
+#: src/idn2.c:70
+#, fuzzy
+msgid ""
+"Command line interface to the Libidn2 implementation of IDNA2008.\n"
+"\n"
+"All strings are expected to be encoded in the locale charset.\n"
+"\n"
+"To process a string that starts with `-', for example `-foo', use `--'\n"
+"to signal the end of parameters, as in `idn2 --quiet -- -foo'.\n"
+"\n"
+"Mandatory arguments to long options are mandatory for short options too.\n"
+msgstr ""
+"Інтерфейс командного рядка до бібліотеки інтернаціоналізованих назв "
+"доменів.\n"
+"\n"
+"Програма вважає, що кодуванням всіх рядків є основне кодування вашої\n"
+"локалі. Скористайтеся параметром «--debug», щоб переглянути дані щодо "
+"кодування.\n"
+"Змінити набір символів можна за допомогою змінної середовища CHARSET.\n"
+"\n"
+"Для обробки рядка, що починається з «-», наприклад, «-foo» додайте у команду "
+"«--»\n"
+"для позначення завершення параметрів. Приклад: «idn --quiet -a -- -foo».\n"
+"\n"
+"Обов’язкові аргументи для параметрів у розгорнутому записів є обов’язковими "
+"і для\n"
+"скорочених форм запису.\n"
+
+#: src/idn2.c:80
+msgid ""
+"  -h, --help               Print help and exit\n"
+"  -V, --version            Print version and exit\n"
+msgstr ""
+"  -h, --help               вивести довідкові дані і завершити роботу\n"
+"  -V, --version            вивести дані щодо версії і завершити роботу\n"
+
+#: src/idn2.c:84
+msgid ""
+"  -d, --decode             Decode (punycode) domain name\n"
+"  -l, --lookup             Lookup domain name (default)\n"
+"  -r, --register           Register label\n"
+msgstr ""
+
+#: src/idn2.c:89
+msgid ""
+"  -T, --tr46t              Enable TR46 transitional processing\n"
+"  -N, --tr46nt             Enable TR46 non-transitional processing\n"
+"      --no-tr46            Disable TR46 processing\n"
+msgstr ""
+
+#: src/idn2.c:94
+#, fuzzy
+msgid ""
+"      --usestd3asciirules  Enable STD3 ASCII rules\n"
+"      --debug              Print debugging information\n"
+"      --quiet              Silent operation\n"
+msgstr ""
+"      --debug              вивести діагностичні дані\n"
+"      --quiet              обробка без додаткових повідомлень\n"
+
+#: src/idn2.c:216
+#, fuzzy, c-format
+msgid "Charset: %s\n"
+msgstr "Набір символів «%s».\n"
+
+#: src/idn2.c:220
+msgid ""
+"Type each input string on a line by itself, terminated by a newline "
+"character.\n"
+msgstr ""
+"Виводити кожен рядок у окремому рядку, розділяти рядки символом нового "
+"рядка.\n"
+
+#: src/idn2.c:248
+msgid "input error"
+msgstr "помилка у вхідних даних"
+
+#~ msgid "String preparation failed"
+#~ msgstr "Помилка під час спроби приготування рядка"
+
+#~ msgid "Punycode failed"
+#~ msgstr "Помилка punycode"
+
+#~ msgid "Non-digit/letter/hyphen in input"
+#~ msgstr "Символ, відмінний від цифри, літери або дефіса у вхідних даних"
+
+#~ msgid "Forbidden leading or trailing minus sign (`-')"
+#~ msgstr "Некоректний початковий або кінцевий дефіс («-»)"
+
+#~ msgid "Output would be too large or too small"
+#~ msgstr "Виведені дані будуть занадто об’ємними або занадто малими"
+
+#~ msgid "Input does not start with ACE prefix (`xn--')"
+#~ msgstr "Вхідні дані не починаються з префікса ACE («xn--»)"
+
+#~ msgid "String not idempotent under ToASCII"
+#~ msgstr "Рядок не є ідемпотентним у ToASCII"
+
+#~ msgid "Input already contain ACE prefix (`xn--')"
+#~ msgstr "Вхідні дані вже містять префікс ACE («xn--»)"
+
+#~ msgid "System iconv failed"
+#~ msgstr "Помилка системного iconv"
+
+#~ msgid "System dlopen failed"
+#~ msgstr "Помилка системного dlopen"
+
+#~ msgid "Invalid input"
+#~ msgstr "Некоректні вхідні дані"
+
+#~ msgid "Output would exceed the buffer space provided"
+#~ msgstr "Об’єм виведених даних перевищує наданий об’єм буфера"
+
+#~ msgid "String size limit exceeded"
+#~ msgstr "Перевищено обмеження на довжину рядка"
+
+#~ msgid "Prohibited code points in input"
+#~ msgstr "Некоректні символи коду у вхідних даних"
+
+#~ msgid "Malformed bidirectional string"
+#~ msgstr "Помилка у форматуванні двонаправленого рядка"
+
+#~ msgid "Prohibited bidirectional code points in input"
+#~ msgstr "Некоректні двонапрямні символи коду у вхідних даних"
+
+#~ msgid "Error in stringprep profile definition"
+#~ msgstr "Помилка у визначені профілю stringprep"
+
+#~ msgid "Flag conflict with profile"
+#~ msgstr "Прапорець конфліктує з профілем"
+
+#~ msgid "Unknown profile"
+#~ msgstr "Невідомий профіль"
+
+#~ msgid "Unicode normalization failed (internal error)"
+#~ msgstr "Помилка під час спроби нормалізації Unicode (внутрішня помилка)"
+
+#~ msgid "Code points prohibited by top-level domain"
+#~ msgstr "Символи коду, заборонені доменом вищого рівня"
+
+#~ msgid "Missing input"
+#~ msgstr "Не вказано вхідних даних"
+
+#~ msgid "No top-level domain found in input"
+#~ msgstr "У вхідних даних не знайдено домену вищого рівня"
+
+#~ msgid ""
+#~ "  -s, --stringprep         Prepare string according to nameprep profile\n"
+#~ "  -d, --punycode-decode    Decode Punycode\n"
+#~ "  -e, --punycode-encode    Encode Punycode\n"
+#~ "  -a, --idna-to-ascii      Convert to ACE according to IDNA (default "
+#~ "mode)\n"
+#~ "  -u, --idna-to-unicode    Convert from ACE according to IDNA\n"
+#~ msgstr ""
+#~ "  -s, --stringprep         обробити рядок відповідно до профілю nameprep\n"
+#~ "  -d, --punycode-decode    декодувати Punycode\n"
+#~ "  -e, --punycode-encode    закодувати у Punycode\n"
+#~ "  -a, --idna-to-ascii      перетворити на ACE відповідно до IDNA (типовий "
+#~ "режим)\n"
+#~ "  -u, --idna-to-unicode    перетворити з ACE відповідно до IDNA\n"
+
+#~ msgid ""
+#~ "      --allow-unassigned   Toggle IDNA AllowUnassigned flag (default "
+#~ "off)\n"
+#~ "      --usestd3asciirules  Toggle IDNA UseSTD3ASCIIRules flag (default "
+#~ "off)\n"
+#~ msgstr ""
+#~ "      --allow-unassigned   увімкнути або вимкнути прапорець "
+#~ "AllowUnassigned IDNA (типово вимкнено)\n"
+#~ "      --usestd3asciirules  увімкнути або вимкнути прапорець "
+#~ "UseSTD3ASCIIRules IDNA (типово вимкнено)\n"
+
+#~ msgid ""
+#~ "      --no-tld             Don't check string for TLD specific rules\n"
+#~ "                             Only for --idna-to-ascii and --idna-to-"
+#~ "unicode\n"
+#~ msgstr ""
+#~ "      --no-tld             не перевіряти рядок на використання "
+#~ "специфічних правил TLD\n"
+#~ "                             Лише для параметрів --idna-to-ascii і --idna-"
+#~ "to-unicode\n"
+
+#~ msgid ""
+#~ "  -n, --nfkc               Normalize string according to Unicode v3.2 "
+#~ "NFKC\n"
+#~ msgstr ""
+#~ "  -n, --nfkc               нормалізувати рядок відповідно до NFKC Unicode "
+#~ "версії 3.2\n"
+
+#~ msgid ""
+#~ "  -p, --profile=STRING     Use specified stringprep profile instead\n"
+#~ "                             Valid stringprep profiles: `Nameprep',\n"
+#~ "                             `iSCSI', `Nodeprep', `Resourceprep', \n"
+#~ "                             `trace', `SASLprep'\n"
+#~ msgstr ""
+#~ "  -p, --profile=РЯДОК      використовувати вказаний профіль stringprep "
+#~ "profile instead\n"
+#~ "                             Можливі значення профілів stringprep: "
+#~ "«Nameprep»,\n"
+#~ "                             «iSCSI», «Nodeprep», «Resourceprep», \n"
+#~ "                             «trace», «SASLprep»\n"
+
+#~ msgid "only one of -s, -e, -d, -a, -u or -n can be specified"
+#~ msgstr ""
+#~ "можна використовувати лише один з параметрів -s, -e, -d, -a, -u або -n"
+
+#~ msgid "could not convert from UTF-8 to UCS-4"
+#~ msgstr "не вдалося перетворити дані з формату UTF-8 на UCS-4"
+
+#~ msgid "stringprep_profile: %s"
+#~ msgstr "stringprep_profile: %s"
+
+#~ msgid "could not convert from UTF-8 to %s"
+#~ msgstr "не вдалося перетворити дані з формату UTF-8 на %s"
+
+#~ msgid "punycode_encode: %s"
+#~ msgstr "punycode_encode: %s"
+
+#~ msgid "malloc"
+#~ msgstr "malloc"
+
+#~ msgid "punycode_decode: %s"
+#~ msgstr "punycode_decode: %s"
+
+#~ msgid "could not convert from UCS-4 to UTF-8"
+#~ msgstr "не вдалося перетворити дані з формату UCS-4 на UTF-8"
+
+#~ msgid "idna_to_ascii_4z: %s"
+#~ msgstr "idna_to_ascii_4z: %s"
+
+#~ msgid "idna_to_unicode_8z4z (TLD): %s"
+#~ msgstr "idna_to_unicode_8z4z (TLD): %s"
+
+#~ msgid "tld_check_4z (position %lu): %s"
+#~ msgstr "tld_check_4z (позиція %lu): %s"
+
+#~ msgid "tld_check_4z: %s"
+#~ msgstr "tld_check_4z: %s"
+
+#~ msgid "idna_to_unicode_8z4z: %s"
+#~ msgstr "idna_to_unicode_8z4z: %s"

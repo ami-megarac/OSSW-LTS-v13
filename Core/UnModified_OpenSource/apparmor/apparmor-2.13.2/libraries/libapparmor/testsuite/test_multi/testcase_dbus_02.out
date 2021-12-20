@@ -1,0 +1,9 @@
+START
+File: testcase_dbus_02.in
+Event type: AA_RECORD_DENIED
+Operation: dbus_bind
+Denied Mask: bind
+Profile: /tmp/apparmor-2.8.0/tests/regression/apparmor/dbus_service
+Name: com.apparmor.Test
+PID: 2940
+DBus bus: session

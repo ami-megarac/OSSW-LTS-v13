@@ -1,0 +1,46 @@
+From: Tomasz Buchert <tomasz@debian.org>
+Date: Mon, 26 Oct 2015 10:09:41 +0100
+Subject: Reformat obfuscated javascript in sphinx theme
+
+This simply reformats the javascript to look more readable.  The code
+still looks a bit obfuscated, but its purpose can be understood fairly
+easily.
+---
+ doc/_themes/sphinx_rtd_theme/static/js/theme.js | 27 ++++++++++++++++++++++++-
+ 1 file changed, 26 insertions(+), 1 deletion(-)
+
+diff --git a/doc/_themes/sphinx_rtd_theme/static/js/theme.js b/doc/_themes/sphinx_rtd_theme/static/js/theme.js
+index 432dc0c..8bb2e73 100644
+--- a/doc/_themes/sphinx_rtd_theme/static/js/theme.js
++++ b/doc/_themes/sphinx_rtd_theme/static/js/theme.js
+@@ -1,4 +1,29 @@
+-require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({"sphinx-rtd-theme":[function(require,module,exports){
++require = (function e(t, n, r) {
++    function s(o, u) {
++        if (!n[o]) {
++            if (!t[o]) {
++                var a = typeof require == "function" && require;
++                if (!u && a) return a(o, !0);
++                if (i) return i(o, !0);
++                var f = new Error("Cannot find module '" + o + "'");
++                throw f.code = "MODULE_NOT_FOUND", f
++            }
++            var l = n[o] = {
++                exports: {}
++            };
++            t[o][0].call(l.exports, function(e) {
++                var n = t[o][1][e];
++                return s(n ? n : e)
++            }, l, l.exports, e, t, n, r)
++        }
++        return n[o].exports
++    }
++    var i = typeof require == "function" && require;
++    for (var o = 0; o < r.length; o++) s(r[o]);
++    return s
++})({
++    "sphinx-rtd-theme": [function(require, module, exports) {
++
+ var jQuery = (typeof(window) != 'undefined') ? window.jQuery : require('jquery');
+ 
+ // Sphinx theme nav state

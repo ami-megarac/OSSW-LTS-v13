@@ -1,0 +1,26 @@
+libgcc_s.so.1 #PACKAGE# #MINVER#
+ (symver)GCC_3.0 1:3.0
+ (symver)GCC_3.3 1:3.3
+ (symver)GCC_3.3.1 1:3.3.1
+# __gcc_personality_sj0, __gcc_personality_v0
+#(symver|optional)GCC_3.3.2 1:3.3.2
+ (symver|arch=armel armhf mips mipsel mipsn32 mips64 mips64el powerpc powerpcspe sh4)GCC_3.3.4 1:3.3.4
+ (symver)GCC_3.4 1:3.4
+ (symver)GCC_3.4.2 1:3.4.2
+#(symver|arch-bits=32)GCC_3.4.4 1:3.4.4
+ (symver|arch=!armel !armhf !any-i386 !mips !mipsel !powerpc !powerpcspe !s390 !sh4 !sparc)GCC_3.4.4 1:3.4.4
+ (symver|arch=armel armhf|ignore-blacklist)GCC_3.5 1:3.5 
+ (symver)GCC_4.0.0 1:4.0
+ (symver|arch=powerpc s390 s390x)GCC_4.1.0 1:4.1
+ (symver)GCC_4.2.0 1:4.2
+ (symver)GCC_4.3.0 1:4.3
+ (symver|arch=any-i386 mips mipsel mipsn32 mips64 mips64el)GCC_4.4.0 1:4.4
+ (symver|arch=arm64 any-i386 mipsn32 mips64 mips64el)GCC_4.5.0 1:4.5
+#(symver|optional)GCC_4.6.0 1:4.6
+ (symver)GCC_4.7.0 1:4.7
+ (symver|arch=any-amd64 any-i386 x32)GCC_4.8.0 1:4.8
+ (symver|arch=!any-amd64 !x32 !sparc64 !s390x)GLIBC_2.0 1:4.2
+ (symver|arch=s390x sh4 sparc64)GLIBC_2.2 1:4.2
+ (symver|arch=sparc)GCC_LDBL_3.0@GCC_LDBL_3.0 1:3.0
+ (symver|arch=alpha sparc)GCC_LDBL_4.0.0@GCC_LDBL_4.0.0 1:4.0
+ (symver)GCC_7.0.0 1:7

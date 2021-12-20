@@ -1,0 +1,1 @@
+Sep 14 18:49:13 mfa-mia-74-app-rabbitmq-1.mia.ix.int kernel: [964718.247816] type=1400 audit(1442256553.643:40143): apparmor="ALLOWED" operation="open" profile="/opt/evoke/venv/bin/gunicorn" name="/opt/evoke/venv/lib/python2.7/warnings.pyc" pid=28943 comm="gunicorn" requested_mask="r" denied_mask="r" fsuid=1000 ouid=110

@@ -1,0 +1,161 @@
+# Adapted from the limal testsuite
+
+proc multi-run { send_program } {
+	set user_id [exec sh -c "/usr/bin/whoami"]
+	if {$user_id != "root"} {
+		puts "In order to actually load profiles, you need to run this test as root."
+		return 0
+	}
+	set errorOccurred 0
+	set path [split $send_program "/"]
+	set filename [lindex $path [expr [llength $path]-1]]
+	set cwd [pwd]
+
+	# extract basename and check extension
+
+	set fname [split $filename "."]
+
+	if {[llength $fname] < 2} {
+		fail "Bad filename syntax '$send_program'"
+		return -1
+	}
+
+	if {[lindex $fname [expr [llength $fname]-1]] != "send"} {
+		fail "Not .send extension '$send_program'"
+		return -1
+	}
+
+	# Set the name the multi run test
+	set base_name [lindex $fname 0]
+	puts "Running $base_name..."
+
+	set testcases [glob $base_name/*.testcase ]
+
+	foreach testcase $testcases {
+		set testPath [split $testcase "/"]
+		set testFilename [lindex $testPath [expr [llength $testPath]-1]]
+		set testFname [split $testFilename "."]
+		set testBase_name [lindex $testFname 0]
+
+		puts "   ... $testBase_name"
+
+		# Generate the executable output directory
+		exec rm -rf $cwd/$base_name/.out
+		exec mkdir -p $cwd/$base_name/.out
+		set send_output_file $cwd/$base_name/.out/$testBase_name.sent
+		set receive_output_file $cwd/$base_name/.out/$testBase_name.received
+
+		# Set the testcase expected output files
+		set send_expected_out $cwd/$base_name/output/$testBase_name.send.out
+		set receive_expected_out $cwd/$base_name/output/$testBase_name.receive.out
+
+		# A little ways down I use sed to turn a generic profile into a testcase
+		# specific one.  Since it uses sed, and we look for three variables in the
+		# generic testcase, we need a couple of staging files.
+		set profile $cwd/$base_name/$testBase_name.profile
+ 		set generic_profile $cwd/$base_name/$base_name.generic-profile
+		set pathname_profile $cwd/$base_name/.out/$testBase_name.profile.pathnames
+		set netdomain_profile $cwd/$base_name/.out/$testBase_name.profile.netdomain
+		set generated_profile $cwd/$base_name/.out/$testBase_name.profile
+
+		# The name of the server program
+		set receive_program "./$base_name.receive"
+		# This is used to check whether or not the receive daemon is still running
+		set receive_in_process ./$base_name/$testBase_name.rec.in.process
+
+		# Read in the test case
+		set testcaseFileId [open $testcase r]
+		set contents [read $testcaseFileId]
+		close $testcaseFileId
+		set line_list [split $contents "\n"]
+
+		foreach line $line_list {
+			set listlist [split $line ":"]
+			set listvalue [string trimleft [lindex $listlist 1]]
+			set testcase_array([lindex $listlist 0]) $listvalue
+		}
+
+		# Set up the sed commands to generate the profile
+		set sed_cmd "/bin/sed \"s|\\\$\\\$PWD|[pwd]|\" < $generic_profile > $pathname_profile"
+		set send_netdomain_sed_cmd "/bin/sed \"s|\\\$\\\$SENDNETDOMAIN|$testcase_array(send_profile)|\" < $pathname_profile > $netdomain_profile"
+		set receive_netdomain_sed_cmd "/bin/sed \"s|\\\$\\\$RECEIVENETDOMAIN|$testcase_array(receive_profile)|\" < $netdomain_profile > $generated_profile"
+
+		# Run sed
+		exec sh -c $sed_cmd
+		exec sh -c $send_netdomain_sed_cmd
+		exec sh -c $receive_netdomain_sed_cmd
+
+		# Load the profile
+		set apparmor_cmd "/sbin/apparmor_parser --replace < $generated_profile > /dev/null"
+		exec sh -c $apparmor_cmd
+
+		# fork off the server process
+		if {[fork] == 0} {
+			# Make a note of our running process
+			set fileId [open $receive_in_process w]
+			puts -nonewline $fileId "[pid]"
+			close $fileId
+			set rec_cmd "$receive_program $testcase_array(receive_ip) $testcase_array(receive_port) $testcase_array(proto) >$receive_output_file 2>$receive_output_file"
+			set rec_status [catch { exec sh -c $rec_cmd } rec_result]
+			file delete $receive_in_process
+			if { $rec_status != 0 } {
+				exit 1
+			}
+			exit 0
+		}
+		# Give the server a little time to get settled
+		sleep 2
+
+		set send_command "$send_program $testcase_array(send_ip) $testcase_array(send_port) $testcase_array(receive_ip) $testcase_array(receive_port) $testcase_array(proto) \"$testcase_array(message)\" >$send_output_file 2>$send_output_file"
+		set result ""
+		set oops [catch { set result [exec sh -c $send_command] } caught]
+		if {$oops != 0} {
+			fail "Test case failed for $testBase_name: $caught"
+			set errorOccurred 0
+			continue
+		}
+ 
+		if {$result != ""} {
+			warning "Run of $testBase_name results in '$result'"
+			set errorOccurred 0
+			continue
+		}
+
+		# Wait for the process that we forked earlier to be done
+		while { [file exists $receive_in_process ] != 0 } { }
+
+		# Now compare the expect output with the actual output from the two programs
+		if { [ file exists $send_output_file ] == 0 } {
+			perror "Missing file $send_output_file" 0
+		} else {
+			if { [ diff $send_output_file $send_expected_out ] != 1 } {
+				puts "Send program output doesn't match expected data:"
+				puts [ exec sh -c "diff -u $send_output_file $send_expected_out || true" ]
+				fail $testBase_name
+				set errorOccurred 0
+				continue
+			}
+		}
+
+		if { [ file exists $receive_output_file ] == 0 } {
+			perror "Missing file $receive_output_file" 0
+		} else {
+			if { [ diff $receive_output_file $receive_expected_out ] != 1 } {
+				puts "Receive program output doesn't match expected data:"
+				puts [ exec sh -c "diff -u $receive_output_file $receive_expected_out || true" ]
+				fail $testBase_name
+				set errorOccurred 0
+				continue
+			}
+		}
+		# If we got this far, then everything is fine
+		pass $testBase_name
+	}
+
+	if { $errorOccurred == 0 } {
+		return 0
+	} else {
+		return -1
+	}
+}
+

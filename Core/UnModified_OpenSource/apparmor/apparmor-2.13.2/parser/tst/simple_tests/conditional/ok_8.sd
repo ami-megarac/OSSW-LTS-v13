@@ -1,0 +1,21 @@
+#=DESCRIPTION basic conditional statements w/hats
+#=EXRESULT PASS
+
+$FOO= false
+$BAR = False
+
+/bin/true {
+  /bin/false rix,
+  capability net_raw,
+  ^hat1 {
+    /usr/bin/sendmail rix,
+  }
+  if ${FOO} {
+    ^hat1 {
+      /usr/bin/sendmail rux,
+    }
+  }
+  /bin/true rix,
+  /bin/sh rix,
+  capability dac_override,
+}

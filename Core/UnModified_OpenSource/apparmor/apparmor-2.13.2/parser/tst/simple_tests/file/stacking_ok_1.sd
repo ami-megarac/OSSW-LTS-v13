@@ -1,0 +1,7 @@
+#
+#=Description basic file exec rule with stacking target
+#=EXRESULT PASS
+#
+/usr/bin/foo {
+  /bin/bar px -> &baz,
+}

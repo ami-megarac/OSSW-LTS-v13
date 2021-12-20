@@ -1,0 +1,3 @@
+#!/usr/bin/dh-exec
+./blkid.static => /sbin/blkid
+./fallocate => /usr/bin/fallocate [linux-any]

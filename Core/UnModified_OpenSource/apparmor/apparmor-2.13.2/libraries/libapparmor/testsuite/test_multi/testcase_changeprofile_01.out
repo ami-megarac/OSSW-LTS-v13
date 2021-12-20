@@ -1,0 +1,11 @@
+START
+File: testcase_changeprofile_01.in
+Event type: AA_RECORD_DENIED
+Audit ID: 1431116353.523:77
+Operation: change_profile
+Profile: /tests/regression/apparmor/changeprofile
+Command: changeprofile
+Name2: /tests/regression/apparmor/rename
+PID: 3459
+Epoch: 1431116353
+Audit subid: 77

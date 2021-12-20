@@ -1,0 +1,311 @@
+?RCS: $Id$
+?RCS:
+?RCS: Copyright (c) 1998 Andy Dougherty
+?RCS:
+?RCS: You may distribute under the terms of either the GNU General Public
+?RCS: License or the Artistic License, as specified in the README file.
+?RCS:
+?MAKE:use64bitint use64bitall archname64: Myread Oldconfig Setvar test \
+	usemorebits longsize ccflags d_quad uquadtype Compile rm_try run
+?MAKE:	-pick add $@ %<
+?Y:TOP
+?S:use64bitint:
+?S:	This variable conditionally defines the USE_64_BIT_INT symbol,
+?S:	and indicates that 64-bit integer types should be used
+?S:	when available.  The minimal possible 64-bitness
+?S:	is employed, just enough to get 64-bit integers into Perl.
+?S:	This may mean using for example "long longs", while your memory
+?S:	may still be limited to 2 gigabytes.
+?S:.
+?S:use64bitall:
+?S:	This variable conditionally defines the USE_64_BIT_ALL symbol,
+?S:	and indicates that 64-bit integer types should be used
+?S:	when available.  The maximal possible
+?S:	64-bitness is employed: LP64 or ILP64, meaning that you will
+?S:	be able to use more than 2 gigabytes of memory.  This mode is
+?S:	even more binary incompatible than USE_64_BIT_INT. You may not
+?S:	be able to run the resulting executable in a 32-bit CPU at all or
+?S:	you may need at least to reboot your OS to 64-bit mode.
+?S:.
+?S:archname64:
+?S:	This variable is used for the 64-bitness part of $archname.
+?S:.
+?C:USE_64_BIT_INT:
+?C:	This symbol, if defined, indicates that 64-bit integers should
+?C:	be used when available.  If not defined, the native integers
+?C:	will be employed (be they 32 or 64 bits).  The minimal possible
+?C:	64-bitness is used, just enough to get 64-bit integers into Perl.
+?C:	This may mean using for example "long longs", while your memory
+?C:	may still be limited to 2 gigabytes.
+?C:.
+?C:USE_64_BIT_ALL:
+?C:	This symbol, if defined, indicates that 64-bit integers should
+?C:	be used when available.  If not defined, the native integers
+?C:	will be used (be they 32 or 64 bits).  The maximal possible
+?C:	64-bitness is employed: LP64 or ILP64, meaning that you will
+?C:	be able to use more than 2 gigabytes of memory.  This mode is
+?C:	even more binary incompatible than USE_64_BIT_INT. You may not
+?C:	be able to run the resulting executable in a 32-bit CPU at all or
+?C:	you may need at least to reboot your OS to 64-bit mode.
+?C:.
+?H:?%<:#ifndef USE_64_BIT_INT
+?H:?%<:#$use64bitint	USE_64_BIT_INT		/**/
+?H:?%<:#endif
+?H:?%<:#ifndef USE_64_BIT_ALL
+?H:?%<:#$use64bitall	USE_64_BIT_ALL		/**/
+?H:?%<:#endif
+?H:.
+?INIT:archname64=''
+?LINT:extern ccflags
+?LINT:use usemorebits
+?LINT:extern use64bits
+?LINT:extern uselonglong
+?LINT:extern uselonglongs
+?LINT:extern use64bitints
+?LINT:extern use64bitsint
+?LINT:extern use64bitsall
+?T:libcquad
+?F:!try
+?F:!use64bitint.cbu
+?F:!use64bitall.cbu
+: Do we want 64bit support
+case "$uselonglong" in
+"$define"|true|[yY]*)
+	cat <<EOM >&4
+
+*** Configure -Duselonglong is deprecated, using -Duse64bitint instead.
+EOM
+	use64bitint="$define"
+	;;
+esac
+case "$use64bits" in
+"$define"|true|[yY]*)
+	cat <<EOM >&4
+
+*** Configure -Duse64bits is deprecated, using -Duse64bitint instead.
+EOM
+	use64bitint="$define"
+	;;
+esac
+case "$use64bitints" in
+"$define"|true|[yY]*)
+	cat <<EOM >&4
+
+*** There is no Configure -Duse64bitints, using -Duse64bitint instead.
+EOM
+	use64bitint="$define"
+	;;
+esac
+case "$use64bitsint" in
+"$define"|true|[yY]*)
+	cat <<EOM >&4
+
+*** There is no Configure -Duse64bitsint, using -Duse64bitint instead.
+EOM
+	use64bitint="$define"
+	;;
+esac
+case "$uselonglongs" in
+"$define"|true|[yY]*)
+	cat <<EOM >&4
+
+*** There is no Configure -Duselonglongs, using -Duse64bitint instead.
+EOM
+	use64bitint="$define"
+	;;
+esac
+case "$use64bitsall" in
+"$define"|true|[yY]*)
+	cat <<EOM >&4
+
+*** There is no Configure -Duse64bitsall, using -Duse64bitall instead.
+EOM
+	use64bitall="$define"
+	;;
+esac
+
+case "$ccflags" in
+*-DUSE_LONG_LONG*|*-DUSE_64_BIT_INT*|*-DUSE_64_BIT_ALL*) use64bitint="$define";;
+esac
+case "$use64bitall" in
+"$define"|true|[yY]*) use64bitint="$define" ;;
+esac
+
+case "$longsize" in
+8) cat <<EOM
+
+You have natively 64-bit long integers.
+EOM
+   val="$define"
+   ;;
+*) case "$use64bitint" in
+   "$define"|true|[yY]*) dflt='y';;
+   *) dflt='n';;
+   esac
+   case "$d_quad" in
+   "$define") ;;
+   *) dflt='n' ;;
+   esac
+   cat <<EOM
+
+Perl can be built to take advantage of 64-bit integer types
+on some systems.  To do so, Configure can be run with -Duse64bitint.
+Choosing this option will most probably introduce binary incompatibilities.
+
+If this doesn't make any sense to you, just accept the default '$dflt'.
+(The default has been chosen based on your configuration.)
+EOM
+   rp='Try to use 64-bit integers, if available?'
+   . ./myread
+   case "$ans" in
+   [yY]*) val="$define" ;;
+   *)     val="$undef"  ;;
+   esac
+   ;;
+esac
+set use64bitint
+eval $setvar
+
+case "$use64bitall" in
+"$define"|true|[yY]*) dflt='y' ;;
+*) case "$longsize" in
+   8) dflt='y' ;;
+   *) dflt='n' ;;
+   esac
+   ;;
+esac
+cat <<EOM
+
+You may also choose to try maximal 64-bitness.  It means using as much
+64-bitness as possible on the platform.  This in turn means even more
+binary incompatibilities.  On the other hand, your platform may not
+have any more 64-bitness available than what you already have chosen.
+
+If this doesn't make any sense to you, just accept the default '$dflt'.
+(The default has been chosen based on your configuration.)
+EOM
+rp='Try to use maximal 64-bit support, if available?'
+. ./myread
+case "$ans" in
+[yY]*) val="$define" ;;
+*)     val="$undef"  ;;
+esac
+set use64bitall
+eval $setvar
+case "$use64bitall" in
+"$define")
+	case "$use64bitint" in
+	"$undef")
+		cat <<EOM
+
+Since you have chosen a maximally 64-bit build, I'm also turning on
+the use of 64-bit integers.
+EOM
+		use64bitint="$define" ;;
+	esac
+	;;
+esac
+
+: Look for a hint-file generated 'call-back-unit'.  If the
+: user has specified that a 64-bit perl is to be built,
+: we may need to set or change some other defaults.
+if $test -f use64bitint.cbu; then
+	echo "Your platform has some specific hints regarding 64-bit integers, using them..."
+	. ./use64bitint.cbu
+fi
+case "$use64bitint" in
+"$define"|true|[yY]*)
+	: This test was common to all the OpenBSD forks, and seems harmless for
+	: other platforms:
+	echo " "
+	echo "Checking if your C library has broken 64-bit functions..." >&4
+	cat >try.c <<EOCP
+#include <stdio.h>
+typedef $uquadtype myULL;
+int main (void)
+{
+    struct {
+	double d;
+	myULL  u;
+    } *p, test[] = {
+	{4294967303.15, 4294967303ULL},
+	{4294967294.2,  4294967294ULL},
+	{4294967295.7,  4294967295ULL},
+	{0.0, 0ULL}
+    };
+    for (p = test; p->u; p++) {
+	myULL x = (myULL)p->d;
+	if (x != p->u) {
+	    printf("buggy\n");
+	    return 0;
+	}
+    }
+    printf("ok\n");
+    return 0;
+}
+EOCP
+	set try
+	if eval $compile_ok; then
+	    libcquad=`$run ./try`
+	    echo "Your C library's 64-bit functions are $libcquad."
+	else
+	    echo "(I can't seem to compile the test program.)"
+	    echo "Assuming that your C library's 64-bit functions are ok."
+	    libcquad="ok"
+	fi
+	$rm_try
+
+	case "$libcquad" in
+	    buggy*)
+		cat >&4 <<EOM
+
+*** You have a C library with broken 64-bit functions.
+*** 64-bit support does not work reliably in this configuration.
+*** Please rerun Configure without -Duse64bitint and/or -Dusemorebits.
+*** Cannot continue, aborting.
+
+EOM
+		exit 1
+		;;
+	esac
+	case "$longsize" in
+	4) case "$archname64" in
+	   '') archname64=64int ;;
+	   esac
+	   ;;
+	esac
+	;;
+esac
+
+: Look for a hint-file generated 'call-back-unit'.  If the
+: user has specified that a maximally 64-bit perl is to be built,
+: we may need to set or change some other defaults.
+if $test -f use64bitall.cbu; then
+	echo "Your platform has some specific hints regarding 64-bit builds, using them..."
+	. ./use64bitall.cbu
+fi
+case "$use64bitall" in
+"$define"|true|[yY]*)
+	case "$longsize" in
+	4) case "$archname64" in
+	   ''|64int) archname64=64all ;;
+	   esac
+	   ;;
+	esac
+	;;
+esac
+
+case "$d_quad:$use64bitint" in
+$undef:$define)
+	cat >&4 <<EOF
+
+*** You have chosen to use 64-bit integers,
+*** but none can be found.
+*** Please rerun Configure without -Duse64bitint and/or -Dusemorebits.
+*** Cannot continue, aborting.
+
+EOF
+	exit 1
+	;;
+esac
+

@@ -1,0 +1,7 @@
+#
+#=DESCRIPTION change_profile w/ unsafe modifier and "unsafe" target
+#=EXRESULT PASS
+#
+/usr/bin/foo {
+   change_profile unsafe /usr/bin/bar -> unsafe,
+}

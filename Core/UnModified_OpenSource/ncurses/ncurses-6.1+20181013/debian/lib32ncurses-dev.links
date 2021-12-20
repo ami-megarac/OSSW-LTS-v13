@@ -1,0 +1,4 @@
+lib32/libtinfo.so.6     usr/lib32/libtinfo.so
+usr/lib32/libncurses.so usr/lib32/libcurses.so
+usr/lib32/libncurses.a  usr/lib32/libcurses.a
+usr/lib32/libtinfo.a    usr/lib32/libtermcap.a

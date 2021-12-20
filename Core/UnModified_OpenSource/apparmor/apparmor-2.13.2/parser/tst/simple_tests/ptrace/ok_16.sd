@@ -1,0 +1,14 @@
+#
+#=Description basic ptrace peer perms rule
+#=EXRESULT PASS
+#
+
+@{SHELL}=/bin/bash
+
+/usr/bin/foo {
+  ptrace peer=/bin/true,
+  ptrace peer=/sbin/init,
+  ptrace peer=@{SHELL},
+  ptrace peer=SOME_OTHER_PROFILE,
+
+  }

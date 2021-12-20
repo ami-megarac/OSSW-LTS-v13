@@ -1,0 +1,8 @@
+#
+#=DESCRIPTION includes testing - test some "odd" locations of includes
+#=EXRESULT PASS
+#
+/does/not/exist {
+  /does/not/exist mr,   include <includes/base> /bin/true Px,
+  include "../tst/simple_tests/include_tests/includes_okay_helper.include" include <includes/base>
+}

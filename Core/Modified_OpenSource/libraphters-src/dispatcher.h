@@ -240,6 +240,17 @@ void NAME##_func(regmatch_t MATCHES[]) { \
     } \
 	if(req==NULL) qcgires_error(req, "Can't set options."); \
 	req = qcgireq_parse(req, 0); \
+	if(req==NULL) { \
+		json_object *jresp; \
+		printf("Status: 400 Bad Request \r\n"); \
+		qcgires_setcontenttype(req, "application/json"); \
+		jresp = json_object_new_object(); \
+		json_object_object_add(jresp, "code", json_object_new_int(7)); \
+		json_object_object_add(jresp, "error", json_object_new_string("Invalid Request.")); \
+		printf("%s", json_object_to_json_string(jresp)); \
+		json_object_put(jresp); \
+		goto end_handler; \
+	} \
 	pre_call_hook(req); \
 	qentry_t *sess = qcgisess_init(req, NULL); \
 	enviptr=getenv("HTTP_X_CSRFTOKEN");\
@@ -308,7 +319,18 @@ void NAME##_func(regmatch_t MATCHES[]) { \
     } \
     if(req==NULL) qcgires_error(req, "Can't set options."); \
     req = qcgireq_parse(req, 0); \
-    pre_call_hook(req);;
+    if(req==NULL) { \
+		json_object *jresp; \
+		printf("Status: 400 Bad Request \r\n"); \
+		qcgires_setcontenttype(req, "application/json"); \
+		jresp = json_object_new_object(); \
+		json_object_object_add(jresp, "code", json_object_new_int(7)); \
+		json_object_object_add(jresp, "error", json_object_new_string("Invalid Request.")); \
+		printf("%s", json_object_to_json_string(jresp)); \
+		json_object_put(jresp); \
+		goto end_handler; \
+	} \
+	pre_call_hook(req);
 
 #define END_HANDLER_AUTHORIZED_UPLOAD \
 end_handler_auth_upload: \
@@ -318,7 +340,9 @@ end_handler_auth_upload: \
 		sess->free(sess); \
 end_handler: \
 		post_call_hook(req); \
-        req->free(req); \
+		if (req != NULL) { \
+			req->free(req); \
+		} \
 }
         /*sess->free(sess); \*/
 

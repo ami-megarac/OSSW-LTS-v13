@@ -1,0 +1,13 @@
+0001-test-escape-left-brace-in-a-regex-in-test-run.patch
+0002-man-fix-bold-style-in-SEE-ALSO-section.patch
+0003-man-standardize-AUTHORS-section.patch
+0004-Enable-large-file-support-on-systems-that-do-not-ena.patch
+0005-getfattr.1-by-default-only-user-namespace-attributes.patch
+0006-attr_list.3-Fix-the-attributes.h-include-path.patch
+0007-Switch-back-to-syscall.patch
+0008-attr_multi-attr_multif-Don-t-set-errno-to-EINVAL.patch
+0009-attr_list-attr_listf-Guard-against-unterminated-buff.patch
+build-require-autoconf-version.patch
+syscalls-linux.patch
+compat-xattr-header.patch
+man-pages-typo-fixes.patch

@@ -1,0 +1,10 @@
+#
+#=DESCRIPTION missing reference variable in dbus peer name modifier
+#=EXRESULT FAIL
+#
+
+/does/not/exist {
+  dbus (send)
+       path="/com/canonical/hud/applications/BAR"
+       peer=(name=@{MISSING_VAR}),
+}

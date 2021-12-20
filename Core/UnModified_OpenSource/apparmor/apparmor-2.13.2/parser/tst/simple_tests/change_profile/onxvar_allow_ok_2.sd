@@ -1,0 +1,8 @@
+#
+#=DESCRIPTION allow change_profile @{var} to a hat
+#=EXRESULT PASS
+#
+@{var}=/test
+/usr/bin/foo {
+   allow change_profile @{var} -> /bin/foo//bar,
+}

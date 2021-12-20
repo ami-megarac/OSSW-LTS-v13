@@ -1,0 +1,218 @@
+#!/usr/bin/perl -w
+# ------------------------------------------------------------------
+#
+#    Copyright (C) 2005-2006 Novell/SUSE
+#
+#    This program is free software; you can redistribute it and/or
+#    modify it under the terms of version 2 of the GNU General Public
+#    License published by the Free Software Foundation.
+#
+# ------------------------------------------------------------------
+
+
+use strict;
+use Getopt::Long;
+use Cwd 'abs_path';
+
+my $confdir = "/etc/apparmor";
+my $sd_mountpoint;
+my $check_enabled = 0;
+my $count_enforced = 0;
+my $count_profiled = 0;
+my $count_complain = 0;
+my $verbose = 0;
+my $help;
+
+GetOptions(
+  'complaining'		=> \$count_complain,
+  'enabled'		=> \$check_enabled,
+  'enforced'		=> \$count_enforced,
+  'profiled'		=> \$count_profiled,
+  'verbose|v'		=> \$verbose,
+  'help|h'		=> \$help,
+) or usage();
+
+sub usage {
+  print "Usage: $0 [OPTIONS]\n";
+  print "Displays various information about the currently loaded AppArmor policy.\n";
+  print "OPTIONS (one only):\n";
+  print "  --enabled       returns error code if subdomain not enabled\n";
+  print "  --profiled      prints the number of loaded policies\n";
+  print "  --enforced      prints the number of loaded enforcing policies\n";
+  print "  --complaining   prints the number of loaded non-enforcing policies\n";
+  print "  --verbose       (default) displays multiple data points about loaded policy set\n";
+  print "  --help          this message\n";
+  exit;
+}
+
+$verbose = 1 if ($count_complain + $check_enabled + $count_enforced + $count_profiled == 0);
+usage() if $help or ($count_complain + $check_enabled + $count_enforced + $count_profiled + $verbose > 1);
+
+sub is_subdomain_loaded() {
+  return 1 if (-d "/sys/module/apparmor");
+  if(open(MODULES, "/proc/modules")) {
+    while(<MODULES>) {
+      return 1 if m/^(subdomain|apparmor)\s+/;
+    }
+  }
+
+  return 0;
+}
+
+sub find_subdomainfs() {
+
+  my $sd_mountpoint;
+  if(open(MOUNTS, "/proc/mounts")) {
+    while(<MOUNTS>) {
+      $sd_mountpoint = "$1/apparmor" if m/^\S+\s+(\S+)\s+securityfs\s/ && -e "$1/apparmor";
+      $sd_mountpoint = "$1/subdomain" if m/^\S+\s+(\S+)\s+securityfs\s/ && -e "$1/subdomain";
+      $sd_mountpoint = $1 if m/^\S+\s+(\S+)\s+subdomainfs\s/ && -e "$1";
+    }
+    close(MOUNTS);
+  }
+
+  return $sd_mountpoint;
+}
+
+sub get_profiles {
+  my $mountpoint = shift;
+  my %profiles = ();
+
+  if (open(PROFILES, "$mountpoint/profiles")) {
+    while(<PROFILES>) {
+      $profiles{$1} = $2 if m/^([^\(]+)\s+\((\w+)\)$/;
+    }
+    close(PROFILES);
+  }
+  return (%profiles);
+}
+
+sub get_processes {
+  my %profiles = @_;
+  my %processes = ();
+  if (opendir(PROC, "/proc")) {
+    my $file;
+    while (defined($file = readdir(PROC))) {
+      if ($file =~ m/^\d+/) {
+        if (open(CURRENT, "/proc/$file/attr/current")) {
+          while (<CURRENT>) {
+            if (m/^([^\(]+)\s+\((\w+)\)$/) {
+              $processes{$file}{'profile'} = $1;
+              $processes{$file}{'mode'} = $2;
+            } elsif (grep(abs_path("/proc/$file/exe") eq $_ , keys(%profiles))) {
+              # keep only unconfined processes that have a profile defined
+              $processes{$file}{'profile'} = abs_path("/proc/$file/exe");
+              $processes{$file}{'mode'} = 'unconfined';
+            }
+          }
+          close(CURRENT);
+        }
+      }
+    }
+    closedir(PROC);
+  }
+  return (%processes);
+}
+
+my $is_loaded = is_subdomain_loaded();
+
+if (!$is_loaded) {
+  print STDERR "apparmor module is not loaded.\n" if $verbose;
+  exit 1;
+}
+
+print "apparmor module is loaded.\n" if $verbose;
+
+$sd_mountpoint = find_subdomainfs();
+if (!$sd_mountpoint) {
+  print STDERR "apparmor filesystem is not mounted.\n" if $verbose;
+  exit 3;
+}
+
+if (! -r "$sd_mountpoint/profiles") {
+  print STDERR "You do not have enough privilege to read the profile set.\n" if $verbose;
+  exit 4;
+}
+
+#print "subdomainfs is at $sd_mountpoint.\n" if $verbose;
+
+# processes is a hash table :
+#   * keys : processes pid
+#   * values : hash containing information about the running process:
+#       * 'profile' : name of the profile applied to the running process
+#       * 'mode' : mode of the profile applied to the running process
+my %processes = ();
+my %enforced_processes = ();
+my %complain_processes = ();
+my %unconfined_processes = ();
+
+# profiles is a hash table :
+#  * keys : profile name
+#  * value : profile mode
+my %profiles;
+my @enforced_profiles = ();
+my @complain_profiles = ();
+
+%profiles = get_profiles($sd_mountpoint);
+@enforced_profiles = grep { $profiles{$_} eq 'enforce' } keys %profiles;
+@complain_profiles = grep { $profiles{$_} eq 'complain' } keys %profiles;
+
+# we consider the case where no profiles are loaded to be "disabled" as well
+my $rc = (keys(%profiles) == 0) ? 2 : 0;
+
+if ($check_enabled) {
+  exit $rc;
+}
+
+if ($count_profiled) {
+  print scalar(keys(%profiles)). "\n";
+  exit $rc;
+}
+
+if ($count_enforced) {
+  print $#enforced_profiles + 1 . "\n";
+  exit $rc;
+}
+
+if ($count_complain) {
+  print $#complain_profiles + 1 . "\n";
+  exit $rc;
+}
+
+
+if ($verbose) {
+  print keys(%profiles) . " profiles are loaded.\n";
+  print $#enforced_profiles + 1 . " profiles are in enforce mode.\n";
+  for (sort(@enforced_profiles)) {
+    print "   " . $_ . "\n";
+  }
+  print $#complain_profiles + 1 . " profiles are in complain mode.\n";
+  for (sort(@complain_profiles)) {
+    print "   " . $_ . "\n";
+  }
+}
+
+%processes = get_processes(%profiles);
+if ($verbose) {
+  for (keys(%processes)) {
+    $enforced_processes{$_} = $processes{$_} if $processes{$_}{'mode'} eq 'enforce';
+    $complain_processes{$_} = $processes{$_} if $processes{$_}{'mode'} eq 'complain';
+    # some early code uses unconfined instead of unconfined.
+    $unconfined_processes{$_} = $processes{$_} if $processes{$_}{'mode'} =~ /uncon(fi|strai)ned/;
+  }
+  print keys(%processes) . " processes have profiles defined.\n";
+  print keys(%enforced_processes) . " processes are in enforce mode :\n";
+  for (sort { $enforced_processes{$a}{'profile'} cmp $enforced_processes{$b}{'profile'} } keys(%enforced_processes)) {
+    print "   " . $enforced_processes{$_}{'profile'} . " ($_) \n";
+  }
+  print keys(%complain_processes) . " processes are in complain mode.\n";
+  for (sort { $complain_processes{$a}{'profile'} cmp $complain_processes{$b}{'profile'} } keys(%complain_processes)) {
+    print "   " . $complain_processes{$_}{'profile'} . " ($_) \n";
+  }
+  print keys(%unconfined_processes) . " processes are unconfined but have a profile defined.\n";
+  for (sort { $unconfined_processes{$a}{'profile'} cmp $unconfined_processes{$b}{'profile'} } keys(%unconfined_processes)) {
+    print "   " . $unconfined_processes{$_}{'profile'} . " ($_) \n";
+  }
+}
+
+exit $rc;

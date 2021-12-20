@@ -1,0 +1,8 @@
+#
+#=DESCRIPTION 'safe' and 'unsafe' for the same exec condition, but different exec targets
+#=EXRESULT PASS
+#
+/usr/bin/foo {
+   change_profile safe /onexec -> /bin/foo,
+   change_profile unsafe /onexec -> /bin/bar,
+}

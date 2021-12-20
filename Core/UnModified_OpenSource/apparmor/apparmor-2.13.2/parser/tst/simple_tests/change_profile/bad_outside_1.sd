@@ -1,0 +1,7 @@
+#
+#=DESCRIPTION change_profile rule outside of a profile
+#=EXRESULT FAIL
+#
+
+change_profile -> /bin/foo,
+

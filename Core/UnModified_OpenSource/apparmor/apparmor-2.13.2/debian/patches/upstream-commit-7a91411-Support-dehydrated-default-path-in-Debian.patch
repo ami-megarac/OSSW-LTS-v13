@@ -1,0 +1,40 @@
+From: Christian Boltz <gitlab2@cboltz.de>
+Date: Thu, 3 Jan 2019 17:32:51 +0000
+Subject: Support dehydrated default path in Debian
+
+---
+ profiles/apparmor.d/abstractions/ssl_certs | 7 ++++---
+ profiles/apparmor.d/abstractions/ssl_keys  | 2 +-
+ 2 files changed, 5 insertions(+), 4 deletions(-)
+
+diff --git a/profiles/apparmor.d/abstractions/ssl_certs b/profiles/apparmor.d/abstractions/ssl_certs
+index 7234f06..b5382ec 100644
+--- a/profiles/apparmor.d/abstractions/ssl_certs
++++ b/profiles/apparmor.d/abstractions/ssl_certs
+@@ -29,9 +29,10 @@
+   /var/lib/acme/certs/*/cert r,
+ 
+   # dehydrated
+-  /etc/dehydrated/certs/*/cert-*.pem r,
+-  /etc/dehydrated/certs/*/chain-*.pem r,
+-  /etc/dehydrated/certs/*/fullchain-*.pem r,
++  /{etc,var/lib}/dehydrated/certs/*/cert*.pem r,
++  /{etc,var/lib}/dehydrated/certs/*/chain*.pem r,
++  /{etc,var/lib}/dehydrated/certs/*/fullchain*.pem r,
++  /{etc,var/lib}/dehydrated/certs/*/ocsp*.der r,
+ 
+   # certbot
+   /etc/letsencrypt/archive/*/cert*.pem r,
+diff --git a/profiles/apparmor.d/abstractions/ssl_keys b/profiles/apparmor.d/abstractions/ssl_keys
+index f53d54e..84f5c50 100644
+--- a/profiles/apparmor.d/abstractions/ssl_keys
++++ b/profiles/apparmor.d/abstractions/ssl_keys
+@@ -22,7 +22,7 @@
+   /var/lib/acme/keys/** r,
+ 
+   # dehydrated
+-  /etc/dehydrated/certs/*/privkey-*.pem r,
++  /{etc,var/lib}/dehydrated/certs/*/privkey*.pem r,
+ 
+   # certbot / letsencrypt
+   /etc/letsencrypt/archive/*/privkey*.pem r,

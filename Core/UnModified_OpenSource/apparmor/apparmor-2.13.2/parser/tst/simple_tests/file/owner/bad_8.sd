@@ -1,0 +1,9 @@
+#
+#=DESCRIPTION owner block needs } termination
+#=EXRESULT FAIL
+#
+/usr/bin/foo {
+  owner {
+    rw foo,
+
+}

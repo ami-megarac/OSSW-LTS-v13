@@ -1,0 +1,8 @@
+#
+#=Description basic ptrace trace rule
+#=EXRESULT PASS
+#
+/usr/bin/foo {
+  ptrace trace,
+
+  }

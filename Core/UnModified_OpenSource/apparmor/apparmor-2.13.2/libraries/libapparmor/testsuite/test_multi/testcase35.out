@@ -1,0 +1,13 @@
+START
+File: testcase35.in
+Event type: AA_RECORD_AUDIT
+Audit ID: 1205249275.686:289
+Operation: file_lock
+Mask: wk::
+fsuid: 1000
+Profile: /usr/lib/firefox/firefox-bin
+Name: /home/jj/.mozilla/firefox/rdrjxihw.default/.parentlock
+Namespace: default
+PID: 5409
+Epoch: 1205249275
+Audit subid: 289

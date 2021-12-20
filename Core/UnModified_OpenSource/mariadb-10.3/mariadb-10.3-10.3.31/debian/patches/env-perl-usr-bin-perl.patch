@@ -1,0 +1,89 @@
+Forwarded: https://github.com/MariaDB/server/pull/1718
+Author: Otto Kekäläinen <otto@debian.org>
+Subject: Fix perl path in scripts
+ Fix Lintian issue
+ https://lintian.debian.org/tags/incorrect-path-for-interpreter.html
+ .
+ Upstream will never accept this patch, see
+ https://github.com/MariaDB/server/pull/1718
+
+--- a/mysql-test/lib/process-purecov-annotations.pl
++++ b/mysql-test/lib/process-purecov-annotations.pl
+@@ -1,4 +1,4 @@
+-#!/usr/bin/env perl
++#!/usr/bin/perl
+ # -*- cperl -*-
+ 
+ # This script processes a .gcov coverage report to honor purecov 
+--- a/mysql-test/lib/v1/mysql-test-run.pl
++++ b/mysql-test/lib/v1/mysql-test-run.pl
+@@ -1,4 +1,4 @@
+-#!/usr/bin/env perl
++#!/usr/bin/perl
+ # -*- cperl -*-
+ 
+ # Copyright (c) 2008, 2013, Oracle and/or its affiliates. All rights reserved.
+--- a/mysql-test/mysql-stress-test.pl
++++ b/mysql-test/mysql-stress-test.pl
+@@ -1,4 +1,4 @@
+-#!/usr/bin/env perl
++#!/usr/bin/perl
+ 
+ # Copyright (c) 2005, 2011, Oracle and/or its affiliates. All rights reserved.
+ #
+--- a/mysql-test/mysql-test-run.pl
++++ b/mysql-test/mysql-test-run.pl
+@@ -1,4 +1,4 @@
+-#!/usr/bin/env perl
++#!/usr/bin/perl
+ # -*- cperl -*-
+ 
+ # Copyright (c) 2004, 2014, Oracle and/or its affiliates.
+--- a/mysql-test/suite/engines/rr_trx/run_stress_tx_rr.pl
++++ b/mysql-test/suite/engines/rr_trx/run_stress_tx_rr.pl
+@@ -1,4 +1,4 @@
+-#!/usr/bin/env perl
++#!/usr/bin/perl
+ ################################################################################
+ #
+ # This script runs the transactional stress test "stress_tx_rr" against the
+--- a/mysql-test/suite/funcs_1/lib/DataGen_local.pl
++++ b/mysql-test/suite/funcs_1/lib/DataGen_local.pl
+@@ -1,4 +1,4 @@
+-#!/usr/bin/env perl
++#!/usr/bin/perl
+ 
+ 
+ if ( (scalar(@ARGV) != 1 ) || ($ARGV[0] =~ /[^0-9]/i ) )
+--- a/mysql-test/suite/funcs_1/lib/DataGen_modify.pl
++++ b/mysql-test/suite/funcs_1/lib/DataGen_modify.pl
+@@ -1,4 +1,4 @@
+-#!/usr/bin/env perl
++#!/usr/bin/perl
+ 
+ 
+ if ( (scalar(@ARGV) != 2 ) || ($ARGV[0] =~ /[^0-9]/i ) )
+--- a/mysql-test/suite/funcs_2/lib/gen_charset_utf8.pl
++++ b/mysql-test/suite/funcs_2/lib/gen_charset_utf8.pl
+@@ -1,4 +1,4 @@
+-#!/usr/bin/env perl
++#!/usr/bin/perl
+ 
+ #################################################################################
+ # Author:  Serge Kozlov								#	
+--- a/mysql-test/suite/rpl/extension/checksum.pl
++++ b/mysql-test/suite/rpl/extension/checksum.pl
+@@ -1,4 +1,4 @@
+-#!/usr/bin/env perl
++#!/usr/bin/perl
+ 
+ # Copyright (c) 2010, Oracle and/or its affiliates. All rights reserved.
+ #
+--- a/scripts/mytop.sh
++++ b/scripts/mytop.sh
+@@ -1,4 +1,4 @@
+-#!/usr/bin/env perl
++#!/usr/bin/perl
+ #
+ # $Id: mytop,v 1.91 2012/01/18 16:49:12 mgrennan Exp $
+ 

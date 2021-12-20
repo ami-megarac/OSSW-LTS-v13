@@ -1,0 +1,57 @@
+Description: Fall back to getsockopt(..., LOCAL_PEERCRED, ...)
+ On kfreeBSD neither SO_PEERCRED nor getpeereid() nor getpeerucred() are
+ available.
+Author: Andreas Metzler <ametzler@debian.org>
+Origin: vendor
+Forwarded: no
+Last-Update: 2018-08-28
+
+--- a/common/unix-peer.c
++++ b/common/unix-peer.c
+@@ -47,6 +47,10 @@
+ #  include <ucred.h>
+ #endif
+ 
++#if  !defined(SO_PEERCRED) && !defined(HAVE_GETPEEREID) && !defined(HAVE_GETPEERUCRED) && defined(HAVE_SYS_UCRED_H)
++#  include <sys/ucred.h>
++#endif
++
+ /* Returns the unix domain socket peer information.
+  * Returns zero on success.
+  */
+@@ -106,6 +110,25 @@ p11_get_upeer_id (int cfd, uid_t *uid, u
+ 
+ 	if (ret)
+ 		return -1;
++
++#elif defined(HAVE_SYS_UCRED_H) && defined(LOCAL_PEERCRED) && defined(XUCRED_VERSION)
++	struct xucred cr;
++	socklen_t cr_len;
++
++	cr_len = sizeof (cr);
++	ret = getsockopt (cfd, 0, LOCAL_PEERCRED, &cr, &cr_len);
++	if (ret == -1)
++		return -1;
++
++	if (uid)
++		*uid = cr.cr_uid;
++
++	if (gid)
++		*gid = cr.cr_gid;
++
++	/* pid not available */
++	if (pid)
++		*pid = (socklen_t)-1;
+ #else
+ #error "Unsupported UNIX variant"
+ #endif
+--- a/configure.ac
++++ b/configure.ac
+@@ -123,6 +123,7 @@ if test "$os_unix" = "yes"; then
+ 	AC_CHECK_FUNCS([setenv])
+ 	AC_CHECK_FUNCS([getpeereid])
+ 	AC_CHECK_FUNCS([getpeerucred])
++	AC_CHECK_HEADERS([sys/ucred.h])
+ 
+ 	# Check if issetugid() is available and has compatible behavior with OpenBSD
+ 	AC_CHECK_FUNCS([issetugid], [

@@ -1,0 +1,8 @@
+#
+#=DESCRIPTION owner is not allowed on network rules
+#=EXRESULT FAIL
+#
+/usr/bin/foo {
+  owner network,
+
+}

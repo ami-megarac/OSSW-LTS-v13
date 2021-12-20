@@ -1,0 +1,186 @@
+#! /bin/sh
+#  -*- Mode: Shell-script -*-
+# debug.test --- definition reference testing
+#
+# Author:            Bruce Korb <bkorb@gnu.org>
+#
+## This file is part of AutoGen.
+## AutoGen Copyright (C) 1992-2016 by Bruce Korb - all rights reserved
+##
+## AutoGen is free software: you can redistribute it and/or modify it
+## under the terms of the GNU General Public License as published by
+## the Free Software Foundation, either version 3 of the License, or
+## (at your option) any later version.
+##
+## AutoGen is distributed in the hope that it will be useful, but
+## WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+## See the GNU General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License along
+## with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+. ./defs
+
+# # # # # # # # # # TEMPLATE FILE # # # # # # # # #
+
+cat > ${testname}.tpl <<_EOF_
+<= AutoGen5 template test =>
+The last of each list:<=
+FOR list =><= DEBUG slot 64 =>
+  LAST -> <= val[$] =>
+
+  list -> <=
+  FOR val ", " =><= DEBUG bucket 128 => val[<=(for-index)=>]=<=val=><=
+  ENDFOR =><=
+ENDFOR =>
+_EOF_
+
+# # # # # # # # # # DEFINITIONS FILE # # # # # # # # #
+
+# Create the files we need in the test environment
+cat > ${testname}.def <<_EOF_
+AutoGen definitions "${testname}." "tpl";
+list =    { val = L0.first, L0.last; };
+List[3] = { val = L3.third.all; };
+_EOF_
+
+# # # # # # # # # # ANTICIPATED RESULTS # # # # # # # # #
+
+sed '/^$/d' > ${testname}.base1 <<\_EOF_
+===AutoGen starts - NNNN:
+Guile Library Version X.X.X
+eval from file agInit.c line XXX:
+(debug-enable 'backtrace)
+Definition Load:
+list[0] (block) from debug.def/2
+  val[0] (text) from debug.def/2
+  val[1] (text) from debug.def/2
+list[3] (block) from debug.def/3
+  val[0] (text) from debug.def/3
+marker '<=' loaded
+marker '=>' loaded
+Starting test template
+open_output_file 'debug.test' mode wb+
+Text       (15) in debug.tpl at line 2
+  The last of each list:
+FOR        ( F) in debug.tpl at line 3
+FOR list loop in debug.tpl on line 3 begins:
+  -  FOR-each list[0] it#0: Nxt 3, first=yes, last=no
+DEBUG      ( 5) in debug.tpl at line 3
+  slot 64
+  --  DEBUG slot 64 -- FOR index 0
+Text       (15) in debug.tpl at line 3
+  
+Unknown    (16) in debug.tpl at line 4
+remapped to 'Expr' (16) in debug.tpl at line 4
+	based on val[$]
+Text       (15) in debug.tpl at line 4
+  
+FOR        ( F) in debug.tpl at line 7
+  , 
+FOR val loop in debug.tpl on line 7 begins:
+  -  FOR-each val[0] it#0: Nxt 1, first=yes, last=no
+DEBUG      ( 5) in debug.tpl at line 7
+  bucket 128
+  --  DEBUG bucket 128 -- FOR index 0
+Text       (15) in debug.tpl at line 7
+   val[
+EXPR       ( E) in debug.tpl at line 7
+  (for-index)
+eval from file debug.tpl line 7:
+(for-index)
+Text       (15) in debug.tpl at line 7
+  ]=
+Unknown    (16) in debug.tpl at line 7
+remapped to 'Expr' (16) in debug.tpl at line 7
+	based on val
+  -  FOR-each val[1] it#1: Nxt 2, first=no, last=yes
+DEBUG      ( 5) in debug.tpl at line 7
+  bucket 128
+  --  DEBUG bucket 128 -- FOR index 1
+Text       (15) in debug.tpl at line 7
+   val[
+EXPR       ( E) in debug.tpl at line 7
+  (for-index)
+eval from file debug.tpl line 7:
+(for-index)
+Text       (15) in debug.tpl at line 7
+  ]=
+EXPR       ( E) in debug.tpl at line 7
+FOR val repeated 2 times
+	from debug.tpl line 7
+  -  FOR-each list[3] it#1: Nxt 4, first=no, last=yes
+DEBUG      ( 5) in debug.tpl at line 3
+  slot 64
+  --  DEBUG slot 64 -- FOR index 3
+Text       (15) in debug.tpl at line 3
+  
+EXPR       ( E) in debug.tpl at line 4
+Text       (15) in debug.tpl at line 4
+  
+FOR        ( F) in debug.tpl at line 7
+  , 
+FOR val loop in debug.tpl on line 7 begins:
+  -  FOR-each val[0] it#0: Nxt 1, first=yes, last=yes
+DEBUG      ( 5) in debug.tpl at line 7
+  bucket 128
+  --  DEBUG bucket 128 -- FOR index 0
+Text       (15) in debug.tpl at line 7
+   val[
+EXPR       ( E) in debug.tpl at line 7
+  (for-index)
+eval from file debug.tpl line 7:
+(for-index)
+Text       (15) in debug.tpl at line 7
+  ]=
+EXPR       ( E) in debug.tpl at line 7
+FOR val repeated 1 times
+	from debug.tpl line 7
+FOR list repeated 2 times
+	from debug.tpl line 3
+Text       (15) in debug.tpl at line 9
+  
+out_close 'debug.test'
+_EOF_
+
+traceout=${testname}-aglog-x1-$$.log
+
+if ${VERBOSE}
+then trace_args=''
+else trace_args=--trace=everything\ --trace-out=${traceout}
+fi
+
+run_ag x1 ${trace_args} ${testname}.def || failure AutoGen failed
+${SED} \
+    -e 's@from file .*agInit.*@from file agInit.c line XXX:@' \
+    -e '/ from debug\.def/s/ at .*//' \
+    -e '/Called ag_scm_for_index/d' \
+    -e '/^$/d' \
+    -e '/^===AutoGen starts/s/ [0-9][0-9]*:.*/ NNNN:/' \
+    -e 's/Guile Library Version .*/Guile Library Version X.X.X/' \
+    ${traceout} > ${testname}.trace1
+pair="${testname}.base1 ${testname}.trace1"
+cmp -s $pair || \
+  failure "`diff -c $pair`"
+
+${VERBOSE} || {
+    unset `set | ${SED} -n '/^AUTOGEN[A-Z_]*=/{;s/=.*//;p;}'`
+    traceout=${testname}-aglog-x2-$$.log
+    trace_args=--trace-out=${traceout}
+    run_ag x2 ${trace_args} ${testname}.def || failure AutoGen failed
+    test -f ${traceout} -a -s ${traceout} && \
+        failure "autogen produced trace output`echo;cat ${traceout}`"
+}
+
+cleanup
+
+## 
+## Local Variables:
+## mode: shell-script
+## indent-tabs-mode: nil
+## sh-indentation: 2
+## sh-basic-offset: 2
+## End:
+
+# end of debug.test

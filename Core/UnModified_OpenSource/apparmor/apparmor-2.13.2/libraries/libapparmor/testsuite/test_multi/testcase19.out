@@ -1,0 +1,13 @@
+START
+File: testcase19.in
+Event type: AA_RECORD_ALLOWED
+Audit ID: 1236774787.169:371
+Operation: file_mmap
+Mask: ::r
+Denied Mask: ::r
+fsuid: 1000
+Profile: /home/jamie/foobar.sh
+Name: /bin/dash
+PID: 13726
+Epoch: 1236774787
+Audit subid: 371

@@ -1,0 +1,31 @@
+From a415394f06d0c7243a082ec45f254614bc1af53b Mon Sep 17 00:00:00 2001
+From: Niko Tyni <ntyni@debian.org>
+Date: Sat, 29 Jul 2017 23:32:51 +0300
+Subject: Also lower the optimization level of op.c and opmini.c on sh4
+
+This amends
+ debian/hppa_op_optimize_workaround.diff
+ debian/hppa_opmini_optimize_workaround.diff
+
+Bug-Debian: https://bugs.debian.org/869373
+Patch-Name: debian/sh4_op_optimize_workaround.diff
+---
+ cflags.SH | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/cflags.SH b/cflags.SH
+index c8231e64e8..3bb0c3e937 100755
+--- a/cflags.SH
++++ b/cflags.SH
+@@ -497,9 +497,9 @@ for file do
+     # or customize here
+ 
+     case "$file" in
+-    op|opmini) : work around http://bugs.debian.org/838613 and 869122
++    op|opmini) : work around http://bugs.debian.org/838613 869122 869373
+         case $archname in
+-        hppa-*)
++        hppa-*|sh4-*)
+             optimize="$optimize -O0";;
+         esac;;
+ 

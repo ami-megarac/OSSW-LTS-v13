@@ -1,0 +1,26 @@
+# taken from cond52.sd
+#=DESCRIPTION hat defined in if and else clauses
+#=EXRESULT PASS
+
+$FOO=true
+
+/bin/true {
+  if $FOO {
+    ^TRUE {
+      /bin/true rix,
+    }
+  } else {
+    ^TRUE {
+      /bin/false rix,
+    }
+  }
+  if not $FOO {
+    ^FALSE {
+      /bin/true rix,
+    }
+  } else {
+    ^FALSE {
+      /bin/false rix,
+    }
+  }
+}

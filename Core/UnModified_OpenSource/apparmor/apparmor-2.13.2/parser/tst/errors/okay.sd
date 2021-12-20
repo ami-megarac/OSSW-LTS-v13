@@ -1,0 +1,4 @@
+#
+/does/not/exist {
+  #include <includes/base>
+}

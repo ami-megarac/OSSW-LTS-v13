@@ -1,0 +1,94 @@
+# This publication is intellectual property of Canonical Ltd. Its contents
+# can be duplicated, either in part or in whole, provided that a copyright
+# label is visibly located on each copy.
+#
+# All information found in this book has been compiled with utmost
+# attention to detail. However, this does not guarantee complete accuracy.
+# Neither Canonical Ltd, the authors, nor the translators shall be held
+# liable for possible errors or the consequences thereof.
+#
+# Many of the software and hardware descriptions cited in this book
+# are registered trademarks. All trade names are subject to copyright
+# restrictions and may be registered trade marks. Canonical Ltd
+# essentially adheres to the manufacturer's spelling.
+#
+# Names of products and trademarks appearing in this book (with or without
+# specific notation) are likewise subject to trademark and trade protection
+# laws and may thus fall under copyright restrictions.
+#
+
+
+=pod
+
+=head1 NAME
+
+aa-enabled - test whether AppArmor is enabled
+
+=head1 SYNOPSIS
+
+B<aa-enabled> [options]
+
+=head1 DESCRIPTION
+
+B<aa-enabled> is used to determine if AppArmor is enabled.
+
+=head1 OPTIONS
+
+B<aa-enabled> accepts the following arguments:
+
+=over 4
+
+=item -h, --help
+
+Display a brief usage guide.
+
+=item -q, --quiet
+
+Do not output anything to stdout. This option is intended to be used by
+scripts that simply want to use the exit code to determine if AppArmor is
+enabled.
+
+=back
+
+=head1 EXIT STATUS
+
+Upon exiting, B<aa-enabled> will set its exit status to the following values:
+
+=over 4
+
+=item B<0>
+
+if AppArmor is enabled.
+
+=item B<1>
+
+if AppArmor is not enabled/loaded.
+
+=item B<2>
+
+intentionally not used as an B<aa-enabled> exit status.
+
+=item B<3>
+
+if the AppArmor control files aren't available under /sys/kernel/security/.
+
+=item B<4>
+
+if B<aa-enabled> doesn't have enough privileges to read the apparmor control files.
+
+=item B<64>
+
+if any unexpected error or condition is encountered.
+
+=back
+
+=head1 BUGS
+
+If you find any bugs, please report them at
+L<https://bugs.launchpad.net/apparmor/+filebug>.
+
+=head1 SEE ALSO
+
+apparmor(7), apparmor.d(5), aa_is_enabled(2), and L<https://wiki.apparmor.net>.
+
+=cut

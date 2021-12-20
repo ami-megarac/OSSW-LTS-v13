@@ -1,0 +1,8 @@
+START
+File: old_style_log_18.in
+Event type: AA_RECORD_INVALID
+Audit ID: 1168661976.062:55
+Operation: APPARMOR
+Info: LOGPROF-HINT unknown_hat TESTHAT pid=27764 profile=/home/matt/projects/change_hat_test/test_hat active=/home/matt/projects/change_hat_test/test_hat 
+Epoch: 1168661976
+Audit subid: 55

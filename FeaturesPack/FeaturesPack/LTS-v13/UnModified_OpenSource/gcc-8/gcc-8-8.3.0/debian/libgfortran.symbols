@@ -1,0 +1,4 @@
+libgfortran.so.5 #PACKAGE# #MINVER#
+ (symver)GFORTRAN_8 8
+ (symver)GFORTRAN_C99_8 8
+ (symver)GFORTRAN_F2C_8 8

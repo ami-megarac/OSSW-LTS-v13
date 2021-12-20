@@ -1,0 +1,182 @@
+From: John Johansen <john.johansen@canonical.com>
+Date: Wed, 20 Feb 2019 01:17:06 -0800
+Subject: parser: Fix parser failing to handle errors when setting up work
+
+The parser is not correctly handling some error conditions when
+dealing with work units. Failure to spawn work, access files, etc
+should be returned where appropriate, and be able to abort processing
+if abort_on_error is set.
+
+In addition some errors are leading to a direct exit without checking
+for abort_on_error.
+
+BugLink: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=921866
+BugLink: http://bugs.launchpad.net/bugs/1815294
+
+Signed-off-by: John Johansen <john.johansen@canonical.com>
+Acked-by: Eric Chiang <ericchiang@google.com>
+(backported from commit cb43e57d27962039c5bc2a380936c7316575701f)
+
+Conflicts:
+	parser/parser_main.c
+Reason:
+	commit 48a32b78b189cf9e2c4d8bce8fb45c68bf4cc327 not backported
+---
+ parser/parser.h      | 14 +++++++++++--
+ parser/parser_main.c | 57 ++++++++++++++++++++++++++++++++++++++--------------
+ 2 files changed, 54 insertions(+), 17 deletions(-)
+
+diff --git a/parser/parser.h b/parser/parser.h
+index e7acda6..5643f55 100644
+--- a/parser/parser.h
++++ b/parser/parser.h
+@@ -171,13 +171,23 @@ extern int preprocess_only;
+ 
+ 
+ #ifdef DEBUG
+-#define PDEBUG(fmt, args...) fprintf(stderr, "parser: " fmt, ## args)
++#define PDEBUG(fmt, args...)				\
++do {							\
++	int pdebug_error = errno;			\
++	fprintf(stderr, "parser: " fmt, ## args);	\
++	errno = pdebug_error;				\
++} while (0)
+ #else
+ #define PDEBUG(fmt, args...)	/* Do nothing */
+ #endif
+ #define NPDEBUG(fmt, args...)	/* Do nothing */
+ 
+-#define PERROR(fmt, args...) fprintf(stderr, fmt, ## args)
++#define PERROR(fmt, args...)			\
++do {						\
++	int perror_error = errno;		\
++	fprintf(stderr, fmt, ## args);		\
++	errno = perror_error;			\
++} while (0)
+ 
+ #ifndef TRUE
+ #define TRUE	(1)
+diff --git a/parser/parser_main.c b/parser/parser_main.c
+index 6260d02..0e3666b 100644
+--- a/parser/parser_main.c
++++ b/parser/parser_main.c
+@@ -1088,8 +1088,11 @@ do {									\
+ 		work_sync_one(RESULT);					\
+ } while (0)
+ 
++/* returns -1 if work_spawn fails, not a return value of any unit of work */
+ #define work_spawn(WORK, RESULT)					\
+-do {									\
++({									\
++	int localrc = 0;						\
++	do {								\
+ 	/* what to do to avoid fork() overhead when single threaded	\
+ 	if (jobs == 1) {						\
+ 		// no parallel work so avoid fork() overhead		\
+@@ -1126,11 +1129,17 @@ do {									\
+ 			fprintf(stderr, "    JOBS SPAWN: created %ld ...\n", njobs);									\
+ 	} else {							\
+ 		/* error */						\
+-		if (debug_jobs)						\
+-			fprintf(stderr, "    JOBS SPAWN: failed error: %d) ...\n", errno);								\
++		if (debug_jobs)	{					\
++			int error = errno;				\
++			fprintf(stderr, "    JOBS SPAWN: failed error: %d) ...\n", errno);	\
++			errno = error;					\
++		}							\
+ 		RESULT(errno);						\
++		localrc = -1;						\
+ 	}								\
+-} while (0)
++	} while (0);							\
++	localrc;							\
++})
+ 
+ 
+ /* sadly C forces us to do this with exit, long_jump or returning error
+@@ -1207,11 +1216,15 @@ static int profile_dir_cb(int dirfd unused, const char *name, struct stat *st,
+ 	if (!S_ISDIR(st->st_mode) && !is_blacklisted(name, NULL)) {
+ 		struct dir_cb_data *cb_data = (struct dir_cb_data *)data;
+ 		autofree char *path = NULL;
+-		if (asprintf(&path, "%s/%s", cb_data->dirname, name) < 0)
++		if (asprintf(&path, "%s/%s", cb_data->dirname, name) < 0) {
+ 			PERROR(_("Out of memory"));
+-		work_spawn(process_profile(option, cb_data->kernel_interface,
+-					   path, cb_data->policy_cache),
+-			   handle_work_result);
++			handle_work_result(errno);
++			return -1;
++		}
++		rc = work_spawn(process_profile(option,
++						cb_data->kernel_interface,
++						path, cb_data->policy_cache),
++				handle_work_result);
+ 	}
+ 	return rc;
+ }
+@@ -1225,11 +1238,15 @@ static int binary_dir_cb(int dirfd unused, const char *name, struct stat *st,
+ 	if (!S_ISDIR(st->st_mode) && !is_blacklisted(name, NULL)) {
+ 		struct dir_cb_data *cb_data = (struct dir_cb_data *)data;
+ 		autofree char *path = NULL;
+-		if (asprintf(&path, "%s/%s", cb_data->dirname, name) < 0)
++		if (asprintf(&path, "%s/%s", cb_data->dirname, name) < 0) {
+ 			PERROR(_("Out of memory"));
+-		work_spawn(process_binary(option, cb_data->kernel_interface,
+-					   path),
+-			    handle_work_result);
++			handle_work_result(errno);
++			return -1;
++		}
++		rc = work_spawn(process_binary(option,
++					       cb_data->kernel_interface,
++					       path),
++				handle_work_result);
+ 	}
+ 	return rc;
+ }
+@@ -1359,11 +1376,14 @@ int main(int argc, char *argv[])
+ 		}
+ 		/* skip stdin if we've seen other command line arguments */
+ 		if (i == argc && optind != argc)
+-			continue;
++			goto cleanup;
+ 
+ 		if (profilename && stat(profilename, &stat_file) == -1) {
++			last_error = errno;
+ 			PERROR("File %s not found, skipping...\n", profilename);
+-			continue;
++			if (abort_on_error)
++				break;
++			goto cleanup;
+ 		}
+ 
+ 		if (profilename && S_ISDIR(stat_file.st_mode)) {
+@@ -1378,20 +1398,27 @@ int main(int argc, char *argv[])
+ 			cb = binary_input ? binary_dir_cb : profile_dir_cb;
+ 			if ((retval = dirat_for_each(AT_FDCWD, profilename,
+ 						     &cb_data, cb))) {
++				last_error = errno;
+ 				PDEBUG("Failed loading profiles from %s\n",
+ 				       profilename);
++				if (abort_on_error)
++					break;
+ 			}
+ 		} else if (binary_input) {
++			/* ignore return as error is handled in work_spawn */
+ 			work_spawn(process_binary(option, kernel_interface,
+ 						  profilename),
+ 				   handle_work_result);
+ 		} else {
++			/* ignore return as error is handled in work_spawn */
+ 			work_spawn(process_profile(option, kernel_interface,
+ 						   profilename, policy_cache),
+ 				   handle_work_result);
+ 		}
+ 
+-		if (profilename) free(profilename);
++	cleanup:
++		if (profilename)
++			free(profilename);
+ 		profilename = NULL;
+ 	}
+ 	work_sync(handle_work_result);

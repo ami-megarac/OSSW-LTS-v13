@@ -1,0 +1,140 @@
+?RCS: $Id: bin.U,v 3.1 1999/07/09 18:20:13 doughera Exp doughera $
+?RCS:
+?RCS: Copyright (c) 1991-1993, Raphael Manfredi
+?RCS:
+?RCS: You may redistribute only under the terms of the Artistic License,
+?RCS: as specified in the README file that comes with the distribution.
+?RCS: You may reuse parts of this distribution only within the terms of
+?RCS: that same Artistic License; a copy of which may be found at the root
+?RCS: of the source tree for dist 3.0.
+?RCS:
+?RCS: $Log: bin.U,v $
+?RCS: Revision 3.1  1999/07/09 18:20:13  doughera
+?RCS: Updated for installprefix
+?RCS:
+?RCS: Revision 3.0.1.4  1995/09/25  09:15:32  ram
+?RCS: patch59: unit is now forced to the top of Configure, if possible
+?RCS:
+?RCS: Revision 3.0.1.3  1995/01/30  14:32:40  ram
+?RCS: patch49: can now handle installation prefix changes (from WED)
+?RCS:
+?RCS: Revision 3.0.1.2  1994/08/29  16:05:28  ram
+?RCS: patch32: now uses installation prefix
+?RCS:
+?RCS: Revision 3.0.1.1  1993/09/13  15:56:51  ram
+?RCS: patch10: made prompting more explicit (WAD)
+?RCS:
+?RCS: Revision 3.0  1993/08/18  12:05:26  ram
+?RCS: Baseline for dist 3.0 netwide release.
+?RCS:
+?MAKE:bin binexp installbin userelocatableinc initialinstalllocation: \
+	Myread Prefixit Getfile Setvar Setprefixvar Oldconfig \
+	test prefix prefixexp
+?MAKE:	-pick add $@ %<
+?Y:TOP
+?D:bin=''
+?S:bin:
+?S:	This variable holds the name of the directory in which the user wants
+?S:	to put publicly executable images for the package in question.  It
+?S:	is most often a local directory such as /usr/local/bin. Programs using
+?S:	this variable must be prepared to deal with ~name substitution.
+?S:.
+?D:binexp=''
+?S:binexp:
+?S:	This is the same as the bin variable, but is filename expanded at
+?S:	configuration time, for use in your makefiles.
+?S:.
+?D:installbin=''
+?S:installbin:
+?S:	This variable is the same as binexp unless AFS is running in which case
+?S:	the user is explicitly prompted for it. This variable should always
+?S:	be used in your makefiles for maximum portability.
+?S:.
+?D:userelocatableinc=''
+?S:userelocatableinc:
+?S:	This variable is set to true to indicate that perl should relocate
+?S:	@INC entries at runtime based on the path to the perl binary.
+?S:	Any @INC paths starting ".../" are relocated relative to the directory
+?S:	containing the perl binary, and a logical cleanup of the path is then
+?S:	made around the join point (removing "dir/../" pairs)
+?S:.
+?S:initialinstalllocation:
+?S:	When userelocatableinc is true, this variable holds the location
+?S:	that make install should copy the perl binary to, with all the
+?S:	run-time relocatable paths calculated from this at install time.
+?S:	When used, it is initialized to the original value of binexp, and
+?S:	then binexp is set to '.../', as the other binaries are found
+?S:	relative to the perl binary.
+?S:.
+?C:BIN:
+?C:	This symbol holds the path of the bin directory where the package will
+?C:	be installed. Program must be prepared to deal with ~name substitution.
+?C:.
+?C:BIN_EXP:
+?C:	This symbol is the filename expanded version of the BIN symbol, for
+?C:	programs that do not want to deal with that at run-time.
+?C:.
+?C:PERL_RELOCATABLE_INC:
+?C:	This symbol, if defined, indicates that we'd like to relocate entries
+?C:	in @INC at run time based on the location of the perl binary.
+?C:.
+?H:#define BIN "$bin"	/**/
+?H:#define BIN_EXP "$binexp"	/**/
+?H:#define PERL_RELOCATABLE_INC "$userelocatableinc"		/**/
+?H:.
+?D:bin='/usr/local/bin'
+?LINT:change prefix
+?LINT:change prefixexp
+?LINT:change prefixvar
+?LINT:change installprefixexp
+?LINT:set userelocatableinc
+: determine where public executables go
+echo " "
+set dflt bin bin
+eval $prefixit
+fn=d~
+rp='Pathname where the public executables will reside?'
+. ./getfile
+if $test "X$ansexp" != "X$binexp"; then
+	installbin=''
+fi
+prefixvar=bin
+: XXX Bug? -- ignores Configure -Dinstallprefix setting.
+: XXX If this is fixed, also fix the "start perl" hunk below, which relies on
+:     this via initialinstalllocation
+. ./setprefixvar
+
+case "$userelocatableinc" in
+$define|true|[yY]*)	dflt='y' ;;
+*)			dflt='n' ;;
+esac
+cat <<EOM
+
+Would you like to build Perl so that the installation is relocatable, so that
+library paths in @INC are determined relative to the path of the perl binary?
+This is not advised for system Perl installs, or if you need to run setid
+scripts or scripts under taint mode.
+
+If this doesn't make any sense to you, just accept the default '$dflt'.
+EOM
+rp='Use relocatable @INC?'
+. ./myread
+case "$ans" in
+y|Y)	val="$define" ;;
+*)	val="$undef"  ;;
+esac
+set userelocatableinc
+eval $setvar
+
+initialinstalllocation="$binexp"
+: Default prefix is now "up one level from where the binaries are"
+case "$userelocatableinc" in
+$define|true|[yY]*)
+    bin=".../"
+    binexp=".../"
+    prefix=".../.."
+    prefixexp=".../.."
+    installprefixexp=".../.."
+    ;;
+esac
+

@@ -1,0 +1,27 @@
+Description: link to Ada binding doc in separate package
+ The Ada binding is packaged separately, there is no need to duplicate
+ the documentation in ncurses-doc. Replace the internal link with a
+ hyperlink.
+Author: Nicolas Boulenguez <nicolas@debian.org>
+Bug-Debian: https://bugs.debian.org/757991
+Forwarded: not-needed
+Last-Update: 2017-07-02
+
+---
+ doc/html/index.html |    5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+--- a/doc/html/index.html
++++ b/doc/html/index.html
+@@ -55,8 +55,9 @@
+     <li>A <a href="hackguide.html">hackers guide</a> to
+     ncurses.</li>
+ 
+-    <li>A description of the <a href="Ada95.html">Ada95
+-    binding</a>, by J&uuml;rgen Pfeifer.</li>
++    <li>A description of the <a href="../../libncursesada-doc/Ada95.html">Ada95
++    binding</a>, by J&uuml;rgen Pfeifer (only available if you have installed
++    the libncursesada-doc Debian package).</li>
+ 
+     <li>A <a href="NCURSES-Programming-HOWTO.html">A short
+     tutorial</a>, by Pradeep Padala.</li>

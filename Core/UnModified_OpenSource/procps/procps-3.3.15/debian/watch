@@ -1,0 +1,11 @@
+# Example watch control file for uscan
+# Rename this file to "watch" and then you can run the "uscan" command
+# to check for upstream updates and more.
+# Site		Directory		Pattern			Version	Script
+#version=3
+#http://procps.sourceforge.net/download.html procps-(.*)\.tar\.gz
+version=4
+opts=filenamemangle=s/.*\/(\d\S+)\/archive\.tar\.gz/procps-$1\.tar\.gz/g \
+  https://gitlab.com/procps-ng/procps/tags?sort=updated_desc .*v([0-9.]+)/archive\.tar\.gz
+
+

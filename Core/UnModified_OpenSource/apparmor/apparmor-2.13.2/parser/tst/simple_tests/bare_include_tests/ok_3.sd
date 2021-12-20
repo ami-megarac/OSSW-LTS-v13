@@ -1,0 +1,9 @@
+#
+#=DESCRIPTION includes testing - basic include of a directory
+#=EXRESULT PASS
+#
+/does/not/exist {
+  include <includes/base>
+  include <includes/>
+  include <includes/base>
+}

@@ -1,0 +1,30 @@
+Description: Sanitize file/directory permissions and owner in libopts
+ tarball. Override mtime with ${BUILD_DATE} which is exported in debian/rules.
+ Avoid gzip timestamp.
+Author: Andreas Metzler <ametzler@debian.org>
+Origin: vendor
+Forwarded: no
+Last-Update: 2015-05-17
+
+--- a/pkg/libopts/mklibsrc.sh
++++ b/pkg/libopts/mklibsrc.sh
+@@ -107,13 +107,16 @@ EOMakefile
+     | ${CLexe} -I4 --spread=1 --line-sep="  \\"
+ } > Makefile.am
+ 
+-gz='gzip --best'
++gz='gzip --best --no-name'
+ sfx=tar.gz
++if test -n "${BUILD_DATE}" ; then
++	TARMTIME="--mtime=${BUILD_DATE}"
++fi
+ 
+ cd ..
+ echo ! cd `pwd`
+-echo ! tar cvf ${tag}.${sfx} ${tag}
+-tar cvf - ${tag} | $gz > ${top_builddir}/autoopts/${tag}.${sfx}
++echo ! tar --sort=name --owner=root --group=root --mode=u+w,g-w,a+r "${TARMTIME}" -cvf ${tag}.${sfx} ${tag}
++tar --sort=name --owner=root --group=root --mode=u+w,g-w,a+r "${TARMTIME}" -cvf - ${tag} | $gz > ${top_builddir}/autoopts/${tag}.${sfx}
+ rm -rf ${tag}
+ 
+ ## Local Variables:

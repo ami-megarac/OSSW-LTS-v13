@@ -1,0 +1,424 @@
+tcp-wrappers (7.6.q-28) unstable; urgency=medium
+
+  * Demoted everything to optional priority.
+  * Updated patch fix_warnings2 to fix more undefined functions.
+  * Fixed patch size_t to actually use socklen_t.
+
+ -- Marco d'Itri <md@linux.it>  Mon, 18 Feb 2019 01:54:18 +0100
+
+tcp-wrappers (7.6.q-27) unstable; urgency=medium
+
+  * Stop recommending tcpd. (Closes: #855919)
+
+ -- Marco d'Itri <md@linux.it>  Mon, 30 Oct 2017 00:22:41 +0100
+
+tcp-wrappers (7.6.q-26) unstable; urgency=medium
+
+  * Added patch fix_warnings2 to fix undefined functions.
+
+ -- Marco d'Itri <md@linux.it>  Mon, 26 Dec 2016 00:08:55 +0100
+
+tcp-wrappers (7.6.q-25) unstable; urgency=medium
+
+  * Replace portmap with rpcbind in the hosts.* files comments.
+    (Closes: #722230)
+  * Update patch fix_warnings: fix the declaration of fix_options().
+    (Closes: #710391)
+
+ -- Marco d'Itri <md@linux.it>  Mon, 30 Dec 2013 07:05:06 +0100
+
+tcp-wrappers (7.6.q-24) unstable; urgency=low
+
+  * Do not remove /etc/hosts.{allow,deny} on purge of libwrap0 if it is
+    installed for multiple architectures. (Closes: #682425)
+    Patch courtesy of Jonathan Nieder.
+
+ -- Marco d'Itri <md@linux.it>  Mon, 30 Jul 2012 03:37:41 +0200
+
+tcp-wrappers (7.6.q-23) unstable; urgency=medium
+
+  * Correctly install libwrap.{a,so} in the multiarch directory.
+    (Closes: #658765)
+
+ -- Marco d'Itri <md@linux.it>  Sun, 19 Feb 2012 01:42:27 +0100
+
+tcp-wrappers (7.6.q-22) unstable; urgency=medium
+
+  * Added patch ignore_missing_inetdconf: stop tcpdmatch and tcpdchk
+    from aborting if /etc/inetd.conf does not exist. (Closes: #650826)
+  * Enabled hardening with dpkg-buildflags, and this time for real.
+  * libwrap0-dev marked "Multi-Arch: same".
+  * Added patch initgroups: properly set supplementary group IDs, taken
+    from the Red Hat package.
+
+ -- Marco d'Itri <md@linux.it>  Mon, 05 Dec 2011 05:56:54 +0100
+
+tcp-wrappers (7.6.q-21) unstable; urgency=medium
+
+  * Added the proper Breaks/Replaces directives to deal with the man pages
+    moved in 7.6.q-20. (Closes: #631252, #631311)
+  * Enabled IPv6 support for the Hurd build. (Closes: #631247)
+  * Enabled hardening with hardening-includes.
+
+ -- Marco d'Itri <md@linux.it>  Fri, 24 Jun 2011 00:21:44 +0200
+
+tcp-wrappers (7.6.q-20) unstable; urgency=low
+
+  * Added patch fix_parsing_long_lines: fixes the /etc/hosts.{allow,deny}
+    parser to properly detect lines longer than 2047 characters which
+    would cause the caller to hang forever in a loop. (Closes: #596261)
+  * Fixed the link ordering of the shared library, patch courtesy of
+    Matthias Klose of Ubuntu. (Closes: #609598)
+  * Moved the *.5 man pages from tcpd to libwrap0. (Closes: #630244)
+  * Converted to multiarch the libwrap0 and tcpd packages.
+  * Switched to debhelper level 8.
+  * Hopefully added proper support for overriding CFLAGS and LDFLAGS.
+  * Removed the -D_REENTRANT flag which has been useless since libc6.
+
+ -- Marco d'Itri <md@linux.it>  Tue, 21 Jun 2011 23:51:38 +0200
+
+tcp-wrappers (7.6.q-19) unstable; urgency=low
+
+  * Made piuparts happy by removing /etc/hosts.{allow,deny} on purge, even
+    if the package is never purged on real systems.
+  * Moved the documentation in libwrap0 and made the documentation
+    directory of the other packages a symlink.
+  * Converted to source format 3.0 (quilt).
+  * Switched to debhelper level 7.
+
+ -- Marco d'Itri <md@linux.it>  Sun, 23 May 2010 16:32:42 +0200
+
+tcp-wrappers (7.6.q-18) unstable; urgency=medium
+
+  * Updated 13_shlib_weaksym again to make the library build even if
+    libwrap0-dev is not installed. (Closes: #535509)
+
+ -- Marco d'Itri <md@linux.it>  Thu, 02 Jul 2009 22:56:33 +0200
+
+tcp-wrappers (7.6.q-17) unstable; urgency=medium
+
+  * Moved the creation of /etc/hosts.{allow,deny} from tcpd to libwrap0.
+  * Removed the debconf question.
+  * tcpd demoted from important to standard priority.
+  * Updated 13_shlib_weaksym: make the symbols in libwrap weak for real.
+    (Closes: #531942)
+
+ -- Marco d'Itri <md@linux.it>  Thu, 02 Jul 2009 12:21:24 +0200
+
+tcp-wrappers (7.6.q-16) unstable; urgency=low
+
+  * New debconf translation: sk. (Closes: #489267)
+  * Updated debconf translations: gl, sv, es, ro.
+    (Closes: #480968, #483768, #488606, #488889)
+
+ -- Marco d'Itri <md@linux.it>  Sat, 26 Jul 2008 01:24:15 +0200
+
+tcp-wrappers (7.6.q-15) unstable; urgency=low
+
+  * Converted from dbs to quilt.
+  * Added cross building support. (Closes: #451854)
+  * Added a dpkg symbols file (and depend on a newer debhelper and dpkg-dev).
+  * Updated debconf translations: fr, ca, nl.
+    (Closes: #435784, #446392, #465667)
+  * New debconf translation: fi. (Closes: #447075)
+  * New patch catch-sigchld: unblocks and catches SIGCHLD from spawned
+    shell commands and uses waitpid to prevent waiting for the childs of
+    the calling application.
+    (From the Fedora package, fixes RH #112975 and RH #156373.)
+
+ -- Marco d'Itri <md@linux.it>  Fri, 04 Apr 2008 05:30:21 +0200
+
+tcp-wrappers (7.6.dbs-14) unstable; urgency=medium
+
+  * Updated patch wildcard_matching to be case insensitive. Fix courtesy of
+    Kees Cook. (Closes: #426811)
+  * Package description and debconf messages fixed by debian-l10n-english.
+    (Closes: #418848)
+  * Updated debconf translations: ja, nb, ru, se, gl, pt_BR, de, cs, pt, ko,
+    vi, da.
+    (Closes: #419712, #419711, #419743, #419824, #419834, #419858, #412493)
+    (Closes: #419955, #420215, #419779, #421483, #422036, #425413, #426688)
+    (Closes: #426788)
+  * New debconf translations: hu, ko, ta, ca.
+    (Closes: #420423, #419739, #419645, #431969)
+  * Removed references to portmapper.txt.gz. (Closes: #432714)
+  * Fixed a typo in hosts_access(5).
+  * Removed obsolete Provides/Conflicts statements.
+
+ -- Marco d'Itri <md@linux.it>  Sun, 20 May 2007 17:26:50 +0200
+
+tcp-wrappers (7.6.dbs-13) unstable; urgency=medium
+
+  * New debconf translation: nb. (Closes: #412329)
+
+ -- Marco d'Itri <md@linux.it>  Sun, 25 Feb 2007 21:05:12 +0100
+
+tcp-wrappers (7.6.dbs-12) unstable; urgency=high
+
+  * Fixed the match_port patch to not break matching on daemon names in
+    a corner case (when request->server->sin has not been initialised by
+    the caller). Patch courtesy of Janusz Krzysztofik. (Closes: #405342)
+  * New debconf translations: ro, es. (Closes: #393514, #401908)
+
+ -- Marco d'Itri <md@linux.it>  Mon,  8 Jan 2007 01:37:59 +0100
+
+tcp-wrappers (7.6.dbs-11) unstable; urgency=medium
+
+  * Fixed the port number matching. (Closes: #384289)
+
+ -- Marco d'Itri <md@linux.it>  Wed, 23 Aug 2006 19:31:06 +0200
+
+tcp-wrappers (7.6.dbs-10) unstable; urgency=low
+
+  * Added support to match servers by port number. (Closes: #377154)
+  * Fixed the check for hosts.{allow,deny} in postinst. (Closes: #374819)
+  * New debconf translations: gl, ru. (Closes: #361265, #367215, #373962)
+
+ -- Marco d'Itri <md@linux.it>  Thu, 17 Aug 2006 20:47:40 +0200
+
+tcp-wrappers (7.6.dbs-9) unstable; urgency=low
+
+  * Updated patch siglongjmp: actually save the signals mask on jumps
+    to prevent blocking SIGALRM on unsuspecting calling programs.
+    Fix contributed by Ian Jackson of Ubuntu. (Closes: #354855)
+  * Updated patch sig_fix with a fix from the Red Hat package.
+  * New patch aclexec: adds the aclexec command and its documentation.
+    (Closes: #17798)
+  * New patch 01_man_typos: fixes some man pages typos. (Closes: #344127)
+  * New patch fix_warnings: fixes misc compilation warnings.
+  * New debconf translations: pt, sv, vi. (Closes: #348442, #333495, #320320)
+
+ -- Marco d'Itri <md@linux.it>  Thu,  2 Mar 2006 00:01:59 +0100
+
+tcp-wrappers (7.6.dbs-8) unstable; urgency=medium
+
+  * Fixed postinst to source /usr/share/debconf/confmodule at top level, or
+    $@ will be reset when it re-executes $0. (Closes: #299129) 
+
+ -- Marco d'Itri <md@linux.it>  Sat, 12 Mar 2005 01:00:14 +0100
+
+tcp-wrappers (7.6.dbs-7) unstable; urgency=medium
+
+  * Updated patch siglongjmp: explicitly pass the second argument 0 to
+    sigsetjmp().
+  * Updated patch rfc931.diff: fix the prototypes for Hurd. (Closes: #289075)
+  * Updated patch 01_man_portability: add a reference for hosts_options(5).
+    (Closes: #298570)
+  * New debconf translations: nl, pt_BR. (Closes: #272481, #284226)
+  * New patch expand_remote_port: add a %-espansion for the remote port
+    number. (Closes: #279695)
+
+ -- Marco d'Itri <md@linux.it>  Wed,  9 Mar 2005 18:22:37 +0100
+
+tcp-wrappers (7.6.dbs-6) unstable; urgency=medium
+
+  * New patch restore_sigalarm correctly restores the SIGALARM handler after
+    it has been modified by libwrap functions. Extracted from the upstream
+    package tcp_wrappers_7.6-ipv6.4.tar.gz. (Closes: #268467)
+  * New debconf translation: it.
+
+ -- Marco d'Itri <md@linux.it>  Sun, 29 Aug 2004 18:43:11 +0200
+
+tcp-wrappers (7.6.dbs-5) unstable; urgency=high
+
+  * Updated debconf translations: ja, fr, da, cs, de.
+    (Closes: #250846, #250881, #251086, #251680, #254019)
+
+ -- Marco d'Itri <md@linux.it>  Wed, 28 Jul 2004 00:56:18 +0200
+
+tcp-wrappers (7.6.dbs-4) unstable; urgency=medium
+
+  * Fixed the text of the debconf template. (Closes: #248262)
+  * New template translations: tr fr da cs.
+    (Closes: #248312, #248690, #248821, #249259)
+  * Removed a bashism (posh sucks and is a waste of our time).
+    (Closes: #247384)
+
+ -- Marco d'Itri <md@linux.it>  Sat, 22 May 2004 12:55:16 +0200
+
+tcp-wrappers (7.6.dbs-3) unstable; urgency=high
+
+  * Updated patch 13_shlib_weaksym to add back to tcpd.h some #includes
+    lost in 7.6.dbs-1. (Closes: #244659, #246675)
+    Post-sarge a new tcpd.h to be used by other programs should be written.
+  * New template translation: ja. (Closes: #246441)
+
+ -- Marco d'Itri <md@linux.it>  Sun,  2 May 2004 15:11:20 +0200
+
+tcp-wrappers (7.6.dbs-2) unstable; urgency=medium
+
+  * Uploaded to unstable.
+  * New patches: man_fromhost and 15_match_clarify to clarify documention.
+    (Closes: #162146, #226930)
+  * Close the bugs fixed by the last upload.
+    (Closes: #20030, #163346, #179707, #184489, #205368, #179708, #205532)
+    (Closes: #62145, #65390, #76378)
+
+ -- Marco d'Itri <md@linux.it>  Sun, 25 Apr 2004 12:18:13 +0200
+
+tcp-wrappers (7.6.dbs-1) experimental; urgency=low
+
+  * Source package converted to DBS.
+  * Switced back from the source patched by Casper Dik to the official
+    tree, because it's the one other distributions are using and this will
+    allow fixing some bugs. IPv6 support is provided by the 10_usagi-ipv6
+    and 11_usagi_fix patches, which are tcp_wrappers.usagi-ipv6.patch and
+    tcp_wrappers.ume-ipv6.patch from the Red Hat package.
+    (Closes: #20030, #163346, #179707, #184489, #205368)
+  * Removed bogus dependency on libc6-dev. (Closes: #179708)
+  * Use : with chown. (Closes: #205532)
+  * Added a debconf question to deny access to everything by default.
+    Patch by Javier Fernández-Sanguino Peña. (Closes: #62145)
+  * New patch 05_wildcard_matching (tcp_wrappers-7.6-bug17847.patch from
+    the Red Hat package) to add support for wildcard matching on hostnames.
+  * New patch 06_fix_gethostbyname (tcp_wrappers-7.6-fixgethostbyname.patch
+    from the Red Hat package) to fix handling of hostnames with a trailing
+    dot. (Closes: #65390)
+  * New patch sig_fix (tcp_wrappers-7.6-sig.patch from the Red Hat package).
+
+ -- Marco d'Itri <md@linux.it>  Sat, 10 Apr 2004 20:46:54 +0200
+
+tcp-wrappers (7.6-ipv6.1-3) unstable; urgency=low
+
+  * Fixed CIDR-style netmasks on little endian architectures.
+  * Added links for hosts.allow(5) and hosts.deny(5) (Closes: #156819).
+
+ -- Marco d'Itri <md@linux.it>  Wed,  4 Sep 2002 22:52:20 +0200
+
+tcp-wrappers (7.6-ipv6.1-2) unstable; urgency=low
+
+  * Moved to main (Closes: #110672, #123057, #137843, #141130, #141132).
+
+ -- Marco d'Itri <md@linux.it>  Mon, 12 Aug 2002 02:47:31 +0200
+
+tcp-wrappers (7.6-ipv6.1-1) experimental; urgency=low
+
+  * New upstream source with IPv6 support by Casper Dik.
+  * Removed README.IRIX. Other README.* files moved from tcpd-dev to tcpd.
+  * Fixed libwrap0.postinst to call ldconfig only at configuration time.
+  * Removed references to /usr/doc/ from /etc/hosts.* (Closes: #123057).
+  * Removed references to tlid and tlid.conf from man pages (Closes: #141130).
+  * Documented in tcpd.8 the existence of libwrap (Closes: #141132).
+  * Added a list of programs linked to libwrap (Closes: #137843).
+
+ -- Marco d'Itri <md@linux.it>  Wed, 31 Jul 2002 19:30:21 +0200
+
+tcp-wrappers (7.6-9) unstable; urgency=low
+
+  * Include changes from NMUs, fixing C++ compilation. Thanks to Matthew
+    Wilcox and Ryan Murray. (Closes: Bug#100891, Bug#105874)
+
+  * Fix paths in man pages. (Closes: Bug#44575, Bug#110890)
+  * Make symlinks for manpages as well as having multiple entries in the NAME
+    section. (Closes: Bug#99581)
+
+ -- Anthony Towns <aj@azure.humbug.org.au>  Sun, 18 Nov 2001 00:24:50 +1000
+
+tcp-wrappers (7.6-8.3) unstable; urgency=low
+
+  * NMU.
+  * tcpd.h: define __P() ourselves; sys/cdefs.h doesn't appear to be standard,
+    and the glibc version adds __throw to the prototypes.
+
+ -- Ryan Murray <rmurray@debian.org>  Sun, 30 Sep 2001 23:06:24 -0700
+
+tcp-wrappers (7.6-8.2) unstable; urgency=low
+
+  * NMU.
+  * tcpd.h: include <stdio.h> and <netinet/in.h> to define some structs
+    which are used by the new prototypes.  Also prevent against multiple
+    inclusion.  Patch courtesy of John Daily.
+
+ -- Matthew Wilcox <willy@debian.org>  Mon, 16 Jul 2001 12:28:54 -0600
+
+tcp-wrappers (7.6-8.1) unstable; urgency=low
+
+  * NMU approved by Anthony Towns.
+  * tcpd.h: use __P() to prototype the functions, allowing use from c++.
+  * scaffold.c: Fix bug detected by above change.  For patch, see bug
+    #100891
+
+ -- Matthew Wilcox <willy@debian.org>  Fri, 29 Jun 2001 19:19:28 -0600
+
+tcp-wrappers (7.6-8) unstable; urgency=low
+
+  * debian/copyright: Update license. (Closes: Bug#99719)
+  * debian/control: Added Build-Depends, and bumped Standards-Version.
+    (Closes: Bug#89084)
+  * debian/rules: Change PWD to CURDIR. (Closes: Bug#45175)
+
+  * debian/tcpd.postinst: Update reference to portmapper.txt.gz in
+    hosts.deny, hosts.allow. (Closes: Bug#77181)
+  * debian/tcpd.postinst: Comment out ALL: PARANOID from hosts.deny.
+    (Closes: Bug#62372, Bug#55528)
+
+  * Move hosts_access(5) and hosts_options(5) to tcpd.deb.
+
+  * Get rid of dh_suidregister.
+
+ -- Anthony Towns <aj@azure.humbug.org.au>  Fri,  8 Jun 2001 20:14:46 +1000
+
+tcp-wrappers (7.6-7) unstable; urgency=low
+
+  * Fix here document in tcpd postinst (Closes: Bug#75309)
+  * Fix apostrophes in tcpd(8), hosts_access(5) and hosts_options(5)
+    manpages (Closes: Bug#75654, Bug#75656)
+  * libwrap0 has a weak allow_severity symbol since 7.6-4 (Closes: Bug#51210) 
+  * Change "tcpd.h" to <tcpd.h> in hosts_access(3) manpage. (Closes: Bug#63526)
+  * tcpd.h seems to be correct (Closes: Bug#65543)
+
+ -- Anthony Towns <ajt@debian.org>  Tue, 26 Dec 2000 15:22:32 +1000
+
+tcp-wrappers (7.6-6) unstable; urgency=low
+
+  * Use $(CC) to build shared libraries instead of $(LD). Important for
+    getting magical start files or something. (Closes: Bug#71940) 
+
+ -- Anthony Towns <ajt@debian.org>  Mon, 18 Sep 2000 11:58:29 -0700
+
+tcp-wrappers (7.6-5) unstable; urgency=low
+
+  * Move /etc/hosts.allow and /etc/hosts.deny from netbase into the
+    tcpd package. Generate them in postinst rather than have them as
+    conffiles.
+
+ -- Anthony Towns <ajt@debian.org>  Sun, 16 Jul 2000 11:51:39 +1000
+
+tcp-wrappers (7.6-4) frozen unstable; urgency=high
+
+  * Actually compile in the weak_symbols. Thanks to Tomas Ogren for
+    working out where things were going wrong. (Closes: Bug#57780,
+    Bug#55824)
+
+ -- Anthony Towns <ajt@debian.org>  Fri, 11 Feb 2000 15:52:44 +1000
+
+tcp-wrappers (7.6-3) frozen unstable; urgency=medium
+
+  * Define hosts_ctl in tcpd.h (Closes: Bug#55265, Bug#53887) 
+
+ -- Anthony Towns <ajt@debian.org>  Tue, 25 Jan 2000 11:14:33 +1000
+
+tcp-wrappers (7.6-2) unstable; urgency=low
+
+  * Move libwrap0 to /lib (Closes: Bug#52534)
+
+  * Make weak symbols for allow_severity and deny_severity 
+    (Closes: Bug#44542)
+  * Adjust shlibs file to require libwrap0 (>= 7.6-1.1) thanks to
+    the above (Closes: Bug#51217)
+
+  * Change how the Hurd is handled, thanks to Marcus Brinkmann 
+    (Closes: Bug#44408)
+
+  * Add support for `ftp' severity specifier. (Closes: Bug#53575)
+
+  * Add -D_REENTRANT when compiling.
+
+ -- Anthony Towns <ajt@debian.org>  Sun, 29 Aug 1999 00:08:36 +1000
+
+tcp-wrappers (7.6-1) unstable; urgency=low
+
+  * Initial Release.
+  * Split from netbase.
+
+ -- Anthony Towns <ajt@debian.org>  Tue, 10 Aug 1999 12:06:33 +1000

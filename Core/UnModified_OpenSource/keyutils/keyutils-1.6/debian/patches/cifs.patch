@@ -1,0 +1,23 @@
+From: Marcus Meissner <meissner@suse.de>
+Date: Wed, 2 Sep 2015 20:54:50 +0200
+Subject: Added 2 cifs helpers to request-key.conf
+
+For CIFS DFS support
+
+Forwarded: not-needed
+Last-Update: 2014-05-18
+---
+ request-key.conf | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/request-key.conf b/request-key.conf
+index ff16a95..4c17633 100644
+--- a/request-key.conf
++++ b/request-key.conf
+@@ -38,4 +38,6 @@ create  user    debug:*         expired         /bin/keyctl reject %k 30 %c %S
+ create  user    debug:*         revoked         /bin/keyctl reject %k 30 %c %S
+ create	user	debug:loop:*	*		|/bin/cat
+ create	user	debug:*		*		/usr/share/keyutils/request-key-debug.sh %k %d %c %S
++create	cifs.spnego	*	*		/usr/sbin/cifs.upcall -c %k
++create	dns_resolver	*	*		/usr/sbin/cifs.upcall %k
+ negate	*	*		*		/bin/keyctl negate %k 30 %S

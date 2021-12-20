@@ -1,0 +1,13 @@
+START
+File: testcase_dbus_01.in
+Event type: AA_RECORD_DENIED
+Operation: dbus_method_call
+Denied Mask: send
+Profile: /tmp/apparmor-2.8.0/tests/regression/apparmor/dbus_service
+Peer profile: unconfined
+Name: org.freedesktop.DBus
+PID: 2922
+DBus bus: session
+DBus path: /org/freedesktop/DBus
+DBus interface: org.freedesktop.DBus
+DBus member: Hello

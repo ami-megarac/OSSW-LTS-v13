@@ -1,0 +1,12 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@/mit-krb5
+includedir=@includedir@/mit-krb5
+vendor=MIT
+
+Name: gssrpc
+Description: GSSAPI RPC implementation
+Version: @KRB5_VERSION@
+Cflags: -isystem ${includedir}
+Libs: -L${libdir} -lgssrpc
+Requires.private: mit-krb5-gssapi

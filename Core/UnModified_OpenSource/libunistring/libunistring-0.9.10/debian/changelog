@@ -1,0 +1,178 @@
+libunistring (0.9.10-1) unstable; urgency=medium
+
+  * New upstream release.
+    - Refresh symbols file.
+  * debian/control:
+    - Switch Vcs-* to new loacation.
+    - Use secure URI for homepage.
+  * Migrate to debhelper 11:
+    - Change debian/compat to 11.
+    - Bump minimum debhelper version in debian/control to >= 11.
+  * Declare compliance with Debian Policy 4.1.5 (No changes needed).
+
+ -- Jörg Frings-Fürst <debian@jff.email>  Sun, 08 Jul 2018 14:26:51 +0200
+
+libunistring (0.9.8-2) unstable; urgency=medium
+
+  * New debian/libunistring2.symbols.hurd-i386.
+    - Prevent FTBFS on hurd-i386.
+
+ -- Jörg Frings-Fürst <debian@jff.email>  Thu, 14 Dec 2017 12:54:56 +0100
+
+libunistring (0.9.8-1) unstable; urgency=medium
+
+  * New upstream release.
+    - Refresh patches.
+    - Refresh symbols file.
+  * Change to my new mail address.
+  * debian/copyright:
+    - Refresh copyright years to 2017.
+  * debian/changelog:
+    - Remove trailing white spaces.
+  * debian/watch:
+    - Use secure URI.
+  * Declare compliance with Debian Policy 4.1.2.0 (No changes needed).
+
+ -- Jörg Frings-Fürst <debian@jff.email>  Sat, 02 Dec 2017 13:08:55 +0100
+
+libunistring (0.9.7-2) unstable; urgency=medium
+
+  * Upload to unstable.
+  * Declare compliance with Debian Policy 4.0.0. (No changes needed).
+
+ -- Jörg Frings-Fürst <debian@jff-webhosting.net>  Sun, 25 Jun 2017 17:51:30 +0200
+
+libunistring (0.9.7-1) experimental; urgency=medium
+
+  * New maintainer (Closes: #858605).
+    - Many thanks to Andreas Rottmann <rotty@debian.org>.
+  * New upstream release (Closes: #846199, #858175).
+  * debian/control:
+    - Add myself as Maintainer.
+  * debian/copyright:
+    - Add myself to debian/*.
+    - Renew licenses and dates.
+  * debian/watch:
+    - Remove dh_make template to prevent lintian warning.
+    - Bump version to 4.
+  * New debian/patches/0700-multiarch-libc.patch (Closes: #857708).
+    - Use multiarched libc-dev header.
+      Thanks to Helmut Grohne <helmut@subdivi.de>.
+  * Refresh and renumber the patch float-endian-detection.patch.
+  * Bump compat to 10:
+    - Change debian/compat to 10.
+    - Change debhelper version at debian/control to >= 10.
+    - Drop dh-autoreconf from both build-depends and dh --with arguments
+      because this is all defaults when using dh compat 10.
+  * Add symbols file.
+  * New README.source to explain the branching model used.
+
+ -- Jörg Frings-Fürst <debian@jff-webhosting.net>  Sat, 10 Jun 2017 12:18:01 +0200
+
+libunistring (0.9.6+really0.9.6-0.1) experimental; urgency=medium
+
+  * Non-maintainer upload.
+  * New upstream release.  (Closes: #804064)
+    - Bump SOVERSION (libunistring0 -> libunistring2)
+  * debian/patches: refresh for new upstream version
+  * debian/copyright: fix typo in path
+
+ -- Manuel A. Fernandez Montecelo <mafm@debian.org>  Sat, 28 May 2016 14:50:52 +0100
+
+libunistring (0.9.6+really0.9.3-0.1) unstable; urgency=medium
+
+  * Non-maintainer upload.
+  * Re-upload 0.9.3-5.4 to revert the soname bump in 0.9.6-1.1. (Closes:
+    #825471.)
+  * Drop the explicit ldconfig triggers, debhelper handles this on its
+    own.
+
+ -- Stephen Kitt <skitt@debian.org>  Fri, 27 May 2016 10:11:04 +0200
+
+libunistring (0.9.3-5.3) unstable; urgency=medium
+
+  * Non-maintainer upload.
+  * Bump Policy Standards-Version to 3.9.8
+    - use dpkg triggers for ldconfig, section 8.1.1 (from previous versions)
+  * debian/compat: set level 9
+  * Update Vcs-* URLs
+  * debian/watch: Improve to match versions numbers and not "latest"
+  * Build-Depends: Require debhelper 9.20160403 or newer
+
+ -- Manuel A. Fernandez Montecelo <mafm@debian.org>  Thu, 26 May 2016 16:31:27 +0100
+
+libunistring (0.9.3-5.2) unstable; urgency=medium
+
+  * Non-maintainer upload.
+  * Missing change from last upload, actually run dh-autoreconf to update
+    config.{sub,guess} and {libtool,aclocal}.m4, necessary for some new
+    ports.  Thanks Fernando Seiti Furusato.  (Closes: #755745)
+
+ -- Manuel A. Fernandez Montecelo <mafm@debian.org>  Mon, 04 Aug 2014 19:51:45 +0100
+
+libunistring (0.9.3-5.1) unstable; urgency=medium
+
+  * Non-maintainer upload.
+  * Run dh-autoreconf to update config.{sub,guess} and
+    {libtool,aclocal}.m4, necessary for some new ports.  Thanks Fernando
+    Seiti Furusato.  (Closes: #755745)
+  * Add patch float-endian-detection.patch which fixes detection of
+    floating point endianness, gathered from Ubuntu, created by Colin
+    Watson.
+
+ -- Manuel A. Fernandez Montecelo <mafm@debian.org>  Mon, 28 Jul 2014 22:47:32 +0100
+
+libunistring (0.9.3-5) unstable; urgency=low
+
+  * Standards-Version 3.9.2 (no changes).
+  * Convert package to multiarch (closes: #646068):
+    - Bumped build-depends versions for cdbs and debhelper.
+    - Extend configure flags to install libraries into
+      multi-arch library directory.
+    - Adapted debian/libunistring0.install.
+    - Mark libunistring0 as "Multi-Arch: same".
+  * Applied outstanding changes from multiarch patch provided by Steve
+    Langasek on bug #646068:
+    - Removed useless .dirs files.
+    - debian/compat bumped to 8 (compat level 9 not needed as we don't use
+      the "dh" script).
+  * debian/copyright:
+    - Bumped DEP5 revision in format URL to 202.
+    - Fixed various issues pointed out by lintian.
+
+ -- Andreas Rottmann <rotty@debian.org>  Wed, 26 Oct 2011 23:23:59 +0200
+
+libunistring (0.9.3-4) unstable; urgency=low
+
+  * Standards-Version 3.9.1:
+    - Don't install libunistring.la (closes: #622432).
+  * Add Vcs-Git and Vcs-Browser fields.
+
+ -- Andreas Rottmann <rotty@debian.org>  Sat, 16 Apr 2011 14:09:54 +0200
+
+libunistring (0.9.3-3) unstable; urgency=low
+
+  * Fix description typo (closes: #596243, thanks to Paul Menzel).
+
+ -- Andreas Rottmann <rotty@debian.org>  Thu, 09 Sep 2010 20:22:45 +0200
+
+libunistring (0.9.3-2) unstable; urgency=low
+
+  * Work around toolchain issue on mipsen by building with -mplt there
+    (closes: #595875, thanks to Julien BLACHE).
+
+ -- Andreas Rottmann <rotty@debian.org>  Wed, 08 Sep 2010 21:45:46 +0200
+
+libunistring (0.9.3-1) unstable; urgency=low
+
+  * New upstream release.
+  * Switched to dpkg-source 3.0 (quilt) format.
+  * Standards-Version 3.8.4 (no changes).
+
+ -- Andreas Rottmann <rotty@debian.org>  Thu, 27 May 2010 19:37:41 +0200
+
+libunistring (0.9.1-1) unstable; urgency=low
+
+  * Initial release (closes: #532125).
+
+ -- Andreas Rottmann <rotty@debian.org>  Sat, 04 Jul 2009 14:31:38 +0200

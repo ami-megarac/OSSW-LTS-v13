@@ -1,0 +1,126 @@
+#
+#=DESCRIPTION Basic test that re profile names are allowed in quotes
+#=EXRESULT PASS
+# vim:syntax=subdomain
+# Last Modified: Sun Apr 17 19:44:44 2005
+#
+"/ **" {
+  #include <includes/base>
+
+  /usr/X11R6/lib/lib*so* rrr,
+  /does/not/exist r,
+  /var/log/messages www,
+  /tmp/sd*.foo rwrwwrll,
+  /bin/cat pxpxpxpxpx,
+  /bin/ls ixixixix,
+  /bin/echo uxuxuxuxux,
+}
+
+"/ *" {
+  #include <includes/base>
+
+  /usr/X11R6/lib/lib*so* rrr,
+  /does/not/exist r,
+  /var/log/messages www,
+  /tmp/sd*.foo rwrwwrll,
+  /bin/cat pxpxpxpxpx,
+  /bin/ls ixixixix,
+  /bin/echo uxuxuxuxux,
+}
+
+"/ ?" {
+  #include <includes/base>
+
+  /usr/X11R6/lib/lib*so* rrr,
+  /does/not/exist r,
+  /var/log/messages www,
+  /tmp/sd*.foo rwrwwrll,
+  /bin/cat pxpxpxpxpx,
+  /bin/ls ixixixix,
+  /bin/echo uxuxuxuxux,
+}
+
+"/ [ab]" {
+  #include <includes/base>
+
+  /usr/X11R6/lib/lib*so* rrr,
+  /does/not/exist r,
+  /var/log/messages www,
+  /tmp/sd*.foo rwrwwrll,
+  /bin/cat pxpxpxpxpx,
+  /bin/ls ixixixix,
+  /bin/echo uxuxuxuxux,
+}
+
+"/ [^ab]" {
+  #include <includes/base>
+
+  /usr/X11R6/lib/lib*so* rrr,
+  /does/not/exist r,
+  /var/log/messages www,
+  /tmp/sd*.foo rwrwwrll,
+  /bin/cat pxpxpxpxpx,
+  /bin/ls ixixixix,
+  /bin/echo uxuxuxuxux,
+}
+
+profile "a **" {
+  #include <includes/base>
+
+  /usr/X11R6/lib/lib*so* rrr,
+  /does/not/exist r,
+  /var/log/messages www,
+  /tmp/sd*.foo rwrwwrll,
+  /bin/cat pxpxpxpxpx,
+  /bin/ls ixixixix,
+  /bin/echo uxuxuxuxux,
+}
+
+profile "a *" {
+  #include <includes/base>
+
+  /usr/X11R6/lib/lib*so* rrr,
+  /does/not/exist r,
+  /var/log/messages www,
+  /tmp/sd*.foo rwrwwrll,
+  /bin/cat pxpxpxpxpx,
+  /bin/ls ixixixix,
+  /bin/echo uxuxuxuxux,
+}
+
+profile "a ?" {
+  #include <includes/base>
+
+  /usr/X11R6/lib/lib*so* rrr,
+  /does/not/exist r,
+  /var/log/messages www,
+  /tmp/sd*.foo rwrwwrll,
+  /bin/cat pxpxpxpxpx,
+  /bin/ls ixixixix,
+  /bin/echo uxuxuxuxux,
+}
+
+profile "a [ab]" {
+  #include <includes/base>
+
+  /usr/X11R6/lib/lib*so* rrr,
+  /does/not/exist r,
+  /var/log/messages www,
+  /tmp/sd*.foo rwrwwrll,
+  /bin/cat pxpxpxpxpx,
+  /bin/ls ixixixix,
+  /bin/echo uxuxuxuxux,
+}
+
+profile "a [^ab]" {
+  #include <includes/base>
+
+  /usr/X11R6/lib/lib*so* rrr,
+  /does/not/exist r,
+  /var/log/messages www,
+  /tmp/sd*.foo rwrwwrll,
+  /bin/cat pxpxpxpxpx,
+  /bin/ls ixixixix,
+  /bin/echo uxuxuxuxux,
+}
+

@@ -1,0 +1,75 @@
+#
+#=DESCRIPTION validate some uses of the profile flags.
+#=EXRESULT PASS
+# vim:syntax=subdomain
+# Last Modified: Sun Apr 17 19:44:44 2005
+#
+/does/not/exist flags=(complain) {
+  #include <includes/base>
+
+  /usr/X11R6/lib/lib*so* r,
+  /does/not/exist r,
+}
+
+/does/not/exist2 flags=(audit) {
+  #include <includes/base>
+
+  /usr/X11R6/lib/lib*so* r,
+  /does/not/exist2 r,
+}
+
+/does/not/exist3 flags=(complain,audit) {
+  #include <includes/base>
+
+  /usr/X11R6/lib/lib*so* r,
+  /does/not/exist5 r,
+}
+
+/does/not/exist4 flags=(audit,complain) {
+  #include <includes/base>
+
+  /usr/X11R6/lib/lib*so* r,
+  /does/not/exist7 r,
+}
+
+/does/not/exist5 flags=(audit,complain,audit) {
+  #include <includes/base>
+
+  /usr/X11R6/lib/lib*so* r,
+  /does/not/exist8 r,
+}
+
+/does/not/exist6 (complain) {
+  #include <includes/base>
+
+  /usr/X11R6/lib/lib*so* r,
+  /does/not/exist r,
+}
+
+/does/not/exist7 (audit) {
+  #include <includes/base>
+
+  /usr/X11R6/lib/lib*so* r,
+  /does/not/exist2 r,
+}
+
+/does/not/exist8 (complain,audit) {
+  #include <includes/base>
+
+  /usr/X11R6/lib/lib*so* r,
+  /does/not/exist5 r,
+}
+
+/does/not/exist9 (audit,complain) {
+  #include <includes/base>
+
+  /usr/X11R6/lib/lib*so* r,
+  /does/not/exist7 r,
+}
+
+/does/not/exist10 (audit,complain,audit) {
+  #include <includes/base>
+
+  /usr/X11R6/lib/lib*so* r,
+  /does/not/exist8 r,
+}

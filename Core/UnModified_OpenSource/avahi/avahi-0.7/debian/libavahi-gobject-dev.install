@@ -1,0 +1,6 @@
+usr/include/avahi-gobject
+usr/lib/*/libavahi-gobject.so
+usr/lib/*/libavahi-gobject.a
+usr/lib/*/pkgconfig/avahi-gobject.pc
+usr/share/gir-1.0/AvahiCore-0.6.gir
+usr/share/gir-1.0/Avahi-0.6.gir

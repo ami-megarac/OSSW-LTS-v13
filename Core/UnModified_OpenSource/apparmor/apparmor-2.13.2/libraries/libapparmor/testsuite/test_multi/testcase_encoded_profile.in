@@ -1,0 +1,1 @@
+Aug 23 17:29:45 hostname kernel: [289763.843292] type=1400 audit(1322614912.304:857): apparmor="ALLOWED" operation="getattr" parent=16001 profile=74657374207370616365 name="/lib/x86_64-linux-gnu/libdl-2.13.so" pid=17011 comm="bash" requested_mask="r" denied_mask="r" fsuid=0 ouid=0

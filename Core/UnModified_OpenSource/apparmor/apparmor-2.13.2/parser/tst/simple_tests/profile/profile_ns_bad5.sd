@@ -1,0 +1,9 @@
+#
+#=DESCRIPTION namespace with no profile name
+#=EXRESULT FAIL
+# vim:syntax=apparmor
+# Last Modified: Thu Feb 11 00:14:20 2016
+#
+:namespace: {
+  /does/not/exist r,
+}

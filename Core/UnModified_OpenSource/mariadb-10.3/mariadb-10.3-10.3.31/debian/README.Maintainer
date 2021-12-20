@@ -1,0 +1,247 @@
+# README for Debian package maintainers
+
+This file mostly applies to how the packaging work-flow works for the official
+Debian packages, but it may contain useful information also for anybody doing
+their own private .deb builds.
+
+## Version control
+
+This package is maintained by the MariaDB/MySQL team in Debian using the
+git-buildpackage tool and storing the git repositories on the Debian Gitlab
+instance Salsa. For details see https://salsa.debian.org/mariadb-team/.
+
+The official Ubuntu packages are also maintained by the same team using the same
+source repository.
+
+### Ensuring git contents match what has been uploaded to Debian/Ubuntu
+
+It is possible (but extremely rare) that somebody uploads a MariaDB package to
+Debian/Ubuntu and either does not use git at all, or simply forgets to push the
+same changes on git, or makes an error in tagging the release or something.
+Therefore maintainers should check that the git contents match what has been
+uploaded to Debian/Ubuntu before making new changes on git.
+
+This can be done by using dgit. The example command below will fetch the latest
+mariadb-10.0 package available in Ubuntu 16.04 (Xenial) base archive, security
+archive or updates archive (whichever has a newer version):
+  dgit -d ubuntu clone mariadb-10.0 xenial,-security,-updates
+  cp -ra mariadb-10.0/* .
+
+You can then compare these two directories with a recursive diff or `git diff`.
+
+
+Another option is to manually check on packages.debian.org or packages.ubuntu.com
+what is the latest version, and download and extract it on top of the existing
+debian/ directory with:
+  curl -SL http://archive.ubuntu.com/ubuntu/pool/universe/m/mariadb-10.0/\
+  mariadb-10.0_10.0.34-0ubuntu0.16.04.1.debian.tar.xz -o - | tar xv --xz
+
+The you can simply run `git diff` to see the report on differences.
+
+
+## Building from sources with git-buildpackage ##
+
+See README.Contribute for details.
+
+## Importing initial sources from upstream the first fime ##
+
+Create repository
+  mkdir mariadb-10.3
+  cd mariadb-10.3
+  git init
+  git branch upstream
+  gbp import-orig --pristine-tar ../../upstream/mariadb-10.3.20
+
+Fill in values prompted
+  What will be the source package name? [mariadb] mariadb-10.3
+  What is the upstream version? [10.1.20]
+
+Checkout master into working dir and finish up manually what needs to be done
+  git checkout master
+
+Eventually commit and push, build, test binaries, test packages etc..
+  gbp push # Pushed upstream and pristine-tar branches
+  git commit -m "Created Debian packaging using git-buildpackage for easy maintenance"
+  git push --all # Pushes the actual packaging branches
+  git push --tags
+
+
+## Upgrading sources from upstream ##
+
+Upstream will publish maintenance releases at least 5 years after the major
+version release, and security updates are likely to come even after that as
+long as major distributions ship the version.
+
+See table at
+https://mariadb.com/kb/en/mariadb/development/mariadb-maintenance-policy/
+
+Release notes are available at
+https://mariadb.com/kb/en/mariadb/development/release-notes/
+
+
+### Steps to import new upstream version ###
+
+Download new source package
+  cd pkg-mariadb-10.3
+  gbp import-orig --uscan --no-interactive --verbose
+
+Refresh patches
+  while quilt push; do quilt refresh; done; quilt pop -a
+
+Simple offsets will be updated automatically. If there are any rejects, inspect
+the files and update the patches or discard the patch completely if you are
+_sure_ that it has been applied upstream.
+
+Generate new debian/changelog entry automatically with git-dch
+  gbp dch -avR
+
+Edit the details to match correct release
+  gedit debian/changelog &
+
+Commit to git
+  git citool
+
+Build and test locally to verify it works.
+  gbp buildpackage --git-pristine-tar
+
+Alternatively you can use Docker with something like this:
+  mkdir ccache buildout
+  docker run -it -v "${PWD}/buildout":/tmp/build -v "${PWD}/ccache":/.ccache \
+     -v "${PWD}/$PKG":/tmp/build/source -w /tmp/build/source \
+     -e DEB_BUILD_OPTIONS="$DEB_BUILD_OPTIONS" -e CCACHE_DIR=/var/cache/ccache \
+     --user=1001 registry.gitlab.com/mariadb/mariadb.org-build-containers:$PKG-debian-sid-build-env \
+     gbp buildpackage --git-pristine-tar -us -uc | tee latest.build
+
+If needed, add commits or amend the ones you made until the package is in
+perfect shape.
+
+Then proceed to make a source only build
+  gbp buildpackage -S
+
+Test more with upload to Launchpad
+  COMMIT_ID=`git log -n 1 --oneline | cut -d ' ' -f 1`
+  PKG=mariadb-10.3
+  backportpackage --yes -u ppa:mysql-ubuntu/$PKG -d xenial -S ~`date '+%s'`.$COMMIT_ID $PKG*.dsc
+
+When done, push to Salsa:
+  gbp push
+
+Wait until the Salsa CI pipeline finishes. If it did not either spot any
+regressions, proceed to tagging the commit:
+  gbp tag
+  gbp push
+
+Sign and upload to autobake for one final round of testing:
+  dput autobake *.changes
+
+Once you are sure there are no regressions, finally upload to Debian
+  dput ftp-master *.changes
+
+After the upload, check that everything is OK at
+* https://tracker.debian.org/mariadb-10.3 (Debian)
+* https://launchpad.net/ubuntu/+source/mariadb-10.3 (Ubuntu)
+
+### Maintaining debian/copyright ###
+
+First install packages: license-reconcile devscripts cdbs
+
+Check if licenses match
+  license-reconcile
+
+Create new copyright file
+  licensecheck --copyright -r . -c . | /usr/lib/cdbs/licensecheck2dep5 > /tmp/copyright
+
+..but you need to do lots of manual work to merge the new file with the old, as
+licensecheck has a lot of cruft and the original copyright file already had
+those cleaned up.
+
+
+### Quality control ###
+
+Run wrap-and-sort to style contents in debian/*
+  wrap-and-sort -a -t -v
+
+Once packages are done check their quality with Lintian
+  lintian -EvIL +pedantic --color=always *.changes
+
+
+## Uploading to Ubuntu PPA for testing ##
+
+Make sure you have key ID set up in ~/.devscripts to avoid using -k parameter
+  DEBSIGN_KEYID=CEE8DA88
+
+These are good to have as environment variables (replace values with your own)
+  DEBEMAIL="otto@seravo.fi"
+  DEBFULLNAME="Otto Kekäläinen"
+  export DEBEMAIL DEBFULLNAME
+
+Then run the commands to automatically change version and upload
+  backportpackage --yes -u ppa:mysql-ubuntu/$PKG -d xenial -S ~`date '+%s'`.$COMMIT_ID $PKG*.dsc
+
+### Launchpad testing matrix
+
+Since Launchpad only has Ubuntu releases, packages for specific Debian releases
+needs to be tested on the Ubuntu release which most closely matches the Debian
+release in question. The following matrix maps what package should be tested
+where:
+
+- 10.4 for sid on launchpad eoan
+- 10.3 for buster on launchpad disco
+- 10.1 for bionic on launchpad bionic
+- 10.0 for xenial on launchpad xenial
+- 10.1 for stretch on launchpad xenial
+
+## Uploading to Ubuntu security releases ##
+
+See example with documented procedure:
+ * https://bugs.launchpad.net/ubuntu/+source/mariadb-5.5/+bug/1464895
+
+Probably the most optimal work-flow would be to create a git branch (e.g.
+ubuntu-16.04) with custom gbp.conf and maintaining it by importing upstream in
+one commit, and updating changelog and other stuff, including refreshing
+patches in another commits, so that it would be easy to produce a patch file
+that Ubuntu security team can apply upon the mix of previous debian/ contents
+from Ubuntu archive and updated others from upstream. This would allow to use
+git-buildpackage to produce test builds instead of plain 'fakeroot dpkg-buildpackage'.
+
+### Upload priority
+
+Do the security uploads in this order for having the best chance of catching
+regressions before they spread out to too many users.
+
+Upload priority for 10.3
+- debian sid
+- debian buster
+- ubuntu disco
+
+for 10.1
+- debian stretch
+- ubuntu bionic
+
+for 10.0
+- debian jessie
+- ubuntu xenial
+
+## Comparison to other distributions ##
+
+For tracking security release information, finding solutions for build errors
+on many architectures and for general quality control it can be useful to keep
+an eye on what packagers in other distributions do:
+
+Fedora:
+  * https://apps.fedoraproject.org/packages/mariadb/
+  * http://pkgs.fedoraproject.org/cgit/mariadb.git/
+OpenSUSE:
+  * https://build.opensuse.org/package/show/server:database/mariadb
+Arch Linux:
+  * https://projects.archlinux.org/svntogit/packages.git/?h=packages/mariadb
+Mageia:
+  * http://svnweb.mageia.org/packages/cauldron/mariadb/current/
+
+## Notes about hard to fix bugs ##
+
+The following issues at https://qa.debian.org/bls/packages/m/mariadb-10.0.html
+are due to a bug in GCC which has been reported to GCC and will become fixed
+eventually:
+  E array-bounds /??PKGBUILDDIR??/strings/decimal.c:300 (arm64, armel, armhf, i386, mips, mipsel, powerpc, ppc64el, sparc)
+  E array-bounds /??PKGBUILDDIR??/strings/decimal.c:496 (arm64, armel, armhf, i386, mips, mipsel, powerpc, ppc64el, sparc)

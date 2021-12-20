@@ -1,0 +1,27 @@
+From 05a64c434466029b298ee1e78a988cd6a7f80c0e Mon Sep 17 00:00:00 2001
+From: John Johansen <john.johansen@canonical.com>
+Date: Wed, 18 Nov 2015 11:41:05 -0800
+Subject: [PATCH 14/27] apparmor: fix ref count leak when profile sha1 hash is
+ read
+
+Signed-off-by: John Johansen <john.johansen@canonical.com>
+Acked-by: Seth Arnold <seth.arnold@canonical.com>
+---
+ security/apparmor/apparmorfs.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/security/apparmor/apparmorfs.c b/security/apparmor/apparmorfs.c
+index 45a6199..0d8dd71 100644
+--- a/security/apparmor/apparmorfs.c
++++ b/security/apparmor/apparmorfs.c
+@@ -331,6 +331,7 @@ static int aa_fs_seq_hash_show(struct seq_file *seq, void *v)
+ 			seq_printf(seq, "%.2x", profile->hash[i]);
+ 		seq_puts(seq, "\n");
+ 	}
++	aa_put_profile(profile);
+ 
+ 	return 0;
+ }
+-- 
+2.7.4
+

@@ -1,0 +1,4 @@
+#=DESCRIPTION Assign boolean non true/false value
+#=EXRESULT FAIL
+
+$VAR = beeblebrox

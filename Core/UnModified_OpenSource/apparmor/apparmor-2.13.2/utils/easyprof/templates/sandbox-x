@@ -1,0 +1,46 @@
+#
+# Example usage for a program named 'foo' which is installed in /opt/foo
+# $ aa-easyprof --template=sandbox \
+#               --template-var="@{APPNAME}=foo" \
+#               --policy-groups=opt-application,user-application \
+#               /opt/foo/bin/foo
+#
+###ENDUSAGE###
+# vim:syntax=apparmor
+# AppArmor policy for ###NAME###
+
+#include <tunables/global>
+
+###VAR###
+
+###PROFILEATTACH### {
+  #include <abstractions/base>
+  #include <abstractions/gnome>
+  #include <abstractions/kde>
+
+  #include <abstractions/X>
+  audit deny @{HOME}/.Xauthority mrwlk,
+
+  /etc/passwd r,
+
+  / r,
+  /**/ r,
+  /usr/** r,
+  /var/lib/dbus/machine-id r,
+
+  owner @{PROC}/[0-9]*/auxv r,
+  owner @{PROC}/[0-9]*/fd/ r,
+  owner @{PROC}/[0-9]*/environ r,
+  owner @{PROC}/[0-9]*/mounts r,
+  owner @{PROC}/[0-9]*/smaps r,
+  owner @{PROC}/[0-9]*/statm r,
+  owner @{PROC}/[0-9]*/task/[0-9]*/stat r,
+
+  ###ABSTRACTIONS###
+
+  ###POLICYGROUPS###
+
+  ###READS###
+
+  ###WRITES###
+}

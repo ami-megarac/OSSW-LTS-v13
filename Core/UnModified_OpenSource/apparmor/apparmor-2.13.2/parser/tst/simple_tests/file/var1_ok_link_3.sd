@@ -1,0 +1,11 @@
+#
+#=DESCRIPTION simple link access test
+#=EXRESULT PASS
+#
+
+@{var}=/test
+profile test {
+  link subset @{var} -> @{var},
+  @{var} r,
+}
+

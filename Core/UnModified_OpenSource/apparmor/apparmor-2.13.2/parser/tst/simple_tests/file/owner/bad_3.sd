@@ -1,0 +1,8 @@
+#
+#=DESCRIPTION owner can not follow path name
+#=EXRESULT FAIL
+#
+/usr/bin/foo {
+  /foo owner rw,
+
+}

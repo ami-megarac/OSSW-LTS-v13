@@ -1,0 +1,19 @@
+#=DESCRIPTION reference auto profile_name variable in rules w/Cx profiles
+#=EXRESULT PASS
+
+profile top_profile /test/profile {
+  /test/profile rix,
+
+  /run/@{profile_name}/tmp rwk,
+  /bin/spork Cx -> spork,
+
+  profile spork {
+    owner /tmp/* r,
+    /run/@{profile_name}/** rw,
+  }
+
+  profile spelunkk {
+    owner /tmp/* r,
+    /run/@{profile_name}/** rw,
+  }
+}

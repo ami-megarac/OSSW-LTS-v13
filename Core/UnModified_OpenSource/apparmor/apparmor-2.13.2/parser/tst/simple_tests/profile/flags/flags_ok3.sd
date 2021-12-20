@@ -1,0 +1,40 @@
+#
+#=DESCRIPTION validate some uses of the profile flags.
+#=EXRESULT PASS
+# vim:syntax=subdomain
+# Last Modified: Sun Apr 17 19:44:44 2005
+#
+/does/not/exist flags=(mediate_deleted) {
+  #include <includes/base>
+
+  /usr/X11R6/lib/lib*so* r,
+  /does/not/exist r,
+}
+
+/does/not/exist1 flags=(audit, mediate_deleted) {
+  #include <includes/base>
+
+  /usr/X11R6/lib/lib*so* r,
+  /does/not/exist r,
+}
+
+/does/not/exist2 flags=(mediate_deleted, audit) {
+  #include <includes/base>
+
+  /usr/X11R6/lib/lib*so* r,
+  /does/not/exist r,
+}
+
+/does/not/exist3 flags=(complain, mediate_deleted) {
+  #include <includes/base>
+
+  /usr/X11R6/lib/lib*so* r,
+  /does/not/exist r,
+}
+
+/does/not/exist4 flags=(mediate_deleted, complain) {
+  #include <includes/base>
+
+  /usr/X11R6/lib/lib*so* r,
+  /does/not/exist r,
+}

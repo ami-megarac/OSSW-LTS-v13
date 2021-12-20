@@ -1,0 +1,13 @@
+#
+#=DESCRIPTION collision same profile, same namespace with profile keyword
+#=EXRESULT FAIL
+# vim:syntax=apparmor
+# Last Modified: Thu Feb 11 00:14:20 2016
+#
+profile :ns:/t {
+  /does/not/exist r,
+}
+
+profile :ns:/t {
+  /does/not/exist r,
+}

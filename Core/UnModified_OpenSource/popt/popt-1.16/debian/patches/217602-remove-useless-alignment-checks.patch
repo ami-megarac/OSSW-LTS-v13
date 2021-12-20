@@ -1,0 +1,42 @@
+Patch by Nicolas Boullis <nboullis@debian.org> and revised by Paul Martin
+<pm@debian.org>.
+
+In functions poptSaveLong and poptSaveInt, libpopt somwhat asserts that
+{long,}ints are aligned on sizeof({long,}int)-byte boundaries. On m68k
+with gcc-3.3 ints and long ints are 4-byte long, but are aligned on 2-bytes
+boundaries at least when they are part onf a struct.
+
+Simply remove this check, as it is quite useless.
+
+Index: popt-1.16/popt.c
+===================================================================
+--- popt-1.16.orig/popt.c	2010-05-13 04:57:52.006009545 +0100
++++ popt-1.16/popt.c	2010-05-13 04:58:15.027009502 +0100
+@@ -1023,8 +1023,13 @@
+ 
+ int poptSaveLong(long * arg, unsigned int argInfo, long aLong)
+ {
++#if 0
+     /* XXX Check alignment, may fail on funky platforms. */
+     if (arg == NULL || (((unsigned long)arg) & (sizeof(*arg)-1)))
++#else
++    /* It does! pm@debian.org */
++    if (arg == NULL)
++#endif
+ 	return POPT_ERROR_NULLARG;
+ 
+     if (aLong != 0 && LF_ISSET(RANDOM)) {
+@@ -1056,8 +1061,13 @@
+ 
+ int poptSaveInt(/*@null@*/ int * arg, unsigned int argInfo, long aLong)
+ {
++#if 0
+     /* XXX Check alignment, may fail on funky platforms. */
+     if (arg == NULL || (((unsigned long)arg) & (sizeof(*arg)-1)))
++#else
++    /* It does! pm@debian.org */
++    if (arg == NULL)
++#endif
+ 	return POPT_ERROR_NULLARG;
+ 
+     if (aLong != 0 && LF_ISSET(RANDOM)) {

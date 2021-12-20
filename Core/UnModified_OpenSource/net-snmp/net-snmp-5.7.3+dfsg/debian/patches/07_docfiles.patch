@@ -1,0 +1,111 @@
+From: Net-SNMP Packaging Team <pkg-net-snmp-devel@lists.alioth.debian.org>
+Date: Thu, 18 Jun 2015 06:12:05 +0900
+Subject: _docfiles
+
+Patch documentation files to change paths to Debian specific locations.
+---
+ EXAMPLE.conf.def |  2 +-
+ FAQ              | 22 +++++++++++-----------
+ 2 files changed, 12 insertions(+), 12 deletions(-)
+
+diff --git a/EXAMPLE.conf.def b/EXAMPLE.conf.def
+index 8f4a197..180713c 100644
+--- a/EXAMPLE.conf.def
++++ b/EXAMPLE.conf.def
+@@ -23,7 +23,7 @@ agentAddress  udp:127.0.0.1:161
+ #  SNMPv3 AUTHENTICATION
+ #
+ #  Note that these particular settings don't actually belong here.
+-#  They should be copied to the file /var/net-snmp/snmpd.conf
++#  They should be copied to the file /var/lib/snmp/snmpd.conf
+ #     and the passwords changed, before being uncommented in that file *only*.
+ #  Then restart the agent
+ 
+diff --git a/FAQ b/FAQ
+index 2844d33..47b07e6 100644
+--- a/FAQ
++++ b/FAQ
+@@ -108,7 +108,7 @@ TABLE OF CONTENTS
+    How do I configure access control?
+    How do I configure SNMPv3 users?
+    The 'createUser' line disappears when I start the agent.  Why?
+-   What's the difference between /var/net-snmp and /usr/local/share/snmp?
++   What's the difference between /var/lib/snmp and /usr/share/snmp?
+    My new agent is ignoring the old snmpd.conf file. Why?
+    Where should the snmpd.conf file go?
+    Why am I getting "Connection refused"?
+@@ -703,7 +703,7 @@ How do I add a MIB to the tools?
+   There are two steps required to add a new MIB file to the tools.
+   Firstly, copy the MIB file into the appropriate location:
+ 
+-	cp MY-MIB.txt /usr/local/share/snmp/mibs
++	cp MY-MIB.txt /usr/share/snmp/mibs
+             (which makes it available to everyone on the system)
+     or
+         mkdir $HOME/.snmp
+@@ -1399,7 +1399,7 @@ My traphandler script doesn't work when run like this - why not?
+   If this is the case, then you can specify this interpreter
+   explicitly as part of the trap handle directive:
+ 
+-	traphandle default /usr/bin/perl /usr/local/bin/log_it
++	traphandle default /usr/bin/perl /usr/bin/log_it
+ 
+     In this case, it's almost certain that you'll also
+   need to give the full path to the traphandle script (as shown)
+@@ -1493,7 +1493,7 @@ OK, what should I put in snmp.conf?
+   string to use.
+ 
+     Some of these (such as MIB information), might be best put in a
+-  shared snmp.conf file (typically /usr/local/share/snmp/snmp.conf or
++  shared snmp.conf file (typically /usr/share/snmp/snmp.conf or
+   /etc/snmp/snmp.conf) to apply to all users of the system.  Others
+   (particularly the SNMPv3 security settings), are more likely to refer
+   to a particular user, and should probably go in a personal snmp.conf
+@@ -2667,7 +2667,7 @@ How do I configure SNMPv3 users?
+ 
+ 	createUser {myUser} MD5 {myPassword} DES
+ 
+-    to the file /var/net-snmp/snmpd.conf (where {myUser} and
++    to the file /var/lib/snmp/snmpd.conf (where {myUser} and
+     {myPassword} are the appropriate values for username and password,
+     _without_ the braces!).  Then re-start the snmpd agent.
+ 
+@@ -2676,7 +2676,7 @@ How do I configure SNMPv3 users?
+         net-snmp-config --create-snmpv3-user
+ 
+      and follow the prompts given.  This will create an entry
+-     in the /var/net-snmp/snmpd.conf file similar to the above.
++     in the /var/lib/snmp/snmpd.conf file similar to the above.
+      Then re-start the snmpd agent.
+ 
+   3) Make sure the agent is running, and will respond to an SNMPv3
+@@ -2710,16 +2710,16 @@ The 'createUser' line disappears when I start the agent.  Why?
+ 
+ 
+ 
+-What's the difference between /var/net-snmp and /usr/local/share/snmp?
+----------------------------------------------------------------------
++What's the difference between /var/lib/snmp and /usr/share/snmp?
++----------------------------------------------------------------
+ 
+-    The /var/net-snmp location is primarily used for information set
++    The /var/lib/snmp location is primarily used for information set
+   during the running of the agent, which needs to be persistent between
+   one run of the agent and the next.   Apart from "createUser" (see
+   the previous entry), you shouldn't need to touch this file.
+ 
+   All other user-provided configuration should go in the traditional
+-  location (typically /usr/local/share/snmp/snmpd.conf or /etc/snmp).
++  location (typically /usr/share/snmp or /etc/snmp).
+ 
+ 
+ 
+@@ -2740,7 +2740,7 @@ Where should the snmpd.conf file go?
+ -----------------------------------
+ 
+     The default location for this file with the basic distribution is
+-  /usr/local/share/snmp/snmpd.conf (or PREFIX/share/snmp/snmpd.conf).
++  /usr/share/snmp/snmpd.conf (or PREFIX/share/snmp/snmpd.conf).
+   Ready-installed versions often look for the file as /etc/snmpd.conf,
+   or /etc/snmp/snmpd.conf.
+ 

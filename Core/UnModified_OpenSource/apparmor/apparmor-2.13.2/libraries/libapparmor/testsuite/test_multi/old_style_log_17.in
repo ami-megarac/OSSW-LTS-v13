@@ -1,0 +1,1 @@
+type=APPARMOR msg=audit(1164007073.953:518): LOGPROF-HINT changing_profile pid=29420

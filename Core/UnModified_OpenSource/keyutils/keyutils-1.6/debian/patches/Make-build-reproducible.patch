@@ -1,0 +1,27 @@
+From: Christian Kastner <ckk@kvr.at>
+Date: Wed, 7 Oct 2015 20:21:58 +0200
+Subject: Make build reproducible
+
+Make the build reproducible by making it possible to set the build date,
+instead of embedding the current date.
+
+Forwarded: not-needed
+Last-Update: 2015-10-07
+---
+ Makefile | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/Makefile b/Makefile
+index 627b11b..80ff4f0 100644
+--- a/Makefile
++++ b/Makefile
+@@ -110,7 +110,8 @@ all: keyctl request-key key.dns_resolver
+ ###############################################################################
+ #RPATH = -Wl,-rpath,$(LIBDIR)
+ 
+-VCPPFLAGS	:= -DPKGBUILD="\"$(shell date -u +%F)\""
++BUILDDATE	?= $(shell date -u +%F)
++VCPPFLAGS	:= -DPKGBUILD="\"$(BUILDDATE)\""
+ VCPPFLAGS	+= -DPKGVERSION="\"keyutils-$(VERSION)\""
+ VCPPFLAGS	+= -DAPIVERSION="\"libkeyutils-$(APIVERSION)\""
+ 

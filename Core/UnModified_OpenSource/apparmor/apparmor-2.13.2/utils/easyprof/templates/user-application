@@ -1,0 +1,29 @@
+#
+# Example usage for a program named 'foo' which is installed in /opt/foo
+# $ aa-easyprof --template=user-application \
+#               --template-var="@{APPNAME}=foo" \
+#               --policy-groups=opt-application,user-application \
+#               /opt/foo/bin/foo
+#
+###ENDUSAGE###
+# vim:syntax=apparmor
+# AppArmor policy for ###NAME###
+# ###AUTHOR###
+# ###COPYRIGHT###
+# ###COMMENT###
+
+#include <tunables/global>
+
+###VAR###
+
+###PROFILEATTACH### {
+  #include <abstractions/base>
+
+  ###ABSTRACTIONS###
+
+  ###POLICYGROUPS###
+
+  ###READS###
+
+  ###WRITES###
+}

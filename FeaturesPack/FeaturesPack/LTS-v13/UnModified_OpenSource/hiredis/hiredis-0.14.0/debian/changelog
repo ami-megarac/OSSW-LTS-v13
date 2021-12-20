@@ -1,0 +1,218 @@
+hiredis (0.14.0-3) unstable; urgency=medium
+
+  * Adopt package. (See #911732)
+  * Update Vcs-Browser and Vcs-Browser.
+  * wrap-and-sort -sa.
+  * Allow test failures on mipsel64.
+  * Move to debhelper-compat virtual package and remove debian/compat.
+  * Run gbp pq import && gbp export to make subsequent changes a no-op.
+  * debian/libhiredis0.14.symbols: Add a Build-Depends-Package field.
+
+ -- Chris Lamb <lamby@debian.org>  Sun, 04 Nov 2018 23:14:09 +0000
+
+hiredis (0.14.0-2) unstable; urgency=medium
+
+  * Fix silly copy/paste error in Vcs-Git/Vcs-Browser
+  * Fix autopkgtest dependencies
+  * Whitespace fixup in changelogs
+  * Restore lost NMU changelog entry
+
+ -- Tom Lee <debian@tomlee.co>  Tue, 02 Oct 2018 23:24:57 -0700
+
+hiredis (0.14.0-1) unstable; urgency=medium
+
+  * New upstream version 0.14.0 (closes: #907259)
+  * Updated patches for 0.14.0
+  * Update Vcs-Git
+  * Use automatic debug packages
+  * Bump Standards-Version to 4.2.1
+  * Update Vcs-Browser
+  * Add DEP3 header to 07_cmake.patch
+  * Add DEB_BUILD_OPTIONS=nocheck support
+  * hardening=+all
+  * Add CPPFLAGS to compile command line
+  * Regenerate symbols file
+  * Add a simple functional test
+  * Use https for copyright format URL
+  * Eliminate some unnecessary whitespace from debian/control
+  * Bump to compat level 11
+  * Clean up debian/rules a bit
+  * Do not install redis-server and procps for nocheck builds
+
+ -- Tom Lee <debian@tomlee.co>  Fri, 28 Sep 2018 14:18:32 -0700
+
+hiredis (0.13.3-2.2) unstable; urgency=medium
+
+  * Non-maintainer upload.
+  * Drop -dbg package in favour of -dbgsym package.
+
+ -- Ondřej Surý <ondrej@debian.org>  Sun, 14 Jan 2018 07:14:08 +0000
+
+hiredis (0.13.3-2) unstable; urgency=medium
+
+  * Ignore /tags
+  * Fix kfreebsd FTBFS (closes #792404)
+  * Fix potential race in "invalid timeout" tests
+  * DEP-3 headers and forwarding patches uptsream
+
+ -- Tom Lee <debian@tomlee.co>  Wed, 18 Nov 2015 00:47:58 -0800
+
+hiredis (0.13.3-1) unstable; urgency=medium
+
+  * Imported Upstream version 0.13.3
+  * Refreshed patches for 0.13.3
+  * Improved cmake support (find_package) (closes: #784768)
+  * Remove some unnecessary cruft from debian/rules
+  * Update .gitignore
+
+ -- Tom Lee <debian@tomlee.co>  Fri, 06 Nov 2015 21:50:03 -0800
+
+hiredis (0.13.1-2) unstable; urgency=medium
+
+  * Upload to unstable
+
+ -- Tom Lee <debian@tomlee.co>  Fri, 12 Jun 2015 08:46:56 -0700
+
+hiredis (0.13.1-1) experimental; urgency=medium
+
+  * Disable network test broken in pbuilder
+    Thanks to Tobias Frost for the patch (closes: #770648)
+  * Fix debian/watch
+  * Imported Upstream version 0.13.1
+  * Refresh patches
+  * Bump Standards-Version to 3.9.6
+  * Update symbols file
+  * Remove support for cmake-2.8
+  * SONAME change: libhiredis0.10 -> libhiredis0.13
+  * Hack around upstream shared library naming scheme
+  * Clear ARCH env var in override_dh_auto_build
+  * Work around a race in 'make check'
+  * Update .gitignore
+
+ -- Tom Lee <debian@tomlee.co>  Thu, 07 May 2015 19:00:22 -0700
+
+hiredis (0.11.0-4) unstable; urgency=medium
+
+  * Symlinks for cmake 3.0 (closes: #758548)
+  * Fix bad include path in hiredis.pc (closes: #739834)
+  * Allow tests to run on kfreebsd
+  * Update Vcs-Browser and Vcs-Git to fix vcs-field-not-canonical
+  * Bump Standards-Version to 3.9.5 (no changes needed)
+
+ -- Tom Lee <debian@tomlee.co>  Sun, 28 Sep 2014 14:08:37 -0700
+
+hiredis (0.11.0-3) unstable; urgency=low
+
+  * Fix incorrect --cflags & --libs in pkg-config file (closes: #717611)
+
+ -- Tom Lee <debian@tomlee.co>  Sun, 11 Aug 2013 11:48:39 -0700
+
+hiredis (0.11.0-2) unstable; urgency=low
+
+  [ Alessandro Ghedini ]
+  * Bump Standards-Version to 3.9.4 (no changes needed)
+
+  [ Tom Lee ]
+  * New maintainer (Closes: #690707)
+  * Bump version in the pkg-config file
+  * Update debian/watch to point to new upstream URL
+  * Update debian/control to point to new upstream URL
+  * Update debian/copyright to point to new upstream URL
+  * Add pkg-config/cmake patch
+  * libhiredis-dev.install no longer needs +x
+
+ -- Tom Lee <debian@tomlee.co>  Sat, 10 Nov 2012 19:54:08 -0800
+
+hiredis (0.11.0-1) unstable; urgency=low
+
+  * New upstream release
+  * Refresh patches
+  * Add proper DEP3 headers to patches
+  * Update symbols file
+  * Fix typos in long descriptions
+  * Remove not-needed Replaces/Conflicts
+
+ -- Alessandro Ghedini <ghedo@debian.org>  Tue, 28 Aug 2012 14:35:20 +0200
+
+hiredis (0.10.1-7) unstable; urgency=low
+
+  * Email change: Alessandro Ghedini -> ghedo@debian.org
+  * Support Multi-Arch
+  * Add -dbg package
+  * Always build depend on redis-server on linux
+
+ -- Alessandro Ghedini <ghedo@debian.org>  Sun, 03 Jun 2012 14:39:59 +0200
+
+hiredis (0.10.1-6) unstable; urgency=low
+
+  * Do not run tests when redis-server is not available
+  * Make sure to honour CPPFLAGS too
+
+ -- Alessandro Ghedini <al3xbio@gmail.com>  Mon, 26 Mar 2012 20:38:39 +0200
+
+hiredis (0.10.1-5) unstable; urgency=low
+
+  * Update debian/copyright format as in Debian Policy 3.9.3
+  * Bump Standards-Version to 3.9.3
+  * Bump debhelper compat level to 9
+  * Disable tests on mipsel
+  * Lower-case first letter in description
+  * Update upstream copyright years
+  * Update packaging copyright years
+  * Use GNU make's $(RM) instead of rm -f
+
+ -- Alessandro Ghedini <al3xbio@gmail.com>  Fri, 23 Mar 2012 13:10:27 +0100
+
+hiredis (0.10.1-4) unstable; urgency=low
+
+  * Add -f flag to rm in dh_auto_test override (Closes: #650800)
+  * Enable tests on sparc, since redis-server does not segfaults anymore
+    (see #647627)
+  * Build depends on redis-server >= 2:2.4.2-2 on sparc to get segfault fix
+  * Do not use -ggdb option (Closes: #657580)
+
+ -- Alessandro Ghedini <al3xbio@gmail.com>  Fri, 27 Jan 2012 10:39:19 +0100
+
+hiredis (0.10.1-3) unstable; urgency=low
+
+  * Add disable-returns-error-when-the-port-is-not-open-test patch
+    (Closes: #634198)
+  * Fix comma-separated-files-in-dep5-copyright
+  * Provide functioning pkg-config and cmake files (Closes: 645674)
+    - Fix and rename (libhiredis.pc -> hiredis.pc) pkg-config file
+    - Add cmake package configuration file
+    - Thanks to Black Jack for the fixes
+  * Do not run tests on sparc
+  * Rename debian/docs -> debian/libhiredis-dev.docs
+  * Move libhiredis0.10 up in debian/control
+
+ -- Alessandro Ghedini <al3xbio@gmail.com>  Tue, 18 Oct 2011 21:38:11 +0200
+
+hiredis (0.10.1-2) unstable; urgency=low
+
+  * Re-enable tests, start Redis with proper configuration before testing
+
+ -- Alessandro Ghedini <al3xbio@gmail.com>  Thu, 30 Jun 2011 19:46:04 +0200
+
+hiredis (0.10.1-1) unstable; urgency=low
+
+  * New upstream release
+  * Drop patches (no more needed)
+    - build-dynamic-library-with-proper-name-and-symlinks
+    - fix-build-of-example-and-test
+    - fix-CFLAGS-and-LDFAGS-conditional-variables
+  * Update use-proper-destdir patch
+  * Disable tests temporarily
+  * Do not install TODO anymore
+  * Update *.symbols file
+  * Install changelog
+  * Bump debhelper compat level to 8
+  * Rename libhiredis0 -> libhiredis0.10
+
+ -- Alessandro Ghedini <al3xbio@gmail.com>  Wed, 29 Jun 2011 12:05:18 +0200
+
+hiredis (0.10.0-1) unstable; urgency=low
+
+  * Initial release (Closes: #612601)
+
+ -- Alessandro Ghedini <al3xbio@gmail.com>  Sun, 01 May 2011 21:09:51 +0200

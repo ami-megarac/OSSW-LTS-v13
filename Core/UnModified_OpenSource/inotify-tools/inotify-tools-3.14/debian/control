@@ -1,0 +1,54 @@
+Source: inotify-tools
+Section: misc
+Priority: optional
+Maintainer: Dmitry Bogatov <KAction@debian.org>
+Build-Depends: debhelper-compat (= 11), doxygen, linux-libc-dev | linux-kernel-headers (>= 2.6.18)
+Standards-Version: 4.2.1
+Vcs-Git: https://salsa.debian.org/debian/inotify-tools.git
+Vcs-Browser: https://salsa.debian.org/debian/inotify-tools
+Homepage: https://github.com/rvoicilas/inotify-tools/wiki/
+
+Package: libinotifytools0
+Architecture: linux-any
+Multi-Arch: same
+Section: libs
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Replaces: inotify-tools (<< 3.10-2)
+Description: utility wrapper around inotify
+ Inotify is a Linux kernel feature enabling user space programs to
+ monitor parts of the filesystem in a efficient way. libinotifytools
+ is a thin layer on top of the kernel interface which makes it easy
+ to set up watches on many files at once, read events without having
+ to deal with low-level I/O, and several utility functions for inotify-
+ related string formatting
+
+Package: libinotifytools0-dev
+Architecture: linux-any
+Section: libdevel
+Provides: libinotifytools-dev
+Conflicts: libinotifytools-dev
+Replaces: inotify-tools (<< 3.10-2)
+Depends: ${shlibs:Depends}, ${misc:Depends}, libinotifytools0 (= ${binary:Version})
+Description: Development library and header files for libinotifytools0
+ Headers, static libraries, and documentation for the libinotifytools
+ library.
+ .
+ libinotifytools is a thin layer on top of the kernel interface which makes it
+ easy to set up watches on many files at once, read events without having to
+ deal with low-level I/O, and several utility functions for inotify-related
+ string formatting
+
+Package: inotify-tools
+Architecture: linux-any
+Multi-Arch: foreign
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: command-line programs providing a simple interface to inotify
+ inotify-tools is a set of command-line programs for Linux providing a
+ simple interface to inotify. These programs can be used to monitor and
+ act upon filesystem events. inotify-tools consists of two utilities:
+ .
+ inotifywait simply blocks for inotify events, making it appropriate
+ for use in shell scripts.
+ .
+ inotifywatch collects filesystem usage statistics and outputs counts
+ of each inotify event.

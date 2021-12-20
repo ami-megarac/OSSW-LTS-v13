@@ -1,0 +1,3 @@
+Tests: executables
+Restrictions: needs-root
+Depends: libcap2-bin, libc-dev, gcc

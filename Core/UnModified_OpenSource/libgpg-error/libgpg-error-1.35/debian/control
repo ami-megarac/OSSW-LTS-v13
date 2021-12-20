@@ -1,0 +1,129 @@
+Source: libgpg-error
+Section: libs
+Maintainer: Debian GnuPG Maintainers <pkg-gnupg-maint@lists.alioth.debian.org>
+Uploaders:
+ Daniel Kahn Gillmor <dkg@fifthhorseman.net>,
+Priority: optional
+Build-Depends:
+ automake (>= 1.14),
+ debhelper-compat (= 12),
+ gettext (>= 0.19.3),
+ texinfo,
+Build-Depends-Indep:
+ mingw-w64,
+Standards-Version: 4.3.0
+Homepage: https://www.gnupg.org/related_software/libgpg-error/
+Vcs-Git: https://salsa.debian.org/debian/libgpg-error.git
+Vcs-Browser: https://salsa.debian.org/debian/libgpg-error
+Rules-Requires-Root: no
+
+Package: libgpg-error-dev
+Section: libdevel
+Architecture: any
+Depends:
+ libgpg-error0 (= ${binary:Version}),
+ ${misc:Depends},
+ ${shlibs:Depends},
+Description: GnuPG development runtime library (developer tools)
+ Library that defines common error values, messages, and common
+ runtime functionality for all GnuPG components.  Among these are GPG,
+ GPGSM, GPGME, GPG-Agent, libgcrypt, pinentry, SmartCard Daemon and
+ possibly more in the future.
+ .
+ It will likely be renamed "gpgrt" in the future.
+ .
+ This package contains the headers and other files needed to compile
+ against this library.
+
+Package: libgpg-error0
+Architecture: any
+Multi-Arch: same
+Depends:
+ ${misc:Depends},
+ ${shlibs:Depends},
+Pre-Depends:
+ ${misc:Pre-Depends},
+Recommends:
+ libgpg-error-l10n,
+Description: GnuPG development runtime library
+ Library that defines common error values, messages, and common
+ runtime functionality for all GnuPG components.  Among these are GPG,
+ GPGSM, GPGME, GPG-Agent, libgcrypt, pinentry, SmartCard Daemon and
+ possibly more in the future.
+ .
+ It will likely be renamed "gpgrt" in the future.
+
+Package: gpgrt-tools
+Architecture: any
+Section: devel
+Multi-Arch: foreign
+Depends:
+ ${misc:Depends},
+ ${shlibs:Depends},
+Pre-Depends:
+ ${misc:Pre-Depends},
+Description: GnuPG development runtime library (executable tools)
+ gpgrt (also known as libgpg-error) defines common error values,
+ messages, and common runtime functionality for all GnuPG components.
+ Among these are GPG, GPGSM, GPGME, GPG-Agent, libgcrypt, pinentry,
+ SmartCard Daemon and possibly more in the future.
+ .
+ This package contains yat2m, a Texinfo to nroff/troff converter
+ useful for building manpages, and gpg-error, a binary for deciphering
+ GnuPG/libgcrypt error codes.
+
+Package: libgpg-error0-udeb
+Section: debian-installer
+Package-Type: udeb
+Architecture: any
+Depends:
+ ${misc:Depends},
+ ${shlibs:Depends},
+Description: library for common error values and messages in GnuPG components
+ Library that defines common error values for all GnuPG
+ components.  Among these are GPG, GPGSM, GPGME, GPG-Agent, libgcrypt,
+ pinentry, SmartCard Daemon and possibly more in the future.
+ .
+ It will likely be renamed "gpgrt" in the future.
+
+Package: libgpg-error-mingw-w64-dev
+Architecture: all
+Multi-Arch: foreign
+Section: libdevel
+Depends:
+ ${misc:Depends},
+Suggests:
+ wine,
+Description: library of error values and messages in GnuPG (Windows development)
+ Library that defines common error values, messages, and common
+ runtime functionality for all GnuPG components.  Among these are GPG,
+ GPGSM, GPGME, GPG-Agent, libgcrypt, pinentry, SmartCard Daemon and
+ possibly more in the future.
+ .
+ It will likely be renamed "gpgrt" in the future.
+ .
+ This is a Windows version of libgpg-error.  It's meant to be used
+ when cross-building software that targets the Windows platform,
+ e.g. the win32-loader component of Debian-Installer.
+
+Package: libgpg-error-l10n
+Architecture: all
+Section: localization
+Multi-Arch: foreign
+Depends:
+ ${misc:Depends},
+Enhances:
+ libgpg-error0,
+Replaces:
+ libgpg-error0 (<< 1.32-1.1~),
+Breaks:
+ libgpg-error0 (<< 1.32-1.1~),
+Description: library of error values and messages in GnuPG (localization files)
+ Library that defines common error values, messages, and common
+ runtime functionality for all GnuPG components.  Among these are GPG,
+ GPGSM, GPGME, GPG-Agent, libgcrypt, pinentry, SmartCard Daemon and
+ possibly more in the future.
+ .
+ It will likely be renamed "gpgrt" in the future.
+ .
+ This package contains the translation files for the use in non-English locales.

@@ -1,0 +1,34 @@
+#!/bin/sh
+
+set -e
+
+BINARY="$AUTOPKGTEST_TMP/binary"
+SOURCE="$AUTOPKGTEST_TMP/binary.c"
+
+cat >"$SOURCE" <<-EOF
+#include <stdio.h>
+#include <unistd.h>
+#include <assert.h>
+#include <string.h>
+
+#include <hiredis.h>
+
+int main (int argc, char **argv) {
+  char *s;
+  int len;
+  
+  len = redisFormatCommand(&s, "PING");
+  if (len < 0) {
+    return 1;
+  }
+  redisFreeCommand(s);
+  return 0;
+}
+EOF
+
+HIREDIS_CFLAGS="`pkg-config --cflags hiredis`"
+HIREDIS_LIBS="`pkg-config --libs hiredis`"
+gcc -o "$BINARY" $HIREDIS_CFLAGS -Wall -Werror "$SOURCE" $HIREDIS_LIBS
+chmod 755 "$BINARY"
+"$BINARY"
+

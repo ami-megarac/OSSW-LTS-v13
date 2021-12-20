@@ -1,0 +1,20 @@
+From: =?UTF-8?q?Tim=20R=C3=BChsen?= <tim.ruehsen@gmx.de>
+Date: Thu, 23 May 2019 14:51:59 +0200
+Subject: Fix generation of idn2.1 man page file
+Origin: https://github.com/libidn/libidn2/commit/f14320fffe193a975e692a8db28069ddc3bfe046
+
+---
+ doc/Makefile.am | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+--- a/doc/Makefile.am
++++ b/doc/Makefile.am
+@@ -45,7 +45,7 @@ dist_man_MANS = $(gdoc_MANS)
+ dist_man_MANS += idn2.1
+ 
+ idn2.1: idn2.md
+-	ronn -r $^ >$@ || false
++	ronn <$^ >$@ || false
+ 
+ CLEANFILES = $(dist_man_MANS) decode.c example-tounicode.c example-toascii.c lookup.c \
+ 	register.c stamp-vti version.texi

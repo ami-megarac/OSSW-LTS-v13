@@ -1,0 +1,49 @@
+#=DESCRIPTION Test of dfa tree optimization
+#=EXRESULT PASS
+
+#This profile exercises the dfa tree optimization
+#Without working tree optimization this profile generates a dfa with 100,000s
+#of states and that requires several gigs, and takes hours to compute
+#With working tree optimization this profile generates a dfa with about 3,000
+#states and takes a second or two to compute.
+/foo {
+  /a/b/c/webdir/config.inc.php rw,
+
+  /a/b/c/** r,
+  /a/b/c/upload/** rw,
+  /a/b/c/webdir/cms/files/** rw,
+  /a/b/c/webdir/content/** rw,
+  /a/b/c/webdir/mitarbeiter/** rw,
+  /a/b/c/webdir/newsletter/** wr,
+  /a/b/c/webdir/pnTemp/** rw,
+  /a/b/c/webdir/redaxo/include/generated/articles/** rw,
+  /a/b/c/webdir/typo3/ext/** rw,
+  /a/b/c/webdir/wiki/images/** rw,
+
+  /a/b/c/**.txt rw,
+  /a/b/c/**.log rw,
+  /a/b/c/webdir/**/com_docman/docman.config.php wr,
+  /a/b/c/webdir/**/settings.php wr,
+  /a/b/c/webdir/**.txt rw,
+  /a/b/c/webdir/upload/**{.jpg,.pdf,.ps,.gif,.png,.ppt,.doc,.txt,.rtf} rw,
+
+  /a/b/c/webdir/courses/uploaded_file*/** rw,
+
+  /a/b/c/webdir/**/conf*.php rw,
+
+  /a/b/c/**{cache,data,download,/ext,fileadmin,files,images,joomla,moodledata/sessions}/** rw,
+  /a/b/c/**log{,s}/** rw,
+  /a/b/c/**typo3{conf,temp}/** rw,
+  /a/b/c/webdir/**/components/** rw,
+  /a/b/c/webdir/content/**/conf/** rw,
+  /a/b/c/webdir/**/content/** rw,
+  /a/b/c/webdir/**/{pages,pictures,data,doc,files,languages,media}/** rw,
+  /a/b/c/webdir/**/{pages,pictures}/** rw,
+  /a/b/c/webdir/**/module{s,}/** rw,
+  /a/b/c/webdir/**/{templates_c,templates,temp,tmp}/** rw,
+  /a/b/c/webdir/**/upload/** rw,
+
+  /a/b/c/webdir/**count*/** rw,
+  /a/b/c/webdir/**/**uploads/** rw,
+
+}

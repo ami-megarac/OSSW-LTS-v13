@@ -1,0 +1,38 @@
+?RCS: $Id$
+?RCS:
+?RCS: Copyright (c) 2000 Jarkko Hietaniemi
+?RCS:
+?RCS: You may distribute under the terms of either the GNU General Public
+?RCS: License or the Artistic License, as specified in the README file.
+?RCS:
+?MAKE:d_isnan: Inlibc cat Compile rm_try Setvar
+?MAKE:	-pick add $@ %<
+?S:d_isnan:
+?S:	This variable conditionally defines the HAS_ISNAN symbol, which
+?S:	indicates to the C program that the isnan() routine is available.
+?S:.
+?C:HAS_ISNAN:
+?C:	This symbol, if defined, indicates that the isnan routine is
+?C:	available to check whether a double is a NaN.
+?C:.
+?H:#$d_isnan HAS_ISNAN		/**/
+?H:.
+?LINT:set d_isnan
+: check for isnan
+echo "Checking to see if you have isnan..." >&4
+$cat >try.c <<EOCP
+#include <math.h>
+int main() { return isnan(0.0); }
+EOCP
+set try
+if eval $compile; then
+	val="$define"
+	echo "You have isnan."
+else
+	val="$undef"
+	echo "You do not have isnan."
+fi
+$rm_try
+set d_isnan
+eval $setvar
+

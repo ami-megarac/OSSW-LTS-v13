@@ -1,0 +1,8 @@
+#=DESCRIPTION bare profile names must start with /
+#=EXRESULT FAIL
+
+@{FOO}=bar
+
+@{FOO} {
+  /does/not/exist r,
+}

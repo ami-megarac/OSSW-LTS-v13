@@ -1,0 +1,29 @@
+From 857c2e027bce7d442f6ba4821d8d75aba0b9a2c1 Mon Sep 17 00:00:00 2001
+From: Steven Chamberlain <steven@pyro.eu.org>
+Date: Thu, 17 Dec 2015 02:15:58 +0000
+Subject: Work around Debian Bug#796798
+
+kFreeBSD 10 (possibly only with softupdates enabled) may defer
+calculating the mtime for more than 2 seconds.  Work around this
+with a stat() call to calculate the mtime immediately.
+
+(Modified to only stat() on kfreebsd by Niko Tyni)
+
+Bug-Debian: https://bugs.debian.org/796798
+Patch-Name: debian/kfreebsd-softupdates.diff
+---
+ t/op/stat.t | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/t/op/stat.t b/t/op/stat.t
+index 905eb85fd4..8dcb3d3fd5 100644
+--- a/t/op/stat.t
++++ b/t/op/stat.t
+@@ -99,6 +99,7 @@ sleep 3 if $funky_FAT_timestamps;
+ print FOO "Now is the time for all good men to come to.\n";
+ close(FOO);
+ 
++stat($tmpfile) if $^O =~ /^gnukfreebsd/;	# Work around Debian Bug#796798
+ sleep 2;
+ 
+ my $has_link = 1;

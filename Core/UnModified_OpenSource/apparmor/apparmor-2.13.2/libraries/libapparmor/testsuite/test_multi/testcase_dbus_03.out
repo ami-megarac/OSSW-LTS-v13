@@ -1,0 +1,14 @@
+START
+File: testcase_dbus_03.in
+Event type: AA_RECORD_DENIED
+Operation: dbus_signal
+Denied Mask: receive
+Profile: /tmp/apparmor-2.8.0/tests/regression/apparmor/dbus_service
+Peer profile: unconfined
+Name: com.apparmor.Test
+PID: 2945
+Peer PID: 2947
+DBus bus: session
+DBus path: /com/apparmor/Test
+DBus interface: com.apparmor.Test
+DBus member: Signal

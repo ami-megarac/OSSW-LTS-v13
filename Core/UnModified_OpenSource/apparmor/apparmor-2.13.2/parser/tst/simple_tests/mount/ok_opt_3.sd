@@ -1,0 +1,8 @@
+#
+#=Description basic rules to test the "read-only" mount option
+#=EXRESULT PASS
+/usr/bin/foo {
+  mount options=read-only /a -> /1,
+  mount options=(read-only) /b -> /2,
+  mount options in (read-only) /d -> /4,
+}

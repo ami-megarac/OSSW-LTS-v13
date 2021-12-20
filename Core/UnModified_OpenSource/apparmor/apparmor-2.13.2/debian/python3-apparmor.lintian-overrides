@@ -1,0 +1,4 @@
+# There's not much more to say about it
+python3-apparmor binary: extended-description-is-probably-too-short
+# Upstream does not ship a changelog.
+python3-apparmor binary: no-upstream-changelog

@@ -1,0 +1,473 @@
+libbsd (0.9.1-2+deb10u1) buster; urgency=medium
+
+  * Non-maintainer upload.
+  * CVE-2019-20367
+    A non-NUL terminated symbol name in the string table might
+    result in a out-of-bounds read.
+
+ -- Gianfranco Costamagna <locutusofborg@debian.org>  Wed, 03 Mar 2021 12:03:12 +0100
+
+libbsd (0.9.1-2) unstable; urgency=medium
+
+  * Perform a proper and correct /usr-merge transition by moving the package
+    contents from / to /usr.
+  * Now using Standards-Version 4.3.0 (no changes needed).
+  * Remove support for old debug symbol package migration.
+  * Add a Build-Depends-Package field to the symbols file.
+
+ -- Guillem Jover <guillem@debian.org>  Mon, 25 Feb 2019 01:33:03 +0100
+
+libbsd (0.9.1-1) unstable; urgency=medium
+
+  * New upstream release.
+    - Fix ABI break coming from NetBSD vis/unvis module import. The OpenBSD
+      interface is now again the default, but it will emit warning, and users
+      should switch to the new NetBSD interface which will be the default in
+      0.10.0. Thanks to Sven Joachim <svenjoac@gmx.de> for the report.
+      Closes: #899282
+    - Fix COPYING file to adhere to the specified format.
+
+ -- Guillem Jover <guillem@debian.org>  Tue, 22 May 2018 16:31:10 +0200
+
+libbsd (0.9.0-1) unstable; urgency=medium
+
+  * New upstream release.
+    - Portability fixes for Sparc, OpenRISC, musl, uClibc, non-glibc in
+      general and Windows.
+    - Add __arraycount() macro.
+    - Add flopenat() function.
+    - Add strtoi() and strtou() functions.
+    - Add several new vis and unvis functions.
+    - Add pidfile_fileno() function, and struct pidfh is now opaque.
+    - The humanize_number() now understands HN_IEC_PREFIXES.
+    - The fmtcheck() function supports all standard printf(3) conversions.
+    - The getentropy(), and thus arc4random() functions will not block
+      anymore on Linux on boot when there's not enough entropy available.
+      Closes: #898088
+    - The arc4random() function handles direct clone() calls better.
+    - The fgetwln() function has now been marked as deprecated.
+  * Now using Standards-Version 4.1.4 (no changes needed).
+
+ -- Guillem Jover <guillem@debian.org>  Mon, 21 May 2018 05:37:20 +0200
+
+libbsd (0.8.7-1) unstable; urgency=medium
+
+  * New upstream release.
+    - Handle several functions now being provided by glibc.
+    - Fix nlist(3) unit test on IA64. Closes: #881611
+  * Now using Standards-Version 4.1.3 (no changes needed).
+  * Switch to debhelper compatibility level 11.
+
+ -- Guillem Jover <guillem@debian.org>  Sat, 13 Jan 2018 17:32:01 +0100
+
+libbsd (0.8.6-3) unstable; urgency=medium
+
+  * Line-wrap remaining Conflicts field.
+  * Now using Standards-Version 4.1.1 (no changes needed).
+  * Switch to debian/watch format version 4.
+  * Set Rules-Requires-Root to no.
+
+ -- Guillem Jover <guillem@debian.org>  Sun, 05 Nov 2017 16:45:39 +0100
+
+libbsd (0.8.6-2) unstable; urgency=medium
+
+  * Line-wrap dependency fields.
+  * Now using Standards-Version 4.1.0 (no changes needed).
+  * Replace dh_autotools-dev_* commands with dh_update_autotools_config,
+    and remove explicit Build-Depends on autotools-dev.
+  * Remove ancient versioned dpkg-dev Build-Depends, satisfied in oldstable.
+
+ -- Guillem Jover <guillem@debian.org>  Sat, 02 Sep 2017 19:25:54 +0200
+
+libbsd (0.8.6-1) unstable; urgency=medium
+
+  * New upstream release.
+    - Fix nlist() unit tests to work on IA64 and PowerPC 64-bit ELFv1.
+    - Fix setproctitle() to work on systems with non-contiguous
+      argv + envp memory areas, such as current GNU/Hurd.
+
+ -- Guillem Jover <guillem@debian.org>  Mon, 17 Jul 2017 01:19:18 +0200
+
+libbsd (0.8.5-1) unstable; urgency=medium
+
+  * New upstream release.
+    - Handle libtool executable names in getprogname() unit test.
+      Closes: #865090
+    - Fix ELF definitions for PowerPC and MIPS in local-elf.h.
+      Thanks to James Cowgill <jcowgill@debian.org>. Closes: #865091
+    - Ship and install libbsd(7).
+
+ -- Guillem Jover <guillem@debian.org>  Sat, 24 Jun 2017 17:01:03 +0200
+
+libbsd (0.8.4-1) unstable; urgency=medium
+
+  * New upstream release.
+    - Add support for TileGX. Closes: #847560
+    - Add support for RISC-V.
+    - Gracefully handle lack of system <sys/cdefs.h>. Closes: #810589
+    - Do not provide funopen() on musl.
+    - Do not use legacy BSD u_* types.
+    - Move all man pages to section 3bsd.
+    - Add missing man page aliases.
+    - Add missing man pages for byteorder(3), errc(3) and fpurge(3).
+    - Add new libbsd(7) library overview man page.
+    - Improve test suite.
+    - Remove a.out support from nlist(). Closes: #818246
+    - Fix broken mmap() usage in nlist() by switching to pread().
+    - Add <sys/time.h> for some of its macros.
+  * Switch to debhelper compatibility level 10.
+  * Now using Standards-Version 4.0.0 (no changes needed).
+
+ -- Guillem Jover <guillem@debian.org>  Mon, 19 Jun 2017 04:30:28 +0200
+
+libbsd (0.8.3-1) unstable; urgency=medium
+
+  * New upstream release.
+    - Fix a memory leak.
+    - Various portability fixes.
+    - Improve test suite.
+  * Switch Homepage and debian/watch URLs from http:// to https://.
+  * Now using Standards-Version 3.9.8 (no changes needed).
+  * Switch to the dpkg makefile fragments in debian/rules.
+  * Enable hardening bindnow feature.
+
+ -- Guillem Jover <guillem@debian.org>  Sat, 23 Apr 2016 11:11:35 +0200
+
+libbsd (0.8.2-1) unstable; urgency=medium
+
+  * New upstream release.
+    - Fix heap buffer overflow in fgetwln().
+    - Various test suite fixes.
+  * Switch debug package to an automatic dbgsym package.
+  * Output the test suite log on errors.
+  * Remove old upgrade postinst to handle lost replaced nlist.h.
+  * Switch Vcs-Git URL from git to https.
+  * Switch debian/copyright Format field URL to https.
+
+ -- Guillem Jover <guillem@debian.org>  Wed, 27 Jan 2016 17:25:11 +0100
+
+libbsd (0.8.1-1) unstable; urgency=medium
+
+  * New upstream release.
+    - Add support for GNU/Hurd and GNU/kFreeBSD. (Closes: #806840)
+    - Fix implicit dependencies for non-overlaid headers. (Closes: #807730)
+  * Switch debian/copyright to machine readable format, reusing upstream
+    COPYING file.
+  * Use https for hadrons.org URLs.
+
+ -- Guillem Jover <guillem@debian.org>  Mon, 14 Dec 2015 04:10:23 +0100
+
+libbsd (0.8.0-2) unstable; urgency=medium
+
+  * Revert addition of libtestu01-0-dev into Build-Depends as it is only
+    available in the non-free area of the archive for now.
+
+ -- Guillem Jover <guillem@debian.org>  Wed, 02 Dec 2015 00:40:34 +0100
+
+libbsd (0.8.0-1) unstable; urgency=medium
+
+  * New upstream release.
+    - Add new man page for reallocarray(3).
+    - Rename funopen.3 manpage to funopen.3bsd.
+    - Add __DECONST, __DEVOLATILE, __DEQUALIFY, __offsetof, __rangeof and
+      __containerof to sys/cdefs.h.
+    - Sync sys/queue.h from FreeBSD.
+    - Add compile and link-time deprecation warnings for fgetln().
+    - Add explicit_bzero() function from OpenBSD.
+    - Fix arc4random prototypes from uchar to unsigned char. (Closes: #719640)
+    - Update arc4random to use ChaCha20. (Closes: #747671)
+  * Switch Vcs-Browser to a cgit URL.
+  * Now using Standards-Version 3.9.6 (no changes needed).
+  * Add libtestu01-0-dev to Build-Depends to test arc4random implementation.
+
+ -- Guillem Jover <guillem@debian.org>  Mon, 30 Nov 2015 23:34:00 +0100
+
+libbsd (0.7.0-2) unstable; urgency=high
+
+  * Fix typo in package descriptions. (Closes: #756596)
+    Thanks to Ivan Masár <helix84@centrum.sk>.
+  * Move dh_install before any other dh_install* command in the binary-arch
+    target in debian/rules.
+  * Call dh_installman in debian/rules.
+  * Install funopen.3 man page as funopen.3bsd to avoid a file conflict
+    with libfuntools-dev. (Closes: #756469)
+
+ -- Guillem Jover <guillem@debian.org>  Fri, 29 Aug 2014 14:42:03 +0200
+
+libbsd (0.7.0-1) unstable; urgency=low
+
+  * New upstream release.
+    - Add ELF types for OpenRISC. (Closes: #736759)
+    - Autoreconf during release adds support for ppc64el. (Closes: #754126)
+  * Try to clarify package descriptions for libbsd0, libbsd0-dbg and
+    libbsd0-udeb, to make it easier to know why the package is installed.
+    Based on suggestions by Jonathan Nieder <jrnieder@gmail.com>.
+    (Closes: #663085)
+  * Mark libbsd-dev as Multi-Arch:same. (Closes: #755480)
+    Thanks to Dima Kogan <dima@secretsauce.net>.
+  * Update config.guess and config.sub at build time, via autotools-dev
+    debhelper commands. (Closes: #748994)
+
+ -- Guillem Jover <guillem@debian.org>  Tue, 29 Jul 2014 04:01:46 +0200
+
+libbsd (0.6.0-2) unstable; urgency=low
+
+  * Take over standalone maintainership.
+    <https://lists.debian.org/debian-bsd/2013/10/msg00227.html>.
+  * Now using Standards-Version 3.9.5 (no changes needed).
+  * Do not set source compression to xz, it's now the default.
+  * Remove packaging history from debian/copyright.
+  * Add signature checking support to debian/watch, and ship upstream
+    signing keys in debian/upstream/signing-key.asc, exported with
+    pgp-clean (signing-party) to avoid useless bloat.
+  * Only restore /usr/include/nlist.h if it's missing, or if it contains
+    a libbsd instance of the header. And use the matching header from the
+    replaced package, which should now be ABI-compatible. (Closes: #724747)
+  * Remove debian/README.Debian, which contains information provided in the
+    package description.
+
+ -- Guillem Jover <guillem@debian.org>  Tue, 04 Mar 2014 05:02:42 +0100
+
+libbsd (0.6.0-1) unstable; urgency=medium
+
+  * New upstream release.
+    - Move setproctitle() constructor into a new libbsd-ctor static library,
+      to avoid breakage on dlopen()+threads+constructor situations, like
+      when using samba NSS modules for example.
+    - Export setproctitle_init().
+
+ -- Guillem Jover <guillem@debian.org>  Sun, 14 Jul 2013 14:29:59 +0200
+
+libbsd (0.5.2-1) unstable; urgency=medium
+
+  * New upstream release.
+    - Force setproctitle() constructor into the .init_array section.
+    - Fix use after free on setproctitle() constructor (bumped urgency).
+  * Update debian/copyright file.
+
+ -- Guillem Jover <guillem@debian.org>  Sat, 08 Jun 2013 18:55:59 +0200
+
+libbsd (0.5.1-1) unstable; urgency=low
+
+  * New upstream release.
+    - Fix build failures on 32-bit systems due to an error on the test suite.
+
+ -- Guillem Jover <guillem@debian.org>  Mon, 27 May 2013 07:02:08 +0200
+
+libbsd (0.5.0-1) unstable; urgency=low
+
+  * New upstream release.
+    - Implement setproctitle(). (Closes: #614959)
+    - Fix «make distclean» target to not remove distributed files.
+  * Change watch file to also look for xz compressed upstream releases.
+  * Fix two builds in a row by calling «make distclean» on clean.
+  * Fix cross-building support by passing correct --build and --host options
+    to configure. Based on patch by Colin Watson <cjwatson@ubuntu.com>.
+    (Closes: #665997)
+  * Move -e option from postinst's shebang to an explicit set call.
+  * Switch to canonical Vcs URLs.
+  * Switch source package to xz compression.
+  * Switch to debhelper compatibility level 9.
+  * Now using Standards-Version 3.9.4 (no changes needed).
+
+ -- Guillem Jover <guillem@debian.org>  Mon, 27 May 2013 06:07:08 +0200
+
+libbsd (0.4.2-1) unstable; urgency=low
+
+  * New upstream release.
+  * Disable silent rules, so that build logs get meaningful information.
+  * Update debian/copyright file.
+
+ -- Guillem Jover <guillem@debian.org>  Wed, 27 Jun 2012 09:41:19 +0200
+
+libbsd (0.4.0-1) unstable; urgency=low
+
+  * New upstream release. (Closes: #668705)
+    - Autoconfiscated, supports cross-building natively. (Closes: #665997)
+    - Provide endian encoding/decoding inline functions. (Closes: #635377)
+    - Provide expand_number(). (Closes: #635379)
+    - Ship <nlist.h> under /usr/include/bsd/. (Closes: #634955, #657772)
+    - Ship <libutil.h> under /usr/include/bsd/. (Closes: #640895)
+    - Fix header protections when using the overlay. (Closes: #630907)
+    - Fix .so symlinks to be relative even when the .so.N shared library
+      is on a different directory. (Closes: #580372)
+    - Remove all deprecated headers and inclusions.
+  * Avoid leaving the system w/o an <nlist.h> previously owned by either
+    libelfg0-dev or libelf-dev when upgrading from old libsd-dev versions
+    which used to Replace them, by restoring <nlist.h> from <bsd/nlist.h>.
+
+ -- Guillem Jover <guillem@debian.org>  Tue, 29 May 2012 08:11:13 +0200
+
+libbsd (0.3.0-2) unstable; urgency=low
+
+  * Make shared library packages multiarch:
+    - Build-Depend on debhelper 8.1.3.
+    - Add misc:Pre-Depends substvar to Pre-Depends field in libbsd0.
+    - Add “Multi-Arch: same” field to libbsd0 and libbsd0-dbg.
+    - Define DEB_HOST_MULTIARCH and use it to set libdir and usrlibdir.
+    - Change paths from lib/ to lib/* in install files.
+  * Now using Standards-Version 3.9.3 (no changes needed).
+
+ -- Guillem Jover <guillem@debian.org>  Sat, 25 Feb 2012 20:52:55 +0100
+
+libbsd (0.3.0-1) unstable; urgency=low
+
+  * New upstream release.
+  * Update and reword function list in package description.
+  * Install all pkg-config files.
+  * Use kfreebsd-any instead of explicit list in libbsd0 Conflicts field.
+  * Now using Standards-Version 3.9.2 (no changes needed).
+  * Switch the symbols file to use symver tags instead of symbol patterns.
+  * Use dpkg-buildflags to set CPPFLAGS, CFLAGS and LDFLAGS.
+  * Remove duplicate inherited Section field from libbsd0.
+
+ -- Guillem Jover <guillem@debian.org>  Thu, 02 Jun 2011 20:28:12 +0200
+
+libbsd (0.2.0-1) unstable; urgency=low
+
+  * New upstream release.
+  * Add ${misc:Depends} to libbsd0-dbg and libbsd-dev Depends.
+  * Now using Standards-Version 3.8.3 (no changes needed).
+  * Switch to source format “3.0 (quilt)”.
+
+ -- Guillem Jover <guillem@debian.org>  Mon, 11 Jan 2010 15:47:40 +0100
+
+libbsd (0.1.6-1) unstable; urgency=low
+
+  * New upstream release.
+    - Fix typo in ‘local-elf.h’ affecting M32R builds. (Closes: #544266)
+  * Add missing libbsd0-udeb.install file to avoid creating empty packages.
+
+ -- Guillem Jover <guillem@debian.org>  Sun, 30 Aug 2009 12:55:00 +0200
+
+libbsd (0.1.5-3) unstable; urgency=low
+
+  * Re-enable libbsd-udeb package on all architectures, as rdate-udeb
+    will need it.
+
+ -- Aurelien Jarno <aurel32@debian.org>  Mon, 27 Jul 2009 01:56:27 +0200
+
+libbsd (0.1.5-2) unstable; urgency=low
+
+  * Restrict the udeb package to kfreebsd-*, as requested by Otavio Salvador.
+
+ -- Aurelien Jarno <aurel32@debian.org>  Mon, 20 Jul 2009 23:21:10 +0200
+
+libbsd (0.1.5-1) unstable; urgency=low
+
+  * New upstream release.
+    - Fix typo in ‘local-elf.h’ affecting AVR32 and SuperH builds.
+      (Closes: #537210)
+  * Add a new library udeb.
+  * Remove --sourcedir from dh_install unneeded with debhelper compat 7.
+  * Now using Standards-Version 3.8.2 (no changes needed).
+
+ -- Guillem Jover <guillem@debian.org>  Fri, 17 Jul 2009 13:59:02 +0200
+
+libbsd (0.1.4-1) unstable; urgency=low
+
+  * New upstream release.
+    - Define N_SYMSIZE on systems not providing it. (Closes: #530857)
+  * Add Replaces to libbsd-dev on old libfreebsd-dev which used to ship
+    nlist(3) and strmode(3).
+  * Add a watch file.
+
+ -- Guillem Jover <guillem@debian.org>  Fri, 29 May 2009 02:54:06 +0200
+
+libbsd (0.1.3-1) unstable; urgency=low
+
+  * New upstream release.
+  * Actually ship pkg-config file in libbsd-dev.
+
+ -- Guillem Jover <guillem@debian.org>  Mon, 25 May 2009 09:45:55 +0200
+
+libbsd (0.1.2-1) unstable; urgency=low
+
+  * New upstream release.
+    - Fix build failures on s390 and powerpc due to a typo.
+    - Fix build failure on alpha due to unportable access to ‘struct exec’.
+  * Add a Replaces to libbsd-dev on libelfg0-dev which also ships ‘nlist.h’.
+    (Closes: #530450)
+
+ -- Guillem Jover <guillem@debian.org>  Mon, 25 May 2009 07:22:36 +0200
+
+libbsd (0.1.1-1) unstable; urgency=low
+
+  [ Aurelien Jarno ]
+  * Move libbsd0-dbg to section debug.
+
+  [ Guillem Jover ]
+  * New upstream release.
+  * Add Replaces on libelf-dev which also ships nlist.h.
+  * Update copyright years in debian/copyright.
+  * Add new functions to package description.
+  * Add new wildcard to the symbols file.
+  * Now using Standards-Version 3.8.1 (no changes needed).
+
+ -- Guillem Jover <guillem@debian.org>  Wed, 20 May 2009 05:26:28 +0200
+
+libbsd (0.0.1-2) unstable; urgency=low
+
+  * Switch to debhelper compatibility level 7.
+  * Use dh_prep instead of “dh_clean -k”.
+  * Add a symbols file for libbsd0.
+  * Use UTF-8 copyright symbol in debian/copyright.
+
+ -- Guillem Jover <guillem@debian.org>  Sun, 22 Feb 2009 05:10:23 +0200
+
+libbsd (0.0.1-1) unstable; urgency=low
+
+  * New upstream release.
+    - Install md5.3 man page as md5.3bsd to avoid conflicting with commonly
+      provided file. (Closes: #492199)
+  * Install upstream ChangeLog.
+
+ -- Guillem Jover <guillem@debian.org>  Sat, 26 Jul 2008 22:57:42 +0300
+
+libbsd (0.0-4) unstable; urgency=low
+
+  [ Petr Salinger ]
+  * Alter the versioned Conflicts for kfreebsd architectures, it should
+    be against binary package net-tools comming from source package
+    freebsd-utils.
+
+ -- Aurelien Jarno <aurel32@debian.org>  Mon, 14 Jul 2008 20:31:06 +0200
+
+libbsd (0.0-3) unstable; urgency=low
+
+  * Add a Homepage field.
+  * Add Vcs-Browser and Vcs-Svn fields.
+  * Add a versioned Conflicts against freebsd-utils (<< 7.0-2) only on
+    kfreebsd architectures, which was using the link_addr and link_ntoa
+    symbols wrongly provided by libbsd.
+
+ -- Guillem Jover <guillem@debian.org>  Sun, 13 Jul 2008 19:51:38 +0300
+
+libbsd (0.0-2) unstable; urgency=low
+
+  * Upload to Debian. (Closes: #461985)
+  * Improve debian/copyright.
+    - Add detailed information about licenses and copyright holders.
+    - Update upstream download URL.
+  * Improve package descriptions.
+    - Add list of currently provided functions.
+    - Mention this is a package with functions commonly available on BSD
+      systems.
+  * Line wrap Uploaders field.
+  * Add new libbsd0-dbg package.
+  * Clean up debian/rules:
+    - Add build-arch and build-indep targets
+    - Rename install to install-arch.
+    - Remove dependencies from binary-indep.
+    - Change binary-arch to depend only on install-arch.
+    - Use $(filter ...) instead of $(findstring ...) to extract space
+      separated options from DEB_BUILD_OPTIONS.
+  * Now using Standards-Version 3.8.0.
+
+ -- Guillem Jover <guillem@debian.org>  Sat, 12 Jul 2008 09:25:08 +0300
+
+libbsd (0.0-1) unreleased; urgency=low
+
+  * Initial release.
+
+ -- Hector Garcia <hector@debian.org>  Sun, 17 Jul 2005 16:17:35 +0200

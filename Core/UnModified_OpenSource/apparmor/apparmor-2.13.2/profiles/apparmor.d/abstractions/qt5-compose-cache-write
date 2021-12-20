@@ -1,0 +1,7 @@
+# vim:syntax=apparmor
+# Allow writing cache for Qt5 "platforminputcontexts" plugins
+
+  # User files
+
+  owner @{HOME}/.cache/qt_compose_cache_{little,big}_endian_* rw,
+

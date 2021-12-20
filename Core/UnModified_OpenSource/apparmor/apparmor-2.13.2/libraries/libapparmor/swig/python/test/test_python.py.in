@@ -1,0 +1,147 @@
+#! @PYTHON@
+# ------------------------------------------------------------------
+#
+#   Copyright (C) 2013 Canonical Ltd.
+#   Author: Steve Beattie <steve@nxnw.org>
+#
+#   This program is free software; you can redistribute it and/or
+#   modify it under the terms of version 2 of the GNU General Public
+#   License published by the Free Software Foundation.
+#
+# ------------------------------------------------------------------
+
+import ctypes
+import os
+import unittest
+import LibAppArmor as libapparmor
+
+TESTDIR = "../../../testsuite/test_multi"
+
+# map of testsuite .out entries that aren't a simple to_lower() and
+# s/ /_/ of the field name
+
+OUTPUT_MAP = {
+    'Event type':       'event',
+    'Mask':             'requested_mask',
+    'Command':          'comm',
+    'Token':            'magic_token',
+    'ErrorCode':        'error_code',
+    'Network family':   'net_family',
+    'Socket type':      'net_sock_type',
+    'Protocol':         'net_protocol',
+    'Local addr':       'net_local_addr',
+    'Foreign addr':     'net_foreign_addr',
+    'Local port':       'net_local_port',
+    'Foreign port':     'net_foreign_port',
+    'Audit subid':      'audit_sub_id',
+}
+
+# FIXME: pull this automatically out of LibAppArmor, but swig
+# classes aren't real enough. (Perhaps we're not using swig correctly)
+EVENT_MAP = {
+    libapparmor.AA_RECORD_ALLOWED:  'AA_RECORD_ALLOWED',
+    libapparmor.AA_RECORD_AUDIT:    'AA_RECORD_AUDIT',
+    libapparmor.AA_RECORD_DENIED:   'AA_RECORD_DENIED',
+    libapparmor.AA_RECORD_ERROR:    'AA_RECORD_ERROR',
+    libapparmor.AA_RECORD_HINT:     'AA_RECORD_HINT',
+    libapparmor.AA_RECORD_INVALID:  'AA_RECORD_INVALID',
+    libapparmor.AA_RECORD_STATUS:   'AA_RECORD_STATUS',
+}
+
+# default is None if not in this table
+NO_VALUE_MAP = {
+    'fsuid': int(ctypes.c_ulong(-1).value),
+    'ouid':  int(ctypes.c_ulong(-1).value),
+}
+
+
+class AAPythonBindingsTests(unittest.TestCase):
+
+    def setUp(self):
+        # REPORT ALL THE OUTPUT
+        self.maxDiff = None
+
+    def _runtest(self, testname):
+        infile = "%s.in" % (testname)
+        outfile = "%s.out" % (testname)
+        # infile *should* only contain one line
+        with open(os.path.join(TESTDIR, infile), 'r') as f:
+            line = f.read()
+            swig_record = libapparmor.parse_record(line)
+
+        record = self.create_record_dict(swig_record)
+        record['file'] = infile
+        libapparmor.free_record(swig_record)
+
+        expected = self.parse_output_file(outfile)
+        self.assertEquals(expected, record,
+                          "expected records did not match\n" +
+                          "expected = %s\nactual = %s" % (expected, record))
+
+    def parse_output_file(self, outfile):
+        '''parse testcase .out file and return dict'''
+
+        output = dict()
+        with open(os.path.join(TESTDIR, outfile), 'r') as f:
+            lines = f.readlines()
+
+        count = 0
+        for l in lines:
+            line = l.rstrip('\n')
+            count += 1
+            if line == "START":
+                self.assertEquals(count, 1,
+                                  "Unexpected output format in %s" % (outfile))
+                continue
+            else:
+                key, value = line.split(": ", 1)
+                if key in OUTPUT_MAP:
+                    newkey = OUTPUT_MAP[key]
+                else:
+                    newkey = key.lower().replace(' ', '_')
+                # check if entry already exists?
+                output[newkey] = value
+
+        return output
+
+    def create_record_dict(self, record):
+        '''parse the swig created record and construct a dict from it'''
+
+        new_record = dict()
+        for key in [x for x in dir(record) if not (x.startswith('_') or x == 'this')]:
+            value = record.__getattr__(key)
+            if key == "event" and value in EVENT_MAP:
+                new_record[key] = EVENT_MAP[value]
+            elif key == "version":
+                # FIXME: out files should report log version?
+                # FIXME: or can we just deprecate v1 logs?
+                continue
+            elif key in NO_VALUE_MAP:
+                if NO_VALUE_MAP[key] == value:
+                    continue
+                else:
+                    new_record[key] = str(value)
+            elif value or value == '':
+                new_record[key] = str(value)
+
+        return new_record
+
+
+def find_testcases(testdir):
+    '''dig testcases out of passed directory'''
+
+    for f in os.listdir(testdir):
+        if f.endswith(".in"):
+            yield f[:-3]
+
+
+def main():
+    for f in find_testcases(TESTDIR):
+        def stub_test(self, testname=f):
+            self._runtest(testname)
+        stub_test.__doc__ = "test %s" % (f)
+        setattr(AAPythonBindingsTests, 'test_%s' % (f), stub_test)
+    return unittest.main(verbosity=2)
+
+if __name__ == "__main__":
+    main()

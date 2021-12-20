@@ -1,0 +1,7 @@
+#=DESCRIPTION recursive assignment of set
+#=EXRESULT FAIL
+
+@{FOO}=@{FOO}
+/bin/foo {
+  /home/@{FOO} r,
+}

@@ -1,0 +1,167 @@
+?RCS: $Id$
+?RCS:
+?RCS: Copyright (c) 1999 Jarkko Hietaniemi
+?RCS:
+?RCS: You may distribute under the terms of either the GNU General Public
+?RCS: License or the Artistic License, as specified in the README file.
+?RCS:
+?MAKE:uselargefiles \
+	ccflags_uselargefiles \
+	ldflags_uselargefiles \
+	libswanted_uselargefiles: \
+	Myread Oldconfig Setvar test lseeksize fpossize \
+	fpostype Compile echo n c cat lseektype rm_try run \
+	use64bitint use64bitall i_stdlib
+?MAKE:	-pick add $@ %<
+?Y:TOP
+?S:uselargefiles:
+?S:	This variable conditionally defines the USE_LARGE_FILES symbol,
+?S:	and indicates that large file interfaces should be used when
+?S:	available.
+?S:.
+?S:ccflags_uselargefiles:
+?S:	This variable contains the compiler flags needed by large file builds
+?S:	and added to ccflags by hints files.
+?S:.
+?S:ldflags_uselargefiles:
+?S:	This variable contains the loader flags needed by large file builds
+?S:	and added to ldflags by hints files.
+?S:.
+?S:libswanted_uselargefiles:
+?S:	This variable contains the libraries needed by large file builds
+?S:	and added to ldflags by hints files.  It is a space separated list
+?S:	of the library names without the "lib" prefix or any suffix, just
+?S:	like libswanted..
+?S:.
+?C:USE_LARGE_FILES:
+?C:	This symbol, if defined, indicates that large file support
+?C:	should be used when available.
+?C:.
+?H:?%<:#ifndef USE_LARGE_FILES
+?H:?%<:#$uselargefiles	USE_LARGE_FILES		/**/
+?H:?%<:#endif
+?H:.
+?INIT:ccflags_uselargefiles=''
+?INIT:ldflags_uselargefiles=''
+?INIT:libswanted_uselargefiles=''
+?T:yyy zzz
+?F:!uselargefiles.cbu !try
+?LINT:change lseeksize
+?LINT:change fpossize
+?LINT:extern uselfs
+?LINT:use use64bitint
+?LINT:use use64bitall
+: Check for large file support
+# Backward compatibility (uselfs is deprecated).
+case "$uselfs" in
+"$define"|true|[yY]*)
+	cat <<EOM >&4
+
+*** Configure -Duselfs is deprecated, using -Duselargefiles instead.
+EOM
+	uselargefiles="$define"
+	;;
+esac
+
+case "$lseeksize:$fpossize" in
+8:8) cat <<EOM
+
+You can have files larger than 2 gigabytes.
+EOM
+   val="$define" ;;
+*)    case "$uselargefiles" in
+   "$undef"|false|[nN]*) dflt='n' ;;
+   *)	dflt='y' ;;
+   esac
+   cat <<EOM
+
+Perl can be built to understand large files (files larger than 2 gigabytes)
+on some systems.  To do so, Configure can be run with -Duselargefiles.
+
+If this doesn't make any sense to you, just accept the default '$dflt'.
+EOM
+   rp='Try to understand large files, if available?'
+   . ./myread
+   case "$ans" in
+   y|Y)	val="$define" ;;
+   *)	val="$undef"  ;;
+   esac
+   ;;
+esac
+set uselargefiles
+eval $setvar
+: Look for a hint-file generated 'call-back-unit'.  If the
+: user has specified that a large files perl is to be built,
+: we may need to set or change some other defaults.
+if $test -f uselargefiles.cbu; then
+	echo "Your platform has some specific hints regarding large file builds, using them..."
+	. ./uselargefiles.cbu
+fi
+case "$uselargefiles" in
+"$define")
+	if $test -f uselargefiles.cbu; then
+		echo " "
+		echo "Rechecking to see how big your file offsets are..." >&4
+		$cat >try.c <<EOCP
+#include <sys/types.h>
+#include <stdio.h>
+int main()
+{
+    printf("%d\n", (int)sizeof($lseektype));
+    return(0);
+}
+EOCP
+		set try
+		if eval $compile_ok; then
+			lseeksize=`$run ./try`
+			$echo "Your file offsets are now $lseeksize bytes long."
+		else
+			dflt="$lseeksize"
+			echo " "
+			echo "(I can't seem to compile the test program.  Guessing...)"
+			rp="What is the size of your file offsets (in bytes)?"
+			. ./myread
+			lseeksize="$ans"
+		fi
+		case "$fpostype" in
+		*_t) zzz="$fpostype"	;;
+		*)   zzz="fpos_t"	;;
+		esac
+		$echo $n "Rechecking the size of $zzz...$c" >&4
+		$cat > try.c <<EOCP
+#include <sys/types.h>
+#include <stdio.h>
+#$i_stdlib I_STDLIB
+#ifdef I_STDLIB
+#include <stdlib.h>
+#endif
+int main() {
+    printf("%d\n", (int)sizeof($fpostype));
+    return(0);
+}
+EOCP
+		set try
+		if eval $compile_ok; then
+			yyy=`$run ./try`
+			dflt="$lseeksize"
+			case "$yyy" in
+			'')	echo " "
+				echo "(I can't execute the test program--guessing $fpossize.)" >&4
+				;;
+			*)	fpossize=$yyy
+				echo " $fpossize bytes." >&4
+				;;
+			esac
+		else
+			dflt="$fpossize"
+			echo " "
+			echo "(I can't compile the test program.  Guessing...)" >&4
+			rp="What is the size of your file positions (in bytes)?"
+			. ./myread
+			fpossize="$ans"
+		fi
+		$rm_try
+	fi
+	;;
+esac
+

@@ -1,0 +1,129 @@
+diff -Naur uboot/common/bootm.c uboot_new/common/bootm.c
+--- uboot/common/bootm.c	2021-10-22 01:10:09.292836950 +0530
++++ uboot_new/common/bootm.c	2021-10-22 01:23:08.003050781 +0530
+@@ -870,6 +870,36 @@
+ }
+ #endif
+ 
++int fit_get_env_dtb(const char **conf_uname)
++{
++	char *selector = NULL;
++	//char dtbsource[128] ={0};
++	int retval=-1;
++	selector = env_get("dtbsource");
++	if(selector != NULL)
++	{
++		//printf("\n selector=%s\n",selector);
++		*conf_uname=(char*)malloc(sizeof(char) *128);
++		retval = snprintf((char*)*conf_uname,128,"conf@%s.dtb",selector);
++		if(retval < 0 || retval >= 128)
++		{
++			printf("\n error in copying data");
++			return retval;
++		}
++		//printf("\n dtbsource=%s---retval=%d\n",dtbsource,retval);
++		//memcpy((char*)conf_uname,dtbsource,retval);
++		//printf("\n conf_uname=%s\n",*conf_uname);
++	}
++	else
++	{
++		return -1;
++	}
++	
++	return 0;
++}
++
++
++
+ /**
+  * boot_get_kernel - find kernel image
+  * @os_data: pointer to a ulong variable, will hold os data start address
+@@ -959,6 +989,7 @@
+ #endif
+ #if IMAGE_ENABLE_FIT
+ 	case IMAGE_FORMAT_FIT:
++		fit_get_env_dtb(&fit_uname_config);
+ 		os_noffset = fit_image_load(images, img_addr,
+ 				&fit_uname_kernel, &fit_uname_config,
+ 				IH_ARCH_DEFAULT, IH_TYPE_KERNEL,
+diff -Naur uboot/oem/ami/fmh/cmd_fmh.c uboot_new/oem/ami/fmh/cmd_fmh.c
+--- uboot/oem/ami/fmh/cmd_fmh.c	2021-10-22 01:10:09.344837309 +0530
++++ uboot_new/oem/ami/fmh/cmd_fmh.c	2021-10-22 01:21:00.154744915 +0530
+@@ -35,7 +35,7 @@
+ 
+ 
+ # define  KERNEL_LOADADDR	0xC00000
+-# define  KERNEL_FILE		"/boot/uImage"
++# define  KERNEL_FILE		"/boot/kernel_fit"
+ # define  KERNEL_DTB		"/boot/kernel.dtb"
+ #ifdef CONFIG_SPX_FEATURE_SECURE_BOOT_ENCRYPTION_SUPPORT
+ # define UIMAGE_LOADADDR	(ASPEED_DRAM_BASE + 0x8000 )
+@@ -1146,16 +1146,22 @@
+ BootFMH(unsigned short PathID)
+ {
+ #if 1
+-	char Command[128] = "FMHEXECUTE";
++	char Command[128] = "bootm";
+ 	char AddrStr[128] = "0xFFFFFFFF";
++	char dtbname[128]={0};
+ #if defined(CONFIG_SPX_FEATURE_MMC_BOOT) || defined(CONFIG_SPX_FEATURE_HW_EMMC_BOOT)  
+-	char AddrStr2[128] = "0xFFFFFFFF";
++	//char AddrStr2[128] = "0xFFFFFFFF";
+ #endif
+ 	char bootargs[256] = {0};
+ 	char imagebooted[16] = {0};
+     char goldenside[16];
+ 	char INITRDAddrStr[128] = "0xFFFFFFFF";
+ 	char dtsaddrstr[128] = "0xFFFFFFFF";
++	memset(dtbname,'\0',128);
++	if((Get_DTB_From_Soc_ID(dtbname) > 0) && (Get_DTB_From_Soc_ID(dtbname) < 128))
++	{
++		env_set("dtbsource",dtbname);
++	}
+ #ifdef CONFIG_SPX_FEATURE_SECURE_BOOT_ENCRYPTION_SUPPORT	
+ 	char lenStr[128] = "0xFFFFFFFF";
+ 	char INITRDLenStr[128] = "0xFFFFFFFF";
+@@ -1788,12 +1794,12 @@
+ 				console_assign(stdout,"nulldev");
+ 			if(rootisinitrd != 1)
+ 			{
+-				retval =  do_bootm(NULL,0,4,argv);
++				retval =  do_bootm(NULL,0,2,argv);
+ 			}
+ 			else
+ 			{
+ 				//env_set("initrd_high","off");
+-				retval = do_bootm(NULL,0,4,argv);
++				retval = do_bootm(NULL,0,3,argv);
+ 			}
+ 			console_assign(stdout,"serial");
+ 			printf("Failed\n");
+@@ -1900,7 +1906,9 @@
+ 	if(do_ext4_load(NULL,0,5,argv) == 0)
+ 	{
+ 		
+-		retval = snprintf(AddrStr2,128,"0x%x",CONFIG_SYS_LOAD_DTB_ADDR);
++		argv[0] = "bootm";
++		retval = do_bootm(NULL,0,1,argv);
++		/*retval = snprintf(AddrStr2,128,"0x%x",CONFIG_SYS_LOAD_DTB_ADDR);
+ 		if(retval < 0 || retval >= 128)
+ 		{
+ 			return retval;
+@@ -1908,7 +1916,7 @@
+ 	
+ 		argv[0] = "ext4load";
+ 		argv[1] = "mmc";
+-		argv[2] = &partition[0]; /* It is assumed that boot partition will be in slot 0 */
++		argv[2] = &partition[0]; // It is assumed that boot partition will be in slot 0 
+ 		argv[3] = &AddrStr2[0];
+ 		argv[4] = KERNEL_DTB;
+ 		argv[5] = NULL;
+@@ -1924,7 +1932,7 @@
+ 			console_assign(stdout,"serial");
+ 			printf("Failed\n");
+ 			return retval;
+-		}
++		}*/
+ 	}
+ 	console_assign(stdout,"nulldev");
+ 	printf("Unable to locate %s\n",KERNEL_FILE);

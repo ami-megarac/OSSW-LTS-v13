@@ -1,0 +1,128 @@
+From 82ae623ec9bc3cb5c68aad22596a766e86d593b7 Mon Sep 17 00:00:00 2001
+From: Cosmin Truta <ctruta@gmail.com>
+Date: Sun, 31 Mar 2019 09:44:45 -0400
+Subject: [PATCH] arm: Rename all functions to the pattern png_*_neon; add
+ debug traces
+
+---
+ arm/palette_neon_intrinsics.c | 12 +++++++++---
+ pngpriv.h                     |  6 +++---
+ pngrtran.c                    |  6 +++---
+ 3 files changed, 15 insertions(+), 9 deletions(-)
+
+diff --git a/arm/palette_neon_intrinsics.c b/arm/palette_neon_intrinsics.c
+index 465ed3697..b4d1fd2ab 100644
+--- a/arm/palette_neon_intrinsics.c
++++ b/arm/palette_neon_intrinsics.c
+@@ -22,7 +22,7 @@
+ 
+ /* Build an RGBA8 palette from the separate RGB and alpha palettes. */
+ void
+-png_riffle_palette_rgba8(png_structrp png_ptr)
++png_riffle_palette_neon(png_structrp png_ptr)
+ {
+    png_const_colorp palette = png_ptr->palette;
+    png_bytep riffled_palette = png_ptr->riffled_palette;
+@@ -30,6 +30,8 @@ png_riffle_palette_rgba8(png_structrp png_ptr)
+    int num_trans = png_ptr->num_trans;
+    int i;
+ 
++   png_debug(1, "in png_riffle_palette_neon");
++
+    /* Initially black, opaque. */
+    uint8x16x4_t w = {{
+       vdupq_n_u8(0x00),
+@@ -57,7 +59,7 @@ png_riffle_palette_rgba8(png_structrp png_ptr)
+ 
+ /* Expands a palettized row into RGBA8. */
+ int
+-png_do_expand_palette_neon_rgba8(png_structrp png_ptr, png_row_infop row_info,
++png_do_expand_palette_rgba8_neon(png_structrp png_ptr, png_row_infop row_info,
+     png_const_bytep row, png_bytepp ssp, png_bytepp ddp)
+ {
+    png_uint_32 row_width = row_info->width;
+@@ -66,6 +68,8 @@ png_do_expand_palette_neon_rgba8(png_structrp png_ptr, png_row_infop row_info,
+    const png_int_32 pixels_per_chunk = 4;
+    int i;
+ 
++   png_debug(1, "in png_do_expand_palette_rgba8_neon");
++
+    if (row_width < pixels_per_chunk)
+       return 0;
+ 
+@@ -99,7 +103,7 @@ png_do_expand_palette_neon_rgba8(png_structrp png_ptr, png_row_infop row_info,
+ 
+ /* Expands a palettized row into RGB8. */
+ int
+-png_do_expand_palette_neon_rgb8(png_structrp png_ptr, png_row_infop row_info,
++png_do_expand_palette_rgb8_neon(png_structrp png_ptr, png_row_infop row_info,
+     png_const_bytep row, png_bytepp ssp, png_bytepp ddp)
+ {
+    png_uint_32 row_width = row_info->width;
+@@ -107,6 +111,8 @@ png_do_expand_palette_neon_rgb8(png_structrp png_ptr, png_row_infop row_info,
+    const png_uint_32 pixels_per_chunk = 8;
+    int i;
+ 
++   png_debug(1, "in png_do_expand_palette_rgb8_neon");
++
+    if (row_width <= pixels_per_chunk)
+       return 0;
+ 
+diff --git a/pngpriv.h b/pngpriv.h
+index 24d245dbf..583c26f9b 100644
+--- a/pngpriv.h
++++ b/pngpriv.h
+@@ -2119,11 +2119,11 @@ PNG_INTERNAL_FUNCTION(png_uint_32, png_check_keyword, (png_structrp png_ptr,
+ 
+ #if PNG_ARM_NEON_IMPLEMENTATION == 1
+ PNG_INTERNAL_FUNCTION(void,
+-                      png_riffle_palette_rgba8,
++                      png_riffle_palette_neon,
+                       (png_structrp),
+                       PNG_EMPTY);
+ PNG_INTERNAL_FUNCTION(int,
+-                      png_do_expand_palette_neon_rgba8,
++                      png_do_expand_palette_rgba8_neon,
+                       (png_structrp,
+                        png_row_infop,
+                        png_const_bytep,
+@@ -2131,7 +2131,7 @@ PNG_INTERNAL_FUNCTION(int,
+                        const png_bytepp),
+                       PNG_EMPTY);
+ PNG_INTERNAL_FUNCTION(int,
+-                      png_do_expand_palette_neon_rgb8,
++                      png_do_expand_palette_rgb8_neon,
+                       (png_structrp,
+                        png_row_infop,
+                        png_const_bytep,
+diff --git a/pngrtran.c b/pngrtran.c
+index 329434091..d2bb82eeb 100644
+--- a/pngrtran.c
++++ b/pngrtran.c
+@@ -1169,7 +1169,7 @@ png_init_palette_transformations(png_structrp png_ptr)
+       if ((png_ptr->num_trans > 0) && (png_ptr->bit_depth == 8))
+       {
+          png_ptr->riffled_palette = (png_bytep)png_malloc(png_ptr, 256 * 4);
+-         png_riffle_palette_rgba8(png_ptr);
++         png_riffle_palette_neon(png_ptr);
+       }
+    }
+ #endif /* PNG_ARM_NEON_INTRINSICS_AVAILABLE */
+@@ -4334,7 +4334,7 @@ png_do_expand_palette(png_structrp png_ptr, png_row_infop row_info,
+                    * but sometimes row_info->bit_depth has been changed to 8.
+                    * In these cases, the palette hasn't been riffled.
+                    */
+-                  i = png_do_expand_palette_neon_rgba8(png_ptr, row_info, row,
++                  i = png_do_expand_palette_rgba8_neon(png_ptr, row_info, row,
+                       &sp, &dp);
+                }
+ #else
+@@ -4365,7 +4365,7 @@ png_do_expand_palette(png_structrp png_ptr, png_row_infop row_info,
+                dp = row + (size_t)(row_width * 3) - 1;
+                i = 0;
+ #ifdef PNG_ARM_NEON_INTRINSICS_AVAILABLE
+-               i = png_do_expand_palette_neon_rgb8(png_ptr, row_info, row,
++               i = png_do_expand_palette_rgb8_neon(png_ptr, row_info, row,
+                    &sp, &dp);
+ #else
+                PNG_UNUSED(png_ptr)

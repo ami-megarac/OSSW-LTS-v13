@@ -1,0 +1,51 @@
+From: intrigeri <intrigeri@boum.org>
+Date: Sun, 24 Feb 2019 17:05:22 +0000
+Subject: base abstraction: allow mr on *.so* in common library paths.
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
+
+For example, VirtualBox guests have /usr/lib/VBoxOGL.so.
+
+Without this changes, in a VirtualBox VM with VBoxVGA graphics,
+at least one Qt5 application (OnionShare) won't start and display:
+
+  ImportError: libGL.so.1: failed to map segment from shared object
+
+… and the system logs have:
+
+  apparmor="DENIED" operation="file_mmap" profile="/usr/bin/onionshare-gui" name="/usr/lib/VBoxOGL.so" pid=11415 comm="onionshare-gui" requested_mask="m" denied_mask="m" fsuid=1000 ouid=0
+
+While this works fine with VBoxSVGA and VMSVGA when 3D acceleration is enabled.
+
+So let's not assume all libraries have a name that starts with "lib".
+
+PR: https://gitlab.com/apparmor/apparmor/merge_requests/345
+(cherry picked from commit 5cbb7df95ef241725b327bccfb5aa21f8be14695)
+Signed-off-by: John Johansen <john.johansen@canonical.com>
+---
+ profiles/apparmor.d/abstractions/base | 10 ++++------
+ 1 file changed, 4 insertions(+), 6 deletions(-)
+
+diff --git a/profiles/apparmor.d/abstractions/base b/profiles/apparmor.d/abstractions/base
+index 16b2a1d..b0fabf3 100644
+--- a/profiles/apparmor.d/abstractions/base
++++ b/profiles/apparmor.d/abstractions/base
+@@ -65,13 +65,11 @@
+ 
+   # we might as well allow everything to use common libraries
+   /{usr/,}lib{,32,64}/**                r,
+-  /{usr/,}lib{,32,64}/lib*.so*          mr,
+-  /{usr/,}lib{,32,64}/**/lib*.so*       mr,
++  /{usr/,}lib{,32,64}/**.so*       mr,
+   /{usr/,}lib/@{multiarch}/**            r,
+-  /{usr/,}lib/@{multiarch}/lib*.so*      mr,
+-  /{usr/,}lib/@{multiarch}/**/lib*.so*   mr,
+-  /{usr/,}lib/tls/i686/{cmov,nosegneg}/lib*.so*    mr,
+-  /{usr/,}lib/i386-linux-gnu/tls/i686/{cmov,nosegneg}/lib*.so*    mr,
++  /{usr/,}lib/@{multiarch}/**.so*   mr,
++  /{usr/,}lib/tls/i686/{cmov,nosegneg}/*.so*    mr,
++  /{usr/,}lib/i386-linux-gnu/tls/i686/{cmov,nosegneg}/*.so*    mr,
+ 
+   # /dev/null is pretty harmless and frequently used
+   /dev/null                      rw,

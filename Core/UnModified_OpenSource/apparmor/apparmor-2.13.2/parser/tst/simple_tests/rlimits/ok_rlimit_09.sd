@@ -1,0 +1,7 @@
+#
+#=DESCRIPTION simple max open file (same as nofile) rlimit test
+#=EXRESULT PASS
+
+profile rlimit {
+  set rlimit ofile <= 1234,
+}

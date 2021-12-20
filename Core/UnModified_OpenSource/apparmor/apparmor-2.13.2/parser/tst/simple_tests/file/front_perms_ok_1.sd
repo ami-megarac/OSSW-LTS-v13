@@ -1,0 +1,23 @@
+#
+#=DESCRIPTION perms before pathname
+#=EXRESULT PASS
+#
+/usr/bin/foo {
+   r /foo1,
+   w /foo1,
+   a /foo1,
+   k /foo1,
+   m /foo1,
+   l /foo1,
+   px /foo1,
+   Px /foo2,
+   ux /foo3,
+   Ux /foo4,
+   ix /foo5,
+   unsafe px /foo6,
+   unsafe Px /foo7,
+   unsafe ux /foo8,
+   unsafe Ux /foo9,
+   unsafe ix /foo10,
+
+}

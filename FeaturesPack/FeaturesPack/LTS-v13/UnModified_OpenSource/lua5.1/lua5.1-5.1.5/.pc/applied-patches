@@ -1,0 +1,4 @@
+0001-debian_make.patch
+0002-module_paths.patch
+0003-extern_C.patch
+0004-Fix-stack-overflow-in-vararg-functions.patch

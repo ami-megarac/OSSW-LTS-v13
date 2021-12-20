@@ -1,0 +1,137 @@
+#!/bin/sh
+# ----------------------------------------------------------------------
+#    Copyright (c) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
+#    NOVELL (All rights reserved)
+#
+#    This program is free software; you can redistribute it and/or
+#    modify it under the terms of version 2 of the GNU General Public
+#    License published by the Free Software Foundation.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program; if not, contact Novell, Inc.
+# ----------------------------------------------------------------------
+# rc.apparmor by Steve Beattie
+#
+# /etc/init.d/aaeventd
+#   and its symbolic link
+# /sbin/rcaaeventd
+#
+# chkconfig: 2345 01 99
+# description: AppArmor Notification and Reporting daemon
+#
+### BEGIN INIT INFO
+# Provides: aaeventd
+# Required-Start: apparmor
+# Required-Stop:
+# Default-Start: 2 3 5
+# Default-Stop:
+# Short-Description: AppArmor Notification and Reporting
+# Description: AppArmor Notification and Reporting daemon
+### END INIT INFO
+APPARMOR_FUNCTIONS=/lib/apparmor/rc.apparmor.functions
+
+# source function library
+if [ -f /etc/init.d/functions ]; then
+        . /etc/init.d/functions
+elif [ -f /etc/rc.d/init.d/functions ]; then
+	. /etc/rc.d/init.d/functions
+elif [ -f /lib/lsb/init-functions ]; then
+	. /lib/lsb/init-functions
+else
+	exit 0
+fi
+
+sd_log_success_msg() {
+	echo -n "$*"
+	success
+	echo
+}
+
+sd_log_warning_msg() {
+	echo -n "$*"
+	warning
+	echo
+}
+
+sd_log_skipped_msg() {
+	echo -n "$*"
+	warning
+	echo
+}
+
+sd_log_failure_msg() {
+	echo -n "$*"
+	failure
+	echo
+}
+
+sd_action() {
+	STRING=$1
+	shift
+	action "${STRING} " "$@"
+	return $?
+}
+
+start_aa_event() {
+	if [ -x "$AA_EV_BIN" -a "${APPARMOR_ENABLE_AAEVENTD}" = "yes" ] ; then
+		sd_action "Starting AppArmor Event daemon" daemon --pidfile $AA_EV_PIDFILE $AA_EV_BIN -p $AA_EV_PIDFILE
+	elif [ -x "$SD_EV_BIN" -a "${APPARMOR_ENABLE_AAEVENTD}" = "yes" ] ; then
+		sd_action "Starting AppArmor Event daemon" daemon --pidfile $SD_EV_PIDFILE $SD_EV_BIN -p $SD_EV_PIDFILE
+	fi
+}
+
+stop_aa_event() {
+	if [ -x "$AA_EV_BIN" -a -f "$AA_EV_PIDFILE" ] ; then
+		sd_action "Shutting down AppArmor Event daemon" killproc -p $AA_EV_PIDFILE -INT $AA_EV_BIN
+	fi
+	if [ -f "$SD_EV_PIDFILE" ] ; then
+		sd_action "Shutting down AppArmor Event daemon" killproc -p $SD_EV_PIDFILE -INT $SD_EV_BIN
+	fi
+}
+
+usage() {
+    echo "Usage: $0 {start|stop|restart|try-restart|reload|force-reload|status}"
+}
+
+# source apparmor function library
+if [ -f "${APPARMOR_FUNCTIONS}" ]; then
+	. ${APPARMOR_FUNCTIONS}
+else
+	sd_log_failure_msg "Unable to find AppArmor initscript functions"
+	exit 1
+fi
+
+case "$1" in
+	start)
+		start_aa_event
+		rc=$?
+		;;
+	stop)
+		stop_aa_event
+		rc=$?
+		;;
+	restart|reload|force-reload|try-restart)
+		stop_aa_event
+		start_aa_event
+		rc=$?
+		;;
+	status)
+        	echo -n "Checking for service AppArmor Event daemon:"
+		if [ "${APPARMOR_ENABLE_AAEVENTD}" = "yes" ]; then
+			/sbin/checkproc -p $AA_EV_PIDFILE $AA_EV_BIN
+			rc_status -v
+		else
+			rc_status -u
+		fi
+		;;
+	*)
+		usage
+		exit 1
+		;;
+esac
+exit $rc

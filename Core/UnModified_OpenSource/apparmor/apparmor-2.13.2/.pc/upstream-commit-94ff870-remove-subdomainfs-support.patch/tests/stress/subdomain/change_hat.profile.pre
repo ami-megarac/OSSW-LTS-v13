@@ -1,0 +1,24 @@
+BASE/change_hat {
+/lib/lib*.so				rm,
+/usr/lib/lib*.so			rm,
+/lib/lib*.so.*				rm,
+/lib/i[356]86/lib*.so			rm,
+/lib/tls/lib*.*.so			rm,
+/lib/ld-*.so				rix,
+/etc/ld.so.*				r,
+BASE/change_hat 			r,
+/bin/ls					rix,
+/dev/pts/*				rw,
+/dev/tty*				rw,
+/dev/null				rw,
+/dev/urandom                            r,
+
+    ^/subprofile/foo {
+	/bin/bash			rix,
+	/tmp/foobar			r,
+	/bin/ls				rix,
+	/dev/pts/*			rw,
+	/dev/tty*			rw,
+	/dev/null			rw,
+    }
+}

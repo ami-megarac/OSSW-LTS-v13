@@ -1,0 +1,45 @@
+From cb5e9ce11b337f4ca9bf38e2353a4e424c8f5201 Mon Sep 17 00:00:00 2001
+From: Wang Dong <dongdwdw@linux.vnet.ibm.com>
+Date: Wed, 26 Oct 2016 04:22:49 +0200
+Subject: libparted/dasd: add test cases for the new fdasd functions
+
+The test case uses a temporary file in libparted/tests under
+Check framwork. It can be issued by "make check" in the test dir.
+
+Signed-off-by: Wang Dong <dongdwdw@linux.vnet.ibm.com>
+Signed-off-by: Hendrik Brueckner <brueckner@linux.vnet.ibm.com>
+Signed-off-by: Brian C. Lane <bcl@redhat.com>
+
+Origin: upstream, https://git.savannah.gnu.org/cgit/parted.git/commit?id=571e078406b59e8dcf02db3e8fe28d8eb4d2cef0
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1737144
+Last-Update: 2018-01-16
+
+Patch-Name: libparted-dasd-add-test-cases-for-the-new-fdasd-func.patch
+---
+ libparted/tests/Makefile.am | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/libparted/tests/Makefile.am b/libparted/tests/Makefile.am
+index c7c10a95..9689fb38 100644
+--- a/libparted/tests/Makefile.am
++++ b/libparted/tests/Makefile.am
+@@ -3,9 +3,9 @@
+ #
+ # This file may be modified and/or distributed without restriction.
+ 
+-TESTS = t1000-label.sh t2000-disk.sh t2100-zerolen.sh t3000-symlink.sh
++TESTS = t1000-label.sh t2000-disk.sh t2100-zerolen.sh t3000-symlink.sh t4000-volser.sh
+ EXTRA_DIST = $(TESTS)
+-check_PROGRAMS = label disk zerolen symlink
++check_PROGRAMS = label disk zerolen symlink volser
+ AM_CFLAGS = $(WARN_CFLAGS) $(WERROR_CFLAGS)
+ 
+ LDADD = \
+@@ -23,6 +23,7 @@ label_SOURCES = common.h common.c label.c
+ disk_SOURCES  = common.h common.c disk.c
+ zerolen_SOURCES = common.h common.c zerolen.c
+ symlink_SOURCES = common.h common.c symlink.c
++volser_SOURCES = common.h common.c volser.c
+ 
+ # Arrange to symlink to tests/init.sh.
+ CLEANFILES = init.sh

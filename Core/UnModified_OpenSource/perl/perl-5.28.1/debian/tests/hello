@@ -1,0 +1,6 @@
+#!/bin/sh
+set -e
+
+# silly test to see that perl is still working
+perl -e 'print "OK: hello, world!\n"' | grep OK
+

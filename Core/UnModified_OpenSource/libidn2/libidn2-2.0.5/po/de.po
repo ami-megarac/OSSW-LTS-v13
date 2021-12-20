@@ -1,0 +1,432 @@
+# German translation of libidn.
+# Copyright (C) 2004 Free Software Foundation, Inc.
+# This file is distributed under the same license as the libidn package.
+# Roland Illig <roland.illig@gmx.de>, 2004.
+# Roland Illig <roland.illig@gmx.de>, 2009.
+# Roland Illig <roland.illig@gmx.de>, 2011.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: libidn 1.21\n"
+"Report-Msgid-Bugs-To: bug-libidn2@gnu.org\n"
+"POT-Creation-Date: 2018-05-18 09:59+0200\n"
+"PO-Revision-Date: 2011-05-02 18:51+0100\n"
+"Last-Translator: Roland Illig <roland.illig@gmx.de>\n"
+"Language-Team: German <translation-team-de@lists.sourceforge.net>\n"
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Bugs: Report translation errors to the Language-Team address.\n"
+
+#: lib/error.c:56
+#, fuzzy
+msgid "success"
+msgstr "Erfolg"
+
+#: lib/error.c:60
+#, fuzzy
+msgid "out of memory"
+msgstr "Nicht genug Speicher"
+
+#: lib/error.c:64
+msgid "could not determine locale encoding format"
+msgstr ""
+
+#: lib/error.c:68
+#, fuzzy
+msgid "could not convert string to UTF-8"
+msgstr "Konnte nicht von %s nach UTF-8 konvertieren."
+
+#: lib/error.c:72
+msgid "string encoding error"
+msgstr ""
+
+#: lib/error.c:76
+#, fuzzy
+msgid "string could not be NFC normalized"
+msgstr "Konnte die NFKC-Normalisierung nicht ausführen."
+
+#: lib/error.c:80
+msgid "string contains invalid punycode data"
+msgstr ""
+
+#: lib/error.c:84
+msgid "punycode encoded data will be too large"
+msgstr ""
+
+#: lib/error.c:88
+msgid "punycode conversion resulted in overflow"
+msgstr ""
+
+#: lib/error.c:92
+msgid "domain name longer than 255 characters"
+msgstr ""
+
+#: lib/error.c:96
+msgid "domain label longer than 63 characters"
+msgstr ""
+
+#: lib/error.c:100
+msgid "input A-label is not valid"
+msgstr ""
+
+#: lib/error.c:104
+msgid "input A-label and U-label does not match"
+msgstr ""
+
+#: lib/error.c:108
+#, fuzzy
+msgid "string is not in Unicode NFC format"
+msgstr "String verändert sich durch Unicode-NFKC-Normalisierung"
+
+#: lib/error.c:112
+msgid "string contains forbidden two hyphens pattern"
+msgstr ""
+
+#: lib/error.c:116
+msgid "string start/ends with forbidden hyphen"
+msgstr ""
+
+#: lib/error.c:120
+msgid "string contains a forbidden leading combining character"
+msgstr ""
+
+#: lib/error.c:124
+msgid "string contains a disallowed character"
+msgstr ""
+
+#: lib/error.c:128
+msgid "string contains a forbidden context-j character"
+msgstr ""
+
+#: lib/error.c:132
+msgid "string contains a context-j character with null rule"
+msgstr ""
+
+#: lib/error.c:136
+msgid "string contains a forbidden context-o character"
+msgstr ""
+
+#: lib/error.c:140
+msgid "string contains a context-o character with null rule"
+msgstr ""
+
+#: lib/error.c:144
+#, fuzzy
+msgid "string contains unassigned code point"
+msgstr "Verbotene unzugeordnete Codepunkte in der Eingabe"
+
+#: lib/error.c:148
+#, fuzzy
+msgid "string has forbidden bi-directional properties"
+msgstr "Widersprüchliche bidirektional-Eigenschaften in der Eingabe"
+
+#: lib/error.c:152
+msgid "Unknown error"
+msgstr "Unbekannter Fehler"
+
+#: src/idn2.c:59
+#, c-format
+msgid "Try `%s --help' for more information.\n"
+msgstr "Versuchen Sie »%s --help« für mehr Informationen.\n"
+
+#: src/idn2.c:63
+#, c-format
+msgid "Usage: %s [OPTION]... [STRINGS]...\n"
+msgstr "Aufruf: %s [OPTION]... [STRINGS]...\n"
+
+#: src/idn2.c:66
+#, fuzzy
+msgid ""
+"Internationalized Domain Name (IDNA2008) convert STRINGS, or standard "
+"input.\n"
+"\n"
+msgstr ""
+"Internationalized Domain Name (IDN) konvertiert STRINGS oder die "
+"Standardeingabe.\n"
+"\n"
+
+#: src/idn2.c:70
+#, fuzzy
+msgid ""
+"Command line interface to the Libidn2 implementation of IDNA2008.\n"
+"\n"
+"All strings are expected to be encoded in the locale charset.\n"
+"\n"
+"To process a string that starts with `-', for example `-foo', use `--'\n"
+"to signal the end of parameters, as in `idn2 --quiet -- -foo'.\n"
+"\n"
+"Mandatory arguments to long options are mandatory for short options too.\n"
+msgstr ""
+"Kommandozeilenprogramm für die Bibliothek für internationalisierte "
+"Domainnamen.\n"
+"\n"
+"Alle Strings werden so codiert erwartet, wie es der Zeichensatz der Locale\n"
+"angibt. Benutzen Sie »--debug« um den aktuellen Zeichensatz herauszufinden.\n"
+"Sie können einen Zeichensatz explizit mit der Umgebungsvariable CHARSET\n"
+"festlegen.\n"
+"\n"
+"Um einen String zu verarbeiten, der mit »-« beginnt (zum Beispiel »-foo«),\n"
+"können Sie das Ende der Optionen mit »--« kennzeichnen.\n"
+"Zum Beispiel: »idn --quiet -a -- -foo«.\n"
+"\n"
+"Notwendige Argumente für die langen Optionen gelten genau so für die\n"
+"kurzen Optionen.\n"
+
+#: src/idn2.c:80
+msgid ""
+"  -h, --help               Print help and exit\n"
+"  -V, --version            Print version and exit\n"
+msgstr ""
+"  -h, --help               Hilfe ausgeben und beenden\n"
+"  -V, --version            Version ausgeben und beenden\n"
+
+#: src/idn2.c:84
+msgid ""
+"  -d, --decode             Decode (punycode) domain name\n"
+"  -l, --lookup             Lookup domain name (default)\n"
+"  -r, --register           Register label\n"
+msgstr ""
+
+#: src/idn2.c:89
+msgid ""
+"  -T, --tr46t              Enable TR46 transitional processing\n"
+"  -N, --tr46nt             Enable TR46 non-transitional processing\n"
+"      --no-tr46            Disable TR46 processing\n"
+msgstr ""
+
+#: src/idn2.c:94
+#, fuzzy
+msgid ""
+"      --usestd3asciirules  Enable STD3 ASCII rules\n"
+"      --debug              Print debugging information\n"
+"      --quiet              Silent operation\n"
+msgstr ""
+"      --debug              Debugging-Informationen ausgeben\n"
+"      --quiet              Ruhig arbeiten\n"
+
+#: src/idn2.c:216
+#, fuzzy, c-format
+msgid "Charset: %s\n"
+msgstr "Zeichensatz »%s«.\n"
+
+#: src/idn2.c:220
+msgid ""
+"Type each input string on a line by itself, terminated by a newline "
+"character.\n"
+msgstr ""
+"Geben Sie jede Eingabezeichenkette in einer eigenen Zeile ein, durch einen "
+"Zeilenumbruch abgeschlossen.\n"
+
+#: src/idn2.c:248
+msgid "input error"
+msgstr "Eingabefehler"
+
+#~ msgid "String preparation failed"
+#~ msgstr "String-Vorbereitung fehlgeschlagen"
+
+#~ msgid "Punycode failed"
+#~ msgstr "Punycode fehlgeschlagen"
+
+#~ msgid "Non-digit/letter/hyphen in input"
+#~ msgstr "Unerlaubtes Zeichen in der Eingabe"
+
+#~ msgid "Forbidden leading or trailing minus sign (`-')"
+#~ msgstr "Verbotenes Minuszeichen am Anfang oder am Ende"
+
+#~ msgid "Output would be too large or too small"
+#~ msgstr "Ergebnis wäre zu groß oder zu klein"
+
+#~ msgid "Input does not start with ACE prefix (`xn--')"
+#~ msgstr "Eingabe beginnt nicht mit dem ACE-Präfix (»xn--«)"
+
+#~ msgid "String not idempotent under ToASCII"
+#~ msgstr "String verändert sich durch ToASCII"
+
+#~ msgid "Input already contain ACE prefix (`xn--')"
+#~ msgstr "Eingabe enthält bereits das ACE-Präfix (»xn--«)"
+
+#~ msgid "System iconv failed"
+#~ msgstr "System-iconv fehlgeschlagen"
+
+#~ msgid "System dlopen failed"
+#~ msgstr "System-dlopen fehlgeschlagen"
+
+#~ msgid "Invalid input"
+#~ msgstr "Ungültige Eingabe"
+
+#~ msgid "Output would exceed the buffer space provided"
+#~ msgstr "Ausgabe würde den vorhandenen Pufferspeicher überfluten"
+
+#~ msgid "String size limit exceeded"
+#~ msgstr "String-Größenbegrenzung überschritten"
+
+#~ msgid "Prohibited code points in input"
+#~ msgstr "Verbotene Codepunkte in der Eingabe"
+
+#~ msgid "Malformed bidirectional string"
+#~ msgstr "Ungültiger Bidirektional-String"
+
+#~ msgid "Prohibited bidirectional code points in input"
+#~ msgstr "Verbotene bidirektionale Codepunkte in der Eingabe"
+
+#~ msgid "Error in stringprep profile definition"
+#~ msgstr "Fehler in der Stringprep-Profildefinition"
+
+#~ msgid "Flag conflict with profile"
+#~ msgstr "Flag-Konflikt mit dem Profil"
+
+#~ msgid "Unknown profile"
+#~ msgstr "Unbekanntes Profil"
+
+#~ msgid "Unicode normalization failed (internal error)"
+#~ msgstr "Unicode-Normalisierung fehlgeschlagen (Interner Fehler)"
+
+#~ msgid "Code points prohibited by top-level domain"
+#~ msgstr "Codepunkte sind von der Top-Level-Domain verboten"
+
+#~ msgid "Missing input"
+#~ msgstr "Fehlende Eingabe"
+
+#~ msgid "No top-level domain found in input"
+#~ msgstr "Keine Top-Level-Domain in der Eingabe gefunden"
+
+#~ msgid ""
+#~ "  -s, --stringprep         Prepare string according to nameprep profile\n"
+#~ "  -d, --punycode-decode    Decode Punycode\n"
+#~ "  -e, --punycode-encode    Encode Punycode\n"
+#~ "  -a, --idna-to-ascii      Convert to ACE according to IDNA (default "
+#~ "mode)\n"
+#~ "  -u, --idna-to-unicode    Convert from ACE according to IDNA\n"
+#~ msgstr ""
+#~ "  -s, --stringprep         String gemäß nameprep-Profil vorbereiten\n"
+#~ "  -d, --punycode-decode    Punycode decodieren\n"
+#~ "  -e, --punycode-encode    Punycode codieren\n"
+#~ "  -a, --idna-to-ascii      Gemäß IDNA in ACE konvertieren "
+#~ "(Standardmodus)\n"
+#~ "  -u, --idna-to-unicode    Gemäß IDNA aus ACE heraus konvertieren\n"
+
+#~ msgid ""
+#~ "      --allow-unassigned   Toggle IDNA AllowUnassigned flag (default "
+#~ "off)\n"
+#~ "      --usestd3asciirules  Toggle IDNA UseSTD3ASCIIRules flag (default "
+#~ "off)\n"
+#~ msgstr ""
+#~ "      --allow-unassigned   Option \"IDNA AllowUnassigned\" umschalten "
+#~ "(Vorgabe: aus)\n"
+#~ "      --usestd3asciirules  Option \"IDNA UseSTD3ASCIIRules\" umschalten "
+#~ "(Vorgabe: aus)\n"
+
+#~ msgid ""
+#~ "      --no-tld             Don't check string for TLD specific rules\n"
+#~ "                             Only for --idna-to-ascii and --idna-to-"
+#~ "unicode\n"
+#~ msgstr ""
+#~ "      --no-tld             String nicht auf TLD-spezifische Regeln "
+#~ "überprüfen\n"
+#~ "                             Nur für --idna-to-ascii und --idna-to-"
+#~ "unicode\n"
+
+#~ msgid ""
+#~ "  -n, --nfkc               Normalize string according to Unicode v3.2 "
+#~ "NFKC\n"
+#~ msgstr ""
+#~ "  -n, --nfkc               String gemäß Unicode v3.2 NFKC normalisieren\n"
+
+#~ msgid ""
+#~ "  -p, --profile=STRING     Use specified stringprep profile instead\n"
+#~ "                             Valid stringprep profiles: `Nameprep',\n"
+#~ "                             `iSCSI', `Nodeprep', `Resourceprep', \n"
+#~ "                             `trace', `SASLprep'\n"
+#~ msgstr ""
+#~ "  -p, --profile=STRING     Angegebenes stringprep-Profil benutzen\n"
+#~ "                             Gültige stringprep-Profile: `Nameprep',\n"
+#~ "                             `iSCSI', `Nodeprep', `Resourceprep', \n"
+#~ "                             `trace', `SASLprep'\n"
+
+#~ msgid "only one of -s, -e, -d, -a, -u or -n can be specified"
+#~ msgstr ""
+#~ "Nur eins von »-s«, »-e«, »-d«, »-a«, »-u« oder »-n« kann angegeben werden."
+
+#~ msgid "could not convert from UTF-8 to UCS-4"
+#~ msgstr "Konnte nicht von UTF-8 nach UCS-4 konvertieren."
+
+#~ msgid "stringprep_profile: %s"
+#~ msgstr "stringprep_profile: %s"
+
+#~ msgid "could not convert from UTF-8 to %s"
+#~ msgstr "Konnte nicht von UTF-8 nach %s konvertieren."
+
+#~ msgid "punycode_encode: %s"
+#~ msgstr "punycode_encode: %s"
+
+#~ msgid "malloc"
+#~ msgstr "malloc"
+
+#~ msgid "punycode_decode: %s"
+#~ msgstr "punycode_decode: %s"
+
+#~ msgid "could not convert from UCS-4 to UTF-8"
+#~ msgstr "Konnte nicht von UCS-4 nach UTF-8 konvertieren."
+
+#~ msgid "idna_to_ascii_4z: %s"
+#~ msgstr "idna_to_ascii_4z: %s"
+
+#~ msgid "idna_to_unicode_8z4z (TLD): %s"
+#~ msgstr "idna_to_unicode_8z4z (TLD): %s"
+
+#~ msgid "tld_check_4z (position %lu): %s"
+#~ msgstr "tld_check_4z (position %lu): %s"
+
+#~ msgid "tld_check_4z: %s"
+#~ msgstr "tld_check_4z: %s"
+
+#~ msgid "idna_to_unicode_8z4z: %s"
+#~ msgstr "idna_to_unicode_8z4z: %s"
+
+#~ msgid ""
+#~ "\n"
+#~ "Report bugs to <%s>.\n"
+#~ msgstr ""
+#~ "\n"
+#~ "Melden Sie Fehler an <%s>.\n"
+#~ "Melden Sie Übersetzungsfehler an <translation-team-de@lists.sourceforge."
+#~ "net>.\n"
+
+#~ msgid "%s: fgets() failed: "
+#~ msgstr "%s: fgets() fehlgeschlagen: "
+
+#~ msgid "input[%d] = U+%04x\n"
+#~ msgstr "input[%d] = U+%04x\n"
+
+#~ msgid "%s: stringprep_profile() failed with error %d.\n"
+#~ msgstr "%s: stringprep_profile() mit Fehler %d fehlgeschlagen.\n"
+
+#~ msgid "output[%d] = U+%04x\n"
+#~ msgstr "output[%d] = U+%04x\n"
+
+#~ msgid "%s: punycode_encode() failed with error %d.\n"
+#~ msgstr "%s: punycode_encode() mit Fehler %d fehlgeschlagen.\n"
+
+#~ msgid "%s: malloc() failed: "
+#~ msgstr "%s: malloc() fehlgeschlagen: "
+
+#~ msgid "%s: punycode_decode() failed with error %d.\n"
+#~ msgstr "%s: punycode_decode() mit Fehler %d fehlgeschlagen.\n"
+
+#~ msgid "%s: idna_to_ascii_4z() failed with error %d.\n"
+#~ msgstr "%s: idna_to_ascii_4z() mit Fehler %d fehlgeschlagen.\n"
+
+#~ msgid "%s: TLD idna_to_unicode_8z8z() failed with error %d.\n"
+#~ msgstr "%s: TLD idna_to_unicode_8z8z() mit Fehler %d fehlgeschlagen.\n"
+
+#~ msgid "tld[%d] = U+%04x\n"
+#~ msgstr "tld[%d] = U+%04x\n"
+
+#~ msgid "%s: string rejected by TLD test (Unicode position %d)\n"
+#~ msgstr ""
+#~ "%s: Zeichenkette beim TLD-Test zurückgewiesen (Unicode position %d)\n"
+
+#~ msgid "%s: tld_check_4z failed with error %d.\n"
+#~ msgstr "%s: tld_check_4z mit Fehler %d fehlgeschlagen.\n"

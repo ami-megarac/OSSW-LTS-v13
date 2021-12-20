@@ -1,0 +1,9 @@
+#
+#=DESCRIPTION includes testing - basic include of global and local include
+#=EXRESULT PASS
+#
+/does/not/exist {
+  #include <includes/base>
+  #include <include_tests/includes_okay_helper.include>
+  #include <includes/base>
+}

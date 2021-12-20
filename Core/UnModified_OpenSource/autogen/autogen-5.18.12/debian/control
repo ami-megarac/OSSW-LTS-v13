@@ -1,0 +1,76 @@
+Source: autogen
+Section: devel
+Priority: optional
+Maintainer: Andreas Metzler <ametzler@debian.org>
+Build-Depends: debhelper (>= 10),
+ gperf,
+ guile-2.0-dev (>= 2.0.11+1-0),
+ libxml2-dev,
+ pkg-config,
+ tar (>= 1.28),
+ autogen <cross>
+Build-Depends-Indep: texinfo, texlive, cm-super-minimal
+Standards-Version: 4.1.3
+Homepage: https://www.gnu.org/software/autogen/
+Vcs-Git: https://anonscm.debian.org/git/collab-maint/autogen.git
+Vcs-Browser: https://anonscm.debian.org/git/collab-maint/autogen.git
+
+Package: autogen
+Architecture: any
+Depends: ${shlibs:Depends}, libopts25-dev (= ${binary:Version}),
+ ${misc:Depends}, ${perl:Depends}
+Recommends: autogen-doc
+Multi-Arch: foreign
+Description: automated text file generator
+ AutoGen is a tool designed for generating program files that contain
+ repetitive text with varied substitutions. This is especially valuable if
+ there are several blocks of such text that must be kept synchronized.
+ .
+ Included with AutoGen is a tool that virtually eliminates the hassle of
+ processing options, keeping usage text up to date and so on. This tool
+ allows you to specify several program attributes, innumerable options and
+ option attributes, then it produces all the code necessary to parse and
+ handle the command line and initialization file options.
+ .
+ This package contains the development tools. libopts25-dev contains the
+ static libraries and header files. libopts25 contains the shared libraries.
+ autogen-doc contains the PostScript and HTML documentation.
+
+Package: autogen-doc
+Section: doc
+Breaks: autogen (<< 1:5.18.3-4)
+Replaces: autogen (<< 1:5.18.3-4)
+Depends: ${misc:Depends}
+Architecture: all
+Description: automated text file generator - documentation
+ AutoGen is a tool designed for generating program files that contain
+ repetitive text with varied substitutions. This is especially valuable if
+ there are several blocks of such text that must be kept synchronized.
+ .
+ This package contains the PostScript and HTML documentation.
+
+Package: libopts25
+Architecture: any
+Pre-Depends: ${misc:Pre-Depends}
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Replaces: autogen
+Section: libs
+Multi-Arch: same
+Description: automated option processing library based on autogen
+ This package contains the shared libraries needed by binaries that use
+ autoopts for option processing. The package containing the header files
+ and static libraries is libopts25-dev. The package containing the
+ development tools is autogen.
+
+Package: libopts25-dev
+Architecture: any
+Pre-Depends: ${misc:Pre-Depends}
+Depends: libopts25 (= ${binary:Version}), ${misc:Depends}
+Conflicts: libopts9-dev
+Replaces: autogen, libopts9-dev
+Section: libdevel
+Multi-Arch: same
+Description: automated option processing library based on autogen
+ This package contains the header files and static libraries used by
+ autoopts. The package containing the shared libraries is libopts25. The
+ package containing the development tools is autogen.

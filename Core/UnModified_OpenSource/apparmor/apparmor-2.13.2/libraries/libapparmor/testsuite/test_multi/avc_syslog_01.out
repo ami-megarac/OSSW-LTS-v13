@@ -1,0 +1,16 @@
+START
+File: avc_syslog_01.in
+Event type: AA_RECORD_DENIED
+Audit ID: 1279967133.365:54
+Operation: open
+Mask: r
+Denied Mask: r
+fsuid: 0
+ouid: 0
+Profile: /usr/sbin/cupsd
+Name: /boot/
+Command: ls
+Parent: 19650
+PID: 19651
+Epoch: 1279967133
+Audit subid: 54

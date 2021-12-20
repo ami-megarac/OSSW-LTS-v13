@@ -1,0 +1,29 @@
+From: Craig Small <csmall@debian.org>
+Date: Wed, 4 Apr 2018 21:07:57 +1000
+Subject: Makefile: compile perl after library
+
+During a parallel build the perl module is made without linking
+to the non-completed library which makes a useless perl module.
+
+This minor change to the Makefile means the perl module is made
+after the library is made.
+
+Closes: #894626
+Thanks to Gregor Herrmann for the patch.
+---
+ Makefile.in | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Makefile.in b/Makefile.in
+index 10f36f3..7b64c2d 100644
+--- a/Makefile.in
++++ b/Makefile.in
+@@ -176,7 +176,7 @@ perlmodules: perlmakefiles subdirs
+            exit 1 ; \
+         fi
+ 
+-perlmakefiles: net-snmp-config-x
++perlmakefiles: standardall net-snmp-config-x
+ 	@if test ! -f perl/Makefile; then \
+ 	  (dir=`pwd`; \
+ 	   cd perl ; \

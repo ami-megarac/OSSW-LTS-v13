@@ -1,0 +1,11 @@
+#=DESCRIPTION reference variables in dbus rules, with duplicates
+#=EXRESULT PASS
+
+@{FOO}=bar baz bar
+@{BAR}=@{FOO} blort
+
+/does/not/exist {
+  dbus (bind)
+       bus=session
+       name="com.@{BAR}.@{FOO}",
+}

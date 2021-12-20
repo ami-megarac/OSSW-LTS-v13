@@ -1,0 +1,61 @@
+Fix test to use newer Api Sanity Checker releases.
+
+--- a/auto/Makefile.am
++++ b/auto/Makefile.am
+@@ -1,6 +1,6 @@
+ AUTOMAKE_OPTIONS = 1.4 foreign
+ 
+-AUTOTEST =      api-sanity-autotest.pl
++AUTOTEST =      api-sanity-checker
+ 
+ TDIRS =		descriptors_storage header_compile_errors test_results tests
+ 
+@@ -8,5 +8,5 @@
+ 	rm -rf $(TDIRS)
+ 
+ check-local:
+-	-[ -d tests ] && ${AUTOTEST} -l popt -d desc -clean
+-	-${AUTOTEST} -l popt -d desc -st types -gen -build -run
++	-[ -d tests ] && ${AUTOTEST} -l popt -d popt.xml -clean
++	-${AUTOTEST} -l popt -d popt.xml -st types -gen -build -run
+--- /dev/null
++++ b/auto/popt.xml.in
+@@ -0,0 +1,28 @@
++<version>
++  1.15
++</version>
++
++<headers>
++  @abs_top_srcdir@/popt.h
++</headers>
++
++<libs>
++  @abs_top_builddir@/.libs/libpopt.so
++</libs>
++
++<include_paths>
++  @abs_top_srcdir@
++</include_paths>
++
++<gcc_options>
++  @CFLAGS@
++</gcc_options>
++
++<opaque_types>
++</opaque_types>
++<skip_interfaces>
++</skip_interfaces>
++<include_preamble>
++</include_preamble>
++<libs_depend>
++</libs_depend>
+--- a/configure.ac
++++ b/configure.ac
+@@ -130,6 +130,6 @@
+ AC_CONFIG_SUBDIRS()
+ AC_CONFIG_FILES([ po/Makefile.in m4/Makefile
+     Doxyfile Makefile popt.pc popt.spec test-poptrc
+-    auto/Makefile auto/desc auto/types
++    auto/Makefile auto/popt.xml auto/types
+ ])
+ AC_OUTPUT

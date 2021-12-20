@@ -1,0 +1,65 @@
+Source: libpng1.6
+Section: libs
+Priority: optional
+Maintainer: Maintainers of libpng1.6 packages <libpng1.6@packages.debian.org>
+Uploaders: Nobuhiro Iwamatsu <iwamatsu@debian.org>,
+           Gianfranco Costamagna <locutusofborg@debian.org>,
+           Tobias Frost <tobi@debian.org>
+Build-Depends: debhelper (>= 10), zlib1g-dev, mawk
+Standards-Version: 4.3.0
+Vcs-Browser: https://salsa.debian.org/debian/libpng1.6
+Vcs-Git: https://salsa.debian.org/debian/libpng1.6.git
+Homepage: http://libpng.org/pub/png/libpng.html
+
+Package: libpng16-16
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Multi-Arch: same
+Description: PNG library - runtime (version 1.6)
+ libpng is a library implementing an interface for reading and writing
+ PNG (Portable Network Graphics) format files.
+ .
+ This package contains the runtime library files needed to run software
+ using libpng.
+
+Package: libpng-dev
+Section: libdevel
+Architecture: any
+Multi-Arch: same
+Depends: ${misc:Depends}, libpng16-16 (= ${binary:Version}), zlib1g-dev
+Conflicts: libpng12-0-dev, libpng12-dev, libpng2-dev, libpng3-dev
+Breaks: libpng16-dev (<< 1.6.20-3), libpng16-devtools (<< 1.6.21-1)
+Replaces: libpng16-dev (<< 1.6.20-3), libpng16-devtools (<< 1.6.21-1)
+Recommends: libpng-tools
+Description: PNG library - development (version 1.6)
+ libpng is a library implementing an interface for reading and writing
+ PNG (Portable Network Graphics) format files.
+ .
+ This package contains the header and development files needed to build
+ programs and packages using libpng.
+
+Package: libpng-tools
+Section: libdevel
+Architecture: any
+Multi-Arch: foreign
+Depends: ${shlibs:Depends}, ${misc:Depends}, libpng16-16 (= ${binary:Version})
+Breaks: libpng16-tools (<< 1.6.21-1)
+Replaces: libpng16-tools (<< 1.6.21-1)
+Description: PNG library - tools (version 1.6)
+ libpng is a library implementing an interface for reading and writing
+ PNG (Portable Network Graphics) format files.
+ .
+ This package contains a program to interact with libpng from the
+ command line.
+
+Package: libpng16-16-udeb
+Package-Type: udeb
+Section: debian-installer
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: PNG library - minimal runtime library (version 1.6)
+ libpng is a library implementing an interface for reading and writing
+ PNG (Portable Network Graphics) format files.
+ .
+ This package provides the minimal libpng runtime library needed for
+ the debian-installer.

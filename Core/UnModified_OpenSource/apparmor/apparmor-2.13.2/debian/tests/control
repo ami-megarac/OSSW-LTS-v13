@@ -1,0 +1,13 @@
+Tests: compile-policy
+Depends: apparmor, apparmor-profiles-extra, bind9, cups-browsed, cups-daemon, evince, haveged, libreoffice-common, libvirt-daemon-system, man-db, ntp, onioncircuits, tcpdump, thunderbird, tor
+Restrictions: allow-stderr
+
+Tests: test-installed
+Depends: @, @builddeps@
+Restrictions: allow-stderr, superficial
+
+# Dummy test so that changes to linux-image-amd64 trigger our other autopkgtests
+# on ci.debian.net
+Test-Command: /bin/true
+Depends: linux-image-amd64 [amd64]
+Restrictions: superficial

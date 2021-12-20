@@ -1,0 +1,46 @@
+# Turkish translation of apparmor package
+# Copyright (C) 2014 Mert Dirik
+# This file is distributed under the same license as the apparmor package.
+# Mert Dirik <mertdirik@gmail.com>, 2014.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: apparmor 2.8.0-5.1\n"
+"Report-Msgid-Bugs-To: apparmor@lists.ubuntu.com\n"
+"POT-Creation-Date: 2010-01-05 17:45-0600\n"
+"PO-Revision-Date: 2014-08-01 19:31+0200\n"
+"Last-Translator: Mert Dirik <mertdirik@gmail.com>\n"
+"Language-Team: Debian L10n Turkish <debian-l10n-turkish@lists.debian.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 1.5.4\n"
+"Language: tr\n"
+
+#. Type: string
+#. Description
+#: ../templates:1001
+msgid "Additional home directory locations:"
+msgstr "Ek ev dizini konumları:"
+
+#. Type: string
+#. Description
+#: ../templates:1001
+msgid ""
+"Please enter a space separated list of any additional locations for user "
+"home directories. These locations are in addition to those specified in /etc/"
+"apparmor.d/tunables/home and must end with a '/'."
+msgstr ""
+"Eklemek istediğiniz kullanıcı ev dizinleri konumlarını boşlukla ayrılmış "
+"şekilde girebilirsiniz. Bu konumlar /etc/apparmor.d/tunables/home dosyasında "
+"belirtilen konumlara ek olarak kullanılır ve '/' ile bitmelidir."
+
+#. Type: string
+#. Description
+#: ../templates:1001
+msgid ""
+"Example: if user's directories are stored in /srv/nfs/home and /mnt/homes, "
+"you should enter \"/srv/nfs/home/ /mnt/homes/\"."
+msgstr ""
+"Örnek: kullanıcı dizinleri /srv/nfs/home ve /mnt/homes konumlarında ise "
+"buraya \"/srv/nfs/home/ /mnt/homes/\" girmelisiniz."

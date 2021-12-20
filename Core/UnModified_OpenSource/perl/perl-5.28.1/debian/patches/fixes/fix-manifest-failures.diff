@@ -1,0 +1,44 @@
+From 90922aa221fdb0567d7b5b264fc67010caea4b9c Mon Sep 17 00:00:00 2001
+From: Niko Tyni <ntyni@debian.org>
+Date: Sun, 2 Dec 2018 11:57:01 +0200
+Subject: Fix t/porting/manifest.t failures when run in a foreign git checkout
+
+The change at ba6733216202523a95b0b7ee2e534b8e30b6d7df didn't work
+correctly: find_git_or_skip() in t/test.pl looks at PERL_BUILD_PACKAGING
+too late, so it doesn't change the logic of skipping, only the explanation
+of why tests get skipped if they do. This was originally reported at
+<https://bugs.debian.org/914962>.
+
+Committer: update commit message for upstream context
+Bug-Debian: https://bugs.debian.org/914962
+Origin: upstream
+Patch-Name: fixes/fix-manifest-failures.diff
+---
+ t/test.pl | 7 +++----
+ 1 file changed, 3 insertions(+), 4 deletions(-)
+
+diff --git a/t/test.pl b/t/test.pl
+index 868911ce39..4d9af221b9 100644
+--- a/t/test.pl
++++ b/t/test.pl
+@@ -199,7 +199,9 @@ sub find_git_or_skip {
+ 	    $source_dir = '.'
+ 	}
+     }
+-    if ($source_dir) {
++    if ($ENV{'PERL_BUILD_PACKAGING'}) {
++	$reason = 'PERL_BUILD_PACKAGING is set';
++    } elsif ($source_dir) {
+ 	my $version_string = `git --version`;
+ 	if (defined $version_string
+ 	      && $version_string =~ /\Agit version (\d+\.\d+\.\d+)(.*)/) {
+@@ -212,9 +214,6 @@ sub find_git_or_skip {
+     } else {
+ 	$reason = 'not being run from a git checkout';
+     }
+-    if ($ENV{'PERL_BUILD_PACKAGING'}) {
+-	$reason = 'PERL_BUILD_PACKAGING is set';
+-    }
+     skip_all($reason) if $_[0] && $_[0] eq 'all';
+     skip($reason, @_);
+ }

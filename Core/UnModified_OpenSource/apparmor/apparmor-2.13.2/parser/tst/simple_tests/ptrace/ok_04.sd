@@ -1,0 +1,8 @@
+#
+#=Description basic audit ptrace all rule
+#=EXRESULT PASS
+#
+/usr/bin/foo {
+  audit ptrace,
+
+  }

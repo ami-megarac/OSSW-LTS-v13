@@ -1,0 +1,11 @@
+#=DESCRIPTION reference variables that are the profile name and attachment
+#=EXRESULT FAIL
+#=TODO
+# This test needs check on @{FOO} attachment having leading / post var expansion
+
+@{FOO}=bar
+@{BAR}=baz
+
+profile @{BAR} @{FOO} {
+  /does/not/exist r,
+}

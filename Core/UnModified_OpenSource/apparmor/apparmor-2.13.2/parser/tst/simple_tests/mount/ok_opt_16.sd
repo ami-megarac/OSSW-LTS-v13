@@ -1,0 +1,10 @@
+#
+#=Description basic rules to test the "dirsync" mount option
+#=EXRESULT PASS
+/usr/bin/foo {
+  mount options=dirsync /a -> /1,
+  mount options=(dirsync) /b -> /2,
+  mount options=(rw,dirsync) /c -> /3,
+  mount options in (dirsync) /d -> /4,
+  mount options in (ro,dirsync) /e -> /5,
+}

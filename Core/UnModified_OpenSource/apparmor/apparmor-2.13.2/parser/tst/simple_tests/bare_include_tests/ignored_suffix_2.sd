@@ -1,0 +1,10 @@
+#
+#=DESCRIPTION includes testing - verify that only suffixes are ignored
+#=EXRESULT PASS
+#
+
+include <include_tests/ignored_suffix_2>
+
+/does/not/exist {
+  @{FOO} r,
+}

@@ -1,0 +1,1 @@
+2013-01-01 15:09:04.562575+08:00 localhost kernel: [ 1911.569682] type=1400 audit(1357024144.556:6368): apparmor="ALLOWED" operation="open" parent=5390 profile="/usr/lib/virtualbox/VBoxSVC//null-2d" name="/sys/class/power_supply/" pid=5457 comm=4143504920506F6C6C6572 requested_mask="r" denied_mask="r" fsuid=1000 ouid=0

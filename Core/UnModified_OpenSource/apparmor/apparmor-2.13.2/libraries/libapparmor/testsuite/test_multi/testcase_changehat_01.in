@@ -1,0 +1,1 @@
+type=AVC msg=audit(1449442292.901:961): apparmor="ALLOWED" operation="change_hat" profile="/usr/sbin/httpd{,2}-prefork" pid=8527 comm="httpd-prefork" target="/usr/sbin/httpd{,2}-prefork//HANDLING_UNTRUSTED_INPUT"

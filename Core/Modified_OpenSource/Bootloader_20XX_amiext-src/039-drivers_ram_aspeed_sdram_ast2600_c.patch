@@ -1,0 +1,17 @@
+--- uboot_org/drivers/ram/aspeed/sdram_ast2600.c	2021-09-08 15:15:34.425827171 +0800
++++ uboot/drivers/ram/aspeed/sdram_ast2600.c	2021-09-08 17:46:41.000000000 +0800
+@@ -41,12 +41,13 @@
+ #define SCU_EFUSE_DATA_VGA_DIS_MASK	BIT(14)
+ 
+ /* bit-field of AST_SCU_HANDSHAKE */
++#define SCU_SDRAM_SUPPORT_IKVM_HIGH_RES BIT(0)
+ #define SCU_SDRAM_INIT_READY_MASK	BIT(6)
+ #define SCU_SDRAM_INIT_BY_SOC_MASK	BIT(7)
+ #define SCU_P2A_BRIDGE_DISABLE		BIT(12)
+ #define SCU_HANDSHAKE_MASK                                                     \
+ 	(SCU_SDRAM_INIT_READY_MASK | SCU_SDRAM_INIT_BY_SOC_MASK |              \
+-	 SCU_P2A_BRIDGE_DISABLE)
++	 SCU_P2A_BRIDGE_DISABLE | SCU_SDRAM_SUPPORT_IKVM_HIGH_RES)
+ 
+ /* bit-field of AST_SCU_MPLL */
+ #define SCU_MPLL_RESET			BIT(25)

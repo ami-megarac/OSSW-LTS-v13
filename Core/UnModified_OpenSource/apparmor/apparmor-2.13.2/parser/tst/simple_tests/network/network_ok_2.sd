@@ -1,0 +1,29 @@
+#
+#=DESCRIPTION basic network tests
+#=EXRESULT PASS
+#
+/usr/bin/foo {
+  network unspec,
+  network inet,
+  network ax25,
+  network ipx,
+  network appletalk,
+  network netrom,
+  network bridge,
+  network atmpvc,
+  network x25,
+  network inet6,
+  network rose,
+  network netbeui,
+  network security,
+  network key,
+  network packet,
+  network ash,
+  network econet,
+  network atmsvc,
+  network sna,
+  network irda,
+  network pppox,
+  network wanpipe,
+  network bluetooth,
+}

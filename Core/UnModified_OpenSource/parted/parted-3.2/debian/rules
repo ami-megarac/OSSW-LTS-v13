@@ -1,0 +1,81 @@
+#!/usr/bin/make -f
+#
+# Copyright (C) 1999, 2000, 2001, 2002  Timshel Knoll
+# Licensed under the terms of the GNU General Public License
+#
+# Based (a long time ago) on parted's debian/rules, which in turn is based on
+# `Sample debian/rules that uses debhelper' from dh_make,
+# GNU Copyright (C) 1997 to 1999 by Joey Hess
+
+DEB_HOST_ARCH ?= $(shell dpkg-architecture -qDEB_HOST_ARCH)
+DEB_HOST_ARCH_OS ?= $(shell dpkg-architecture -qDEB_HOST_ARCH_OS)
+
+export DEB_BUILD_MAINT_OPTIONS := hardening=+all
+
+CONFFLAGS := --sbindir=/sbin --enable-mtrace --enable-shared
+CONFFLAGS += --disable-gcc-warnings
+
+# Enable device-mapper only on Linux
+ifeq (linux, $(DEB_HOST_ARCH_OS))
+  CONFFLAGS += --enable-device-mapper
+else
+  CONFFLAGS += --disable-device-mapper
+endif
+
+# Everything above here is common to the deb and udeb builds.
+CONFFLAGS_UDEB := $(CONFFLAGS)
+
+# Options specific to the udeb build.
+CONFFLAGS_UDEB += ac_cv_header_execinfo_h=no --libdir=/lib
+CONFFLAGS_UDEB += --disable-static --without-readline
+
+%:
+	dh $@ --with=autoreconf
+
+override_dh_auto_configure:
+	dh_auto_configure -Bbuild-deb -- $(CONFFLAGS)
+	# We need to unset CFLAGS here to force debhelper to recompute it
+	# with the new DEB_CFLAGS_MAINT_APPEND.  We also need to unset
+	# DH_INTERNAL_BUILDFLAGS to force debhelper to recompute any build
+	# flags at all.  If there's a better way to do this I'd like to hear
+	# about it.
+	env -u DH_INTERNAL_BUILDFLAGS -u CFLAGS DEB_CFLAGS_MAINT_APPEND=-Os \
+		dh_auto_configure -Bbuild-udeb -- $(CONFFLAGS_UDEB)
+
+override_dh_auto_build:
+	dh_auto_build -Bbuild-deb
+	# Only build binaries for the udeb pass.
+	$(MAKE) -C build-udeb/lib
+	$(MAKE) -C build-udeb/libparted
+	$(MAKE) -C build-udeb/parted
+
+override_dh_auto_test:
+	:
+
+override_dh_auto_clean:
+	rm -rf build-deb build-udeb
+
+override_dh_clean:
+	rm -rf debian/tmp-udeb
+	dh_clean
+
+override_dh_auto_install:
+	dh_auto_install -Bbuild-deb
+	$(MAKE) -C build-udeb/libparted install DESTDIR=$(CURDIR)/debian/tmp-udeb
+	$(MAKE) -C build-udeb/parted install DESTDIR=$(CURDIR)/debian/tmp-udeb
+	rm -f debian/tmp/usr/lib/*/*.la
+	rm -f debian/tmp-udeb/lib/*.la debian/tmp-udeb/lib/*.so
+
+override_dh_install:
+	dh_install -Nparted-udeb -Nlibparted2-udeb -Nlibparted-fs-resize0-udeb --fail-missing
+	dh_install -pparted-udeb -plibparted2-udeb -plibparted-fs-resize0-udeb --sourcedir=debian/tmp-udeb --fail-missing
+
+override_dh_strip:
+	dh_strip -plibparted2 --ddeb-migration='libparted2-dbg (<< 3.2-11~)'
+	dh_strip -plibparted-fs-resize0 \
+		--ddeb-migration='libparted-fs-resize0-dbg (<< 3.2-11~)'
+	dh_strip -Nlibparted2 -Nlibparted-fs-resize0
+
+override_dh_makeshlibs:
+	dh_makeshlibs -plibparted2 --add-udeb=libparted2-udeb -- -c4
+	dh_makeshlibs -plibparted-fs-resize0 --add-udeb=libparted-fs-resize0-udeb -- -c4

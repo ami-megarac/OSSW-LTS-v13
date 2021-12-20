@@ -1,0 +1,8 @@
+cifs.patch
+cflags.patch
+hardening.patch
+Debian-specific-kernel-feature-tests.patch
+Make-build-reproducible.patch
+endianness-and-PIE.patch
+pkg-config-install-tweaks.patch
+man-page-fixes.patch

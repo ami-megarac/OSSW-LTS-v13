@@ -1,0 +1,5 @@
+#!/usr/bin/dh-exec
+# Use agetty for getty, except on Hurd.
+# On Hurd, the package "hurd" ships "sbin/getty".
+[!hurd-any] sbin/agetty sbin/getty
+[!hurd-any] usr/share/man/man8/agetty.8 usr/share/man/man8/getty.8

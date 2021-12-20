@@ -1,0 +1,31 @@
+#
+#=Description basic signal mixed send/receive rules
+#=EXRESULT PASS
+#
+/usr/bin/signal-test {
+  signal (r),
+  signal (rw),
+
+}
+
+/usr/bin/signal-test2 {
+  signal (r, w),
+  signal (read, write),
+
+}
+
+/usr/bin/signal-test3 {
+  signal (send, receive),
+
+}
+
+/usr/bin/signal-test4 {
+  signal (r send, receive, write, rw, send),
+  signal r,
+
+}
+
+/usr/bin/signal-test5 {
+  signal (r send,,,, receive,write,rw, send),
+}
+

@@ -1,0 +1,7 @@
+#
+#=DESCRIPTION simple rtprio rlimit test
+#=EXRESULT PASS
+
+profile rlimit {
+  set rlimit rtprio <= 10,
+}

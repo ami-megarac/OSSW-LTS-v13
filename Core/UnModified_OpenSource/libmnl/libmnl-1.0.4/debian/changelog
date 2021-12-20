@@ -1,0 +1,146 @@
+libmnl (1.0.4-2) unstable; urgency=medium
+
+  * Update debian/copyright
+    * The upstream has changed the license of libmnl from GPL-2+ to LGPL-2.1
+      Thanks to Jean-Baptiste Rouault who pointing this [1] (Closes: #839721)
+      [1] https://git.netfilter.org/libmnl/commit/?id=a2975d2
+    * Update my email and copyright year.
+
+ -- Neutron Soutmun <neutrons@debian.org>  Wed, 05 Oct 2016 23:47:51 +0700
+
+libmnl (1.0.4-1) unstable; urgency=medium
+
+  * Imported Upstream version 1.0.4
+    - Fix FTBFS with clang [1] (Closes: #789480)
+      [1] https://git.netfilter.org/libmnl/commit/?id=dcdb473
+  * Drop debian/patches/update-libtool.patch, updated upstream
+  * Change my email to neutrons@debian.org
+  * Update Vcs-* with secured URI
+  * Bump Standards-Version to 3.9.8, no changes needed
+  * Update debian/libmnl0.symbols
+    * Add new version and new API function symbols
+  * Bump package priority to "important" (Closes: #799255)
+    * Prepare for the next debian revision of "iptables" package as
+      requested by Arturo Borrero Gonzalez <arturo.borrero.glez@gmail.com>
+
+ -- Neutron Soutmun <neutrons@debian.org>  Mon, 08 Aug 2016 14:44:16 +0700
+
+libmnl (1.0.3-5) unstable; urgency=medium
+
+  * Drop the NEWS as it's considered doesn't make any senses
+    * debian/NEWS:
+      - Drop as it's considered doesn't make any senses and no interest for
+        the end-user anyway. Thanks to David Prévot who reported.
+        (Closes: #756967)
+
+ -- Neutron Soutmun <neo.neutron@gmail.com>  Mon, 04 Aug 2014 09:59:54 +0700
+
+libmnl (1.0.3-4) unstable; urgency=low
+
+  * debian/control: Drop Dm-Upload-Allowed as it is obsoleted
+  * Make package more backports friendly, bump Standards-Version
+    * debian/control:
+      - Build-deps on debhelper (>= 9~), more backports friendly.
+      - Bump Standards-Version to 3.9.5, no changes needed.
+  * Apply wrap-and-sort -s
+  * Drop unnecessary include for buildflags.mk
+    * debian/rules:
+      - Drop DPKG_EXPORT_BUILDFLAGS and buildflags.mk inclusion as
+        debhelper is already takes care of them.
+  * Move lib to /lib/[arch triplet]
+    * debian/rules, debian/libmnl{0,-dev}.install:
+      - Move lib to /lib/[arch triplet]
+      - Add LIBMNL_SO_VER variable to declare the soname version for
+        the libmnl-dev symlink creation.
+    * debian/libmnl-dev.links:
+      - Create the /usr/lib/[arch triplet]/libmnl.so symlink to lib.
+    * debin/control:
+      - Add dh-exec to build-deps as it is required by arch triplet static
+        lib installation.
+      - Add Vcs-{Browser,Git} URL.
+    * debian/NEWS:
+      - Add the information for reason why move the lib.
+    * debian/libmnl{0,-dev}.dirs:
+      - Drop as unneeded.
+  * debian/libmnl0.symbols: Add symbol control file.
+  * debian/rules: Add stack protector (hardening) compiler flag
+  * debian/copyright: Update copyright years
+  * Switch debian package compression to xz
+  * Get library so version on build-time instead of hardcoded
+    * debian/rules:
+      - Get library so version on build-time and pass it to dh_link for
+        symlinks installation.
+  * Add cryptographic upstream tarball signature verification
+  * debian/control: Change Architecture to linux-any (Closes: #745225)
+  * Add patch to fix FTBFS on ppc64el
+    * debian/patches/update-libtool.patch:
+      - Thanks to Erwan Prioul for pointing to Adam Conrad's patch.
+        (Closes: #748760)
+  * Drop directly mentions multiarch-support in a Pre-Depends
+    * debian/control:
+      - Drop directly mentions multiarch-support in a Pre-Depends.
+        This is the preparation for the eglibc to glibc transition.
+        See: #747439 - lintian: warn about Pre-Depends: multiarch-support
+                       in debian/control
+
+ -- Neutron Soutmun <neo.neutron@gmail.com>  Sun, 20 Apr 2014 20:25:34 +0700
+
+libmnl (1.0.3-3) unstable; urgency=low
+
+  * Fix typo in pre-depends
+    Closes: #675323
+
+ -- Anibal Monsalve Salazar <anibal@debian.org>  Thu, 31 May 2012 19:38:34 +1000
+
+libmnl (1.0.3-2) unstable; urgency=low
+
+  [ Neutron Soutmun ]
+  * debian/rules:
+    - Also build static library.
+  * debian/libmnl{0,-dev}.install:
+    - Update installation path to MultiArch libdir path.
+  * Add watch file
+  * Use autoreconf
+    * debian/control:
+      - Add dh-autoreconf to build-deps.
+  * Drop duplicated "Section" filed in control file
+    * debian/control:
+      - Drop duplicated "Section" field of libmnl0 package as it could be
+        inherited from source package. It prevents missing duplicate places
+        that need to be fixed if the value ever changes.
+  * Update long description with extended description
+    * debian/control:
+      - Update long description with extended description which explains
+        what is in each package.
+  * Update copyright format url to version 1.0 
+
+  [ Anibal Monsalve Salazar ]
+  * New co-maintainer: Neutron Soutmun
+  * Dm-Upload-Allowed: yes
+
+ -- Anibal Monsalve Salazar <anibal@debian.org>  Tue, 31 May 2012 09:17:38 +1000
+
+libmnl (1.0.3-1) unstable; urgency=low
+
+  * New upstream version 1.0.3
+    Closes: #656870
+  * Fix out-of-date-standards-version
+  * DH compatibility is 9
+  * Add multiarch support
+  * Use hardening options
+
+ -- Anibal Monsalve Salazar <anibal@debian.org>  Mon, 28 May 2012 13:03:37 +1000
+
+libmnl (1.0.1-1) unstable; urgency=low
+
+  * New upstream release
+  * Upload to unstable
+
+ -- Anibal Monsalve Salazar <anibal@debian.org>  Sat, 01 Jan 2011 18:59:00 +1100
+
+libmnl (0.0.0~20101124-1) experimental; urgency=low
+
+  * Initial release
+    Closes: 604757
+
+ -- Anibal Monsalve Salazar <anibal@debian.org>  Wed, 24 Nov 2010 12:14:40 +1100

@@ -1,0 +1,47 @@
+.TH YAT2M "1" "February 2018" "yat2m 1.27" "User Commands"
+.SH NAME
+yat2m \- Yet Another Texinfo to Man Converter 1.27
+.SH SYNOPSIS
+.B yat2m
+[\fI\,OPTION\/\fR] [\fI\,FILE\/\fR]
+.SH DESCRIPTION
+Extract man pages from a Texinfo source.
+.TP
+\fB\-\-source\fR NAME
+use NAME as source field
+.HP
+\fB\-\-release\fR STRING use STRING as the release field
+.TP
+\fB\-\-date\fR EPOCH
+use EPOCH as publication date
+.TP
+\fB\-\-store\fR
+write output using @manpage name
+.TP
+\fB\-\-select\fR NAME
+only output pages with @manpage NAME
+.TP
+\fB\-\-verbose\fR
+enable extra informational output
+.TP
+\fB\-\-debug\fR
+enable additional debug output
+.TP
+\fB\-\-help\fR
+display this help and exit
+.TP
+\fB\-I\fR DIR
+also search in include DIR
+.TP
+\fB\-D\fR gpgone
+the only usable define
+.PP
+With no FILE, or when FILE is \-, read standard input.
+.SH "REPORTING BUGS"
+Report bugs to <https://bugs.gnupg.org>.
+.SH COPYRIGHT
+Copyright \(co 2005, 2017 g10 Code GmbH
+This program comes with ABSOLUTELY NO WARRANTY.
+.br
+This is free software, and you are welcome to redistribute it
+under certain conditions. See the /usr/share/doc/libgpg-error-dev/copyright for details.

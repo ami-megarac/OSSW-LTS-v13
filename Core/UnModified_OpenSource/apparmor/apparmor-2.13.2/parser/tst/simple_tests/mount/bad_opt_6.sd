@@ -1,0 +1,6 @@
+#
+#=Description basic rule to test the invalid "norelative" mount option
+#=EXRESULT FAIL
+/usr/bin/foo {
+  mount options=(norelative) /a -> /1,
+}

@@ -1,0 +1,18 @@
+#!/bin/sh
+set -C -e -f -u
+cd "$ADTTMP"
+cat > hello.c <<EOF
+#include <stdlib.h>
+#include <bzlib.h>
+int main () {
+  char dst [500];
+  char src [10];
+  unsigned int dstLen = sizeof (dst);
+  if (BZ2_bzBuffToBuffCompress (dst, &dstLen, src, sizeof (src), 1, 0, 0) == BZ_OK)
+    exit (EXIT_SUCCESS);
+  else
+    exit (EXIT_FAILURE);
+}
+EOF
+cc hello.c -lbz2 -o hello
+./hello

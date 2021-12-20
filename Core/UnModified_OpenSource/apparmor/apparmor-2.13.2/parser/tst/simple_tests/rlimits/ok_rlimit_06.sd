@@ -1,0 +1,7 @@
+#
+#=DESCRIPTION simple core file size rlimit test
+#=EXRESULT PASS
+
+profile rlimit {
+  set rlimit core <= 44444KB, # 4 chosen by completely fair die roll
+}

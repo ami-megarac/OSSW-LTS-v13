@@ -1,0 +1,9 @@
+#
+#=Description basic signal no parens permissions rule
+#=EXRESULT FAIL
+#
+/usr/bin/signal-test {
+  signal read write send receive,
+
+}
+

@@ -1,0 +1,7 @@
+#
+#=DESCRIPTION simple cpu rlimit test
+#=EXRESULT PASS
+
+profile rlimit {
+  set rlimit cpu <= infinity,
+}

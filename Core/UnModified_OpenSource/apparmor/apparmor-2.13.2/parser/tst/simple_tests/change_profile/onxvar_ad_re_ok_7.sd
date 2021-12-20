@@ -1,0 +1,66 @@
+#
+#=DESCRIPTION audit deny change_profile @{var} with just re, namespace
+#=EXRESULT PASS
+#
+
+
+@{var}=/test
+/usr/bin/foo {
+   audit deny change_profile @{var} -> :ab:*,
+}
+
+/usr/bin/foo2 {
+   audit deny change_profile @{var} -> :ab:**,
+}
+
+/usr/bin/foo3 {
+   audit deny change_profile @{var} -> :ab:?,
+}
+
+/usr/bin/foo4 {
+   audit deny change_profile @{var} -> :ab:[ab],
+}
+
+/usr/bin/foo5 {
+   audit deny change_profile @{var} -> :ab:[^ab],
+}
+
+/usr/bin/foo6 {
+   audit deny change_profile @{var} -> :*:ab,
+}
+
+/usr/bin/foo7 {
+   audit deny change_profile @{var} -> :**:ab,
+}
+
+/usr/bin/foo8 {
+   audit deny change_profile @{var} -> :?:ab,
+}
+
+/usr/bin/foo9 {
+   audit deny change_profile @{var} -> :[ab]:ab,
+}
+
+/usr/bin/foo10 {
+   audit deny change_profile @{var} -> :[^ab]:ab,
+}
+
+/usr/bin/foo11 {
+   audit deny change_profile @{var} -> :*:*,
+}
+
+/usr/bin/foo12 {
+   audit deny change_profile @{var} -> :**:**,
+}
+
+/usr/bin/foo13 {
+   audit deny change_profile @{var} -> :?:?,
+}
+
+/usr/bin/foo14 {
+   audit deny change_profile @{var} -> :[ab]:[ab],
+}
+
+/usr/bin/foo15 {
+   audit deny change_profile @{var} -> :[^ab]:[^ab],
+}

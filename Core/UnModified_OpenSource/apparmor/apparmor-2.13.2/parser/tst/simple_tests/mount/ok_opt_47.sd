@@ -1,0 +1,10 @@
+#
+#=Description basic rules to test the "rshared" mount option
+#=EXRESULT PASS
+/usr/bin/foo {
+  mount options=rshared -> /1,
+  mount options=(rshared) -> /2,
+  mount options=(rw,rshared) -> /3,
+  mount options in (rshared) -> /4,
+  mount options in (ro,rshared) -> /5,
+}

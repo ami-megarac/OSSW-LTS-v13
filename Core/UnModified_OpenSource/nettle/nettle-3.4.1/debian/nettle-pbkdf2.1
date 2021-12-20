@@ -1,0 +1,64 @@
+.\"                                      Hey, EMACS: -*- nroff -*-
+.\" First parameter, NAME, should be all caps
+.\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
+.\" other parameters are allowed: see man(7), man(1)
+.TH NETTLE\-PBKDF2 1 "June 2014" "Nettle 3.0"  "Nettle tools"
+.\" Please adjust this date whenever revising the manpage.
+.SH NAME
+nettle\-pbkdf2 \- Command-line password-based key derivation tool.
+.SH SYNOPSIS
+.B nettle\-pbkdf2
+.RI [ OPTIONS ]
+.I SALT
+.SH DESCRIPTION
+This manual page documents briefly the
+.B nettle\-pbkdf2
+command.
+This manual page was written for the Debian GNU/Linux distribution
+because the original program does not have a manual page.
+.PP
+.\" TeX users may be more comfortable with the \fB<whatever>\fP and
+.\" \fI<whatever>\fP escape sequences to invode bold face and italics, 
+.\" respectively.
+\fBnettle\-pbkdf2\fP is a front-end for Nettle's PBKDF2
+(Password-Based Key Derivation Function 2) implementation. PBKDF2
+applies a pseudo-random function to a passphrase together with a salt,
+producing a \fIderived key\fP of arbitrary length. By iterating the
+process many times, feeding the output of each round as the input of
+the next, brute-force cracking of the password is made to take
+correspondingly longer time. The use of a salt makes it harder to use
+dictionaries or rainbow tables. As computers become more powerful, the
+number of iterations can be increased without changing the rest of the
+algorithm.
+.PP
+The pseudo-random function used by this tool is currently HMAC-SHA256.
+.PP
+The password is read from standard input and the resulting derived key
+is written to standard output in groups of 16 hexadecimal digits,
+unless the \-\-raw option is used. The salt and number of iterations
+are not included in the output.
+.SH OPTIONS
+This program follows the usual GNU command line syntax, with long
+options starting with two dashes (`-').  A summary of options is
+included below.
+.TP
+.B \-l, \-\-length=\fIlength\fP
+Desired output length in octets.
+.TP
+.B \-\-raw
+Output derived key in raw binary format.
+.TP
+.B \-\-hex-salt
+Specifies that \fISALT\fP is provided in hexadecimal format.
+.TP
+.B \-\-help
+Show summary of options.
+.TP
+.B \-V, \-\-version
+Show version of program.
+.SH SEE ALSO
+.BR mkpasswd (1) ,
+.IR https://en.wikipedia.org/wiki/PBKDF2
+.SH AUTHOR
+This manual page was originally written by Magnus Holmgren <holmgren@debian.org>,
+for the Debian GNU/Linux system (but may be used by others).

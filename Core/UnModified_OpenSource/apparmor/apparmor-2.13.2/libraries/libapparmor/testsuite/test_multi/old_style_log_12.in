@@ -1,0 +1,3 @@
+type=APPARMOR msg=audit(1201615421.935:4837): PERMITTING link access from /home/jj/.fonts.cache-2.LCK to /home/jj/.fonts.cache-2.TMP-IyT7AP (firefox-bin(16844) profile null-complain-profile active null-complain-profile)
+
+

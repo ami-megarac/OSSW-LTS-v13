@@ -1,0 +1,25 @@
+#!/bin/sh
+set -e
+
+ARCH=$(dpkg --print-architecture)
+DATA=debian/tests/data
+
+[ -d $DATA/$ARCH ] || exit 77
+
+TDIR=$(mktemp -d)
+echo "testing NDBM reading..."
+
+for pag in $DATA/$ARCH/*-ndbm.pag; do
+    base=$(basename $pag .pag)
+    cp $pag $TDIR
+    dir=$(echo $pag | sed 's/\.pag$/.dir/')
+    if [ -e $dir ]; then
+        cp $dir $TDIR
+    else
+        # NDBM compat in stretch and earlier made .dir a hardlink to .pag
+        ln $TDIR/$base.pag $TDIR/$base.dir || exit 77
+    fi
+    perl -MFcntl -MNDBM_File -le 'tie %h, q(NDBM_File), shift, O_RDWR, 0640 or die "opening NDBM file failed: $!"; die "contents of NDBM file not found?" if !$h{foo}; print $h{foo}' $TDIR/$base | grep OK
+done
+
+rm -r "$TDIR"

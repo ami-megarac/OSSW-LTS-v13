@@ -1,0 +1,15 @@
+START
+File: syslog_hostname_with_dot.in
+Event type: AA_RECORD_ALLOWED
+Audit ID: 1442256553.643:40143
+Operation: open
+Mask: r
+Denied Mask: r
+fsuid: 1000
+ouid: 110
+Profile: /opt/evoke/venv/bin/gunicorn
+Name: /opt/evoke/venv/lib/python2.7/warnings.pyc
+Command: gunicorn
+PID: 28943
+Epoch: 1442256553
+Audit subid: 40143

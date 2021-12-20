@@ -1,0 +1,14 @@
+#
+#=DESCRIPTION test append
+#=EXRESULT PASS
+# vim:syntax=apparmor
+#
+/usr/bin/foo {
+  allow /{usr/,}bin/cat a,
+  allow /{usr/,}bin/true ra,
+  allow /{usr/,}bin/false ma,
+  allow /lib/libc.so la,
+  allow /{usr/,}bin/less ixa,
+  allow /{usr/,}bin/more pxa,
+  allow /a uxa,
+}

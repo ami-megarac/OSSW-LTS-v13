@@ -1,0 +1,9 @@
+#=DESCRIPTION simple expansions within file rules with numeric variable
+#=EXRESULT PASS
+@{FOO1} = /foo /bar /baz /biff
+@{B1A1R1} = @{FOO1}
+
+/usr/bin/foo {
+  /@{FOO1}/.foo/* r,
+  /foo/@{B1A1R1}/.foo/* r,
+}

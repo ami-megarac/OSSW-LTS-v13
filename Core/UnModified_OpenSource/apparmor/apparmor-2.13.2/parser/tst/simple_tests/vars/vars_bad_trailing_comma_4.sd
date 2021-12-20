@@ -1,0 +1,10 @@
+#=DESCRIPTION trailing commas should trigger an error
+#=EXRESULT FAIL
+
+@{LIBVIRT} = libvirt, libtriv
+
+/does/not/exist {
+
+  change_profile ->
+  	@{LIBVIRT}-[0-9a-f]*-[0-9a-f]*-[0-9a-f]*-[0-9a-f]*-[0-9a-f]*,
+}

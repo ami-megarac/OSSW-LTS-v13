@@ -1,0 +1,1 @@
+type=AVC msg=audit(1279948227.175:27): apparmor="STATUS" operation="profile_replace" name="/sbin/dhclient3" pid=12291 comm="apparmor_parser"

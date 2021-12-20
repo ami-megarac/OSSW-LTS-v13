@@ -1,0 +1,45 @@
+#!/bin/sh
+# Run upstream runtime tests
+# Assumes $AUTOPKGTEST_TMP is set, see /usr/share/doc/autopkgtest/README.package-tests.gz
+
+# We just copy and run the entire test suite to resp. from the $AUTOPKGTEST_TMP
+# directory because it generates output within each test's source directory.
+set -e
+cp -r tests "$AUTOPKGTEST_TMP/upstream-runtime-tests-isolation"
+cd "$AUTOPKGTEST_TMP/upstream-runtime-tests-isolation"
+set +e
+
+# Clean out tests not requiring machine-isolation, as these are performed by
+# upstream-runtime-tests
+# As of v1.6, this leaves "padd" and "requesting" as tests requiring
+# machine-isolation
+for testname in \
+				add \
+				clear \
+				describing \
+				dh_compute \
+				instantiating \
+				invalidate \
+				link \
+				listing \
+				newring \
+				noargs \
+				permitting \
+				pupdate \
+				reading \
+				restrict \
+				revoke \
+				search \
+				session \
+				show \
+				timeout \
+				unlink \
+				update
+do
+	rm -rf keyctl/$testname
+done
+
+make run
+
+# Save all test output files so that they can be accessed from ci.debian.net
+cp -r keyctl "$AUTOPKGTEST_ARTIFACTS/upstream-runtime-tests-isolation"

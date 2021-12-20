@@ -1,0 +1,8 @@
+#
+#=DESCRIPTION simple bare set keyword
+#=EXRESULT FAIL
+#
+
+/usr/bin/signal-test {
+  signal set,
+}

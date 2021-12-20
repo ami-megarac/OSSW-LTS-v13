@@ -1,0 +1,25 @@
+?RCS: $Id$
+?RCS:
+?RCS: Copyright (c) 2000 Jarkko Hietaniemi
+?RCS:
+?RCS: You may distribute under the terms of either the GNU General Public
+?RCS: License or the Artistic License, as specified in the README file.
+?RCS:
+?MAKE:d_fp_classl: Inlibc
+?MAKE:	-pick add $@ %<
+?S:d_fp_classl:
+?S:	This variable conditionally defines the HAS_FP_CLASSL symbol, which
+?S:	indicates to the C program that the fp_classl() routine is available.
+?S:.
+?C:HAS_FP_CLASSL:
+?C:	This symbol, if defined, indicates that the fp_classl routine is
+?C:	available to classify long doubles.  Available for example in
+?C:	Digital UNIX.  See for possible values HAS_FP_CLASS.
+?C:.
+?H:#$d_fp_classl HAS_FP_CLASSL		/**/
+?H:.
+?LINT:set d_fp_classl
+: see if fp_classl exists
+set fp_classl d_fp_classl
+eval $inlibc
+

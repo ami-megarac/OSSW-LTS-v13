@@ -1,0 +1,19 @@
+#!/bin/sh
+
+set -e
+
+: "${AUTOPKGTEST_TMP:="${ADTTMP}"}"
+
+if [ -z "${HOME-}" ] || ! [ -w "${HOME}" ]; then
+    export HOME="${AUTOPKGTEST_TMP}"
+fi
+
+unset DISPLAY
+
+DBUS_TEST_HOMEDIR="$AUTOPKGTEST_TMP"
+export DBUS_TEST_HOMEDIR
+export DBUS_TEST_MALLOC_FAILURES=0
+
+exec 2>&1
+
+exec gnome-desktop-testing-runner dbus

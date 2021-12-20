@@ -1,0 +1,47 @@
+From: David Cook <divergentdave@gmail.com>
+Date: Sat, 14 Nov 2020 13:10:29 -0600
+Subject: Follow-up to arithmetic overflow fix
+Origin: https://github.com/p11-glue/p11-kit/commit/commit/bd670b1d4984b27d6a397b9ddafaf89ab26e4e7f
+Bug: https://github.com/p11-glue/p11-kit/security/advisories/GHSA-q4r3-hm6m-mvc2
+Bug-Debian-Security: https://security-tracker.debian.org/tracker/CVE-2020-29361
+
+Check if nmemb is zero in p11_rpc_message_alloc_extra_array to avoid a
+division by zero trap. Additionally, change the reallocarray
+compatibility shim so that it won't assert when resizing an array to
+zero, and add the same nmemb != 0 check there.
+---
+ common/compat.c       | 4 ++--
+ p11-kit/rpc-message.c | 2 +-
+ 2 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/common/compat.c b/common/compat.c
+index be7e9e6405b3..4390cef25a81 100644
+--- a/common/compat.c
++++ b/common/compat.c
+@@ -525,8 +525,8 @@ reallocarray (void *ptr,
+ 	      size_t nmemb,
+ 	      size_t size)
+ {
+-	assert (nmemb > 0 && size > 0);
+-	if (SIZE_MAX / nmemb < size) {
++	assert (nmemb >= 0 && size >= 0);
++	if (nmemb != 0 && SIZE_MAX / nmemb < size) {
+ 		errno = ENOMEM;
+ 		return NULL;
+ 	}
+diff --git a/p11-kit/rpc-message.c b/p11-kit/rpc-message.c
+index 875adafa0434..8dfa30bdea5a 100644
+--- a/p11-kit/rpc-message.c
++++ b/p11-kit/rpc-message.c
+@@ -120,7 +120,7 @@ p11_rpc_message_alloc_extra_array (p11_rpc_message *msg,
+ 				   size_t nmemb,
+ 				   size_t size)
+ {
+-	if ((SIZE_MAX - sizeof (void *)) / nmemb < size) {
++	if (nmemb != 0 && (SIZE_MAX - sizeof (void *)) / nmemb < size) {
+ 		errno = ENOMEM;
+ 		return NULL;
+ 	}
+-- 
+2.30.0.rc2
+

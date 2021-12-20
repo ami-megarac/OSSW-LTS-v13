@@ -1,0 +1,49 @@
+.TH snmpcheck 1 2018-03-30 V5.7.3 Net-SNMP
+.SH NAME
+snmpcheck \- check hosts SNMP access
+.SH SYNOPSIS
+.B snmpcheck
+[\fIoptions\fR] [[\fB\-a\fR] \fIHOSTS\fR]...
+.SH DESCRIPTION
+\fBsnmpcheck\fP is a program that checks the SNMP status of the
+specified hosts
+.SH OPTIONS
+.SS Common Options
+.TP
+.B \-h
+Display this message.
+.TP
+.B \-a
+check error log file AND hosts specified on command line.
+.TP
+.B \-p
+Don't try and ping\-echo the host first
+.TP
+.B \-f
+Only check for things I can fix
+.TP
+.I HOSTS
+check these hosts for problems.
+.SS X Options:
+.TP
+.B \-x
+forces ascii base if $DISPLAY set (instead of tk).
+.TP
+.B \-H
+start in hidden mode.  (hides user interface)
+.TP
+.BI \-V " NUM"
+sets the initial verbosity level of the command log (def: 1)
+.TP
+.B \-L
+Show the log window at startup
+.TP
+.B \-d
+Don't start by checking anything.  Just bring up the interface.
+.SS "Ascii Options:"
+.TP
+.B \-n
+Don't ever try and fix the problems found.  Just list.
+.TP
+.B \-y
+Always fix problems found.

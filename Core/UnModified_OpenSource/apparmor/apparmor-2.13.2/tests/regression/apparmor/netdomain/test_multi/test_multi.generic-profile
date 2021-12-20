@@ -1,0 +1,17 @@
+# Generic profile for test_multi.send and test_multi.receive
+#include <tunables/global>
+
+$$PWD/test_multi.send {
+	#include <abstractions/base>
+	$$SENDNETDOMAIN
+	$$PWD/test_multi/*.send r,
+	$$PWD/test_multi.send mr,
+}
+
+$$PWD/test_multi.receive {
+	#include <abstractions/base>
+	$$RECEIVENETDOMAIN
+	$$PWD/test_multi/*.receive r,
+	$$PWD/test_multi.receive mr,
+}
+

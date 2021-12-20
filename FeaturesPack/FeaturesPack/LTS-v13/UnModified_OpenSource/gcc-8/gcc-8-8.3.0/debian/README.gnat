@@ -1,0 +1,34 @@
+If you want to develop Ada programs and libraries on Debian, please
+read the Debian Policy for Ada:
+
+http://people.debian.org/~lbrenta/debian-ada-policy.html
+
+The default Ada compiler is and always will be the package `gnat'.
+Debian contains many programs and libraries compiled with it, which
+are all ABI-compatible.
+
+Starting with gnat-4.2, Debian provides both zero-cost and
+setjump/longjump versions of the run-time library.  The zero-cost
+exception handling mechanism is the default as it provides the best
+performance.  The setjump/longjump exception handling mechanism is new
+and only provided as a static library.  It is necessary to use this
+exception handling mechanism in distributed (annex E) programs.  If
+you wish to use the new sjlj library:
+
+1) call gnatmake with --RTS=sjlj
+2) call gnatbind with -static
+
+Do NOT link your programs with libgnat-4.2.so, because it uses the ZCX
+mechanism.
+
+
+This package also includes small tools covering specific needs.
+
+* When linking objects compiled from both Ada and C sources, you need
+  to use compatible versions of the Ada and C compilers. The
+  /usr/bin/gnatgcc symbolic link targets a version of the C compiler
+  compatible with the default Ada compiler, and may differ from the
+  default C compiler /usr/bin/gcc.
+
+* When packaging Ada sources for Debian, you may want to read the
+  /usr/share/ada/debian_packaging-$(gnat_version).mk Makefile snippet.

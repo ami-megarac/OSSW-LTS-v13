@@ -1,0 +1,4 @@
+version=3
+opts=pgpsigurlmangle=s/$/.sig/ \
+https://ftp.gnu.org/gnu/autogen/rel([\d\.]+)/autogen-([\d\.]+)\.tar\.(?:xz|bz2|gz)
+#ftp://ftp.gnu.org/gnu/autogen/autogen-([\d\.]+)\.tar\.(?:xz|bz2|gz)

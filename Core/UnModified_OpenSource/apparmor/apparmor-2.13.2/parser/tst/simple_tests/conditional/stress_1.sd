@@ -1,0 +1,306 @@
+#=DESCRIPTION simple stress test nested ifs
+#=EXRESULT PASS
+$a1 = true
+$a2 = true
+$a3 = true
+$a4 = true
+$a5 = true
+$a6 = true
+$a7 = true
+$a8 = true
+$a9 = true
+$a10 = true
+$a11 = true
+$a12 = true
+$a13 = true
+$a14 = true
+$a15 = true
+$a16 = true
+$a17 = true
+$a18 = true
+$a19 = true
+$a20 = true
+$a21 = true
+$a22 = true
+$a23 = true
+$a24 = true
+$a25 = true
+$a26 = true
+$a27 = true
+$a28 = true
+$a29 = true
+$a30 = true
+$a31 = true
+$a32 = true
+$a33 = true
+$a34 = true
+$a35 = true
+$a36 = true
+$a37 = true
+$a38 = true
+$a39 = true
+$a40 = true
+$a41 = true
+$a42 = true
+$a43 = true
+$a44 = true
+$a45 = true
+$a46 = true
+$a47 = true
+$a48 = true
+$a49 = true
+$a50 = true
+$a51 = true
+$a52 = true
+$a53 = true
+$a54 = true
+$a55 = true
+$a56 = true
+$a57 = true
+$a58 = true
+$a59 = true
+$a60 = true
+$a61 = true
+$a62 = true
+$a63 = true
+$a64 = true
+$a65 = true
+$a66 = true
+$a67 = true
+$a68 = true
+$a69 = true
+$a70 = true
+$a71 = true
+$a72 = true
+$a73 = true
+$a74 = true
+$a75 = true
+$a76 = true
+$a77 = true
+$a78 = true
+$a79 = true
+$a80 = true
+$a81 = true
+$a82 = true
+$a83 = true
+$a84 = true
+$a85 = true
+$a86 = true
+$a87 = true
+$a88 = true
+$a89 = true
+$a90 = true
+$a91 = true
+$a92 = true
+$a93 = true
+$a94 = true
+$a95 = true
+$a96 = true
+$a97 = true
+$a98 = true
+$a99 = true
+$a100 = true
+/bin/true {
+  /bin/true r,
+  if $a1 {
+    if $a2 {
+      if $a3 {
+        if $a4 {
+          if $a5 {
+            if $a6 {
+              if $a7 {
+                if $a8 {
+                  if $a9 {
+                    if $a10 {
+                      if $a11 {
+                        if $a12 {
+                          if $a13 {
+                            if $a14 {
+                              if $a15 {
+                                if $a16 {
+                                  if $a17 {
+                                    if $a18 {
+                                      if $a19 {
+                                        if $a20 {
+                                          if $a21 {
+                                            if $a22 {
+                                              if $a23 {
+                                                if $a24 {
+                                                  if $a25 {
+                                                    if $a26 {
+                                                      if $a27 {
+                                                        if $a28 {
+                                                          if $a29 {
+                                                            if $a30 {
+                                                              if $a31 {
+                                                                if $a32 {
+                                                                  if $a33 {
+                                                                    if $a34 {
+                                                                      if $a35 {
+                                                                        if $a36 {
+                                                                          if $a37 {
+                                                                            if $a38 {
+                                                                              if $a39 {
+                                                                                if $a40 {
+                                                                                  if $a41 {
+                                                                                    if $a42 {
+                                                                                      if $a43 {
+                                                                                        if $a44 {
+                                                                                          if $a45 {
+                                                                                            if $a46 {
+                                                                                              if $a47 {
+                                                                                                if $a48 {
+                                                                                                  if $a49 {
+                                                                                                    if $a50 {
+                                                                                                      if $a51 {
+                                                                                                        if $a52 {
+                                                                                                          if $a53 {
+                                                                                                            if $a54 {
+                                                                                                              if $a55 {
+                                                                                                                if $a56 {
+                                                                                                                  if $a57 {
+                                                                                                                    if $a58 {
+                                                                                                                      if $a59 {
+                                                                                                                        if $a60 {
+                                                                                                                          if $a61 {
+                                                                                                                            if $a62 {
+                                                                                                                              if $a63 {
+                                                                                                                                if $a64 {
+                                                                                                                                  if $a65 {
+                                                                                                                                    if $a66 {
+                                                                                                                                      if $a67 {
+                                                                                                                                        if $a68 {
+                                                                                                                                          if $a69 {
+                                                                                                                                            if $a70 {
+                                                                                                                                              if $a71 {
+                                                                                                                                                if $a72 {
+                                                                                                                                                  if $a73 {
+                                                                                                                                                    if $a74 {
+                                                                                                                                                      if $a75 {
+                                                                                                                                                        if $a76 {
+                                                                                                                                                          if $a77 {
+                                                                                                                                                            if $a78 {
+                                                                                                                                                              if $a79 {
+                                                                                                                                                                if $a80 {
+                                                                                                                                                                  if $a81 {
+                                                                                                                                                                    if $a82 {
+                                                                                                                                                                      if $a83 {
+                                                                                                                                                                        if $a84 {
+                                                                                                                                                                          if $a85 {
+                                                                                                                                                                            if $a86 {
+                                                                                                                                                                              if $a87 {
+                                                                                                                                                                                if $a88 {
+                                                                                                                                                                                  if $a89 {
+                                                                                                                                                                                    if $a90 {
+                                                                                                                                                                                      if $a91 {
+                                                                                                                                                                                        if $a92 {
+                                                                                                                                                                                          if $a93 {
+                                                                                                                                                                                            if $a94 {
+                                                                                                                                                                                              if $a95 {
+                                                                                                                                                                                                if $a96 {
+                                                                                                                                                                                                  if $a97 {
+                                                                                                                                                                                                    if $a98 {
+                                                                                                                                                                                                      if $a99 {
+                                                                                                                                                                                                        if $a100 {
+                                                                                                                                                                                                          /bin/false ux,
+                                                                                                                                                                                                        }
+                                                                                                                                                                                                      }
+                                                                                                                                                                                                    }
+                                                                                                                                                                                                  }
+                                                                                                                                                                                                }
+                                                                                                                                                                                              }
+                                                                                                                                                                                            }
+                                                                                                                                                                                          }
+                                                                                                                                                                                        }
+                                                                                                                                                                                      }
+                                                                                                                                                                                    }
+                                                                                                                                                                                  }
+                                                                                                                                                                                }
+                                                                                                                                                                              }
+                                                                                                                                                                            }
+                                                                                                                                                                          }
+                                                                                                                                                                        }
+                                                                                                                                                                      }
+                                                                                                                                                                    }
+                                                                                                                                                                  }
+                                                                                                                                                                }
+                                                                                                                                                              }
+                                                                                                                                                            }
+                                                                                                                                                          }
+                                                                                                                                                        }
+                                                                                                                                                      }
+                                                                                                                                                    }
+                                                                                                                                                  }
+                                                                                                                                                }
+                                                                                                                                              }
+                                                                                                                                            }
+                                                                                                                                          }
+                                                                                                                                        }
+                                                                                                                                      }
+                                                                                                                                    }
+                                                                                                                                  }
+                                                                                                                                }
+                                                                                                                              }
+                                                                                                                            }
+                                                                                                                          }
+                                                                                                                        }
+                                                                                                                      }
+                                                                                                                    }
+                                                                                                                  }
+                                                                                                                }
+                                                                                                              }
+                                                                                                            }
+                                                                                                          }
+                                                                                                        }
+                                                                                                      }
+                                                                                                    }
+                                                                                                  }
+                                                                                                }
+                                                                                              }
+                                                                                            }
+                                                                                          }
+                                                                                        }
+                                                                                      }
+                                                                                    }
+                                                                                  }
+                                                                                }
+                                                                              }
+                                                                            }
+                                                                          }
+                                                                        }
+                                                                      }
+                                                                    }
+                                                                  }
+                                                                }
+                                                              }
+                                                            }
+                                                          }
+                                                        }
+                                                      }
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

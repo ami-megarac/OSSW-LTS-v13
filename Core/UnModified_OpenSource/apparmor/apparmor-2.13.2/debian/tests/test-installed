@@ -1,0 +1,33 @@
+#!/bin/sh
+
+set -e
+
+TEST_DIRS="binutils parser"
+
+SOURCE_DIR=$(pwd)
+
+WORKDIR=$(mktemp -d)
+trap "rm -rf $WORKDIR" 0 INT QUIT ABRT PIPE TERM
+
+cp -a common $WORKDIR/
+
+for dir in $TEST_DIRS ; do
+   mkdir -p $WORKDIR/$(dirname $dir)
+   cp -a $SOURCE_DIR/$dir $WORKDIR/$dir
+   (
+      cd $WORKDIR/$dir
+      echo "Running tests in $WORKDIR/$dir"
+      if [ ! -f Makefile ] ; then
+	 if [ -x autogen.sh ] ; then
+	     echo "No Makefile found in $WORKDIR/$dir, running ./autogen.sh"
+	     ./autogen.sh
+	 fi
+      fi
+      if [ ! -f Makefile ] ; then
+	  echo "No Makefile found in $WORKDIR/$dir, aborting."
+	  exit 1
+      fi
+      USE_SYSTEM=1 make tests V=1
+   )
+   rm -rf $WORKDIR/$dir
+done

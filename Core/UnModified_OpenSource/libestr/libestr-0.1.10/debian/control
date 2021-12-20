@@ -1,0 +1,34 @@
+Source: libestr
+Priority: extra
+Maintainer: Pierre Chifflier <pollux@debian.org>
+Build-Depends: debhelper (>= 9),
+    autotools-dev,
+    dh-autoreconf
+Standards-Version: 3.9.7
+Section: libs
+Homepage: http://libestr.sourceforge.net/
+#Vcs-Git: git://git.debian.org/collab-maint/libestr.git
+#Vcs-Browser: http://git.debian.org/?p=collab-maint/libestr.git;a=summary
+
+Package: libestr-dev
+Section: libdevel
+Architecture: any
+Depends: libestr0 (= ${binary:Version}), ${misc:Depends}
+Multi-Arch: same
+Description: helper functions for handling strings (headers)
+ The 'libestr' library contains some essential string manipulation
+ functions and more, like escaping special characters.
+ .
+ This package contains the development files.
+
+Package: libestr0
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Pre-Depends: ${misc:Pre-Depends}
+Multi-Arch: same
+Description: Helper functions for handling strings (lib)
+ The 'libestr' library contains some essential string manipulation
+ functions and more, like escaping special characters.
+ .
+ This package contains the shared library.

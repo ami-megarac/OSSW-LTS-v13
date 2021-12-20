@@ -1,0 +1,22 @@
+Description: Add a reference to mount(8) for the acl/noacl mount options.
+Author: Guillem Jover <guillem@debian.org>
+Bug-Debian: https://bugs.debian.org/304764
+Origin: vendor
+Forwarded: no
+Last-Modified: 2019-02-28
+
+
+---
+ man/man5/acl.5 |    1 +
+ 1 file changed, 1 insertion(+)
+
+--- a/man/man5/acl.5
++++ b/man/man5/acl.5
+@@ -403,6 +403,7 @@ header.
+ .Xr mkdir 2 ,
+ .Xr mkfifo 2 ,
+ .Xr mknod 2 ,
++.Xr mount 8 ,
+ .Xr open 2 ,
+ .Xr setfacl 1 ,
+ .Xr stat 2 ,

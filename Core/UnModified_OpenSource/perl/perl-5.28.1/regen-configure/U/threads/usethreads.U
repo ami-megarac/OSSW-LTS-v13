@@ -1,0 +1,215 @@
+?RCS: $Id: usethreads.U,v $
+?RCS:
+?RCS: Copyright (c) 1998-2000 Andy Dougherty
+?RCS:
+?RCS: You may distribute under the terms of either the GNU General Public
+?RCS: License or the Artistic License, as specified in the README file.
+?RCS:
+?RCS: $Log: usethreads.U,v $
+?RCS:
+?MAKE:usethreads useithreads use5005threads d_oldpthreads usereentrant: \
+	Myread Oldconfig Setvar test cat patchlevel
+?MAKE:	-pick add $@ %<
+?Y:TOP
+?S:usethreads:
+?S:	This variable conditionally defines the USE_THREADS symbol,
+?S:	and indicates that Perl should be built to use threads.
+?S:.
+?S:useithreads:
+?S:	This variable conditionally defines the USE_ITHREADS symbol,
+?S:	and indicates that Perl should be built to use the interpreter-based
+?S:	threading implementation.
+?S:.
+?S:use5005threads:
+?S:	This variable conditionally defines the USE_5005THREADS symbol,
+?S:	and indicates that Perl should be built to use the 5.005-based
+?S:	threading implementation. Only valid up to 5.8.x.
+?S:.
+?X: I'm putting old_pthreads in this unit because it might eventually
+?X: be part of an automatic determination to see if we can use threads
+?X: at all.
+?S:d_oldpthreads:
+?S:	This variable conditionally defines the OLD_PTHREADS_API symbol,
+?S:	and indicates that Perl should be built to use the old
+?S:	draft POSIX threads API.  This is only potentially meaningful if
+?S:	usethreads is set.
+?S:.
+?S:usereentrant:
+?S:	This variable conditionally defines the USE_REENTRANT_API symbol,
+?S:	which indicates that the thread code may try to use the various
+?S:	_r versions of library functions.  This is only potentially
+?S:	meaningful if usethreads is set and is very experimental, it is
+?S:	not even prompted for.
+?S:.
+?C:USE_ITHREADS:
+?C:	This symbol, if defined, indicates that Perl should be built to
+?C:	use the interpreter-based threading implementation.
+?C:.
+?C:USE_5005THREADS:
+?C:	This symbol, if defined, indicates that Perl should be built to
+?C:	use the 5.005-based threading implementation.
+?C:	Only valid up to 5.8.x.
+?C:.
+?C:USE_THREADS:
+?C:	This symbol, if defined, indicates that Perl should
+?C:	be built to use threads.  At present, it is a synonym for
+?C:	USE_5005THREADS for perl older than 5.8 and USE_ITHREADS
+?C:	for 5.8.x and newer, but eventually the source ought to be
+?C:	changed to use this to mean _any_ threading implementation.
+?C:.
+?C:OLD_PTHREADS_API:
+?C:	This symbol, if defined, indicates that Perl should
+?C:	be built to use the old draft POSIX threads API.
+?C:.
+?C:USE_REENTRANT_API:
+?C:	This symbol, if defined, indicates that Perl should
+?C:	try to use the various _r versions of library functions.
+?C:	This is extremely experimental.
+?C:.
+?H:#$use5005threads	USE_5005THREADS		/**/
+?H:#$useithreads	USE_ITHREADS		/**/
+?H:?%<:#if defined(USE_5005THREADS) && !defined(USE_ITHREADS)
+?H:?%<:#define		USE_THREADS		/* until src is revised*/
+?H:?%<:#endif
+?H:#$d_oldpthreads	OLD_PTHREADS_API		/**/
+?H:#$usereentrant	USE_REENTRANT_API	/**/
+?H:.
+?X:       [hmb] Removed LINT for use5005threads, useithreads, and
+?X:             usereentrant, as LINT is only run on blead
+?LINT:set usethreads d_oldpthreads
+?INIT:: set usethreads on the Configure command line to enable threads.
+?INIT:usereentrant='undef'
+?F:!usethreads.cbu
+: Do we want threads support and if so, what type
+?X: We should really have some explanatory text here, and some
+?X: automatic setting of sensible defaults.
+case "$usethreads" in
+$define|true|[yY]*)     dflt='y';;
+*)     # Catch case where user specified ithreads or 5005threads but
+       # forgot -Dusethreads (A.D. 4/2002)
+       case "$useithreads$use5005threads" in
+       *$define*)	dflt='y';;
+       *)		dflt='n';;
+       esac
+       ;;
+esac
+cat <<EOM
+
+Perl can be built to offer a form of threading support on some systems
+To do so, Configure can be run with -Dusethreads.
+
+Note that Perl built with threading support runs slightly slower
+and uses slightly more memory than plain Perl.
+
+If this doesn't make any sense to you, just accept the default '$dflt'.
+EOM
+rp='Build a threading Perl?'
+. ./myread
+case "$ans" in
+y|Y)    val="$define" ;;
+*)      val="$undef" ;;
+esac
+set usethreads
+eval $setvar
+
+if $test $patchlevel -lt 9; then
+    case "$usethreads" in
+    $define)
+	: Default to ithreads unless overridden on command line or with
+	: old config.sh
+	dflt='y'
+	case "$use5005threads" in
+		$define|true|[yY]*)
+			echo "5.005 threads are no longer supported"
+			exit 1
+		;;
+	esac
+	case "$useithreads" in
+		$undef|false|[nN]*) dflt='n';;
+	esac
+	rp='Use the newer interpreter-based ithreads?'
+	. ./myread
+	case "$ans" in
+	y|Y)    val="$define" ;;
+	*)      val="$undef" ;;
+	esac
+	set useithreads
+	eval $setvar
+	: Now set use5005threads to the opposite value.
+	case "$useithreads" in
+	$define) val="$undef" ;;
+	*) val="$define" ;;
+	esac
+	set use5005threads
+	eval $setvar
+	;;
+    *)
+	useithreads="$undef"
+	use5005threads="$undef"
+	;;
+    esac
+
+?X: This is not supposed to be possible but with some trickery, maybe.
+    case "$useithreads$use5005threads" in
+    "$define$define")
+	$cat >&4 <<EOM
+
+You cannot have both the ithreads and the 5.005 threads enabled
+at the same time.  Disabling the 5.005 threads since they are
+much less stable than the ithreads.
+
+EOM
+	use5005threads="$undef"
+	;;
+    esac
+
+else
+: perl-5.9.x and later
+
+    if test X"$usethreads" = "X$define"; then
+	case "$use5005threads" in
+	    $define|true|[yY]*)
+		$cat >&4 <<EOM
+
+5.005 threads has been removed for 5.10.  Perl will be built using ithreads.
+
+EOM
+	    ;;
+	esac
+    fi
+
+    use5005threads="$undef"
+    useithreads="$usethreads"
+fi
+
+?X: Check out what kind of threads API we have
+case "$d_oldpthreads" in
+'')	: Configure tests would be welcome here.  For now, assume undef.
+	val="$undef" ;;
+*)	val="$d_oldpthreads" ;;
+esac
+set d_oldpthreads
+eval $setvar
+
+?X: In general, -lpthread needs to come before -lc but after other
+?X: libraries such as -lgdbm and such like. We assume here that -lc
+?X: is present in libswanted. If that fails to be true, then this
+?X: can be changed to add pthread to the very end of libswanted.
+
+: Look for a hint-file generated 'call-back-unit'.  If the
+: user has specified that a threading perl is to be built,
+: we may need to set or change some other defaults.
+if $test -f usethreads.cbu; then
+    echo "Your platform has some specific hints regarding threaded builds, using them..."
+    . ./usethreads.cbu
+else
+    case "$usethreads" in
+	"$define"|true|[yY]*)
+		$cat <<EOM
+(Your platform does not have any specific hints for threaded builds.
+ Assuming POSIX threads, then.)
+EOM
+	;;
+    esac
+fi
+

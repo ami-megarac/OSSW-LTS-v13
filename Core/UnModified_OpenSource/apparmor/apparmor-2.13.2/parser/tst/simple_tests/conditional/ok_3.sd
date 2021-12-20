@@ -1,0 +1,17 @@
+#=DESCRIPTION basic conditional statements w/file rules
+#=EXRESULT PASS
+
+$FOO=true
+$BAR = False
+
+/bin/true {
+  /bin/false rix,
+  if ${FOO} {
+    /bin/true rix,
+  }
+  /bin/true rix,
+  if ${BAR} {
+    /etc/shadow rw,
+  }
+  /bin/sh rix,
+}

@@ -1,0 +1,8 @@
+START
+File: old_style_log_13.in
+Event type: AA_RECORD_INVALID
+Audit ID: 1173790298.983:1669
+Operation: APPARMOR
+Info: REJECTING access to syscall 'sysctl (write)' (syscall_sysctl(25423) profile /home/steve/svn/trunk-forge/tests/regression/subdomain/syscall_sysctl active /home/steve/svn/trunk-forge/tests/regression/subdomain/syscall_sysctl)
+Epoch: 1173790298
+Audit subid: 1669

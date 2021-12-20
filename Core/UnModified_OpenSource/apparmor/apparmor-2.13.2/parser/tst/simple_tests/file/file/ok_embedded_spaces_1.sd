@@ -1,0 +1,6 @@
+#=DESCRIPTION Simple test case for embedded spaces
+#=EXRESULT PASS
+
+/bin/foo {
+  file "/abc\ def" r,
+}

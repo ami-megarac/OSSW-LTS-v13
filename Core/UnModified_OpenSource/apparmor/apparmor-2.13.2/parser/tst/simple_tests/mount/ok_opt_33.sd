@@ -1,0 +1,10 @@
+#
+#=Description basic rules to test the "norelatime" mount option
+#=EXRESULT PASS
+/usr/bin/foo {
+  mount options=norelatime /a -> /1,
+  mount options=(norelatime) /b -> /2,
+  mount options=(rw,norelatime) /c -> /3,
+  mount options in (norelatime) /d -> /4,
+  mount options in (ro,norelatime) /e -> /5,
+}

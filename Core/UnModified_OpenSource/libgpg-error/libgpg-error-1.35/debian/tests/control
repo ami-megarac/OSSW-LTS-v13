@@ -1,0 +1,8 @@
+Test-Command: debian/tests/libgpg-error-mingw-w64-dev i686
+Depends: libgpg-error-mingw-w64-dev, wine, wine32, libgpg-error-dev
+
+Test-Command: debian/tests/libgpg-error-mingw-w64-dev x86_64
+Depends: libgpg-error-mingw-w64-dev, wine, wine64, libgpg-error-dev
+
+Tests: build
+Depends: libgpg-error-dev, build-essential

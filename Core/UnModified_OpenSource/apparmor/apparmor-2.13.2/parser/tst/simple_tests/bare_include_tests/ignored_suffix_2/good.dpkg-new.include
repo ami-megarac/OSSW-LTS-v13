@@ -1,0 +1,6 @@
+#=DESCRIPTION Valid include
+#
+# if parsed stand-alone,
+#=EXRESULT PASS
+
+@{FOO} = /foo /bar

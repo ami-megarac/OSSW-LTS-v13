@@ -1,0 +1,11 @@
+#
+#=DESCRIPTION change_profile /onexec with quotes
+#=EXRESULT PASS
+#
+/usr/bin/foo {
+   change_profile /onexec -> "/bin/foo",
+}
+
+/usr/bin/foo2 {
+   change_profile /onexec -> "/bin/ foo",
+}

@@ -1,0 +1,9 @@
+#=DESCRIPTION reference variables is null
+#=EXRESULT FAIL
+#needs post var expansion check that variable contained a value
+
+@{FOO}=
+
+profile bar @{FOO} {
+  /does/not/exist r,
+}

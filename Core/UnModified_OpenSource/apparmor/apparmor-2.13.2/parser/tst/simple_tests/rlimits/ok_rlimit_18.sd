@@ -1,0 +1,7 @@
+#
+#=DESCRIPTION simple realtime time rlimit test
+#=EXRESULT PASS
+
+profile rlimit {
+  set rlimit rttime <= 60minutes,
+}

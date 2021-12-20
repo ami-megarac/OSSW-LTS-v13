@@ -1,0 +1,4 @@
+usr/include/
+usr/lib/*/libfastjson.a
+usr/lib/*/libfastjson.so
+usr/lib/*/pkgconfig/

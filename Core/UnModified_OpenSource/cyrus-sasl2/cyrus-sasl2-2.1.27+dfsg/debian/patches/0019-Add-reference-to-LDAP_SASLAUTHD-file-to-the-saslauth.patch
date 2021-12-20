@@ -1,0 +1,24 @@
+From: Debian Cyrus SASL Team
+ <pkg-cyrus-sasl2-debian-devel@lists.alioth.debian.org>
+Date: Thu, 24 Mar 2016 11:35:04 +0100
+Subject: Add reference to LDAP_SASLAUTHD file to the saslauthd documentation
+
+---
+ saslauthd/saslauthd.mdoc | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/saslauthd/saslauthd.mdoc b/saslauthd/saslauthd.mdoc
+index 17c9284..f38b5de 100644
+--- a/saslauthd/saslauthd.mdoc
++++ b/saslauthd/saslauthd.mdoc
+@@ -246,8 +246,8 @@ instead.
+ .Pp
+ Authenticate against an ldap server.  The ldap configuration parameters are
+ read from /etc/saslauthd.conf.  The location of this file can be
+-changed with the -O parameter. See the LDAP_SASLAUTHD file included with the
+-distribution for the list of available parameters.
++changed with the -O parameter. See the LDAP_SASLAUTHD file included in the
++cyrus-sasl2-doc package for the list of available parameters.
+ .It Li sia
+ .Em (Digital UNIX)
+ .Pp

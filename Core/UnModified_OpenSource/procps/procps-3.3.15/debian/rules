@@ -1,0 +1,93 @@
+#!/usr/bin/make -f
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+PACKAGE="procps"
+DEBROOT=$(CURDIR)/debian/tmp
+
+DEB_HOST_MULTIARCH ?= $(shell dpkg-architecture -qDEB_HOST_MULTIARCH)
+DEB_HOST_ARCH_OS ?= $(shell dpkg-architecture -qDEB_HOST_ARCH_OS)
+DEB_HOST_GNU_TYPE ?= $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
+DEB_BUILD_GNU_TYPE ?= $(shell dpkg-architecture -qDEB_BUILD_GNU_TYPE)
+ifneq ($(DEB_HOST_GNU_TYPE),$(DEB_BUILD_GNU_TYPE))
+configure_flags += --host=$(DEB_HOST_GNU_TYPE)
+endif
+
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+
+ifeq ($(DEB_HOST_ARCH_OS),linux)
+LINUX_CONFIGURE_EXTRA_FLAGS = --with-systemd --enable-libselinux
+endif
+
+%:
+	dh $@
+
+override_dh_auto_configure:
+	./configure \
+	  $(configure_flags) \
+	  --build=$(DEB_BUILD_GNU_TYPE) \
+	  --disable-silent-rules \
+	  --enable-watch8bit --enable-w-from \
+	  --enable-skill ${LINUX_CONFIGURE_EXTRA_FLAGS} \
+	  --disable-pidof \
+	  --disable-modern-top \
+	  --prefix=/usr \
+	  --exec-prefix=/ \
+	  --libdir=/usr/lib/$(DEB_HOST_MULTIARCH)
+
+
+override_dh_auto_install: $(autogen-files)
+	dh_auto_install
+	mkdir $(DEBROOT)/bbin
+	mv $(DEBROOT)/bin/kill $(DEBROOT)/bbin/
+	mv $(DEBROOT)/bin/ps $(DEBROOT)/bbin/
+
+	# Rename w as there are two of them
+	(cd $(DEBROOT)/bin && mv w w.procps )
+	(cd $(DEBROOT)/usr/share/man/man1 && mv w.1 w.procps.1 )
+
+
+ifneq ($(DEB_HOST_ARCH_OS), linux)
+	rm -f \
+		$(DEBROOT)/bin/slabtop \
+		$(DEBROOT)/usr/share/man/man1/slabtop.1 \
+		$(DEBROOT)/sbin/sysctl \
+		$(DEBROOT)/usr/share/man/man8/sysctl.8 \
+		$(DEBROOT)/usr/share/man/man5/sysctl.conf.5 \
+		$(NULL)
+
+    # Rename kill as there are two of them
+	(cd $(DEBROOT)/bbin && mv kill kill.procps )
+	(cd $(DEBROOT)/usr/share/man/man1 && mv kill.1 kill.procps.1 )
+endif
+ifeq ($(DEB_HOST_ARCH_OS), hurd)
+	rm -f \
+		$(DEBROOT)/bin/pmap \
+		$(DEBROOT)/usr/share/man/man1/pmap.1 \
+		$(NULL)
+
+	# Rename vmstat as there are two of them
+	(cd $(DEBROOT)/bin && mv vmstat vmstat.procps )
+	(cd $(DEBROOT)/usr/share/man/man8 && mv vmstat.8 vmstat.procps.8 )
+	
+    # Rename uptime as there are two of them
+	(cd $(DEBROOT)/bin && mv uptime uptime.procps )
+	(cd $(DEBROOT)/usr/share/man/man1 && mv uptime.1 uptime.procps.1 )
+
+	# Rename ps as there are two of them
+	(cd $(DEBROOT)/bbin && mv ps ps.procps )
+	(cd $(DEBROOT)/usr/share/man/man1 && mv ps.1 ps.procps.1 )
+endif
+
+override_dh_installchangelogs:
+	dh_installchangelogs NEWS
+
+override_dh_installinit:
+ifeq ($(DEB_HOST_ARCH_OS), linux)
+	dh_installinit --no-start
+endif
+
+override_dh_makeshlibs:
+	dh_makeshlibs -V 'libprocps7 (>=2:3.3.15-1)'
+

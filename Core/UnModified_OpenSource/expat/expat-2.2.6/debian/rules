@@ -1,0 +1,128 @@
+#!/usr/bin/make -f
+## ----------------------------------------------------------------------
+## debian/rules : package script for expat
+## ----------------------------------------------------------------------
+
+## uncomment this to turn on verbose mode
+#export DH_VERBOSE=1
+
+DEB_BUILD_GNU_TYPE ?= $(shell dpkg-architecture -qDEB_BUILD_GNU_TYPE)
+DEB_HOST_GNU_TYPE  ?= $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
+DEB_HOST_ARCH      ?= $(shell dpkg-architecture -qDEB_HOST_ARCH)
+DEB_HOST_ARCH_OS   ?= $(shell dpkg-architecture -qDEB_HOST_ARCH_OS)
+DEB_HOST_MULTIARCH ?= $(shell dpkg-architecture -qDEB_HOST_MULTIARCH)
+
+ifeq ($(DEB_BUILD_GNU_TYPE), $(DEB_HOST_GNU_TYPE))
+	CONFFLAGS = --build=$(DEB_HOST_GNU_TYPE)
+else
+	CONFFLAGS = --build=$(DEB_BUILD_GNU_TYPE) --host=$(DEB_HOST_GNU_TYPE)
+endif
+
+ifneq (,$(filter $(DEB_HOST_ARCH_OS), kfreebsd hurd))
+	CONFFLAGS += --with-libbsd
+endif
+
+# -pthread -D_REENTRANT #551079
+CFLAGS  = `dpkg-buildflags --get CFLAGS`
+CFLAGS  += -Wall
+
+LDFLAGS = -Wl,-Bsymbolic-functions
+LDFLAGS += `dpkg-buildflags --get LDFLAGS`
+
+CPPFLAGS = `dpkg-buildflags --get CPPFLAGS`
+
+UPACKAGE = $(shell dh_listpackages | grep -- -udeb$$)
+
+COMMA = ,
+ifneq (,$(filter parallel=%,$(subst $(COMMA), ,$(DEB_BUILD_OPTIONS))))
+  NJOBS := -j $(subst parallel=,,$(filter parallel=%,$(subst $(COMMA), ,$(DEB_BUILD_OPTIONS))))
+endif
+
+config-common-stamp:
+	dh_testdir
+	rm -rf $(CURDIR)/src $(CURDIR)/srcw
+	mkdir -p $(CURDIR)/src $(CURDIR)/srcw
+	tar cf - expat/* | tar --strip-components=1 -C $(CURDIR)/src   -xf -
+	tar cf - expat/* | tar --strip-components=1 -C $(CURDIR)/srcw -xf -
+	sed -i -e "s,libexpat\.la,libexpatw.la," \
+		-e "s,libexpat_la,libexpatw_la," \
+		$$(find srcw -name Makefile.am)
+	cd $(CURDIR)/src ; ./buildconf.sh
+	cd $(CURDIR)/srcw; ./buildconf.sh
+	touch $@
+
+build/config.status: config-common-stamp
+	dh_testdir
+	(mkdir -p $(@D); cd $(@D); CFLAGS="$(CFLAGS)" CPPFLAGS="$(CPPFLAGS)" LDFLAGS="$(LDFLAGS)" \
+	 ../src/configure $(CONFFLAGS) --prefix=/usr --mandir=\$${prefix}/share/man --libdir=\$${prefix}/lib/$(DEB_HOST_MULTIARCH))
+
+buildw/config.status: config-common-stamp
+	dh_testdir
+	(mkdir -p $(@D); cd $(@D); CFLAGS="$(CFLAGS) -DXML_UNICODE" CPPFLAGS="$(CPPFLAGS)" LDFLAGS="$(LDFLAGS)" \
+	 ../srcw/configure $(CONFFLAGS) --prefix=/usr --mandir=\$${prefix}/share/man --libdir=\$${prefix}/lib/$(DEB_HOST_MULTIARCH))
+
+clean:
+	dh_testdir
+	dh_testroot
+	rm -rf src/ srcw/
+	rm -rf build/ buildw/
+	rm -rf debian/tmp/
+	dh_autoreconf_clean
+	dh_clean config-common-stamp build-stamp debian/xmlwf.1
+
+build: build-stamp
+build-arch: build-stamp
+build-indep: build-stamp
+build-stamp: build/config.status buildw/config.status
+	dh_testdir
+	$(MAKE) $(NJOBS) -C build/
+	$(MAKE) $(NJOBS) -C buildw/lib all
+#	docbook-to-man doc/xmlwf.sgml > debian/xmlwf.1
+	touch $@
+
+install: build
+	dh_testdir
+	dh_testroot
+	dh_prep
+	dh_installdirs
+	$(MAKE) -C build/ install DESTDIR=$(CURDIR)/debian/tmp
+	$(MAKE) -C buildw/lib install DESTDIR=$(CURDIR)/debian/tmp APIHEADER=
+	# Move libexpat.so.* to /lib so that zfsutils can use it.
+	mkdir -p $(CURDIR)/debian/tmp/lib/$(DEB_HOST_MULTIARCH)
+	mv $(CURDIR)/debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)/libexpat.so.* \
+		$(CURDIR)/debian/tmp/lib/$(DEB_HOST_MULTIARCH)/
+	for i in $(CURDIR)/debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)/libexpat.so ; do \
+		dest=$$(readlink $$i) ; \
+		rm -f $$i ; \
+		ln -s /lib/$(DEB_HOST_MULTIARCH)/$$dest $$i ; \
+	done
+	mkdir -p debian/tmp/usr/include/$(DEB_HOST_MULTIARCH)
+	mv debian/tmp/usr/include/expat_config.h debian/tmp/usr/include/$(DEB_HOST_MULTIARCH)/.
+
+binary-indep: build install
+binary-arch: build install
+	dh_testdir
+	dh_testroot
+	dh_install -a --sourcedir=debian/tmp
+	rm debian/libexpat1-dev/usr/share/doc/libexpat1-dev/expat.html/Makefile.am
+	dh_installdocs -a
+	dh_installman -a
+#	dh_installman -pexpat debian/xmlwf.1
+	dh_installexamples -a
+	dh_installchangelogs -a expat/Changes
+	dh_link -a
+	dh_strip -a
+	dh_compress -a
+	dh_fixperms -a
+	chmod 644 $(CURDIR)/debian/libexpat1-dev/usr/share/doc/libexpat1-dev/examples/* \
+	          $(CURDIR)/debian/libexpat1-dev/usr/share/aclocal/*
+	dh_makeshlibs -a -V --add-udeb=$(UPACKAGE)
+	dh_installdeb -a
+	dh_shlibdeps -a -l $(CURDIR)/debian/libexpat1/usr/lib/$(DEB_HOST_MULTIARCH)
+	dh_gencontrol -a
+	dh_md5sums -a
+	dh_builddeb -a
+
+binary: binary-indep binary-arch
+
+.PHONY: clean build install binary-indep binary-arch binary

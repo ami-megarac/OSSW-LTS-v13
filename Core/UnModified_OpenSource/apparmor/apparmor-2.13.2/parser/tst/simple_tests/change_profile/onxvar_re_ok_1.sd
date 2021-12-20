@@ -1,0 +1,25 @@
+#
+#=DESCRIPTION change_profile @{var}
+#=EXRESULT PASS
+#
+@{var}=/test
+/usr/bin/foo {
+   change_profile @{var} -> /bin/*,
+}
+
+/usr/bin/foo2 {
+   change_profile @{var} -> /bin/**,
+}
+
+/usr/bin/foo3 {
+   change_profile @{var} -> /bin/?,
+}
+
+/usr/bin/foo4 {
+   change_profile @{var} -> /bin/[ab],
+}
+
+/usr/bin/foo5 {
+   change_profile @{var} -> /bin/[^ab],
+}
+

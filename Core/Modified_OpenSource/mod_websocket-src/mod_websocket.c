@@ -2066,10 +2066,21 @@ static handler_t mod_websocket_check_extension(server *srv, connection *con, voi
     for (i = hdrs->used; i > 0; i--) {
         hdr = (data_string *)hdrs->data[i - 1];
         if (buffer_is_equal_string(hdr->key, CONST_STR_LEN("Connection"))) {
+		if(connection_hdr_value != NULL)
+		{
+			buffer_free(connection_hdr_value);
+			connection_hdr_value = NULL;
+		}
+
             connection_hdr_value = buffer_init_buffer(hdr->value);
             buffer_to_lower(connection_hdr_value);
         }
         if (buffer_is_equal_string(hdr->key, CONST_STR_LEN("Upgrade"))) {
+		if(upgrade_hdr_value != NULL)
+		{
+			buffer_free(upgrade_hdr_value);
+			upgrade_hdr_value=NULL;
+		}
             upgrade_hdr_value = buffer_init_buffer(hdr->value);
             buffer_to_lower(upgrade_hdr_value);
         }
@@ -2086,8 +2097,19 @@ static handler_t mod_websocket_check_extension(server *srv, connection *con, voi
             log_error_write(srv, __FILE__, __LINE__, "ss",
                             con->uri.path->ptr, "is not WebSocket Request");
         }
-        buffer_free(connection_hdr_value);
-        buffer_free(upgrade_hdr_value);
+		if(connection_hdr_value != NULL)
+		{
+			buffer_free(connection_hdr_value);
+			connection_hdr_value = NULL;
+		}
+
+		
+		if(upgrade_hdr_value != NULL)
+		{
+			buffer_free(upgrade_hdr_value);
+			upgrade_hdr_value=NULL;
+		}
+        
         return HANDLER_GO_ON;
     }
 
@@ -2430,7 +2452,6 @@ SUBREQUEST_FUNC(mod_websocket_handle_subrequest) {
 
 			if (ServiceWebSockCmd(Instance, hctx->con->request.uri) != 0) {
 			    	hctx->con->dupped = 0;
-				hctx->con->ssl = NULL;
 				hctx->con->http_status = MOD_WEBSOCKET_INTERNAL_SERVER_ERROR;
 				hctx->con->mode = DIRECT;
 				break;

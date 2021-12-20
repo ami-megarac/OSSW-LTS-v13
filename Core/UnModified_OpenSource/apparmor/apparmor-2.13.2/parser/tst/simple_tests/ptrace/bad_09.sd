@@ -1,0 +1,8 @@
+#
+#=Description ptrace w/owner
+#=EXRESULT FAIL
+#
+/usr/bin/foo {
+  owner ptrace r,
+
+}

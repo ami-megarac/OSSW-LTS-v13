@@ -1,0 +1,7 @@
+#
+#=DESCRIPTION simple unix getattr acceptance test
+#=EXRESULT FAIL
+
+profile a_profile {
+  unix (getattr) peer=(label=unconfined),
+}

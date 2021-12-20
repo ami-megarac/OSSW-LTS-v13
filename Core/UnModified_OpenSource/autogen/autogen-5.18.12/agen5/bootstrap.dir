@@ -1,0 +1,120 @@
+#! /bin/echo This_file_must_be_sourced,_not_executed
+#
+# ----------------------------------------------------------------------
+# agen5/bootstrap.dir --- maintainer's bootstrap script
+#
+# Author:            Bruce Korb <bkorb@gnu.org>
+##  This file is part of AutoGen.
+##  AutoGen Copyright (C) 1992-2016 by Bruce Korb - all rights reserved
+##
+## AutoGen is free software: you can redistribute it and/or modify it
+## under the terms of the GNU General Public License as published by the
+## Free Software Foundation, either version 3 of the License, or
+## (at your option) any later version.
+##
+## AutoGen is distributed in the hope that it will be useful, but
+## WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+## See the GNU General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License along
+## with this program.  If not, see <http://www.gnu.org/licenses/>.
+# ----------------------------------------------------------------------
+#
+#  This script rebuilds sources not kept in the GIT repository.
+#  These files are distributed, so it is not necessary to invoke
+#  AutoGen before building AutoGen.
+
+#  "make" will invoke this file with the name of the desired output
+#  as an argument.  We do this here rather than in the make file
+#  because some of the rules are complex and we don't want to
+#  deal with the dual update problem.
+
+readonly stamp_list=$(echo "stamp-opts${nl}stamp-proto"
+    sed -n '/^make_[a-z_]*[(]/{;s/^make_/stamp-/;s/[()].*//;p;}' \
+        ${top_srcdir}/agen5/mk-stamps.sh)
+
+set_defaults()
+{
+    builddir=$(pwd)
+    srcdir=${top_srcdir}/agen5
+
+    export builddir srcdir
+
+    #  Make sure we have a default for top build and source.
+    #  Some of the templates need this information.
+    #
+    eval "set -a;$(egrep '^AG_[A-Z0-9_]*=' ${top_srcdir}/VERSION);set +a"
+
+    #  disable any $HOME defaults
+    #
+    HOME=/dev/null
+    SHELL=${POSIX_SHELL-/bin/sh}
+
+    ${VERBOSE:-false} && set -x || :
+    #  Ensure complete success or a noticable failure
+    #
+    set -e
+}
+
+assemble_Makefile() {
+    {
+        sed '/# *start-generated-text/q' ${srcdir}/Makefile.am.pre
+        echo
+
+        echo list_stamps = '\'
+        sflist=''
+        for f in $stamp_list
+        do sflist=${sflist}$f${nl}
+        done
+        printf %s "$sflist" | \
+            ${CLexe} --spread=1 -I4 --line=' \'
+
+        echo "if AMDEP"
+        for f in $stamp_list
+        do
+            echo "@am__include@ @am__quote@./\$(DEPDIR)/${f}.d@am__quote@"
+        done
+        echo endif
+
+        fmt='\n%s:\n\t@target="$(AUTOGEN_%s_TList)" \\\n'
+        fmt=${fmt}'\t$(MAKE_STAMP)\n'
+        for f in $stamp_list
+        do
+            g=$(echo $f | sed 's/[^a-zA-Z0-9]/_/g')
+            printf "$fmt" $f $g
+        done
+        printf '.PHONY: stamps\nstamps: $(list_stamps)\n%s' \
+            $'\n# end-generated-text\n# end of Makefile.am\n'
+
+    } > Makefile.am
+}
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+#
+#  M A I N
+#
+set_defaults ${1+"$@"}
+DEPDIR=
+
+if ${skip_gen:-false}
+then
+    untar_touch agen5.tgz
+else
+    . ${srcdir}/mk-stamps.sh $stamp_list
+    assemble_Makefile
+fi
+
+#  IF we symlinked in columns or getdefs,
+#  THEN it is time to unlink them
+#
+test -z "$rmlist" || rm -f $rmlist
+
+# Local Variables:
+# mode:shell-script
+# sh-indentation:4
+# sh-basic-offset:4
+# indent-tabs-mode: nil
+# End:
+
+# end of agen5/bootstrap.dir

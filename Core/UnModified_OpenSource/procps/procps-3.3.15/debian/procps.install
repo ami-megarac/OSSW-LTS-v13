@@ -1,0 +1,8 @@
+# Files to install for non-kfreebsd and non-hurd systems
+# I think that just means linux
+debian/sysctl.conf etc
+debian/protect-links.conf etc/sysctl.d
+debian/README.sysctl etc/sysctl.d
+bbin/* bin
+bin/* usr/bin
+sbin/sysctl sbin

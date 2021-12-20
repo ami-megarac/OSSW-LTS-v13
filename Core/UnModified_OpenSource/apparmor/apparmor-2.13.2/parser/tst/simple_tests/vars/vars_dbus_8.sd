@@ -1,0 +1,13 @@
+#=DESCRIPTION reference variables in dbus rules, embedded within alternation
+#=EXRESULT PASS
+
+@{TLDS}=com org
+@{DOMAINS}=gnome freedesktop
+
+/does/not/exist {
+   dbus (send, receive)
+       bus=session
+       path={/@{TLDS}/foo,/com/@{DOMAINS}}
+       interface=@{TLDS}.freedesktop
+       peer=(name=@{TLDS}.freedesktop label=/@{TLDS}/freedesktop),
+}

@@ -1,0 +1,14 @@
+#=DESCRIPTION Conditional tests with 'defined' keyword
+#=EXRESULT PASS
+
+@FOO = ""
+
+/bin/true {
+  if defined @FOO {
+    /bin/true rix,
+  }
+  if defined @BAR {
+    /bin/false rix,
+  }
+  /dev/null r,
+}

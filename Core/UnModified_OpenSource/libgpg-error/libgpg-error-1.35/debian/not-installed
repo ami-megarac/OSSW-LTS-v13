@@ -1,0 +1,10 @@
+usr/share/locale/*/LC_MESSAGES/libgpg-error.mo
+usr/i686-w64-mingw32/share/locale/*/LC_MESSAGES/libgpg-error.mo
+usr/*-w64-mingw32/share/libgpg-error/errorref.txt
+usr/*-w64-mingw32/share/man/man1/gpgrt-config.1
+usr/*-w64-mingw32/share/info/dir
+usr/*-w64-mingw32/share/info/gpgrt.info
+usr/*-w64-mingw32/share/common-lisp/source/gpg-error/*
+usr/*-w64-mingw32/share/aclocal/gpgrt.m4
+usr/*-w64-mingw32/share/aclocal/gpg-error.m4
+usr/share/common-lisp/source/gpg-error/*

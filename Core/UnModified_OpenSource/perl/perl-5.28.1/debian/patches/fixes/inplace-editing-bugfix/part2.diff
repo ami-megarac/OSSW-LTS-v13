@@ -1,0 +1,56 @@
+From c6c141a3f4dbdaa4d25aa1f7c3f69b20f7254813 Mon Sep 17 00:00:00 2001
+From: Tony Cook <tony@develop-help.com>
+Date: Tue, 20 Nov 2018 16:43:43 +1100
+Subject: (perl #133659) tests for global destruction handling of inplace
+ editing
+
+Bug-Debian: https://bugs.debian.org/914651
+Origin: upstream
+Patch-Name: fixes/inplace-editing-bugfix/part2.diff
+---
+ t/io/inplace.t | 28 +++++++++++++++++++++++++++-
+ 1 file changed, 27 insertions(+), 1 deletion(-)
+
+diff --git a/t/io/inplace.t b/t/io/inplace.t
+index 98159e06bf..ac50f1ab77 100644
+--- a/t/io/inplace.t
++++ b/t/io/inplace.t
+@@ -5,7 +5,7 @@ require './test.pl';
+ 
+ $^I = $^O eq 'VMS' ? '_bak' : '.bak';
+ 
+-plan( tests => 6 );
++plan( tests => 8 );
+ 
+ my @tfiles     = (tempfile(), tempfile(), tempfile());
+ my @tfiles_bak = map "$_$^I", @tfiles;
+@@ -91,3 +91,29 @@ SKIP:
+     
+     END { unlink_all(@ifiles); }
+ }
++
++{
++    my @tests =
++      ( # opts, code, result, name, $TODO
++       [ "-n", "die", "bar\n", "die shouldn't touch file" ],
++       [ "-n", "last", "", "last should update file", "not implemented yet" ],
++      );
++    our $file = tempfile() ;
++
++    for my $test (@tests) {
++        (my ($opts, $code, $result, $name), our $TODO) = @$test;
++        open my $fh, ">", $file or die;
++        print $fh "bar\n";
++        close $fh;
++
++        runperl( prog => $code,
++                 switches => [ grep length, "-i", $opts ],
++                 args => [ $file ],
++                 stderr => 1, # discarded
++               );
++        open $fh, "<", $file or die;
++        my $data = do { local $/; <$fh>; };
++        close $fh;
++        is($data, $result, $name);
++    }
++}

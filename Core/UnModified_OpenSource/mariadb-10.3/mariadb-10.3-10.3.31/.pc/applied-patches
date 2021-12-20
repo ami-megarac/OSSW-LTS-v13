@@ -1,0 +1,14 @@
+disable-test-disks.patch
+extend_default_test_timeout_for_tokudb.patch
+mips-groonga-atomic.patch
+mips-connect-unaligned.patch
+mips-machine.patch
+c11_atomics.patch
+kFreeBSD-gettid.patch
+mytop-merge_src:mytop_improvements.patch
+0024-Revert-to-using-system-pcre-library.patch
+0025-Change-the-default-optimization-from-O3-to-O2-in-mys.patch
+hurd.patch
+tokudb-libjemalloc.patch
+MDEV-18768-automate-auth_socket-to_unix_socket-upgrade.patch
+env-perl-usr-bin-perl.patch

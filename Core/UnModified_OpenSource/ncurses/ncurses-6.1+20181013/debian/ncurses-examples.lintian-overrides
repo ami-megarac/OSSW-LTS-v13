@@ -1,0 +1,2 @@
+# This file describes the sample programs in its directory
+ncurses-examples: package-contains-documentation-outside-usr-share-doc usr/lib/ncurses/examples/README.gz

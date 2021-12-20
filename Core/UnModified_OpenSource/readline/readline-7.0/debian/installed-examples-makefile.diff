@@ -1,0 +1,19 @@
+--- debian/libreadline6-dev/usr/share/doc/libreadline6/examples/Makefile
++++ debian/libreadline6-dev/usr/share/doc/libreadline6/examples/Makefile
+@@ -27,12 +27,11 @@
+ datarootdir = ${prefix}/share
+ 
+ bindir = ${exec_prefix}/bin
+-srcdir = /scratch/packages/tmp/readline6-6.3/examples
++srcdir = /usr/share/doc/libreadline6/examples
+ datadir = ${datarootdir}
+-VPATH = /scratch/packages/tmp/readline6-6.3/examples
+-top_srcdir = /scratch/packages/tmp/readline6-6.3
+-#BUILD_DIR = .
+-BUILD_DIR = /scratch/packages/tmp/readline6-6.3/build
++VPATH = .:/usr/share/doc/libreadline6/examples
++top_srcdir = /usr/include/readline
++BUILD_DIR = /usr/src/readline6/build
+ installdir = $(datadir)/readline
+ 
+ INSTALL = /usr/bin/install -c

@@ -1,0 +1,61 @@
+Author: Guillem Jover <guillem@debian.org>
+Description: Fix various typos
+Warned-by: lintian
+
+---
+ man/man1/getfattr.1    |    2 +-
+ man/man3/attr_multi.3  |    6 +++---
+ man/man3/attr_remove.3 |    2 +-
+ 3 files changed, 5 insertions(+), 5 deletions(-)
+
+--- a/man/man3/attr_multi.3
++++ b/man/man3/attr_multi.3
+@@ -137,7 +137,7 @@ field contains the actual size of the at
+ The
+ .I am_flags
+ field may be set to the \f4ATTR_ROOT\fP flag.
+-If the process has appropriate priviledges,
++If the process has appropriate privileges,
+ the ROOT namespace will be searched for the named attribute,
+ otherwise the USER namespace will be searched.
+ .TP
+@@ -151,7 +151,7 @@ fields contain the new value for the giv
+ The \f4ATTR_ROOT\fP flag may be set in the
+ .I am_flags
+ field.
+-If the process has appropriate priviledges,
++If the process has appropriate privileges,
+ the ROOT namespace will be searched for the named attribute,
+ otherwise the USER namespace will be searched.
+ The \f4ATTR_CREATE\fP and the \f4ATTR_REPLACE\fP flags
+@@ -181,7 +181,7 @@ fields are not used and are ignored.
+ The
+ .I am_flags
+ field may be set to the \f4ATTR_ROOT\fP flag.
+-If the process has appropriate priviledges,
++If the process has appropriate privileges,
+ the ROOT namespace will be searched for the named attribute,
+ otherwise the USER namespace will be searched.
+ .PP
+--- a/man/man3/attr_remove.3
++++ b/man/man3/attr_remove.3
+@@ -48,7 +48,7 @@ refers to the file descriptor associated
+ If the attribute
+ .I attrname
+ exists, the attribute name and value will be removed from the
+-fileystem object.
++filesystem object.
+ The
+ .I flags
+ argument can contain the following symbols bitwise OR\'ed together:
+--- a/man/man1/getfattr.1
++++ b/man/man1/getfattr.1
+@@ -74,7 +74,7 @@ Valid values of
+ .I en
+ are "text", "hex", and "base64".
+ Values encoded as text strings are enclosed in double quotes ("),
+-while strings encoded as hexidecimal and base64 are prefixed with
++while strings encoded as hexadecimal and base64 are prefixed with
+ 0x and 0s, respectively.
+ .TP
+ .BR \-h ", " \-\-no-dereference

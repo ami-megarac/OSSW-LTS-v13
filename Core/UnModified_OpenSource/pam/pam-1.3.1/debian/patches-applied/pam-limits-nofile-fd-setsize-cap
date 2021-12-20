@@ -1,0 +1,60 @@
+From: Robie Basak <robie.basak@ubuntu.com>
+Subject: pam_limits: cap the default soft nofile limit read from pid 1 to FD_SETSIZE
+
+Cap the default soft nofile limit read from pid 1 to FD_SETSIZE since
+larger values can cause problems with fd_set overflow and systemd sets
+itself higher.
+
+See:
+https://lists.ubuntu.com/archives/ubuntu-devel/2010-September/031446.html
+http://www.outflux.net/blog/archives/2014/06/13/5-year-old-glibc-select-weakness-fixed/
+https://sourceware.org/bugzilla/show_bug.cgi?id=10352
+https://github.com/systemd/systemd/commit/4096d6f5879aef73e20dd7b62a01f447629945b0
+
+pam_limits reads the default limits from /proc/1/limits. Previously,
+using upstart, this resulted in a 1024 nofile soft limit on Ubuntu
+systems by default. Using systemd, this results in a limit of 65536
+instead. This is not the intention of systemd upstream. See systemd
+commit 4096d6f for an explanation of systemd's behaviour.
+
+If we want to make such a change to the default distribution soft limit
+in PAM, we should do it deliberately and carefully, not accidentally. A
+change should consider what uses select(2) and might inadvertently (and
+incorrectly) assume that file descriptors will always fit into an
+fd_set, what vulnerabilities or crashes the change could consequently
+create, and whether the protection now present with FORTIFY_SOURCE is
+suitably enabled in all relevant builds.
+
+So this keeps the soft limit at 1024 for now. The hard limit will rise
+to 65536 along with systemd. Anything that knows that it will not be
+buggy with respect to fd_set and FD_SETSIZE, such as by using poll(2) or
+epoll(7) instead of select(2), can always raise the soft limit itself
+without issue.
+
+20:54 <rbasak> slangasek: [...] I'm also not sure how to go about
+upstreaming this as pam_limits seems to be heavily patched already.
+
+Forwarded: no
+Reviewed-by: Adam Conrad <adconrad@ubuntu.com>
+Reviewed-by: Martin Pitt <martin.pitt@ubuntu.com>
+Last-Update: 2015-04-22
+
+Index: pam/modules/pam_limits/pam_limits.c
+===================================================================
+--- pam.orig/modules/pam_limits/pam_limits.c
++++ pam/modules/pam_limits/pam_limits.c
+@@ -451,6 +451,14 @@
+         pl->limits[i].src_hard = LIMITS_DEF_KERNEL;
+     }
+     fclose(limitsfile);
++
++    /* Cap the default soft nofile limit read from pid 1 to FD_SETSIZE
++     * since larger values can cause problems with fd_set overflow and
++     * systemd sets itself higher. */
++    if (pl->limits[RLIMIT_NOFILE].src_soft == LIMITS_DEF_KERNEL &&
++        pl->limits[RLIMIT_NOFILE].limit.rlim_cur > FD_SETSIZE) {
++      pl->limits[RLIMIT_NOFILE].limit.rlim_cur = FD_SETSIZE;
++    }
+ }
+ 
+ static int init_limits(pam_handle_t *pamh, struct pam_limit_s *pl, int ctrl)

@@ -1,0 +1,7 @@
+#
+#=Description ptrace all rule outside of a profile
+#=EXRESULT FAIL
+#
+
+  ptrace,
+

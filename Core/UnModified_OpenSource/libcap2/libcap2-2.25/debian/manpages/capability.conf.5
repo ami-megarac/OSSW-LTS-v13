@@ -1,0 +1,106 @@
+'\" t
+.\"     Title: capability.conf
+.\"    Author: [see the "AUTHOR" section]
+.\" Generator: DocBook XSL Stylesheets v1.75.2 <http://docbook.sf.net/>
+.\"      Date: 09/23/2011
+.\"    Manual: Linux-PAM Manual
+.\"    Source: Linux-PAM Manual
+.\"  Language: English
+.\"
+.TH "CAPABILITY\&.CONF" "5" "09/23/2011" "Linux-PAM Manual" "Linux\-PAM Manual"
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+capablity.conf \- configuration file for the pam_cap module
+.SH "DESCRIPTION"
+.PP
+Each line of the file consists of two fields; the fields define:
+.PP
+\fB<capability-list>\fR
+.sp
+.RS 4
+One or more comma-separated capabilities, specified as either the textual capability name,
+or numeric capability value.  Text name(s) and numeric value(s) may be intermixed.
+.sp
+The special capability name \fBall\fR may be used to enable all capabilities known to the local system\&.
+.sp
+The special capability name \fBnone\fR may be used to disable all current inheritable capabilities\&.
+.RE
+.sp
+.RS 4
+\fBNOTE:\fR No whitespace is pemitted between the values\&.  The names all and none may not be combined with any other capabilities\&.
+.RE
+.PP
+\fB<username>\fR
+.sp
+.RS 4
+One or more whitespace-separated usernames, or the wildcard \fB*\fR\&.
+.RE
+.sp
+.RS 4
+\fBNOTE:\fR The first matching entry is used.  Thus, only a single matching username entry,
+and/or a single wildcard entry, may be used.  A matching username entry must \fIprecede\fR
+the wildcard entry in order to be effective\&.
+.RE
+.PP
+\fBIMPORTANT:\fR <capability-list> \fIreplaces\fR the current process' inherited capabilities;
+i.e. there is no provision for adding/subtracting from the current set.
+In most environments, the inheritable set of the process performing user authentication
+is 0 (empty)\&.
+.sp
+If any capability name or numeric value is invalid/unknown to the local
+system, the capabilities will be rejected, and the inheritable set will 
+\fBnot\fR be modified.
+.SH "EXAMPLES"
+.PP
+These are some example lines which might be specified in
+/etc/security/capability\&.conf\&.
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+# Simple
+cap_sys_ptrace               developer
+cap_net_raw                  user1
+
+# Multiple capablities
+cap_net_admin,cap_net_raw    jrnetadmin
+# Identical, but with numeric values
+12,13                        jrnetadmin
+
+# Combining names and numerics
+cap_sys_admin,22,25          jrsysadmin
+
+# Next line has no effect; user1 already matched above
+5,12,13                      user1
+
+# Insure any potential capailities from calling process are dropped
+none                         luser1 luser2
+
+# Allow anyone to manipulate capabilities
+# Will NOT apply to users matched above !
+cap_setpcap                  *
+   
+.fi
+.if n \{\
+.RE
+.\}
+.SH "SEE ALSO"
+.PP
+
+\fBpam_cap\fR(8),
+\fBpam.d\fR(5),
+\fBpam\fR(7),
+\fBcapabilities\fR(7)
+.SH "AUTHOR"
+.PP
+pam_cap was initially written by Andrew G. Morgan <morgan@kernel\&.org>

@@ -1,0 +1,9 @@
+#=DESCRIPTION recursive set definitions -- two variables
+#=EXRESULT FAIL
+
+@{FOO}=@{BAR}
+@{BAR}=@{FOO}
+
+/bin/foo {
+  /home/@{FOO} r,
+}

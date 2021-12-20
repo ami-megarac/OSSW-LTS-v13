@@ -1,0 +1,49 @@
+From 6d9c5d63057b9a3abb6831277ac3ed8df03626c9 Mon Sep 17 00:00:00 2001
+From: Dominic Hargreaves <dom@earth.li>
+Date: Mon, 17 May 2010 13:23:07 +0300
+Subject: Point users to Debian packages of deprecated core modules
+
+Bug-Debian: http://bugs.debian.org/747628
+Patch-Name: debian/deprecate-with-apt.diff
+---
+ lib/deprecate.pm | 18 +++++++++++++++++-
+ 1 file changed, 17 insertions(+), 1 deletion(-)
+
+diff --git a/lib/deprecate.pm b/lib/deprecate.pm
+index 47bc11253e..01d48fa6cc 100644
+--- a/lib/deprecate.pm
++++ b/lib/deprecate.pm
+@@ -7,6 +7,16 @@ our $VERSION = 0.03;
+ our %Config;
+ unless (%Config) { require Config; *Config = \%Config::Config; }
+ 
++# Debian-specific change: recommend the separate Debian packages of
++# deprecated modules where available
++
++our %DEBIAN_PACKAGES = (
++    'B::Debug'         => 'libb-debug-perl',
++    'Locale::Codes'    => 'liblocale-codes-perl',
++    'Locale::Country'  => 'liblocale-codes-perl',
++    'Locale::Language' => 'liblocale-codes-perl',
++);
++
+ # This isn't a public API. It's internal to code maintained by the perl-porters
+ # If you would like it to be a public API, please send a patch with
+ # documentation and tests. Until then, it may change without warning.
+@@ -58,9 +68,15 @@ EOM
+ 	if (defined $callers_bitmask
+ 	    && (vec($callers_bitmask, $warnings::Offsets{deprecated}, 1)
+ 		|| vec($callers_bitmask, $warnings::Offsets{all}, 1))) {
+-	    warn <<"EOM";
++		if (my $deb = $DEBIAN_PACKAGES{$package}) {
++		    warn <<"EOM";
++$package will be removed from the Perl core distribution in the next major release. Please install the separate $deb package. It is being used at $call_file, line $call_line.
++EOM
++		} else {
++		    warn <<"EOM";
+ $package will be removed from the Perl core distribution in the next major release. Please install it from CPAN. It is being used at $call_file, line $call_line.
+ EOM
++		}
+ 	}
+     }
+ }

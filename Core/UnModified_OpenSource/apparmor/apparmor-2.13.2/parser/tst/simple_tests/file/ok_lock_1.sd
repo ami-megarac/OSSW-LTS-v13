@@ -1,0 +1,17 @@
+#
+#=DESCRIPTION k and other perms do not conflict
+#=EXRESULT PASS
+#
+/usr/bin/foo {
+  /bin/a k,
+  /bin/b rk,
+  /bin/c wk,
+  /bin/d ak,
+  /bin/e lk,
+  /bin/e mk,
+  /bin/f pxk,
+  /bin/g Pxk,
+  /bin/h ixk,
+  /bin/i uxk,
+  /bin/j Uxk,
+}

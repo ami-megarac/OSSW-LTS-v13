@@ -1,0 +1,1 @@
+Aug 23 17:29:45 hostname kernel: [  878.662172] type=1503 audit(1282626827.320:411): operation="truncate" pid=1957 parent=1 profile="/etc/update-motd.d/91-release-upgrade" requested_mask="w::" denied_mask="w::" fsuid=0 ouid=0 name="/var/lib/update-notifier/release-upgrade-available"

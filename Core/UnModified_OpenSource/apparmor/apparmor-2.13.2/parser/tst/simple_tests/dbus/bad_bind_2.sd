@@ -1,0 +1,8 @@
+#
+#=DESCRIPTION dbus bind with non-bind interface modifier
+#=EXRESULT FAIL
+#
+
+profile foo {
+  dbus bind bus=session interface=blort,
+}

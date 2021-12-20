@@ -35,15 +35,12 @@ typedef IO_ACCESS_DATA_T jtag_ioaccess_data;
 #define  IOCTL_JTAG_ERASE_JBC          _IOW('j', 3, int)
 
 
-
-
-struct io_xfer {
+struct altera_io_xfer {
     unsigned int     mode;        //0 :HW mode, 1: SW mode    
     unsigned long    Address;
     unsigned long    Data;
     int id;
 };
-
 
 #endif /* _JTAG_IOCTL_H_ */
 

@@ -1,0 +1,8 @@
+START
+File: old_style_log_10.in
+Event type: AA_RECORD_INVALID
+Audit ID: 1167188680.127:54
+Operation: APPARMOR
+Info: PERMITTING attribute (something) change to /else (bash(23415) profile /bin/freak-aa-out active /bin/freak-aa-out)
+Epoch: 1167188680
+Audit subid: 54

@@ -1,0 +1,10 @@
+  GLIBCXX_LDBL_3.4.21@GLIBCXX_LDBL_3.4.21 5
+# cxx11 symbols only
+ (optional=abi_c++11)_ZNKSt7__cxx119money_getIcSt19istreambuf_iteratorIcSt11char_traitsIcEEE3getES4_S4_bRSt8ios_baseRSt12_Ios_IostateRg@GLIBCXX_3.4.21 5.2
+ (optional=abi_c++11)_ZNKSt7__cxx119money_getIcSt19istreambuf_iteratorIcSt11char_traitsIcEEE6do_getES4_S4_bRSt8ios_baseRSt12_Ios_IostateRg@GLIBCXX_3.4.21 5.2
+ (optional=abi_c++11)_ZNKSt7__cxx119money_getIwSt19istreambuf_iteratorIwSt11char_traitsIwEEE3getES4_S4_bRSt8ios_baseRSt12_Ios_IostateRg@GLIBCXX_3.4.21 5.2
+ (optional=abi_c++11)_ZNKSt7__cxx119money_getIwSt19istreambuf_iteratorIwSt11char_traitsIwEEE6do_getES4_S4_bRSt8ios_baseRSt12_Ios_IostateRg@GLIBCXX_3.4.21 5.2
+ (optional=abi_c++11)_ZNKSt7__cxx119money_putIcSt19ostreambuf_iteratorIcSt11char_traitsIcEEE3putES4_bRSt8ios_basecg@GLIBCXX_3.4.21 5.2
+ (optional=abi_c++11)_ZNKSt7__cxx119money_putIcSt19ostreambuf_iteratorIcSt11char_traitsIcEEE6do_putES4_bRSt8ios_basecg@GLIBCXX_3.4.21 5.2
+ (optional=abi_c++11)_ZNKSt7__cxx119money_putIwSt19ostreambuf_iteratorIwSt11char_traitsIwEEE3putES4_bRSt8ios_basewg@GLIBCXX_3.4.21 5.2
+ (optional=abi_c++11)_ZNKSt7__cxx119money_putIwSt19ostreambuf_iteratorIwSt11char_traitsIwEEE6do_putES4_bRSt8ios_basewg@GLIBCXX_3.4.21 5.2

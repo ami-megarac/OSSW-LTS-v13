@@ -1,0 +1,32 @@
+From aeab4cbfb86d0faeeb709e8201672e0662aa2c6f Mon Sep 17 00:00:00 2001
+From: John Johansen <john.johansen@canonical.com>
+Date: Fri, 25 Jul 2014 04:02:03 -0700
+Subject: [PATCH 04/25] apparmor: exec should not be returning ENOENT when it
+ denies
+
+The current behavior is confusing as it causes exec failures to report
+the executable is missing instead of identifying that apparmor
+caused the failure.
+
+Signed-off-by: John Johansen <john.johansen@canonical.com>
+Acked-by: Seth Arnold <seth.arnold@canonical.com>
+---
+ security/apparmor/domain.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/security/apparmor/domain.c b/security/apparmor/domain.c
+index dc0027b..67a7418 100644
+--- a/security/apparmor/domain.c
++++ b/security/apparmor/domain.c
+@@ -433,7 +433,7 @@ int apparmor_bprm_set_creds(struct linux_binprm *bprm)
+ 				new_profile = aa_get_newest_profile(ns->unconfined);
+ 				info = "ux fallback";
+ 			} else {
+-				error = -ENOENT;
++				error = -EACCES;
+ 				info = "profile not found";
+ 				/* remove MAY_EXEC to audit as failure */
+ 				perms.allow &= ~MAY_EXEC;
+-- 
+2.7.4
+

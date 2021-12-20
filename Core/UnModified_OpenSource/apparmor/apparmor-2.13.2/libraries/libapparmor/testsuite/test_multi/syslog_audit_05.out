@@ -1,0 +1,13 @@
+START
+File: syslog_audit_05.in
+Event type: AA_RECORD_ALLOWED
+Audit ID: 1225263601.980:37699
+Operation: inode_permission
+Mask: r::
+Denied Mask: r::
+fsuid: 0
+Profile: /bin/dash
+Name: /bin/dash
+PID: 1144
+Epoch: 1225263601
+Audit subid: 37699

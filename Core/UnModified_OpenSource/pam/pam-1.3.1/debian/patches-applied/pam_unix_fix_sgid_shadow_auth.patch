@@ -1,0 +1,25 @@
+Revert upstream change that prevents pam_unix from working with sgid
+shadow applications.
+
+Authors: Steve Langasek <vorlon@debian.org>
+
+Upstream status: to be submitted (and debated...)
+
+Index: pam/modules/pam_unix/passverify.c
+===================================================================
+--- pam.orig/modules/pam_unix/passverify.c
++++ pam/modules/pam_unix/passverify.c
+@@ -198,11 +198,11 @@
+ 			 * ...and shadow password file entry for this user,
+ 			 * if shadowing is enabled
+ 			 */
++			*spwdent = pam_modutil_getspnam(pamh, name);
+ #ifndef HELPER_COMPILE
+-			if (geteuid() || SELINUX_ENABLED)
++			if (*spwdent == NULL && (geteuid() || SELINUX_ENABLED))
+ 				return PAM_UNIX_RUN_HELPER;
+ #endif
+-			*spwdent = pam_modutil_getspnam(pamh, name);
+ 			if (*spwdent == NULL || (*spwdent)->sp_pwdp == NULL)
+ 				return PAM_AUTHINFO_UNAVAIL;
+ 		}

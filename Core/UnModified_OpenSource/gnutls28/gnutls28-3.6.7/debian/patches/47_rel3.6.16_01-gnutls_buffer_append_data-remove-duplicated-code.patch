@@ -1,0 +1,57 @@
+From 54e161b9dabe4bd3b08b532475294a37c7562b45 Mon Sep 17 00:00:00 2001
+From: Daiki Ueno <ueno@gnu.org>
+Date: Tue, 9 Mar 2021 13:07:26 +0100
+Subject: [PATCH 1/6] gnutls_buffer_append_data: remove duplicated code
+
+The function shared the same logic as in _gnutls_buffer_resize.
+
+Signed-off-by: Daiki Ueno <ueno@gnu.org>
+---
+ lib/str.c | 24 ++++--------------------
+ 1 file changed, 4 insertions(+), 20 deletions(-)
+
+diff --git a/lib/str.c b/lib/str.c
+index e31449937d..2247fc322b 100644
+--- a/lib/str.c
++++ b/lib/str.c
+@@ -113,7 +113,7 @@ gnutls_buffer_append_data(gnutls_buffer_t dest, const void *data,
+ 			   size_t data_size)
+ {
+ 	size_t const tot_len = data_size + dest->length;
+-	size_t const unused = MEMSUB(dest->data, dest->allocd);
++	int ret;
+ 
+ 	if (unlikely(dest->data != NULL && dest->allocd == NULL))
+ 		return gnutls_assert_val(GNUTLS_E_INVALID_REQUEST);
+@@ -126,25 +126,9 @@ gnutls_buffer_append_data(gnutls_buffer_t dest, const void *data,
+ 		return gnutls_assert_val(GNUTLS_E_MEMORY_ERROR);
+ 	}
+ 
+-	if (dest->max_length >= tot_len) {
+-
+-		if (dest->max_length - unused <= tot_len) {
+-			align_allocd_with_data(dest);
+-		}
+-	} else {
+-		size_t const new_len =
+-		    MAX(data_size, MIN_CHUNK) + MAX(dest->max_length,
+-						    MIN_CHUNK);
+-
+-		dest->allocd = gnutls_realloc_fast(dest->allocd, new_len);
+-		if (dest->allocd == NULL) {
+-			gnutls_assert();
+-			return GNUTLS_E_MEMORY_ERROR;
+-		}
+-		dest->max_length = new_len;
+-		dest->data = dest->allocd + unused;
+-
+-		align_allocd_with_data(dest);
++	ret = _gnutls_buffer_resize(dest, tot_len);
++	if (ret < 0) {
++		return ret;
+ 	}
+ 	assert(dest->data != NULL);
+ 
+-- 
+2.30.2
+

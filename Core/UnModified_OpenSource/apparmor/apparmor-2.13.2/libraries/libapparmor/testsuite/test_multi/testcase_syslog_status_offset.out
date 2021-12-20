@@ -1,0 +1,11 @@
+START
+File: testcase_syslog_status_offset.in
+Event type: AA_RECORD_STATUS
+Audit ID: 1283989336.064:272335
+Name: /home/jj/master/tests/regression/apparmor/net_raw
+Command: apparmor_parser
+Info: failed to unpack profile
+ErrorCode: 71
+PID: 4958
+Epoch: 1283989336
+Audit subid: 272335

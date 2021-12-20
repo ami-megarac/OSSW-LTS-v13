@@ -1,0 +1,10 @@
+#
+#=DESCRIPTION allow change_profile /onexec with variable+regex (LP: #390810)
+#=EXRESULT PASS
+#
+
+@{LIBVIRT}="libvirt"
+
+/usr/bin/foo {
+   allow change_profile /onexec -> @{LIBVIRT}-[0-9a-f]*-[0-9a-f]*-[0-9a-f]*-[0-9a-f]*-[0-9a-f]*,
+}

@@ -1,0 +1,38 @@
+From 95d203cfb59627a86483a279ba82f1aa75297e07 Mon Sep 17 00:00:00 2001
+From: John Johansen <john.johansen@canonical.com>
+Date: Wed, 15 Jun 2016 09:57:55 +0300
+Subject: [PATCH 19/27] apparmor: don't check for vmalloc_addr if kvzalloc()
+ failed
+
+Signed-off-by: John Johansen <john.johansen@canonical.com>
+---
+ security/apparmor/match.c | 10 +++++-----
+ 1 file changed, 5 insertions(+), 5 deletions(-)
+
+diff --git a/security/apparmor/match.c b/security/apparmor/match.c
+index f9f57c6..32b72eb 100644
+--- a/security/apparmor/match.c
++++ b/security/apparmor/match.c
+@@ -75,14 +75,14 @@ static struct table_header *unpack_table(char *blob, size_t bsize)
+ 				     u32, be32_to_cpu);
+ 		else
+ 			goto fail;
++		/* if table was vmalloced make sure the page tables are synced
++		 * before it is used, as it goes live to all cpus.
++		 */
++		if (is_vmalloc_addr(table))
++			vm_unmap_aliases();
+ 	}
+ 
+ out:
+-	/* if table was vmalloced make sure the page tables are synced
+-	 * before it is used, as it goes live to all cpus.
+-	 */
+-	if (is_vmalloc_addr(table))
+-		vm_unmap_aliases();
+ 	return table;
+ fail:
+ 	kvfree(table);
+-- 
+2.7.4
+

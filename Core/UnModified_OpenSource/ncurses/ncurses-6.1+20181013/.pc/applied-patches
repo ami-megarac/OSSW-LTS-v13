@@ -1,0 +1,7 @@
+01-debian-no-ada-doc.diff
+02-debian-backspace.diff
+03-debian-ncursesconfig-omit-L.diff
+CVE-2019-17594.diff
+CVE-2019-17595.diff
+fix-write_it.diff
+fix-tic-infloop.diff

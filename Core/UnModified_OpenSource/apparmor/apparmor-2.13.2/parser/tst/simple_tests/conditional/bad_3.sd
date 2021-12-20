@@ -1,0 +1,10 @@
+#=DESCRIPTION conditional at end of line
+#=EXRESULT FAIL
+
+$FOO=true
+
+/bin/true {
+  /bin/true r if $FOO {
+    ,
+  }
+}

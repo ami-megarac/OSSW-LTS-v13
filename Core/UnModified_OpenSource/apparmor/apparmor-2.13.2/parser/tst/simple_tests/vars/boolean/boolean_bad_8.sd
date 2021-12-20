@@ -1,0 +1,5 @@
+# taken from cond10.sd
+#=DESCRIPTION boolean assignment of an integer
+#=EXRESULT FAIL
+
+$FOO=1

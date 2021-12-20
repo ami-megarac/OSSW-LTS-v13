@@ -1,0 +1,1 @@
+Dec  7 13:18:59 rosa kernel: audit: type=1400 audit(1417954745.397:82): apparmor="ALLOWED" operation="open" profile="/home/simi/bin/aa-test" name="/usr/bin/" pid=3231 comm="ls" requested_mask="r" denied_mask="r" fsuid=1000 ouid=0

@@ -1,0 +1,169 @@
+#! /bin/sh
+#  -*- Mode: Shell-script -*-
+# ----------------------------------------------------------------------
+# stdopts.test ---   test standard options
+#
+# Author:            Bruce Korb <bkorb@gnu.org>
+##
+##  This file is part of AutoOpts, a companion to AutoGen.
+##  AutoOpts is free software.
+##  AutoOpts is Copyright (C) 1992-2015 by Bruce Korb - all rights reserved
+##
+##  AutoOpts is available under any one of two licenses.  The license
+##  in use must be one of these two and the choice is under the control
+##  of the user of the license.
+##
+##   The GNU Lesser General Public License, version 3 or later
+##      See the files "COPYING.lgplv3" and "COPYING.gplv3"
+##
+##   The Modified Berkeley Software Distribution License
+##      See the file "COPYING.mbsd"
+##
+##  These files have the following sha256 sums:
+##
+##  8584710e9b04216a394078dc156b781d0b47e1729104d666658aecef8ee32e95  COPYING.gplv3
+##  4379e7444a0e2ce2b12dd6f5a52a27a4d02d39d247901d3285c88cf0d37f477b  COPYING.lgplv3
+##  13aa749a5b0a454917a944ed8fffc530b784f5ead522b1aacaf4ec8aa55a6239  COPYING.mbsd
+#
+# ----------------------------------------------------------------------
+
+. ./defs
+
+# # # # # # # # # # DEFINITIONS FILE # # # # # # # # #
+
+echo "creating ${testname}.def in `pwd`"
+cat > ${testname}.def <<- _EOF_
+
+	AutoGen Definitions options;
+
+	prog-name = test_${testname};
+	prog-title = "${testname} test";
+	config-header = 'config.h';
+	no-xlate = anything;
+	main = {
+	    main-type = main;
+	    main-text = <<- _EndMain_
+		\    (void)optionProcess(&test_${testname}Options, argc, argv);
+		\    optionPutShell(&test_${testname}Options);
+		\    return ferror(stdout) ? 1 : 0;
+		_EndMain_;
+	};
+	long-opts;
+
+	#define VERBOSE_ENUM
+	#define VERBOSE_FLAG
+
+	#include stdoptions
+	_EOF_
+
+${AG_L} ${testname}.def || \
+  failure AutoGen could not process
+
+compile "-?"
+
+# # # # # # # # # # HELP OUTPUT FILE # # # # # # # # #
+
+echo creating ${testname}.hlp
+clean_help > ${testname}.hbase <<- _EOF_
+	test_stdopts - stdopts test
+	Usage:  stdopts [ -<flag> [<val>] | --<name>[{=| }<val>] ]...
+
+	The following options are commonly used and are provided and supported
+	by AutoOpts:
+
+	  Flg Arg Option-Name    Description
+	   -V KWd verbose        run program with progress info
+
+	Version, usage and configuration options:
+
+	  Flg Arg Option-Name    Description
+	   -? no  help           display extended usage information and exit
+	   -! no  more-help      extended usage information passed thru pager
+
+	Options are specified by doubled hyphens and their name or by a single
+	hyphen and the flag character.
+
+	The valid "verbose" option keywords are:
+	  silent quiet brief informative verbose
+	  or an integer from 0 through 4
+	_EOF_
+
+#  When building with DEBUG set, we get an unanticipated option:
+#
+${GREP} -v 'run program with debugging info' ${testname}.help > ${testname}.hres
+
+cmp -s ${testname}.h[br]* || \
+  failure "MISCOMPARE: `diff ${testname}.h[br]*`"
+
+./${testname} --verbose=exp > /dev/null 2>&1 && \
+  failure ${testname} accepted ambiguous keyword
+
+./${testname} --verbose=inf > ${testname}.out || \
+  failure ${testname} did not handle its options
+
+cat > ${testname}.oex <<_EOF_
+OPTION_CT=1
+export OPTION_CT
+TEST_STDOPTS_VERBOSE='informative'
+export TEST_STDOPTS_VERBOSE
+_EOF_
+
+cmp -s ${testname}.o* || \
+  failure "`diff ${testname}.o??`"
+
+# # # # # # # # # # USAGE OPTION # # # # # # # # # # #
+
+( ${SED} "s/${testname}/${testname}-2/g
+	s/-2Options/_2Options/g" ${testname}.def
+  echo 'usage-opt;'
+) > ${testname}-2.def
+
+testname=${testname}-2
+
+${AG_L} ${testname}.def || {
+    testname=${testname%-2}
+    failure AutoGen could not process
+}
+
+compile "--usage"
+
+clean_help > ${testname}.hbase <<- _EOF_
+	test_stdopts-2 - stdopts-2 test
+	Usage:  stdopts-2 [ -<flag> [<val>] | --<name>[{=| }<val>] ]...
+	  Flg Arg Option-Name    Description
+	   -V KWd verbose        run program with progress info
+	   -? no  help           display extended usage information and exit
+	   -! no  more-help      extended usage information passed thru pager
+	   -u no  usage          abbreviated usage to stdout
+
+	Options are specified by doubled hyphens and their name or by a single
+	hyphen and the flag character.
+	_EOF_
+
+#  When building with DEBUG set, we get an unanticipated option:
+#
+${GREP} -v 'run program with debugging info' ${testname}.help > ${testname}.hres
+
+cmp -s ${testname}.h[br]* || {
+    testname=${testname%-2}
+    failure "MISCOMPARE: `diff ${testname}-2.h[br]*`"
+}
+
+use=`
+  set +x
+  exec 2>&1
+  exec 1>/dev/null
+  ./${testname} --usage`
+test $? -eq 0       || failure usage failure
+test "X${use}" = X  || failure misdirected usage
+
+testname=${testname%-2}
+cleanup
+
+## Local Variables:
+## mode: shell-script
+## indent-tabs-mode: nil
+## sh-indentation: 2
+## End:
+
+# end of stdopts.test

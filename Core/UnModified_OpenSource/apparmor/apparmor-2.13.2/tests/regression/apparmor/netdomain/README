@@ -1,0 +1,27 @@
+The multi-run testsuite works as follows:
+
+In the base netdomain testsuite directory, there are two binaries: 
+test_multi.send and test_multi.receive.
+
+The testcases are in test_multi/[testcase_name].testcase.  These testcases 
+contain key/value pairs separated by a colon:
+	- send_ip: [ip address the sending program should bind to]
+	- send_port: [port number the sending program should bind to]
+	- send_profile: [the netdomain profile string for the sending program.
+	  It can be blank]
+	- receive_ip: [ip address the receive program should bind to]
+	- receive_port: [port number the receive program should bind to]
+	- receive_profile: [the netdomain profile string for the receive 
+	  program.  It can be blank]
+	- proto: [udp or tcp]
+	- message: [A message string that the sending program will send to the
+	  receiving program]
+
+In test_multi/output there are the expected output files:
+	- [testcase_name].send.out
+	- [testcase_name].receive.out
+
+When the test suite runs, it will execute the sending and receiving 
+programs in parallel with the appropriate testcase settings applied to 
+them.  Once the programs have finished executing, the output is diff'd 
+against the expected output to determine whether or not the test passes.

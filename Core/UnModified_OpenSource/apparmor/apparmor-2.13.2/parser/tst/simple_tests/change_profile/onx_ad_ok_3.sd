@@ -1,0 +1,7 @@
+#
+#=DESCRIPTION audit deny change_profile /onexec with name space
+#=EXRESULT PASS
+#
+/usr/bin/foo {
+   audit deny change_profile /onexec -> :foo:/bin/foo,
+}

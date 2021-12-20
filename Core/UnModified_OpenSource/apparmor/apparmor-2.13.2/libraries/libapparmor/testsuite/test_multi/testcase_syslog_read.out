@@ -1,0 +1,15 @@
+START
+File: testcase_syslog_read.in
+Event type: AA_RECORD_ALLOWED
+Audit ID: 1437850920.403:64
+Operation: open
+Mask: r
+Denied Mask: r
+fsuid: 1000
+ouid: 1000
+Profile: /usr/sbin/vsftpd
+Name: /home/bane/foo
+Command: vsftpd
+PID: 1811
+Epoch: 1437850920
+Audit subid: 64

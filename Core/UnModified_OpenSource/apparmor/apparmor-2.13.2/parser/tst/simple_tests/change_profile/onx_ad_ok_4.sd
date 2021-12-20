@@ -1,0 +1,10 @@
+#
+#=DESCRIPTION audit deny change_profile /onexec with a variable (LP: #390810)
+#=EXRESULT PASS
+#
+
+@{LIBVIRT}="libvirt"
+
+/usr/bin/foo {
+   audit deny change_profile /onexec -> @{LIBVIRT}-foo,
+}

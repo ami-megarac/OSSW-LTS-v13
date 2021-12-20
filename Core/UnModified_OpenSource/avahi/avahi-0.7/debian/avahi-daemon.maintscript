@@ -1,0 +1,2 @@
+rm_conffile /etc/network/if-up.d/avahi-daemon 0.7-4+deb10u1~ avahi-daemon
+rm_conffile /etc/resolvconf/update-libc.d/avahi-daemon 0.7.-4+deb10u1~ avahi-daemon

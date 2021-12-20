@@ -1,0 +1,30 @@
+#=DESCRIPTION basic conditional with not statements/weird whitespace
+#=EXRESULT PASS
+
+$FOO=true
+$BAR = False
+
+/bin/true {
+  /bin/false rix,
+  capability net_raw,
+  if not not not not not
+     not not not not not
+     not not not not not
+     not not not not not
+                     not
+     not
+             not
+	 not
+	         not
+
+     not
+${FOO}
+                   {
+
+    /usr/bin/sendmail
+    					rux,
+}
+  /bin/true rix,
+  /bin/sh rix,
+  capability dac_override,
+                                                                               }

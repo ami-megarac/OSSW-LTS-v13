@@ -1,0 +1,7 @@
+#
+#=DESCRIPTION simple unix shutdown acceptance test
+#=EXRESULT PASS
+
+profile a_profile {
+  unix shutdown,
+}

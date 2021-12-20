@@ -1,0 +1,12 @@
+#
+#=DESCRIPTION deny audit is wrong order for prefixes
+#=EXRESULT FAIL
+#
+
+@{LIBVIRT}="libvirt"
+@{LIBVIRT_RE}="libvirt*"
+
+@{var}=/test
+/usr/bin/foo {
+   deny audit change_profile @{var} -> @{LIBVIRT}-fo*,
+}

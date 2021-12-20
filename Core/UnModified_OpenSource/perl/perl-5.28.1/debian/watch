@@ -1,0 +1,5 @@
+version=4
+http://www.perl.com/CPAN/src/5.0/ (?:.*/)?perl-(5\.\d*[02468](?:\.[\d.]+)?)\.tar\.(?:xz|bz2|gz) debian uupdate
+opts="component=regen-configure, repack, compression=xz" \
+https://github.com/perl5-metaconfig/metaconfig/tags/ \
+    (?:.*?/)?(\d[\d.]*)\.tar\.gz debian uupdate

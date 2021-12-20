@@ -1,0 +1,36 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+# debian/rules file for libcap-ng
+# Written by Pierre Chifflier <pollux@debian.org>
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+export DEB_BUILD_HARDENING=1
+
+ifneq ($(filter nopython,$(DEB_BUILD_PROFILES)),)
+override_dh_auto_configure:
+	dh_auto_configure -- --without-python --without-python3
+endif
+
+override_dh_install:
+	mkdir -p $(CURDIR)/debian/tmp/lib/$(DEB_HOST_MULTIARCH) && \
+	mv $(CURDIR)/debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)/lib*.so.0* $(CURDIR)/debian/tmp/lib/$(DEB_HOST_MULTIARCH)/; \
+	rm debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)/libcap-ng.so; \
+	ln -s ../../../lib/$(DEB_HOST_MULTIARCH)/libcap-ng.so.0.0.0 debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)/libcap-ng.so; \
+	dh_install --exclude=.la
+
+override_dh_auto_clean:
+	dh_auto_clean
+	-rm -rf debian/tmp-python-cap-ng
+
+override_dh_auto_test:
+	# do nothing, some tests are failing because of failing relink
+	:
+
+%:
+ifeq ($(filter nopython,$(DEB_BUILD_PROFILES)),)
+	dh $@ --with=python2,python3,autoreconf
+else
+	dh $@ --with=autoreconf
+endif

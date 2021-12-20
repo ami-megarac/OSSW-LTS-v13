@@ -1,0 +1,9 @@
+#
+#=DESCRIPTION deny audit is wrong order for prefixes
+#=EXRESULT FAIL
+#
+@{var}=/test
+/usr/bin/foo {
+   deny audit change_profile @{var} -> /bin/*,
+}
+

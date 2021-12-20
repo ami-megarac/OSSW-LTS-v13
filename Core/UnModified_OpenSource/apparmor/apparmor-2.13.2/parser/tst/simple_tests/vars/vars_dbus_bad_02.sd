@@ -1,0 +1,8 @@
+#
+#=DESCRIPTION missing reference variable in dbus name modifier
+#=EXRESULT FAIL
+#
+
+/does/not/exist {
+  dbus (bind) name=@{MISSING_VAR},
+}

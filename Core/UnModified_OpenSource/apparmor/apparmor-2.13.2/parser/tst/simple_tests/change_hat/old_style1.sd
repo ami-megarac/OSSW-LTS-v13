@@ -1,0 +1,28 @@
+#
+#=DESCRIPTION Simple test of old-style hats
+#=EXRESULT FAIL
+#=DISABLED
+# vim:syntax=subdomain
+# Last Modified: Sun Apr 17 19:44:44 2005
+#
+/does/not/exist {
+  #include <includes/base>
+
+  /usr/X11R6/lib/lib*so* r,
+  /usr/bin/emacs r,
+}
+
+# hat 1
+/does/not/exist^HAT1 {
+  /var/log/HAT1 rwl,
+}
+
+# hat 2
+/does/not/exist^HAT2 {
+  /var/log/HAT2 rwl,
+}
+
+# hat 3
+/does/not/exist^HAT3 {
+  /var/log/HAT3 rwl,
+}

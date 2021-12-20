@@ -1,0 +1,22 @@
+#!/bin/sh
+
+set -e
+
+case "$1" in
+    configure|reconfigure)
+        adduser --system --disabled-password --disabled-login --home /var/run/lldpd \
+       	    --no-create-home --quiet --force-badname --group _lldpd
+
+        for i in /usr/sbin/lldpcli; do
+            if ! dpkg-statoverride --list $i > /dev/null 2>&1; then
+                dpkg-statoverride --update --add _lldpd adm 4750 $i
+            fi
+        done
+        ;;
+esac
+
+dpkg-maintscript-helper rm_conffile /etc/bash_completion.d/lldpcli.bash-completion 0.7.15~ lldpd -- "$@"
+
+#DEBHELPER#
+
+exit 0

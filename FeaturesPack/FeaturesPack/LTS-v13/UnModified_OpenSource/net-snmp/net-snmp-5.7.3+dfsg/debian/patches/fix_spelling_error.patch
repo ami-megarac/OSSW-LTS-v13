@@ -1,0 +1,63 @@
+From: Net-SNMP Packaging Team <pkg-net-snmp-devel@lists.alioth.debian.org>
+Date: Thu, 18 Jun 2015 06:12:05 +0900
+Subject: fix_spelling_error
+
+---
+ apps/encode_keychange.c  | 2 +-
+ apps/snmpnetstat/inet.c  | 2 +-
+ apps/snmpnetstat/inet6.c | 2 +-
+ apps/snmpusm.c           | 2 +-
+ 4 files changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/apps/encode_keychange.c b/apps/encode_keychange.c
+index 5bf8e4c..0ecc51b 100644
+--- a/apps/encode_keychange.c
++++ b/apps/encode_keychange.c
+@@ -403,7 +403,7 @@ usage_to_file(FILE * ofp)
+    "-f will require reading from the stdin/terminal, ignoring a) and b).\n\
+     -P will prevent prompts for passphrases to stdout from being printed.\n\
+ \n\
+-    <engineID> is interpreted as a hex string when preceeded by \"0x\",\n\
++    <engineID> is interpreted as a hex string when preceded by \"0x\",\n\
+     otherwise it is created to contain \"text\".  If nothing is given,\n\
+     <engineID> is constructed from the first IP address for the local host.\n");
+ 
+diff --git a/apps/snmpnetstat/inet.c b/apps/snmpnetstat/inet.c
+index 0537340..9224973 100644
+--- a/apps/snmpnetstat/inet.c
++++ b/apps/snmpnetstat/inet.c
+@@ -449,7 +449,7 @@ icmp_stats(const char *name)
+     struct stat_table icmpstats_tbl[] = {
+         { 1, "%14d total message%s received"},
+         { 2, "%14d message%s dropped due to errors"},
+-        {14, "%14d ouput message request%s"},
++        {14, "%14d output message request%s"},
+         {15, "%14d output message%s discarded"},
+         { 0, ""}
+     };
+diff --git a/apps/snmpnetstat/inet6.c b/apps/snmpnetstat/inet6.c
+index 7109b87..f3bf195 100644
+--- a/apps/snmpnetstat/inet6.c
++++ b/apps/snmpnetstat/inet6.c
+@@ -334,7 +334,7 @@ icmp6_stats(const char *name)
+     struct stat_table icmp6stats_tbl[] = {
+         { 1, "%14d total message%s received"},
+         { 2, "%14d message%s dropped due to errors"},
+-        {18, "%14d ouput message request%s"},
++        {18, "%14d output message request%s"},
+         {19, "%14d output message%s discarded"},
+         { 0, ""}
+     };
+diff --git a/apps/snmpusm.c b/apps/snmpusm.c
+index 42919bd..f0985fd 100644
+--- a/apps/snmpusm.c
++++ b/apps/snmpusm.c
+@@ -150,7 +150,7 @@ usage(void)
+     fprintf(stderr, "\t\t\t(it won't be active until you active it)\n");
+     fprintf(stderr, "\t-Cx\t\tChange the privacy key.\n");
+     fprintf(stderr, "\t-Ca\t\tChange the authentication key.\n");
+-    fprintf(stderr, "\t-Ck\t\tAllows to use localized key (must start with 0x)\n");
++    fprintf(stderr, "\t-Ck\t\tAllows one to use localized key (must start with 0x)\n");
+     fprintf(stderr, "\t\t\tinstead of passphrase.\n");
+ }
+ 

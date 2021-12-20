@@ -1,0 +1,197 @@
+# ------------------------------------------------------------------
+#
+#    Copyright (C) 2002-2006 Novell/SUSE
+#
+#    This program is free software; you can redistribute it and/or
+#    modify it under the terms of version 2 of the GNU General Public
+#    License published by the Free Software Foundation.
+#
+# ------------------------------------------------------------------
+
+
+----------------------
+
+1. Overview
+2. Requirements
+3. Compiling the code
+4. Installation
+5. Generating a basic Tomcat profile
+6. Implementation Notes
+7. Profile Generation Tools and change_hat
+8. Feedback/Resources
+
+-----------------------
+
+
+1. Overview
+   --------
+
+This package provides an implementation of a Tomcat 5.0 Valve that calls out 
+to the change_hat(2) function provided by libapparmor to allow a process to 
+change its security context. Any feedback is greatly appreciated.
+
+
+2. Requirements
+   ------------
+
+ AppArmor version 1.2 or later
+ Tomcat version 5.0.X
+ JDK 1.4.2 or later
+
+
+3. Compiling the Code
+   -----------------
+
+From the top level directory execute: 
+  ant jar jni_so
+
+
+This will create a jar file and a shared library (for the JNI interface to the 
+libapparmor library) and place the jar file under dist/ and the shared library 
+under src/jni_src.
+
+
+4. Installation
+   ------------
+
+- Copy the jar file to $TOMCAT_HOME/server/lib:
+
+  [SLES10 example]
+
+  cp dist/changeHatValve.jar /usr/share/tomcat5/server/lib
+
+
+- Copy the shared library to somehere in your library search path:
+
+  cp dist/libJNIChangeHat.so /usr/lib
+
+  [Note: you must ensure that the target directory is passed to tomcat via the
+   java.library.path propert. This can be accomplished by setting the JAVA_OPTS
+   enviroment variable, export JAVA_OPTS=-Djava.library.path, or set via the 
+   env variable LD_LIBRARY_PATH to include this directory so that tomcat can 
+   find this library at startup]
+
+
+- Configure the Tomcat server to use ChangeHatValve:
+
+  Place the configuration directive below in your server.xml file. The valve 
+  definition should be the initial configuration option declared in the 
+  top-level container in the container hierarchy.
+
+  <Valve className="com.novell.apparmor.catalina.valves.ChangeHatValve"
+             mediationType="ServletPath"/>
+
+  [Note: The mediationType attribute may be set to ServletPath or URI depending 
+         on the granularity of containers that you wish to create. URI will 
+         prompt the user to create containers for every URI it processes. This 
+         is not recommended for most deployment scenarios and so the default 
+         "ServletPath" should be used. This maps to containers identified by 
+         the ServletPath header defined in the HttpRequest.]
+
+
+- Defining a default and required hat for the tomcat profile
+
+  Edit the file /etc/apparmor/logprof.conf and add the following line to the 
+  section [required_hats]:
+     ^.+/catalina.sh$          = DEFAULT
+
+  Edit the file /etc/apparmor/logprof.conf and add the following line to the 
+  section [default_hat]:
+     ^.+/catalina.sh$          = DEFAULT
+
+
+
+ 
+5. Generating a basic Tomcat profile
+   -------------------------------
+
+Once the installation steps above have been started you are ready to begin 
+creating a profile for your application. The profile creation tool genprof will
+guide you through generating a profile and its support for change_hat will 
+prompt you create discrete hats as requested byt the changeHatValve during 
+tomcat execution.
+
+  1. Create a basic profile for the tomcat server.
+
+     - Run the command "genprof PATH_TO_CATALINA.SH"
+     - In a seperate window start tomcat and then stop tomcat
+     - In the genprof window press "S" to scan for events
+     - Answer the questions about the initial profile for tomcat
+
+
+  2. Extending the profile to include containers for your web-app
+
+     - Stop the tomcat server
+     - Deploy your WAR file or equivalent files under the container. 
+     - execute "genprof PATH_TO_CATALINA.SH"
+     - In a seperate window start tomcat and then exercise your web application
+     - In the genprof window press "S" to scan for events
+       During the prompting you will be asked questions similar to:
+  
+        -----------------------------------------------
+    
+       Profile:       /usr/share/tomcat5/bin/catalina.sh
+       Default Hat:   DEFAULT
+       Requested Hat: /servlet/CookieExample
+
+  (A)dd Requested Hat / (U)se Default Hat / (D)eny / Abo(r)t / (F)inish
+
+       ------------------------------------------------
+
+   This example shows the tomcat valve for changehat attempting to change to 
+   the hat "/servlet/CookieExample". You can choose to create this hat, and 
+   subsequently fill it with resources, use the Default hat, named "DEFAULT" 
+   and is the default hat for request processing. 
+
+
+
+6. Implementation Notes
+   --------------------
+
+- Selecting the hat during request processing
+
+This implementation follows the following pattern to decide what hat to execute in for an incoming request:
+
+  Try #1: Request data (URI or ServletInfo) 
+      if  #1 fails (because the hat does not exist) then try #2
+  Try #2: DEFAULT - this is the default hat for request processing
+      if #2 fails (because of any error) then..
+  Error: report that change_hat calls failed and remain in current security context. 
+
+- Java 1.4.2 Notes
+
+  This library uses java.security.SecureRandom to generate random numbers used as cookies in 
+  the change_hat(2) interface. This class on java version 1.4.2 uses /dev/random which is a 
+  blocking call and can adversely effect performance. Java can be configured to use 
+  /dev/urandom instead. For details:
+
+   http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4705093 
+
+
+
+7. Profile Tools and change_hat
+   ----------------------------
+
+When using the profile generation tool, genprof, you will be prompted to add a 
+new hat when you exercise your program and requests are processed by the 
+changeHatValve. You can choose to Add the hat or use the Default hat.
+If you choose to add the requested hat: genprof  will create the hat and then 
+all subsequent resource requests will be mediated in this hew hat (or security 
+context).        
+If you choose to use the default hat: genprof will mediate all resource 
+requests in the default hat for the duration of processing this request.
+When the request processng is complete the valve will change_hat back to the 
+parent context.
+
+
+
+8. Feedback/Resources
+   -----------------
+
+To provide feedback or ask questions please contact the 
+apparmor-dev@forge.novell.com mail list. This is the development list for the 
+AppArmor team.
+
+
+
+

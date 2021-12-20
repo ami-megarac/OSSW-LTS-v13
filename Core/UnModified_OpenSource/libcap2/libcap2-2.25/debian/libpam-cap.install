@@ -1,0 +1,5 @@
+lib/*/security
+
+pam_cap/capability.conf		etc/security
+
+debian/local/pam-configs/*	usr/share/pam-configs

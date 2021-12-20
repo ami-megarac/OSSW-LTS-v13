@@ -1,0 +1,64 @@
+From de667616518666b10f9bf5eb1a34e82eacc12f70 Mon Sep 17 00:00:00 2001
+From: Niko Tyni <ntyni@debian.org>
+Date: Mon, 16 Jul 2018 10:12:37 +0300
+Subject: Disable debugperl stack extension checks for binary compatibility
+ with perl
+
+When an XS module is built without -DDEBUGGING but the interpreter is,
+the debugging stack high-water mark checking on the interpreter side
+doesn't work properly. This makes /usr/bin/debugperl less useful than
+it could be as it can no longer use many XS module packages.
+
+Patch the check away for now. We hope upstream will provide a Configure
+option for this in the future.
+
+Bug: https://rt.perl.org/Ticket/Display.html?id=133327
+Bug-Debian: https://bugs.debian.org/902779
+Patch-Name: debian/disable-stack-check.diff
+---
+ dump.c   | 3 +++
+ pp_hot.c | 3 +++
+ 2 files changed, 6 insertions(+)
+
+diff --git a/dump.c b/dump.c
+index 227eb996ee..4e1c594ce8 100644
+--- a/dump.c
++++ b/dump.c
+@@ -2500,6 +2500,8 @@ Perl_runops_debug(pTHX)
+         ++PL_op_exec_cnt[PL_op->op_type];
+ #endif
+ #if defined DEBUGGING && !defined DEBUGGING_RE_ONLY
++/* disabled on Debian due to https://bugs.debian.org/902779 */
++#ifndef DEBIAN
+         if (PL_curstackinfo->si_stack_hwm < PL_stack_sp - PL_stack_base)
+             Perl_croak_nocontext(
+                 "panic: previous op failed to extend arg stack: "
+@@ -2507,6 +2509,7 @@ Perl_runops_debug(pTHX)
+                     PL_stack_base, PL_stack_sp,
+                     PL_stack_base + PL_curstackinfo->si_stack_hwm);
+         PL_curstackinfo->si_stack_hwm = PL_stack_sp - PL_stack_base;
++#endif
+ #endif
+ 	if (PL_debug) {
+             ENTER;
+diff --git a/pp_hot.c b/pp_hot.c
+index 56e3cbe6e1..f4e1ae726d 100644
+--- a/pp_hot.c
++++ b/pp_hot.c
+@@ -5232,6 +5232,8 @@ PP(pp_entersub)
+ 	CvXSUB(cv)(aTHX_ cv);
+ 
+ #if defined DEBUGGING && !defined DEBUGGING_RE_ONLY
++/* disabled on Debian due to https://bugs.debian.org/902779 */
++#ifndef DEBIAN
+         /* This duplicates the check done in runops_debug(), but provides more
+          * information in the common case of the fault being with an XSUB.
+          *
+@@ -5245,6 +5247,7 @@ PP(pp_entersub)
+                     HvNAME(GvSTASH(CvGV(cv))), GvNAME(CvGV(cv)), CvFILE(cv),
+                     PL_stack_base, PL_stack_sp,
+                     PL_stack_base + PL_curstackinfo->si_stack_hwm);
++#endif
+ #endif
+ 	/* Enforce some sanity in scalar context. */
+ 	if (is_scalar) {

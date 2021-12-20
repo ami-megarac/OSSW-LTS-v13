@@ -1,0 +1,15 @@
+local/mib2c*.conf etc/snmp
+usr/bin/mib2c
+usr/bin/mib2c-update
+usr/include/*
+usr/lib/*/lib*.a
+usr/lib/*/lib*.so
+# Install the "broke" headers
+agent/mibgroup/struct.h	usr/include/net-snmp/agent
+agent/mibgroup/util_funcs.h usr/include/net-snmp
+agent/mibgroup/mibincl.h usr/include/net-snmp/library
+agent/mibgroup/header_complex.h usr/include/net-snmp/agent
+usr/bin/net-snmp-config
+usr/share/man/man1/net-snmp-config.1
+usr/bin/net-snmp-create-v3-user
+usr/share/man/man1/net-snmp-create-v3-user.1

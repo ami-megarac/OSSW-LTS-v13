@@ -1,0 +1,45 @@
+#
+#=DESCRIPTION deny change_profile /onexec re with quotes
+#=EXRESULT PASS
+#
+
+/usr/bin/foo5 {
+   deny change_profile /onexec -> "/bin/*",
+}
+
+/usr/bin/foo6 {
+   deny change_profile /onexec -> "/bin/**",
+}
+
+/usr/bin/foo7 {
+   deny change_profile /onexec -> "/bin/[ab]",
+}
+
+/usr/bin/foo8 {
+   deny change_profile /onexec -> "/bin/[^ab]",
+}
+
+/usr/bin/foo10 {
+   deny change_profile /onexec -> "/bin/?ab",
+}
+
+/usr/bin/foo11 {
+   deny change_profile /onexec -> "/bin/ *",
+}
+
+/usr/bin/foo12 {
+   deny change_profile /onexec -> "/bin/ **",
+}
+
+/usr/bin/foo13 {
+   deny change_profile /onexec -> "/bin/ [ab]",
+}
+
+/usr/bin/foo14 {
+   deny change_profile /onexec -> "/bin/ [^ab]",
+}
+
+/usr/bin/foo15 {
+   deny change_profile /onexec -> "/bin/ ?ab",
+}
+

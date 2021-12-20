@@ -1,0 +1,313 @@
+libssh2 (1.8.0-2.1) unstable; urgency=high
+
+  * Non-maintainer upload.
+  * Possible integer overflow in transport read allows out-of-bounds write
+    (CVE-2019-3855) (Closes: #924965)
+  * Possible integer overflow in keyboard interactive handling allows
+    out-of-bounds write (CVE-2019-3856) (Closes: #924965)
+  * Possible integer overflow leading to zero-byte allocation and
+    out-of-bounds write (CVE-2019-3857) (Closes: #924965)
+  * Possible zero-byte allocation leading to an out-of-bounds read
+    (CVE-2019-3858) (Closes: #924965)
+  * Out-of-bounds reads with specially crafted payloads due to unchecked use
+    of _libssh2_packet_require and _libssh2_packet_requirev (CVE-2019-3859)
+    (Closes: #924965)
+  * Out-of-bounds reads with specially crafted SFTP packets (CVE-2019-3860)
+    (Closes: #924965)
+  * Out-of-bounds reads with specially crafted SSH packets (CVE-2019-3861)
+    (Closes: #924965)
+  * Out-of-bounds memory comparison (CVE-2019-3862) (Closes: #924965)
+  * Integer overflow in user authenicate keyboard interactive allows
+    out-of-bounds writes (CVE-2019-3863) (Closes: #924965)
+  * Fixed misapplied patch for user auth.
+  * moved MAX size declarations
+
+ -- Salvatore Bonaccorso <carnil@debian.org>  Sun, 31 Mar 2019 16:06:20 +0200
+
+libssh2 (1.8.0-2) unstable; urgency=low
+
+  * Add missing zlib1g-dev dependency (Closes: #900558).
+  * Remove manual -dbg package and corresponding override in d/rules.
+  * Update Homepage, copyright and tarball download URL to use https.
+  * Clean spurious EOL whitespace from d/changelog.
+  * Add signature check to debian/watch.
+  * Update debhelper compatibility (and dependency).
+  * Remove no longer needed explicit dh --parallel flag
+  * Enable full hardening mode.
+  * Update packaging copyright years.
+  * Bump Standards-Version.
+
+ -- Mikhail Gusarov <dottedmag@debian.org>  Sat, 23 Jun 2018 21:45:38 +0200
+
+libssh2 (1.8.0-1) unstable; urgency=low
+
+  * New upstream release.
+    - Refresh 0001-Add-lgpg-error-to-.pc-to-facilitate-static-linking.patch
+    - Refresh 0001-Do-not-expose-private-libraries-nor-link-flags-to-us.patch
+    - Take ced924b78a40126606797ef57a74066eb3b4b83f.patch from upstream
+  * Do not build against OpenSSL even if libssl-dev is installed
+    (Closes: #857793).
+
+ -- Mikhail Gusarov <dottedmag@debian.org>  Thu, 16 Mar 2017 00:56:58 +0100
+
+libssh2 (1.7.0-1) unstable; urgency=low
+
+  * New upstream release(Closes: #825097).
+    - Refresh patches.
+  * Bump Standards-Version, no changes required.
+
+ -- Mikhail Gusarov <dottedmag@debian.org>  Fri, 22 Jul 2016 09:05:27 +0200
+
+libssh2 (1.5.0-1) unstable; urgency=low
+
+  * New upstream release.
+    - Drop 0003-CVE-2015-1782.patch, included upstream.
+  * Acknowledge 1.4.3-4.1 NMU. Thanks, Salvatore!
+
+ -- Mikhail Gusarov <dottedmag@debian.org>  Thu, 19 Mar 2015 07:39:43 +0100
+
+libssh2 (1.4.3-4.1) unstable; urgency=high
+
+  * Non-maintainer upload by the Security Team.
+  * Add 0003-CVE-2015-1782.patch.
+    CVE-2015-1782: Using SSH_MSG_KEXINIT data unbounded. (Closes: #780249)
+
+ -- Salvatore Bonaccorso <carnil@debian.org>  Wed, 11 Mar 2015 12:08:30 +0100
+
+libssh2 (1.4.3-4) unstable; urgency=low
+
+  * Update description to mention SFTPv5 support
+    (Closes: #671199).
+  * Add -lgpg-error to .pc file to fix static linking against libgcrypt
+    (Closes: #760359).
+
+ -- Mikhail Gusarov <dottedmag@debian.org>  Wed, 03 Sep 2014 15:49:23 +0200
+
+libssh2 (1.4.3-3) unstable; urgency=low
+
+  * Do not expose private libraries nor link flags to users of libssh2
+    (Closes: #747417).
+  * Rebuild with libgcrypt20 (Closes: #744829).
+  * Fix typos in manpages.
+  * Bump Standards-Version, no changes required.
+
+ -- Mikhail Gusarov <dottedmag@debian.org>  Mon, 19 May 2014 10:23:27 +0200
+
+libssh2 (1.4.3-2) unstable; urgency=medium
+
+  * Make package multi-arch-aware (Closes: #731310).
+  * Bump Standards-Version, no changes required.
+
+ -- Mikhail Gusarov <dottedmag@debian.org>  Wed, 04 Dec 2013 21:29:00 +0100
+
+libssh2 (1.4.3-1) unstable; urgency=low
+
+  * New upstream release.
+    - Drop debian/patches/with-gcrypt.patch, applied upstream.
+  * Incorporate 1.4.2-1.1 NMU by Dmitry. Thanks!
+
+ -- Mikhail Gusarov <dottedmag@debian.org>  Tue, 21 May 2013 12:09:00 +0200
+
+libssh2 (1.4.2-1.1) unstable; urgency=medium
+
+  * Non-maintainer upload.
+  * Added patch to fix pkg-config/libgcrypt dependency (Closes: #675785).
+  * Install upstream ChangeLog (Closes: #675782).
+  * debian/control:
+    + libssh2-1-dev to depend on libgcrypt11-dev.
+    + added Homepage field.
+
+ -- Dmitry Smirnov <onlyjob@member.fsf.org>  Sat, 04 Aug 2012 19:13:21 +1000
+
+libssh2 (1.4.2-1) unstable; urgency=low
+
+  * New upstream release.
+
+ -- Mikhail Gusarov <dottedmag@debian.org>  Mon, 28 May 2012 17:41:48 +0200
+
+libssh2 (1.4.1-1) unstable; urgency=low
+
+  * New upstream release.
+    - Drop debian/patches/undefined-libssh-error.patch, upstream.
+
+ -- Mikhail Gusarov <dottedmag@debian.org>  Sun, 08 Apr 2012 16:39:12 +0200
+
+libssh2 (1.4.0-1) unstable; urgency=low
+
+  * New upstream release.
+    - Drop debian/patches/fix-version-in-pc.patch taken from git.
+    - Drop debian/patches/mang-wrong-nf-macro.patch, applied upstream.
+    - Update libssh2-1.symbols for new upstream release.
+    - Add debian/patches/undefined-libssh-error.patch, necessary to
+      facilitate compilation with GnuTLS.
+  * Drop Conflicts/Replaces for packages no longer in archive.
+  * Use dh(7) for packaging.
+  * Use dh-autoreconf instead of manually stashing changed files and
+    moving them back.
+  * Do not run test 'mansyntax.sh', it requires specific locale to be
+    available, and in general is a duplicate of lintian check.
+  * Update debian/copyright to version 1.0 of machine-parseable format.
+  * Enable multiarch, based on patch by Johannes Cloos (Closes: #663751).
+  * Bump Standards-Version, no changes needed.
+
+ -- Mikhail Gusarov <dottedmag@debian.org>  Mon, 19 Mar 2012 17:53:21 +0100
+
+libssh2 (1.2.8-2) unstable; urgency=low
+
+  * Fix version in pkg-config file (Closes: #637670).
+
+ -- Mikhail Gusarov <dottedmag@debian.org>  Sun, 14 Aug 2011 21:42:38 +0200
+
+libssh2 (1.2.8-1) unstable; urgency=low
+
+  * New upstream release.
+
+ -- Mikhail Gusarov <dottedmag@debian.org>  Sat, 09 Apr 2011 16:20:20 +0200
+
+libssh2 (1.2.7-1) unstable; urgency=low
+
+  * New upstream release.
+  * Bump Standards-Version, no changes needed.
+
+ -- Mikhail Gusarov <dottedmag@debian.org>  Mon, 28 Mar 2011 21:03:51 +0200
+
+libssh2 (1.2.6-1) unstable; urgency=low
+
+  * New upstream release.
+    - Update symbols file. libssh2_error and libssh2_kex_exchange symbols
+      were unexported, being private.
+  * Simplify package description (Closes: #580325).
+  * Update Maintainer field to use my @debian.org address.
+  * Convert debian/copyright to machine-readable format.
+
+ -- Mikhail Gusarov <dottedmag@debian.org>  Thu, 10 Jun 2010 17:33:32 +0700
+
+libssh2 (1.2.5-1) unstable; urgency=low
+
+  * New upstream release.
+    - Update symbols file.
+  * Convert to source format 3.0 (quilt)
+  * Bump Standards-Version to 3.8.4, no changes needed.
+
+ -- Mikhail Gusarov <dottedmag@dottedmag.net>  Thu, 01 Apr 2010 21:46:07 +0700
+
+libssh2 (1.2.4-1) unstable; urgency=low
+
+  * New upstream release.
+    - Adjust list of files to stash before build and to restore later.
+    - Update symbols file.
+
+ -- Mikhail Gusarov <dottedmag@dottedmag.net>  Sun, 28 Feb 2010 13:11:14 +0600
+
+libssh2 (1.2.2-1) unstable; urgency=low
+
+  * New upstream release.
+
+  * Run autoreconf during build to update libtool/automake/autoconf
+    generated files (Closes: #558523).
+    - Expand list of files to stash before build and to restore after.
+
+  * Remove disable_example_compilation.patch, example compilation does not
+    hurt anyone.
+    - Remove quilt from Build-Depends,
+    - Stop call patch/unpatch in debian/rules,
+    - Remove README.source.
+
+ -- Mikhail Gusarov <dottedmag@dottedmag.net>  Sun, 29 Nov 2009 18:45:58 +0600
+
+libssh2 (1.2.1-2) unstable; urgency=low
+
+  * Install libssh2.pc (Closes: #554437)
+
+ -- Mikhail Gusarov <dottedmag@dottedmag.net>  Wed, 04 Nov 2009 23:48:29 +0600
+
+libssh2 (1.2.1-1) unstable; urgency=low
+
+  * debian/watch:
+    - update to match changed upstream download location.
+  * debian/rules:
+    - adjust "keep files" list in order to produce clean .diff.gz
+    - avoid installing .gitignore alongside the examples
+    - stylistic fixes
+  * debian/control:
+    - bump Standards-Version, no changes required.
+
+ -- Mikhail Gusarov <dottedmag@dottedmag.net>  Mon, 28 Sep 2009 19:10:36 +0700
+
+libssh2 (1.2-1) unstable; urgency=low
+
+  * New upstream release.
+    - updated debian/libssh2-1.symbols.
+  * debian/rules: config.sub, config.guess, ChangeLog and
+    win32/libssh2.dsp from tarball are preserved, due to being deleted by
+    `make distclean'.
+  * Standards-Version updated to 3.8.2, no changes required.
+
+ -- Mikhail Gusarov <dottedmag@dottedmag.net>  Thu, 13 Aug 2009 02:28:57 +0700
+
+libssh2 (1.1-1) unstable; urgency=low
+
+  * New upstream release.
+    - Dropped unexport-private-symbols.patch, applied upstream.
+    - Dropped fix_manpage.patch, applied upstream.
+    - Lots of private symbols were un-exported, adjusting
+      libssh2-1.symbols
+  * Updating Standards-Version to 3.8.1, no changes required.
+
+ -- Mikhail Gusarov <dottedmag@dottedmag.net>  Thu, 02 Apr 2009 16:20:42 +0700
+
+libssh2 (1.0-1) unstable; urgency=low
+
+  * New upstream release (Closes: #514225).
+  * Replaced fix_manpage.patch with new set of manpages' fixes.
+  * debian/patches/disable_example_compilation.patch:
+    - added description, as suggested by Lintian,
+    - refreshed.
+  * debian/patches/unexport-private-symbols.patch:
+    - new patch, disabling export of _libssh2_* private symbols.
+  * debian/libssh2-1.symbols:
+    - added symbols file.
+  * debian/control:
+    - removed duplicate Section: libs from binary package,
+    - bumped Standards-Version to 3.8.0:
+      + debian/README.source added.
+  * debian/rules:
+    - clean target now unpatches the source,
+    - no longer reconfigures package twice: fixed quilt patch target,
+    - simplified configure target,
+    - deprecated dh_clean -k replaced with dh_prep.
+  * debhelper compat bumped to 7.
+
+ -- Mikhail Gusarov <dottedmag@dottedmag.net>  Tue, 17 Feb 2009 22:50:14 +0600
+
+libssh2 (0.18-1) unstable; urgency=low
+
+  * New upstream release
+    - Removed 'CVS directories in tarball' lintian override.
+
+  - Added patch fixing the syntactic errors in manpages.
+
+ -- Mikhail Gusarov <dottedmag@dottedmag.net>  Sun, 11 Nov 2007 17:16:34 +0600
+
+libssh2 (0.17-1) unstable; urgency=low
+
+  * New upstream release (Closes: #409362, #430569):
+    * ABI change: soname changed (adding Conflicts and Replaces to new
+      -dev package)
+    * installing more documentation.
+    * added lintian override: CVS directory accidentally went in release
+      tarball.
+  * Build using libgcrypt, not OpenSSL (Closes: #409362).
+  * Quilt introduced to manage patches:
+    * Added patch disabling compilation of example.
+  * Watch file added.
+  * ${Source-Version} changed to ${binary:Version}: makes lintian happy
+    and allows binNMUs.
+
+ -- Mikhail Gusarov <dottedmag@dottedmag.net>  Wed, 04 Jul 2007 15:21:46 +0700
+
+libssh2 (0.14+20070102-1) unstable; urgency=low
+
+  * Initial release (Closes: #403446).
+
+ -- Mikhail Gusarov <dottedmag@dottedmag.net>  Tue,  2 Jan 2007 03:17:15 +0600

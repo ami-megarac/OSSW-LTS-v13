@@ -1,0 +1,11 @@
+#
+#=DESCRIPTION allow change_profile with name space with quotes
+#=EXRESULT PASS
+#
+/usr/bin/foo {
+   allow change_profile -> ":foo:/bin/foo",
+}
+
+/usr/bin/foo2 {
+   allow change_profile -> ":foo:/bin/ foo",
+}

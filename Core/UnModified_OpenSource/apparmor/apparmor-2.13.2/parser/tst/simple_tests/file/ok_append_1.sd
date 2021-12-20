@@ -1,0 +1,13 @@
+#
+#=DESCRIPTION test append
+#=EXRESULT PASS
+#
+/usr/bin/foo {
+  /bin/cat a,
+  /bin/true ra,
+  /bin/false ma,
+  /lib/libc.so la,
+  /bin/less ixa,
+  /bin/more pxa,
+  /a uxa,
+}

@@ -1,0 +1,119 @@
+Source: nghttp2
+Maintainer: Tomasz Buchert <tomasz@debian.org>
+Uploaders: Ondřej Surý <ondrej@debian.org>
+Section: httpd
+Priority: optional
+Build-Depends: debhelper (>= 12),
+               debhelper-compat (= 12),
+               dpkg-dev (>= 1.17.14),
+               libc-ares-dev,
+               libcunit1-dev <!nocheck>,
+               libev-dev (>= 1:4.15),
+               libevent-dev,
+               libjansson-dev (>= 2.5),
+               libjemalloc-dev [!hurd-i386],
+               libssl-dev,
+               libsystemd-dev,
+               libxml2-dev,
+               pkg-config,
+               zlib1g-dev
+Build-Depends-Indep: python3-sphinx
+Standards-Version: 4.3.0
+Vcs-Browser: https://salsa.debian.org/debian/nghttp2
+Vcs-Git: https://salsa.debian.org/debian/nghttp2.git
+Homepage: https://nghttp2.org/
+
+Package: libnghttp2-dev
+Architecture: any
+Section: libdevel
+Depends: libnghttp2-14 (= ${binary:Version}), pkg-config, ${misc:Depends}
+Suggests: libnghttp2-doc
+Conflicts: libnghttp2-3-dev, libnghttp2-4-dev, libnghttp2-5-dev
+Replaces: libnghttp2-3-dev, libnghttp2-4-dev, libnghttp2-5-dev
+Description: library implementing HTTP/2 protocol (development files)
+ This is an implementation of the Hypertext Transfer Protocol version
+ 2 in C. The framing layer of HTTP/2 is implemented as a reusable C
+ library.
+ .
+ This package installs development files.
+
+Package: libnghttp2-doc
+Architecture: all
+Section: doc
+Depends: libjs-jquery, libjs-underscore, lynx | www-browser, ${misc:Depends}
+Description: library implementing HTTP/2 protocol (documentation)
+ This is an implementation of the Hypertext Transfer Protocol version
+ 2 in C. The framing layer of HTTP/2 is implemented as a reusable C
+ library.
+ .
+ This package installs documentation.
+
+Package: libnghttp2-14
+Architecture: any
+Multi-Arch: same
+Section: libs
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Pre-Depends: ${misc:Pre-Depends}
+Description: library implementing HTTP/2 protocol (shared library)
+ This is an implementation of the Hypertext Transfer Protocol version
+ 2 in C. The framing layer of HTTP/2 is implemented as a reusable C
+ library.
+ .
+ This package installs a shared library.
+
+Package: nghttp2-client
+Architecture: any
+Multi-Arch: foreign
+Depends: libnghttp2-14 (= ${binary:Version}),
+         lsb-base,
+         ${misc:Depends},
+         ${shlibs:Depends}
+Breaks: nghttp2 (<< 1.3.4-2~)
+Replaces: nghttp2 (<< 1.3.4-2~)
+Description: client implementing HTTP/2 protocol
+ This is a command line client implementing the HTTP/2 protocol. It
+ gives access to many low-level and advanced aspects of the protocol
+ and therefore is useful for debugging.
+
+Package: nghttp2-proxy
+Architecture: any
+Multi-Arch: foreign
+Depends: libnghttp2-14 (= ${binary:Version}),
+         lsb-base,
+         openssl,
+         python3,
+         ${misc:Depends},
+         ${shlibs:Depends}
+Breaks: nghttp2 (<< 1.3.4-2~)
+Pre-Depends: ${misc:Pre-Depends}
+Replaces: nghttp2 (<< 1.3.4-2~)
+Description: reverse proxy implementing HTTP/2 protocol
+ This is a standalone server implementing the HTTP/2 protocol with
+ HTTP/1.1 fallback for clients that do not support it. It can be used
+ as a frontend in front of web servers that do not support HTTP/2.
+
+Package: nghttp2-server
+Architecture: any
+Multi-Arch: foreign
+Depends: libnghttp2-14 (= ${binary:Version}),
+         lsb-base,
+         ${misc:Depends},
+         ${shlibs:Depends}
+Breaks: nghttp2 (<< 1.3.4-2~)
+Replaces: nghttp2 (<< 1.3.4-2~)
+Description: server implementing HTTP/2 protocol
+ This is a standalone server implementing the HTTP/2 protocol with
+ HTTP/1.1 fallback for clients that do not support it. It can be used
+ to serve files from a local directory.
+
+Package: nghttp2
+Architecture: all
+Depends: nghttp2-client (>= ${binary:Version}),
+         nghttp2-proxy (>= ${binary:Version}),
+         nghttp2-server (>= ${binary:Version}),
+         ${misc:Depends}
+Description: server, proxy and client implementing HTTP/2
+ This package will install a set of programs implementing the HTTP/2
+ protocol: a standalone server (nghttp2-server), a reverse proxy
+ (nghttp2-proxy) and a client (nghttp2-client). It provides no files
+ on its own and is not necessary for these programs to work.

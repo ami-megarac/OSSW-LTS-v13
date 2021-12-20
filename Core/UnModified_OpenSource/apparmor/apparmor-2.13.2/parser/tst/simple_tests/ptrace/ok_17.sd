@@ -1,0 +1,10 @@
+#
+#=Description ptrace peer w/implicit profile name rule
+#=EXRESULT PASS
+#
+
+
+/usr/bin/foo {
+  ptrace peer=@{profile_name},
+
+  }

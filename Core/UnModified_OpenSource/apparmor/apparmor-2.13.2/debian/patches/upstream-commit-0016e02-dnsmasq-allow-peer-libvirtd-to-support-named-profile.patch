@@ -1,0 +1,22 @@
+From: Christian Boltz <gitlab2@cboltz.de>
+Date: Tue, 22 Jan 2019 22:23:59 +0000
+Subject: dnsmasq: allow peer=libvirtd to support named profile
+
+---
+ profiles/apparmor.d/usr.sbin.dnsmasq | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/profiles/apparmor.d/usr.sbin.dnsmasq b/profiles/apparmor.d/usr.sbin.dnsmasq
+index 494c793..3f66a17 100644
+--- a/profiles/apparmor.d/usr.sbin.dnsmasq
++++ b/profiles/apparmor.d/usr.sbin.dnsmasq
+@@ -28,7 +28,9 @@
+   network inet6 raw,
+ 
+   signal (receive) peer=/usr/{bin,sbin}/libvirtd,
++  signal (receive) peer=libvirtd,
+   ptrace (readby) peer=/usr/{bin,sbin}/libvirtd,
++  ptrace (readby) peer=libvirtd,
+ 
+   owner /dev/tty rw,
+ 

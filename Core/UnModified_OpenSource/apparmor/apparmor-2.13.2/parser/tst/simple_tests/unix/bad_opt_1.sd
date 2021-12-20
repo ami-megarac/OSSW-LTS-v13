@@ -1,0 +1,7 @@
+#
+#=DESCRIPTION simple unix getopt w/peer addr test
+#=EXRESULT FAIL
+
+profile a_profile {
+  unix getopt peer=(addr=none),
+}

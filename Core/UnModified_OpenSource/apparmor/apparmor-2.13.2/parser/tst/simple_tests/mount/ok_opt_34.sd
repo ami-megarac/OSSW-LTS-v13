@@ -1,0 +1,10 @@
+#
+#=Description basic rules to test the "iversion" mount option
+#=EXRESULT PASS
+/usr/bin/foo {
+  mount options=iversion /a -> /1,
+  mount options=(iversion) /b -> /2,
+  mount options=(rw,iversion) /c -> /3,
+  mount options in (iversion) /d -> /4,
+  mount options in (ro,iversion) /e -> /5,
+}

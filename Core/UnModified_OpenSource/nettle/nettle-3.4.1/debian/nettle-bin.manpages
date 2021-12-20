@@ -1,0 +1,5 @@
+debian/sexp-conv.1
+debian/pkcs1-conv.1
+debian/nettle-lfib-stream.1
+debian/nettle-hash.1
+debian/nettle-pbkdf2.1

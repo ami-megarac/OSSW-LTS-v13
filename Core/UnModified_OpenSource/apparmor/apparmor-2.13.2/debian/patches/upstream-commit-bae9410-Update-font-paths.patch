@@ -1,0 +1,23 @@
+From: Jamie Strandboge <jamie@strandboge.com>
+Date: Mon, 30 Apr 2018 10:03:22 +0000
+Subject: Update font paths
+
+---
+ profiles/apparmor.d/abstractions/fonts | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/profiles/apparmor.d/abstractions/fonts b/profiles/apparmor.d/abstractions/fonts
+index 45cdf9a..25f8e0a 100644
+--- a/profiles/apparmor.d/abstractions/fonts
++++ b/profiles/apparmor.d/abstractions/fonts
+@@ -18,7 +18,9 @@
+   /usr/share/fonts/**                   r,
+ 
+   /etc/fonts/**                         r,
+-  /usr/share/fontconfig/conf.avail/**   r,
++  # Debian, openSUSE paths are different
++  /usr/share/{fontconfig,fonts-config,*-fonts}/conf.avail/{,**} r,
++  /usr/share/ghostscript/fonts/{,**}    r,
+ 
+   /opt/kde3/share/fonts/**              r,
+ 

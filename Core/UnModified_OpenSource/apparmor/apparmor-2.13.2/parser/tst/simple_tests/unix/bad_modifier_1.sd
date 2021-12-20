@@ -1,0 +1,7 @@
+#
+#=DESCRIPTION unix entry with a bad modifier
+#=EXRESULT FAIL
+
+profile foo {
+  unix send type=dgram modifier=foo,
+}

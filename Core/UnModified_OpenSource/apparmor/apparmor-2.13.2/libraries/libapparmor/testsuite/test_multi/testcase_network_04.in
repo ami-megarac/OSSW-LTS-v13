@@ -1,0 +1,1 @@
+type=AVC msg=audit(1333697181.284:273901): apparmor="DENIED" operation="recvmsg" parent=1596 profile="/home/ubuntu/tmp/nc" pid=1056 comm="nc" laddr=::1 lport=2048 faddr=::1 fport=33986 family="inet6" sock_type="stream" protocol=6

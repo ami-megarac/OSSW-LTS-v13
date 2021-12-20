@@ -1,0 +1,10 @@
+#=DESCRIPTION can't additional assign to variables without initial assign
+#=EXRESULT FAIL
+
+@{FOO} += @{BAZ}
+@{BAZ} = @{BAR}
+@{BAR} = 2006
+
+/bin/foo {
+  /@{FOO} r,
+}

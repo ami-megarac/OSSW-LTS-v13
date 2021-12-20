@@ -1,0 +1,6 @@
+#
+#=Description basic rule to test the invalid "XXX" mount option
+#=EXRESULT FAIL
+/usr/bin/foo {
+  mount options=(XXX) /a -> /1,
+}

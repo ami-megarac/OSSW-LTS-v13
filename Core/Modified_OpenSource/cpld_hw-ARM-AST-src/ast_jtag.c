@@ -34,8 +34,8 @@ unsigned long g_jtag_base=0x1E6E4000;
 #define TCK_PIN	2 
 #define TMS_PIN	3 
 
-extern int jtag_write_register(struct io_xfer *io,int size);
-extern int jtag_read_register(struct io_xfer *io,int size);
+extern int jtag_write_register(struct altera_io_xfer *io,int size);
+extern int jtag_read_register(struct altera_io_xfer *io,int size);
 
 typedef enum {
 	SET_LOW = 0,
@@ -50,8 +50,8 @@ typedef enum {
  * Note: Connect a GPIO(G5) to replace TDO, and read it to get data back from device. A workaround for AST2300/AST1050.
  */
 static int ast_tdo_pin(void){
-	struct io_xfer ioxfer;
-	memset(&ioxfer,0,sizeof(struct io_xfer));
+	struct altera_io_xfer ioxfer;
+	memset(&ioxfer,0,sizeof(struct altera_io_xfer));
     if(g_jtag_base==0x1E6E4000) 
     { 
         ioxfer.id=0;
@@ -61,7 +61,7 @@ static int ast_tdo_pin(void){
         ioxfer.id=1;
     }
     ioxfer.Address=(JTAG_STATUS);
-    jtag_read_register(&ioxfer,sizeof(struct io_xfer));
+    jtag_read_register(&ioxfer,sizeof(struct altera_io_xfer));
 	return (ioxfer.Data & SOFTWARE_TDIO_BIT);
 }
 
@@ -72,7 +72,7 @@ int jtag_io(int pin, int act){
     int reVal = 0;
     unsigned int op_code = 0;
     unsigned int force_action = 0;
-    struct io_xfer ioxfer;	
+    struct altera_io_xfer ioxfer;	
 
     switch(act)
     {
@@ -104,7 +104,7 @@ int jtag_io(int pin, int act){
 				op_code |= SOFTWARE_TDIO_BIT;
 			}
 
-			memset(&ioxfer,0,sizeof(struct io_xfer));
+			memset(&ioxfer,0,sizeof(struct altera_io_xfer));
 		    if(g_jtag_base==0x1E6E4000) 
             {
                 //printk("g_jtag_base==0x1E6E4000\n");
@@ -117,7 +117,7 @@ int jtag_io(int pin, int act){
         	}
             ioxfer.Address=(JTAG_STATUS);
 			ioxfer.Data=(SOFTWARE_MODE_ENABLE | op_code);
-			jtag_write_register(&ioxfer,sizeof(struct io_xfer));
+			jtag_write_register(&ioxfer,sizeof(struct altera_io_xfer));
 		}
 		break;
     	case READ_VAL:

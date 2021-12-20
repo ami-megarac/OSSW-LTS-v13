@@ -1,0 +1,21 @@
+#
+#=Description basic signal w/multiple var names rule
+#=EXRESULT PASS
+#
+
+@{SHELLS}=/bin/bash /bin/dash /bin/tcsh
+
+/usr/bin/signal-test1 {
+  signal peer=@{SHELLS},
+
+}
+
+/usr/bin/signal-test2 {
+  signal (send) peer=@{SHELLS},
+
+}
+
+/usr/bin/signal-test3 {
+  signal (receive) peer=@{SHELLS},
+
+}

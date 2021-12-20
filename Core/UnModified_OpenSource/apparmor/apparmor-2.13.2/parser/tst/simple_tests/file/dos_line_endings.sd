@@ -1,0 +1,41 @@
+# vim:syntax=subdomain
+# Last Modified: Wed Aug 31 11:14:09 2005
+#=DESCRIPTION dos line endings
+#=EXRESULT PASS
+/usr/lib/RealPlayer10/realplay {
+  #include <includes/base>
+  #include <includes/fonts>
+
+  /bin/bash ix,
+  /bin/sed ixr,
+  /bin/true ixr,
+  /etc/opt/gnome/pango/pango.modules r,
+  /opt/gnome/lib/gtk-2.0/2.4.0/loaders/* r,
+  /opt/gnome/lib/lib*so* r,
+  /opt/gnome/lib/pango/1.4.0/modules/* r,
+  /opt/gnome/share/icons r,
+  /opt/gnome/share/icons/** r,
+  /opt/gnome/bin/nautilus rux,
+  /root r,
+  /root/.Xauthority r,
+  /root/.fonts.cache-1 r,
+  /root/.realplayerrc rw,
+  /home/*/ r,
+  /home/*/.Xauthority r,
+  /home/*/.fonts.cache-1 r,
+  /home/*/.realplayerrc rw,
+  /usr/X11R6/lib/Acrobat7/Resource/Font/* r,
+  /usr/X11R6/lib/Acrobat7/Resource/Font/PFM/* r,
+  /usr/lib/RealPlayer10/** r,
+  /usr/lib/RealPlayer10/realplay.bin ixr,
+  /usr/lib/jvm/java-1.4.2-sun-1.4.2.06/jre/lib/fonts/** r,
+  /usr/lib/ooo-2.0/share/fonts/** r,
+  /opt/MozillaFirefox/bin/firefox.sh pxr,
+  /opt/MozillaFirefox/lib/firefox-bin pxr,
+  /opt/MozillaFirefox/lib/init.d r,
+  /usr/bin/opera pxr,
+  /usr/share/icons r,
+  /usr/share/icons/** r,
+  /opt/gnome/share/pixmaps r,
+  /opt/gnome/share/pixmaps/** r,
+}

@@ -1,0 +1,10 @@
+#
+#=Description basic rules to test the "nosuid" mount option
+#=EXRESULT PASS
+/usr/bin/foo {
+  mount options=nosuid /a -> /1,
+  mount options=(nosuid) /b -> /2,
+  mount options=(rw,nosuid) /c -> /3,
+  mount options in (nosuid) /d -> /4,
+  mount options in (ro,nosuid) /e -> /5,
+}

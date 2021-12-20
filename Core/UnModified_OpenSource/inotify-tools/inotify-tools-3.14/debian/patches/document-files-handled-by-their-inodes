@@ -1,0 +1,44 @@
+Description: Should document that files are handled by their inodes
+Debian-Bug: http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=594163
+Author: Ondřej Kuzník <ondra@mistotebe.net>
+ Ryan Niebur <ryan@debian.org>
+
+Index: inotify-tools/man/inotifywait.1
+===================================================================
+--- inotify-tools.orig/man/inotifywait.1	2012-06-18 02:43:47.000000000 -0700
++++ inotify-tools/man/inotifywait.1	2012-06-18 02:44:02.000000000 -0700
+@@ -332,6 +332,14 @@
+ DELETE badfile
+ .fi
+ 
++.SH CAVEATS
++
++When using inotifywait, the filename that is outputted is not
++guaranteed to be up to date after a move because it is the inode that
++is being monitored. Additionally, none of the observed operations are
++guaranteed to have been performed on the filename inotifywait was
++instructed to monitor in cases when the file is known by several names
++in the filesystem.
+ 
+ .SH BUGS
+ There are race conditions in the recursive directory watching code
+Index: inotify-tools/man/inotifywatch.1
+===================================================================
+--- inotify-tools.orig/man/inotifywatch.1	2012-06-18 02:43:47.000000000 -0700
++++ inotify-tools/man/inotifywatch.1	2012-06-18 02:43:57.000000000 -0700
+@@ -254,6 +254,15 @@
+ 2      2       0       /home/rohan/.beagle/Indexes/KMailIndex/SecondaryIndex/
+ .fi
+ 
++.SH CAVEATS
++
++When using inotifywatch, the filename that is outputted is not
++guaranteed to be up to date after a move because it is the inode that
++is being monitored. Additionally, none of the observed operations are
++guaranteed to have been performed on the filename inotifywatch was
++instructed to monitor in cases when the file is known by several names
++in the filesystem.
++
+ .SH BUGS
+ There are race conditions in the recursive directory watching code
+ which can cause events to be missed if they occur in a directory immediately

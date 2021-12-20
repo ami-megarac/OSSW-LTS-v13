@@ -1,0 +1,2 @@
+# Uses the path to see if dpkg is available
+libsnmp-dev: uses-dpkg-database-directly usr/lib/x86_64-linux-gnu/libnetsnmpmibs.a

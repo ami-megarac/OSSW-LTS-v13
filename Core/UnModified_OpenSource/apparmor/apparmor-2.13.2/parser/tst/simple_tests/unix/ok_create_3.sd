@@ -1,0 +1,7 @@
+#
+#=DESCRIPTION simple unix create w/addr acceptance test
+#=EXRESULT PASS
+
+profile a_profile {
+  unix create addr=none,
+}

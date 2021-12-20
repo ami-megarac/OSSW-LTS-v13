@@ -1,0 +1,5 @@
+#
+/does/not/exist {
+  #include <includes/base>
+  #include <includes/busted>
+}

@@ -1,0 +1,8 @@
+usr/bin/libpng-config
+usr/bin/libpng16-config
+usr/include
+usr/lib/*/pkgconfig
+usr/lib/*/libpng.a
+usr/lib/*/libpng16.a
+usr/lib/*/libpng.so
+usr/lib/*/libpng16.so

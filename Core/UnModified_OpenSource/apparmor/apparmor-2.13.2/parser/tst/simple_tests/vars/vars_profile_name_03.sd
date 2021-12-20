@@ -1,0 +1,8 @@
+#=DESCRIPTION profiles declared with the profile keyword can begin with var
+#=EXRESULT PASS
+
+@{FOO}=bar
+
+profile @{FOO} {
+  /does/not/exist r,
+}

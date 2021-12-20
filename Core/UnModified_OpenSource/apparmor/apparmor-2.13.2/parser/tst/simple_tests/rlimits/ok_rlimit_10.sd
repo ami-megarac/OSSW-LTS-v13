@@ -1,0 +1,7 @@
+#
+#=DESCRIPTION simple max virtual memory szie rlimit test
+#=EXRESULT PASS
+
+profile rlimit {
+  set rlimit as <= 2047MB,
+}

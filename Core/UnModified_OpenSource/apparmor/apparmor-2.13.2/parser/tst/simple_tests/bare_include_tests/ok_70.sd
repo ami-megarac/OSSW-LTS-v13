@@ -1,0 +1,9 @@
+#
+#=DESCRIPTION include if existss testing - basic include if exists of a directory
+#=EXRESULT PASS
+#
+/does/not/exist {
+  include if exists <includes/base>
+  include if exists simple_tests/includes/
+  include if exists <includes/base>
+}

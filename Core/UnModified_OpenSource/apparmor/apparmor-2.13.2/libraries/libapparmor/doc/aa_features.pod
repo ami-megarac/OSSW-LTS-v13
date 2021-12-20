@@ -1,0 +1,166 @@
+# This publication is intellectual property of Canonical Ltd. Its contents
+# can be duplicated, either in part or in whole, provided that a copyright
+# label is visibly located on each copy.
+#
+# All information found in this book has been compiled with utmost
+# attention to detail. However, this does not guarantee complete accuracy.
+# Neither Canonical Ltd, the authors, nor the translators shall be held
+# liable for possible errors or the consequences thereof.
+#
+# Many of the software and hardware descriptions cited in this book
+# are registered trademarks. All trade names are subject to copyright
+# restrictions and may be registered trade marks. Canonical Ltd.
+# essentially adhere to the manufacturer's spelling.
+#
+# Names of products and trademarks appearing in this book (with or without
+# specific notation) are likewise subject to trademark and trade protection
+# laws and may thus fall under copyright restrictions.
+#
+
+
+=pod
+
+=head1 NAME
+
+aa_features - an opaque object representing a set of AppArmor kernel features
+
+aa_features_new - create a new aa_features object based on a path
+
+aa_features_new_from_string - create a new aa_features object based on a string
+
+aa_features_new_from_kernel - create a new aa_features object based on the current kernel
+
+aa_features_ref - increments the ref count of an aa_features object
+
+aa_features_unref - decrements the ref count and frees the aa_features object when 0
+
+aa_features_write_to_file - write a string representation of an aa_features object to a file
+
+aa_features_is_equal - equality test for two aa_features objects
+
+aa_features_supports - provides aa_features object support status
+
+aa_features_id - provides unique identifier for an aa_features object
+
+=head1 SYNOPSIS
+
+B<#include E<lt>sys/apparmor.hE<gt>>
+
+B<typedef struct aa_features aa_features;>
+
+B<int aa_features_new(aa_features **features, int dirfd, const char *path);>
+
+B<int aa_features_new_from_string(aa_features **features, const char *string, size_t size);>
+
+B<int aa_features_new_from_kernel(aa_features **features);>
+
+B<aa_features *aa_features_ref(aa_features *features);>
+
+B<void aa_features_unref(aa_features *features);>
+
+B<int aa_features_write_to_file(aa_features *features, int dirfd, const char *path);>
+
+B<bool aa_features_is_equal(aa_features *features1, aa_features *features2);>
+
+B<bool aa_features_supports(aa_features *features, const char *str);>
+
+B<char *aa_features_id(aa_features *features);>
+
+Link with B<-lapparmor> when compiling.
+
+=head1 DESCRIPTION
+
+The I<aa_features> object contains information about the AppArmor features
+supported by a kernel. The feature support information is based upon the files
+AppArmor represents in securityfs, which is typically found at
+/sys/kernel/security/apparmor/features/. That information may be parsed and
+turned into a string or flat file in order to represent a set of features of a
+kernel that is not currently running.
+
+The aa_features_new() function creates an I<aa_features> object based upon a
+directory file descriptor and path. The I<path> can point to a file or
+directory. See the openat(2) man page for examples of I<dirfd> and I<path>. The
+allocated I<features> object must be freed using aa_features_unref().
+
+The aa_features_new_from_string() function is similar except that it accepts a
+NUL-terminated string representation of the AppArmor features as the I<string>
+argument. The length of the features string, not counting the NUL-terminator,
+must be specified as the I<size> argument. The allocated I<features> object
+must be freed using aa_features_unref().
+
+The aa_features_new_from_kernel() function creates an I<aa_features> object
+from the current running kernel. The allocated I<features> object must be freed
+using aa_features_unref().
+
+aa_features_ref() increments the reference count on the I<features> object.
+
+aa_features_unref() decrements the reference count on the I<features> object
+and releases all corresponding resources when the reference count reaches zero.
+
+The aa_features_write_to_file() function writes a string representation of the
+I<features> object to the file specified by the I<dirfd> and I<path>
+combination.
+
+aa_features_is_equal() can be used to detect if the I<features1> and
+I<features2> objects are equal. The definition of equality is private to
+libapparmor and may be changed in ways that do not break backward
+compatibility.
+
+The aa_features_supports() function can be used to query the I<features> object
+to determine if a feature is supported. The I<str> argument should be equal to
+the path, relative to the "apparmor/features/" directory of securityfs, of the
+feature to query. For example, to test if policy version 6 is supported, I<str>
+would be "policy/versions/v6".
+
+The aa_features_id() function returns a string representation of an
+identifier that can be used to uniquely identify an I<aa_features> object.
+The mechanism for generating the string representation is internal to
+libapparmor and subject to change but an example implementation is
+applying a hash function to the features string.
+
+=head1 RETURN VALUE
+
+The aa_features_new() family of functions return 0 on success and I<*features>
+will point to an I<aa_features> object that must be freed by
+aa_features_unref(). -1 is returned on error, with errno set appropriately, and
+I<*features> will be set to NULL.
+
+aa_features_ref() returns the value of I<features>.
+
+aa_features_write_to_file() returns 0 on success. -1 is returned on error, with
+errno set appropriately.
+
+aa_features_is_equal() returns true if I<features1> and I<features2> are equal
+and false if they are not equal.
+
+aa_features_supports() returns true if the feature represented by I<str> is
+supported and false if it is not supported.
+
+aa_features_id() returns a string identifying I<features> which must be
+freed by the caller. NULL is returned on error, with errno set
+appropriately.
+
+=head1 ERRORS
+
+The errno value will be set according to the underlying error in the
+I<aa_features> family of functions that return -1 or NULL on error.
+
+=head1 NOTES
+
+The aa_features_id() function can be found in libapparmor version
+2.13. All the other aa_feature functions described above are present
+in libapparmor version 2.10.
+
+aa_features_unref() saves the value of errno when called and restores errno
+before exiting in libapparmor version 2.12 and newer.
+
+=head1 BUGS
+
+None known. If you find any, please report them at
+L<https://bugs.launchpad.net/apparmor/+filebug>.
+
+=head1 SEE ALSO
+
+openat(2) and L<https://wiki.apparmor.net>.
+
+=cut

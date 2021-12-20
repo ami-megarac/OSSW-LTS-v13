@@ -1,0 +1,112 @@
+#! /usr/bin/make -f
+# Build the gnutls package for Debian.
+
+export DEB_BUILD_MAINT_OPTIONS := hardening=+bindnow
+export DEB_CFLAGS_MAINT_APPEND := -Wall
+export DEB_CXXFLAGS_MAINT_APPEND := -Wall
+
+include /usr/share/dpkg/pkg-info.mk
+
+# used by autogen
+ifndef SOURCE_DATE_EPOCH
+	export MAN_PAGE_DATE = $(shell env LC_ALL=C date -u -d \
+		"`dpkg-parsechangelog --show-field Date`" +%Y-%m-%d)
+else
+	export MAN_PAGE_DATE = $(shell env LC_ALL=C date -u -d \
+		"@$(SOURCE_DATE_EPOCH)" +%Y-%m-%d)
+endif
+
+AMCONFBUILDINDEP := $(shell if dh_listpackages | grep -q gnutls-doc ; \
+	then echo "--enable-gtk-doc" ; \
+	else echo "--disable-gtk-doc --disable-doc"; fi)
+
+CONFIGUREARGS = \
+	--enable-ld-version-script --enable-cxx \
+	--disable-rpath \
+	--enable-libdane --without-tpm --disable-guile \
+	--enable-openssl-compatibility \
+	--disable-silent-rules \
+	--with-unbound-root-key-file=/usr/share/dns/root.key \
+	--with-default-trust-store-file=/etc/ssl/certs/ca-certificates.crt \
+	--with-packager=Debian \
+	--with-packager-bug-reports=http://bugs.debian.org/ \
+	--with-packager-version=$(DEB_VERSION) \
+
+BDIR = -O--builddirectory=b4deb
+
+override_dh_auto_configure:
+	# Binary files related to
+	# 41_rel3.6.9_01-Support-for-Generalname-registeredID-from-RFC-5280-i.patch
+	cp debian/binary/cert10.der debian/binary/cert5.der \
+		tests/certs-interesting/
+	dh_auto_configure --verbose $(BDIR) -- \
+		$(CONFIGUREARGS) \
+		--enable-static \
+		$(AMCONFBUILDINDEP)
+
+
+override_dh_makeshlibs:
+	dh_makeshlibs $(BDIR) -p libgnutlsxx28 -V 'libgnutlsxx28 (>= 3.6.5)'
+	dh_makeshlibs $(BDIR) -p libgnutls30  -V 'libgnutls30 (>= 3.6.5-0)' -- -c4
+	dh_makeshlibs $(BDIR) -p libgnutls-dane0  -V 'libgnutls-dane0 (>= 3.6.5-0)' \
+		-- -c4
+	dh_makeshlibs $(BDIR) -p libgnutls-openssl27 -V 'libgnutls-openssl27 (>= 3.6.5-0)'
+	dh_makeshlibs $(BDIR) --remaining-packages
+
+
+# pre-clean rule: save gnutls.pdf since it is expensive to regenerate.
+# See README.source
+override_dh_auto_clean:
+	if [ -e doc/gnutls.pdf ] ; then \
+		mv -v doc/gnutls.pdf doc/gnutls.pdf.debbackup ; fi
+	if test -e Makefile ; then $(MAKE) distclean ; fi
+	#dh_auto_clean $(BDIR) --verbose
+	# restore gnutls.pdf
+	if [ -e doc/gnutls.pdf.debbackup ] && [ ! -e doc/gnutls.pdf ] ; \
+		then mv -v doc/gnutls.pdf.debbackup doc/gnutls.pdf ; fi
+	rm -fv `grep -El 'has been AutoGen-ed |has been AutoGen-ed *$$' doc/manpages/*.?`
+	# Binary files related to
+	# 41_rel3.6.9_01-Support-for-Generalname-registeredID-from-RFC-5280-i.patch
+	rm -f tests/certs-interesting/cert10.der \
+		tests/certs-interesting/cert5.der
+
+override_dh_auto_build:
+	dh_auto_build $(BDIR) --verbose --parallel
+ifeq ($(filter --disable-doc,$(AMCONFBUILDINDEP)),)
+	$(MAKE) -C b4deb html
+else
+	$(MAKE) -C b4deb/doc/manpages
+endif
+
+override_dh_auto_install:
+	dh_auto_install $(BDIR) --verbose
+ifneq ($(filter --disable-doc,$(AMCONFBUILDINDEP)),)
+	$(MAKE) -C b4deb/doc/manpages DESTDIR=`pwd`/debian/tmp install
+endif
+	find debian/*/usr/lib/* -name '*.so.*.*' -type f -exec \
+		chrpath -d {} +
+
+override_dh_installinfo:
+	dh_installinfo $(BDIR)
+	if test -e debian/gnutls-doc ; then \
+		cd debian/gnutls-doc/usr/share/info && \
+		sed -i -e 's:image src="\([^"]*.png"\):image src="/usr/share/doc/gnutls-doc/html/\1:g' *.info* ; \
+	fi
+
+override_dh_installchangelogs:
+	dh_installchangelogs $(BDIR)
+	rm -vrf debian/libgnutlsxx28/usr/share/doc/libgnutlsxx28
+	dh_link $(BDIR) -plibgnutlsxx28 usr/share/doc/libgnutls30 \
+		usr/share/doc/libgnutlsxx28
+
+override_dh_compress:
+	dh_compress $(BDIR) -X.pdf
+
+override_dh_auto_test:
+	dh_auto_test $(BDIR) --verbose -- VERBOSE=1
+
+override_dh_clean:
+	dh_clean $(BDIR) -X.bak
+
+%:
+	dh $@ --builddirectory=b4deb

@@ -1,0 +1,85 @@
+#! /usr/bin/make -f
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+## Figure out some variables
+DEB_HOST_ARCH_OS	?= $(shell dpkg-architecture -qDEB_HOST_ARCH_OS)
+DEB_HOST_GNU_CPU	?= $(shell dpkg-architecture -qDEB_HOST_GNU_CPU)
+DEB_HOST_GNU_TYPE	?= $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
+DEB_HOST_MULTIARCH	?= $(shell dpkg-architecture -qDEB_HOST_MULTIARCH)
+PKG_CONFIG		?= $(DEB_HOST_GNU_TYPE)-pkg-config
+
+DOPACKAGES = $(shell dh_listpackages)
+
+BUILT_USING=$(shell dpkg-query -f '$${source:Package} (= $${source:Version}), ' -W "libsepol1-dev")
+
+## Default target
+binary:
+
+## Sanity check
+ifneq ($(DEB_HOST_ARCH_OS),linux)
+$(error This is a linux only package. Aborting build.)
+endif
+
+## The build system doesn't use CPPFLAGS, pass them to CFLAGS to enable the
+## missing (hardening) flags.
+export DEB_CFLAGS_MAINT_APPEND = $(shell dpkg-buildflags --get CPPFLAGS)
+
+## Unconditionally run debhelper command targets
+.PHONY: FORCE
+FORCE:
+
+## By default, pass everything through debhelper automatically
+export DH_OPTIONS
+DH_ADDONS =
+ifneq ($(filter python-selinux,$(DOPACKAGES)),)
+DH_ADDONS += --with=python2
+endif
+ifneq ($(filter python3-selinux,$(DOPACKAGES)),)
+DH_ADDONS += --with=python3
+endif
+ifneq ($(filter ruby-selinux,$(DOPACKAGES)),)
+DH_ADDONS += --with=ruby
+endif
+%: FORCE
+	@dh $@ $(DH_ADDONS)
+
+## Don't try to rebuild the debian/rules file
+debian/rules:
+	@touch $@
+
+## Set up some variables to be passed to the upstream Makefile
+extra_make_args = ARCH=$(DEB_HOST_GNU_CPU)
+extra_make_args += CC=$(DEB_HOST_GNU_TYPE)-gcc
+extra_make_args += PKG_CONFIG=$(PKG_CONFIG)
+override_dh_auto_build: FORCE
+	+$(MAKE) $(extra_make_args) all
+
+## Work around the very limited SELinux build-system
+DESTDIR = $(CURDIR)/debian/tmp
+base_extra_install_args  = $(extra_make_args)
+base_extra_install_args += DESTDIR=$(DESTDIR)
+extra_install_args = $(base_extra_install_args) LIBDIR=/usr/lib/$(DEB_HOST_MULTIARCH)
+extra_install_args += SHLIBDIR=/lib/$(DEB_HOST_MULTIARCH)
+python_extra_install_args = $(base_extra_install_args) LIBDIR=/usr/lib
+
+override_dh_auto_install: FORCE
+	+$(MAKE) $(extra_install_args) install
+ifneq ($(filter python-selinux python3-selinux,$(DOPACKAGES)),)
+	+$(MAKE) $(python_extra_install_args) -f debian/python.mk
+endif
+ifneq ($(filter ruby-selinux,$(DOPACKAGES)),)
+	+$(MAKE) $(extra_install_args) -f debian/ruby.mk
+endif
+
+## Generate a hard error for any upstream files we don't install
+override_dh_missing: FORCE
+	dh_missing --fail-missing
+
+override_dh_gencontrol:
+	dh_gencontrol -- -VBuilt-Using="$(BUILT_USING)"
+
+override_dh_makeshlibs:
+	dh_makeshlibs -plibselinux1 --add-udeb="libselinux1-udeb" -V
+	dh_makeshlibs --remaining-packages

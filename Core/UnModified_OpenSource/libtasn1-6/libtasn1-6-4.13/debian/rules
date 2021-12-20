@@ -1,0 +1,51 @@
+#! /usr/bin/make -f
+# Build the libtasn1 packages for Debian.
+
+export DEB_BUILD_MAINT_OPTIONS := hardening=+bindnow
+export DEB_CFLAGS_MAINT_APPEND := -Wall
+export DEB_CXXFLAGS_MAINT_APPEND := -Wall
+
+AMCONFBUILDINDEP := $(shell if dh_listpackages | grep -q libtasn1-doc ; \
+        then echo "--enable-gtk-doc" ; \
+        else echo "--disable-gtk-doc"; fi)
+
+override_dh_auto_configure:
+	# touch-magic when cross-compiling
+	if [ \
+		`dpkg-architecture -q DEB_BUILD_GNU_TYPE` != \
+		`dpkg-architecture -q DEB_HOST_GNU_TYPE` \
+		] ; then \
+		touch `grep -l help2man doc/*.[18]` ;\
+		fi
+
+	dh_auto_configure --verbose -- \
+	--disable-silent-rules \
+	--enable-ld-version-script --with-packager=Debian \
+	--disable-gtk-doc-pdf \
+	--with-packager-bug-reports=http://bugs.debian.org/ \
+	--with-packager-version="$(DEB_VERSION)" \
+	$(AMCONFBUILDINDEP)
+
+override_dh_makeshlibs:
+	dh_makeshlibs -V 'libtasn1-6 (>=4.7-0)' -- -c4
+
+override_dh_auto_build:
+	dh_auto_build --verbose --parallel
+ifeq ($(filter --disable-gtk-doc,$(AMCONFBUILDINDEP)),)
+	if ! test -e doc/libtasn1.pdf ; then \
+		$(MAKE) pdf ; fi
+	if ! test -e doc/libtasn1.html ; then \
+		$(MAKE) html ; fi
+endif
+
+override_dh_strip:
+	dh_strip --ddeb-migration='libtasn1-6-dbg (<< 4.7-3~)'
+
+override_dh_compress:
+	dh_compress --exclude=libtasn1.pdf
+
+override_dh_installchangelogs:
+	dh_installchangelogs NEWS
+
+%:
+	dh $@

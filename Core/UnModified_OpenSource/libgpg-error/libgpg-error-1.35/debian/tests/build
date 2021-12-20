@@ -1,0 +1,7 @@
+#!/bin/bash
+
+set -e
+
+gcc -pedantic -Wall -Werror -o test-run $(pkg-config --cflags --libs gpg-error) debian/tests/simple-build.c
+./test-run
+rm -f test-run

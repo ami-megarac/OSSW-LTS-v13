@@ -1,0 +1,2 @@
+# Upstream does not ship a changelog.
+dh-apparmor binary: no-upstream-changelog

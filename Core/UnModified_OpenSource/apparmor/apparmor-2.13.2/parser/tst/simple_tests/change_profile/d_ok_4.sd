@@ -1,0 +1,10 @@
+#
+#=DESCRIPTION deny change_profile with a variable (LP: #390810)
+#=EXRESULT PASS
+#
+
+@{LIBVIRT}="libvirt"
+
+/usr/bin/foo {
+   deny change_profile -> @{LIBVIRT}-foo,
+}

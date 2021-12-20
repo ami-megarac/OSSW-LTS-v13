@@ -1,0 +1,11 @@
+[Unit]
+Description=Initialize hardware monitoring sensors
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=-/usr/bin/sensors -s
+ExecStart=-/usr/bin/sensors
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,55 @@
+From 1ea1ef445fa79a18393dd670ccd4a2648fe0d0c5 Mon Sep 17 00:00:00 2001
+From: Colin Watson <cjwatson@ubuntu.com>
+Date: Fri, 28 Mar 2014 17:09:52 +0000
+Subject: Add LVM support on kFreeBSD
+
+Patch-Name: kfreebsd_lvm.patch
+---
+ libparted/arch/freebsd.c | 27 +++++++++++++++++++++++++++
+ 1 file changed, 27 insertions(+)
+
+diff --git a/libparted/arch/freebsd.c b/libparted/arch/freebsd.c
+index b78d2bb0..f7061c74 100644
+--- a/libparted/arch/freebsd.c
++++ b/libparted/arch/freebsd.c
+@@ -1178,6 +1178,31 @@ _probe_zfs_volumes ()
+ 	return 1;
+ }
+ 
++static int
++_probe_lvm_volumes ()
++{
++	DIR*	lvm_dir;
++	struct dirent*	lvm_dent;
++	char            buf[PATH_MAX];
++	struct stat     st;
++
++	lvm_dir = opendir ("/dev/linux_lvm");
++	if (!lvm_dir)
++		return 0;
++
++	while ((lvm_dent = readdir (lvm_dir))) {
++		if (strcmp (lvm_dent->d_name, ".")  == 0 || strcmp (lvm_dent->d_name, "..") == 0)
++			continue;
++		snprintf (buf, sizeof (buf), "/dev/linux_lvm/%s", lvm_dent->d_name);
++		if (stat (buf, &st) != 0)
++			continue;
++		_ped_device_probe (buf);
++	}
++	closedir (lvm_dir);
++
++	return 1;
++}
++
+ static void
+ freebsd_probe_all ()
+ {
+@@ -1186,6 +1211,8 @@ freebsd_probe_all ()
+ 	_probe_kern_disks ();
+ 
+ 	_probe_zfs_volumes ();
++
++	_probe_lvm_volumes ();
+ }
+ 
+ static char*

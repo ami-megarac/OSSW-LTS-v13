@@ -1,0 +1,9 @@
+version=3
+opts=uversionmangle=s/(\d)[_\.\-\+]?((RC|rc|pre|dev|beta|alpha|b|a)[\-\.]?\d*)$/$1~$2/,pgpsigurlmangle=s/$/.sig/ \
+ftp://ftp.gnu.org/gnu/nettle/nettle-(\d.*)\.(?:tgz|tbz2|txz|tar\.(?:gz|bz2|xz))
+opts=uversionmangle=s/(\d)[_\.\-\+]?((RC|rc|pre|dev|beta|alpha|b|a)[\-\.]?\d*)$/$1~$2/,pgpsigurlmangle=s/$/.sig/ \
+https://ftp.gnu.org/gnu/nettle/nettle-(\d.*)\.(?:tgz|tbz2|txz|tar\.(?:gz|bz2|xz))
+opts=uversionmangle=s/(\d)[_\.\-\+]?((RC|rc|pre|dev|beta|alpha|b|a)[\-\.]?\d*)$/$1~$2/,pgpsigurlmangle=s/$/.sig/ \
+ftp://ftp.lysator.liu.se/pub/security/lsh/nettle-(\d.*)\.(?:tgz|tbz2|txz|tar\.(?:gz|bz2|xz))
+opts=uversionmangle=s/(\d)[_\.\-\+]?((RC|rc|pre|dev|beta|alpha|b|a)[\-\.]?\d*)$/$1~$2/,pgpsigurlmangle=s/$/.sig/ \
+http://www.lysator.liu.se/~nisse/archive/nettle-(\d.*)\.(?:tgz|tbz2|txz|tar\.(?:gz|bz2|xz))

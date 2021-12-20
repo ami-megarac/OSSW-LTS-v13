@@ -1,0 +1,8 @@
+START
+File: old_style_log_04.in
+Event type: AA_RECORD_INVALID
+Audit ID: 1177962395.525:1837
+Operation: APPARMOR
+Info: REJECTING link access from /tmp/sdtest.3676-13458-it3683/target to /tmp/sdtest.3676-13458-it3683/src (link(3823) profile /home/steve/svn/apparmor-forge/tests/regression/subdomain/link active /home/steve/svn/apparmor-forge/tests/regression/subdomain/link)
+Epoch: 1177962395
+Audit subid: 1837

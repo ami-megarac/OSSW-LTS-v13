@@ -1,0 +1,207 @@
+inotify-tools (3.14-7) unstable; urgency=medium
+
+  * Update maintainer email.
+  * Update Vcs-* fields in debian/control.
+  * Build-depend on `debhelper-compat' (obsoletes `debian/compat')
+  * Update standards version to 4.2.1 (no changes needed)
+  * Add 'Build-Depends-Package' field into symbols file
+
+ -- Dmitry Bogatov <KAction@debian.org>  Sat, 24 Nov 2018 21:58:58 +0000
+
+inotify-tools (3.14-6) unstable; urgency=medium
+
+  * Convert package to source format 3.0 (quilt)
+  * Create patches in `debian/patches`, making package buildable with
+    `dgit build` (Closes: #896014)
+  * Update standards version to 4.1.4 (no changes needed)
+  * Bump debhelper compat to 11
+
+ -- Dmitry Bogatov <KAction@gnu.org>  Wed, 20 Jun 2018 10:29:13 +0300
+
+inotify-tools (3.14-5) unstable; urgency=medium
+
+  * Disable sanitize build flags (Closes: #895811)
+  * Remove sanitize symbols from symbols file
+
+ -- Dmitry Bogatov <KAction@gnu.org>  Tue, 17 Apr 2018 22:22:55 +0300
+
+inotify-tools (3.14-4) unstable; urgency=medium
+
+  * Upload to unstable
+  * Change source format back to 1.0, since it works better with dgit.
+    As such, remove obsolete debian/README.source.
+  * Enable all paranoid options of dpkg-buildflags(1)
+  * Mark packages as multiarch-compatible (Closes: #875462)
+  * Update Vcs-* fields in debian/control.
+  * Update standards version to 4.1.3 (no changes needed)
+  * Drop explicit dependency on autotools (implied by debhelper-10)
+  * Use secure URL when referencing to copyright-format
+  * Remove lintian-override about embedded javascript library.
+    Lintian now knows, that there is nothing can be done in case of
+    Doxygen.
+  * Add sanity-check symbols into symbols file.
+
+ -- Dmitry Bogatov <KAction@gnu.org>  Mon, 12 Feb 2018 22:31:28 +0300
+
+inotify-tools (3.14-3) experimental; urgency=medium
+
+  * New maintainer (Closes: #856293)
+  * Convert package to dgit-maint-merge workflow (patches are squashed
+    in uploaded source package)
+  * Bump debhelper compat to 10
+  * Adjust debian/*.install files to match paths, where libraries are installed
+    by debhelper-10.
+  * Remove unneed due compat 10 overrides from `debian/rules'
+  * Reformat 'debian/changelog' according to DEP-5
+  * Enable hardening
+  * Update Vcs-* fields
+  * Bump standards version to 3.9.8 (No changes needed)
+  * Add lintian override concerning embedded javascript file. It is way
+    how doxygen works and it can not be fixed.
+  * Register doxygen documentation via doc-base.
+  * Fix segfault with cvs output when filename contains comma (Closes: #702738)
+
+ -- Dmitry Bogatov <KAction@gnu.org>  Thu, 09 Mar 2017 13:25:04 +0300
+
+inotify-tools (3.14-2) unstable; urgency=medium
+
+  * QA upload.
+  * Set maintainer to Debian QA Group. (see #856293)
+  * Set architecture to linux-any to not even try building on other
+    architectures. (Closes: #745204)
+  * Run dh-autoreconf to fix FTBFS on arm64. (Closes: #727902)
+
+ -- Adrian Bunk <bunk@debian.org>  Tue, 28 Feb 2017 11:33:27 +0200
+
+inotify-tools (3.14-1) unstable; urgency=low
+
+  * debian/source/format now set to 3.0 (quilt)
+    - remove quilt from Build-Deps and rules file as dpkg handles this
+  * move git repository to collab-maint
+  * remove dh_make comments from d/watch
+  * Include NMU thanks to Moritz Muehlenhoff
+  * Add patch to fix spelling of writable
+  * Update Standards-Version to 3.9.3
+  * Add dependency from libinotifytools0-dev for symlinking to
+     the file in libinotifytools0
+  * Add patch documenting inode behavior, thanks to Ondřej Kuzník
+    (Closes: #594163)
+  * Include watch file for new upstream location
+  * Update Homepage to new github wiki
+  * Update to new upstream release
+    - Remove 59-62.patch and fix-segfault-csv.patch, applied upstream,
+      refresh remaining changes
+
+ -- Ryan Niebur <ryan@debian.org>  Mon, 18 Jun 2012 02:49:29 -0700
+
+inotify-tools (3.13-3.1) unstable; urgency=low
+
+  * Non-maintainer upload.
+  * Enable hardened build flags (Closes: #657841)
+
+ -- Moritz Muehlenhoff <jmm@debian.org>  Sat, 07 Apr 2012 17:53:25 +0200
+
+inotify-tools (3.13-3) unstable; urgency=low
+
+  * fix FTBFS by fixing the tests to not make bad assumptions (Closes:
+    #558981)
+  * prevent segfault in csv mode when there's no filename associated
+    with the watch descriptor (LP: #408805)
+  * update my email address
+
+ -- Ryan Niebur <ryan@debian.org>  Thu, 24 Dec 2009 13:31:36 -0800
+
+inotify-tools (3.13-2) unstable; urgency=low
+
+  * remove clarify-timeout-option patch, use the patch from upstream SVN
+    (60.patch)
+  * add patch, 59.patch, from upstream svn to clarify move_self in the
+    manpage (Closes: #533536)
+  * add patch, 61.patch, from upstream SVN to make inotifywatch react to
+    SIGUSR1 (Closes: #509842)
+  * add patch, 62.patch, from upstream SVN to fix recursive monitoring
+    when you limit the events (closes: #447672) (LP: 254751)
+  * add DMUA field
+  * shrink debian/rules a bit more
+  * set Standards-Version to 3.8.3
+
+ -- Ryan Niebur <ryanryan52@gmail.com>  Sat, 05 Sep 2009 12:56:17 -0700
+
+inotify-tools (3.13-1) unstable; urgency=low
+
+  * New Upstream Version (Closes: #494782)
+    - fixes outputting time strings (Closes: #458132)
+    - patch for inotifytools_next_events blocking if timeout is 0
+      apparently applied upstream (Closes: #520672)
+  * fix old changelog entries
+  * add Homepage field
+  * updated debian copyright, point to GPL-2
+  * remove debian/dirs, it's not needed
+  * change Sections
+  * debian policy 3.8.1
+  * depend on misc:Depends
+  * Adopt package (Closes: #518267)
+  * debhelper 7
+  * add Vcs-* headers
+  * add symbols file
+  * fix minus signs in man pages
+    - use quilt
+  * clarify the --timeout option, thanks to Ben Finney for the patch
+    (Closes: #464829)
+  * add README.source
+
+ -- Ryan Niebur <ryanryan52@gmail.com>  Fri, 10 Apr 2009 12:29:24 -0700
+
+inotify-tools (3.12-1) unstable; urgency=low
+
+  * New upstream.
+  * Include headers in -dev package - Ooops. (Closes: 450769)
+
+ -- Peter Makholm <peter@makholm.net>  Mon, 03 Dec 2007 09:15:51 +0000
+
+inotify-tools (3.11-1) unstable; urgency=high
+
+  * New upstream, fixes buffer overflow in inotifytools_snprintf
+    CVE-2007-5037 (Fixes: #443913 for testing and unstable)
+
+ -- Peter Makholm <peter@makholm.net>  Tue, 25 Sep 2007 05:20:18 +0000
+
+inotify-tools (3.10-3) unstable; urgency=low
+
+  * The libinotify packages replaces files in the pre-split package
+    (Closes: 434148)
+  * Added build-depend on doxygen so documentation will be buildt
+    everywhere
+
+ -- Peter Makholm <peter@makholm.net>  Sun, 22 Jul 2007 09:50:41 +0000
+
+inotify-tools (3.10-2) unstable; urgency=low
+
+  * Split into libinotifytools0 and inotify-tools packages
+  * Change Build-depend on linux-kernel-headers (>= 2.6.18) to
+    linux-libc-dev | linux-kernel-header (>= 2.6.18)
+    (Yes, we want to help backporting and really needs some linux
+    headers)
+  * use cdbs instead af old old old dh_make template
+
+ -- Peter Makholm <peter@makholm.net>  Tue, 17 Jul 2007 20:15:31 +0000
+
+inotify-tools (3.10-1) unstable; urgency=low
+
+   * New upstream release
+
+ -- Peter Makholm <peter@makholm.net>  Tue, 08 May 2007 19:16:54 +0200
+
+inotify-tools (3.3-1) unstable; urgency=low
+
+  * New upstream release
+  * Use <asm/unistd.h> for syscall numbers (Closes: #398158, #395310)
+    Thanks to Goswin von Brederlow and LaMont Jones
+
+ -- Peter Makholm <peter@makholm.net>  Mon, 13 Nov 2006 18:18:21 +0000
+
+inotify-tools (2.6-1) unstable; urgency=low
+
+  * Initial release (Closes: #394249)
+
+ -- Peter Makholm <peter@makholm.net>  Fri, 20 Oct 2006 15:55:21 +0000

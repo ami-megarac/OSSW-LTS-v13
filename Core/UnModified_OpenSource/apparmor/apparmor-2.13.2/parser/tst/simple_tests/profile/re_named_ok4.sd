@@ -1,0 +1,127 @@
+#
+# $Id$
+#=DESCRIPTION Basic test that re profile names are allowed after :ns:
+#=EXRESULT PASS
+# vim:syntax=subdomain
+# Last Modified: Sun Apr 17 19:44:44 2005
+#
+:ns:one /** {
+  #include <includes/base>
+
+  /usr/X11R6/lib/lib*so* rrr,
+  /does/not/exist r,
+  /var/log/messages www,
+  /tmp/sd*.foo rwrwwrll,
+  /bin/cat pxpxpxpxpx,
+  /bin/ls ixixixix,
+  /bin/echo uxuxuxuxux,
+}
+
+:ns:two /* {
+  #include <includes/base>
+
+  /usr/X11R6/lib/lib*so* rrr,
+  /does/not/exist r,
+  /var/log/messages www,
+  /tmp/sd*.foo rwrwwrll,
+  /bin/cat pxpxpxpxpx,
+  /bin/ls ixixixix,
+  /bin/echo uxuxuxuxux,
+}
+
+:ns:three /? {
+  #include <includes/base>
+
+  /usr/X11R6/lib/lib*so* rrr,
+  /does/not/exist r,
+  /var/log/messages www,
+  /tmp/sd*.foo rwrwwrll,
+  /bin/cat pxpxpxpxpx,
+  /bin/ls ixixixix,
+  /bin/echo uxuxuxuxux,
+}
+
+:ns:four /[ab] {
+  #include <includes/base>
+
+  /usr/X11R6/lib/lib*so* rrr,
+  /does/not/exist r,
+  /var/log/messages www,
+  /tmp/sd*.foo rwrwwrll,
+  /bin/cat pxpxpxpxpx,
+  /bin/ls ixixixix,
+  /bin/echo uxuxuxuxux,
+}
+
+:ns:five /[^ab] {
+  #include <includes/base>
+
+  /usr/X11R6/lib/lib*so* rrr,
+  /does/not/exist r,
+  /var/log/messages www,
+  /tmp/sd*.foo rwrwwrll,
+  /bin/cat pxpxpxpxpx,
+  /bin/ls ixixixix,
+  /bin/echo uxuxuxuxux,
+}
+
+profile :ns:six /** {
+  #include <includes/base>
+
+  /usr/X11R6/lib/lib*so* rrr,
+  /does/not/exist r,
+  /var/log/messages www,
+  /tmp/sd*.foo rwrwwrll,
+  /bin/cat pxpxpxpxpx,
+  /bin/ls ixixixix,
+  /bin/echo uxuxuxuxux,
+}
+
+profile :ns:seven /* {
+  #include <includes/base>
+
+  /usr/X11R6/lib/lib*so* rrr,
+  /does/not/exist r,
+  /var/log/messages www,
+  /tmp/sd*.foo rwrwwrll,
+  /bin/cat pxpxpxpxpx,
+  /bin/ls ixixixix,
+  /bin/echo uxuxuxuxux,
+}
+
+profile :ns:eight /? {
+  #include <includes/base>
+
+  /usr/X11R6/lib/lib*so* rrr,
+  /does/not/exist r,
+  /var/log/messages www,
+  /tmp/sd*.foo rwrwwrll,
+  /bin/cat pxpxpxpxpx,
+  /bin/ls ixixixix,
+  /bin/echo uxuxuxuxux,
+}
+
+profile :ns:nine /[ab] {
+  #include <includes/base>
+
+  /usr/X11R6/lib/lib*so* rrr,
+  /does/not/exist r,
+  /var/log/messages www,
+  /tmp/sd*.foo rwrwwrll,
+  /bin/cat pxpxpxpxpx,
+  /bin/ls ixixixix,
+  /bin/echo uxuxuxuxux,
+}
+
+profile :ns:ten /[^ab] {
+  #include <includes/base>
+
+  /usr/X11R6/lib/lib*so* rrr,
+  /does/not/exist r,
+  /var/log/messages www,
+  /tmp/sd*.foo rwrwwrll,
+  /bin/cat pxpxpxpxpx,
+  /bin/ls ixixixix,
+  /bin/echo uxuxuxuxux,
+}
+

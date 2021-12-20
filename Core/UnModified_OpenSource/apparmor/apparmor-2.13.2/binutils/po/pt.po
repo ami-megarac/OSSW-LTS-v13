@@ -1,0 +1,72 @@
+# Portuguese translation for apparmor
+# Copyright (c) 2016 Rosetta Contributors and Canonical Ltd 2016
+# This file is distributed under the same license as the apparmor package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2016.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: apparmor\n"
+"Report-Msgid-Bugs-To: AppArmor list <apparmor@lists.ubuntu.com>\n"
+"POT-Creation-Date: 2015-11-28 10:23-0800\n"
+"PO-Revision-Date: 2016-03-03 08:34+0000\n"
+"Last-Translator: Ivo Xavier <ivoxavier.8@gmail.com>\n"
+"Language-Team: Portuguese <pt@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Launchpad-Export-Date: 2016-06-01 05:15+0000\n"
+"X-Generator: Launchpad (build 18053)\n"
+"Language: pt\n"
+
+#: ../aa_enabled.c:26
+#, c-format
+msgid ""
+"%s: [options]\n"
+"  options:\n"
+"  -q | --quiet        Don't print out any messages\n"
+"  -h | --help         Print help\n"
+msgstr ""
+"%s: [opções]\n"
+"  opções:\n"
+"  -q | --silencioso        Não mostrar mensagens\n"
+"  -h | --ajuda         Mostar ajuda\n"
+
+#: ../aa_enabled.c:45
+#, c-format
+msgid "unknown or incompatible options\n"
+msgstr "opções desconhecidas ou incompatíveis\n"
+
+#: ../aa_enabled.c:55
+#, c-format
+msgid "unknown option '%s'\n"
+msgstr "opção desconhecida '%s'\n"
+
+#: ../aa_enabled.c:64
+#, c-format
+msgid "Yes\n"
+msgstr "Sim\n"
+
+#: ../aa_enabled.c:71
+#, c-format
+msgid "No - not available on this system.\n"
+msgstr "Não - não disponível neste sistema.\n"
+
+#: ../aa_enabled.c:74
+#, c-format
+msgid "No - disabled at boot.\n"
+msgstr "Não - desligado ao iniciar.\n"
+
+#: ../aa_enabled.c:77
+#, c-format
+msgid "Maybe - policy interface not available.\n"
+msgstr "Talvez - política de interface não disponível.\n"
+
+#: ../aa_enabled.c:81
+#, c-format
+msgid "Maybe - insufficient permissions to determine availability.\n"
+msgstr "Talvez - permissões insuficientes para determinar disponibilidade.\n"
+
+#: ../aa_enabled.c:84
+#, c-format
+msgid "Error - '%s'\n"
+msgstr "Erro - '%s'\n"

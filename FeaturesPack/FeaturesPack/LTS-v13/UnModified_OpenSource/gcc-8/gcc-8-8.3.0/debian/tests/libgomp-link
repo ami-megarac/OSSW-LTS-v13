@@ -1,0 +1,77 @@
+#!/bin/sh
+# autopkgtest check: Build and run a simple program against libgfortran,
+# to verify basic compile-time and run-time linking functionality.
+
+set -e
+
+CC=gcc-8
+F95=gfortran-8
+
+WORKDIR=$(mktemp -d)
+trap "rm -rf $WORKDIR" 0 INT QUIT ABRT PIPE TERM
+cd $WORKDIR
+cat <<EOF > hello-gomp.c
+#include <omp.h>
+#include <stdio.h>
+#include <stdlib.h>
+int main (int argc, char *argv[]) {
+
+int nthreads, tid;
+
+/* Fork a team of threads giving them their own copies of variables */
+#pragma omp parallel private(nthreads, tid)
+ {
+
+ /* Obtain thread number */
+ tid = omp_get_thread_num();
+ printf("Hello World from thread = %d\n", tid);
+
+ /* Only master thread does this */
+ if (tid == 0)
+ {
+  nthreads = omp_get_num_threads();
+ printf("Number of threads = %d\n", nthreads);
+ }
+
+ } /* All threads join master thread and disband */
+}
+EOF
+
+$CC -fopenmp -o gctest hello-gomp.c
+echo "build: OK"
+ldd gctest
+[ -x gctest ]
+./gctest
+echo "run: OK"
+
+cat <<EOF > hello-gomp.f
+       program omp_par_do
+         implicit none
+
+         integer, parameter :: n = 100
+         real, dimension(n) :: dat, result
+         integer :: i
+
+         !$OMP PARALLEL DO
+         do i = 1, n
+            result(i) = my_function(dat(i))
+         end do
+         !$OMP END PARALLEL DO
+
+       contains
+
+         function my_function(d) result(y)
+           real, intent(in) :: d
+           real :: y
+
+           ! do something complex with data to calculate y
+         end function my_function
+       end program omp_par_do
+EOF
+
+$F95 -fopenmp -o gftest hello-gomp.f
+echo "build: OK"
+ldd gftest
+[ -x gftest ]
+./gftest
+echo "run: OK"

@@ -1,0 +1,21 @@
+# taken from cond50.sd
+#=DESCRIPTION simple else clause
+#=EXRESULT PASS
+
+$FOO=true
+
+/bin/true {
+  if $FOO {
+    /bin/true rix,
+  } else {
+    /bin/false rix,
+  }
+}
+
+/bin/false {
+  if not $FOO {
+    /bin/true rix,
+  } else {
+    /bin/false rix,
+  }
+}

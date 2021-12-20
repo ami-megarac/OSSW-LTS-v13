@@ -1,0 +1,26 @@
+From: Debian Cyrus SASL Team
+ <pkg-cyrus-sasl2-debian-devel@lists.alioth.debian.org>
+Date: Thu, 24 Mar 2016 11:35:03 +0100
+Subject: Don't overwrite PIC objects with non-PIC variant
+
+is created out of non-PIC objects, is not going to overwrite the PIC version,
+which is created out of PIC objects. The PIC version is placed in .libs, and
+the non-PIC version in the current directory.  This ensures that both non-PIC
+and PIC versions are available in the correct locations.
+---
+ lib/Makefile.am | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/lib/Makefile.am b/lib/Makefile.am
+index c2dfbf7..fbaf7be 100644
+--- a/lib/Makefile.am
++++ b/lib/Makefile.am
+@@ -99,7 +99,7 @@ endif
+ 
+ libsasl2.a: libsasl2.la $(SASL_STATIC_OBJS)
+ 	@echo adding static plugins and dependencies
+-	$(AR) cru .libs/$@ $(SASL_STATIC_OBJS)
++	$(AR) cru $@ $(SASL_STATIC_OBJS)
+ 	@for i in ./libsasl2.la ../common/libplugin_common.la ../sasldb/libsasldb.la ../plugins/lib*.la; do \
+ 	if test ! -f $$i; then continue; fi; . $$i; \
+ 	for j in $$dependency_libs foo; do \

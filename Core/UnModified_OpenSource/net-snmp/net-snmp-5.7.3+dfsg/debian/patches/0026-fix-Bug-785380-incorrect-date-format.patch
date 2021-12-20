@@ -1,0 +1,22 @@
+From: Hideki Yamane <henrich@debian.org>
+Date: Thu, 28 Jan 2016 21:38:09 +0900
+Subject: fix Bug#785380 incorrect date format
+
+---
+ local/traptoemail | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/local/traptoemail b/local/traptoemail
+index e738ba7..cadc18b 100755
+--- a/local/traptoemail
++++ b/local/traptoemail
+@@ -13,6 +13,9 @@ use Net::SMTP;
+ use Getopt::Std;
+ use POSIX qw(strftime);
+ 
++# for sane timestamp format
++$ENV{LANG} = 'C';
++
+ $opts{'s'} = "localhost";
+ $opts{'f'} = 'root@' . `hostname`;
+ chomp($opts{'f'});

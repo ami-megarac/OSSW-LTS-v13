@@ -1,0 +1,21 @@
+From: Kees Cook <kees@debian.org>
+Date: Mon, 29 Jan 2018 12:26:43 +0000
+Subject: allow parser to build even when not on Linux.
+
+---
+ common/Make.rules | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/common/Make.rules b/common/Make.rules
+index d2149fc..ee18b41 100644
+--- a/common/Make.rules
++++ b/common/Make.rules
+@@ -84,7 +84,7 @@ pod_clean:
+ CAPABILITIES=$(shell echo "\#include <linux/capability.h>" | cpp -dM | LC_ALL=C sed -n -e '/CAP_EMPTY_SET/d' -e 's/^\#define[ \t]\+CAP_\([A-Z0-9_]\+\)[ \t]\+\([0-9xa-f]\+\)\(.*\)$$/CAP_\1/p' | LC_ALL=C sort)
+ 
+ .PHONY: list_capabilities
+-list_capabilities: /usr/include/linux/capability.h
++list_capabilities:
+ 	@echo "$(CAPABILITIES)"
+ 
+ # =====================

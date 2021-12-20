@@ -1,0 +1,7 @@
+usr/include/dbus*/dbus/dbus*.h
+usr/lib/*/cmake/DBus1
+usr/lib/*/dbus-1.0/include/dbus/dbus*.h
+usr/lib/*/libdbus-1*.a
+usr/lib/*/libdbus-1*.so
+usr/lib/*/pkgconfig/dbus-1.pc
+usr/share/xml/dbus-1/*.dtd

@@ -1,0 +1,9 @@
+invalid-arch-string-in-source-relation
+
+quilt-build-dep-but-no-series-file
+
+# lintian can't handle (>= ${gcc:Version})
+weak-library-dev-dependency
+
+# yes, still generating the series file for the build
+patch-file-present-but-not-mentioned-in-series

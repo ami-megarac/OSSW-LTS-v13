@@ -1,0 +1,6 @@
+#
+#=Description basic rule to test the valid "runbindable" mount opt and an invalid src
+#=EXRESULT FAIL
+/usr/bin/foo {
+  mount options=(runbindable) /a -> /1,
+  }

@@ -1,0 +1,17 @@
+START
+File: testcase_syslog_link_01.in
+Event type: AA_RECORD_DENIED
+Audit ID: 1284062308.965:276251
+Operation: link
+Mask: l
+Denied Mask: l
+fsuid: 0
+ouid: 0
+Profile: /home/ubuntu/bzr/apparmor/tests/regression/apparmor/link
+Name: /tmp/sdtest.19088-12382-HWH57d/linkfile
+Command: link
+Name2: /tmp/sdtest.19088-12382-HWH57d/target
+Parent: 19088
+PID: 19142
+Epoch: 1284062308
+Audit subid: 276251

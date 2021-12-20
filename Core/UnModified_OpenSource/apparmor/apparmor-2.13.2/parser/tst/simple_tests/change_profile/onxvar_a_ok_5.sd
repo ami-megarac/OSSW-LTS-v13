@@ -1,0 +1,11 @@
+#
+#=DESCRIPTION audit change_profile @{var} with variable+regex (LP: #390810)
+#=EXRESULT PASS
+#
+
+@{LIBVIRT}="libvirt"
+
+@{var}=/test
+/usr/bin/foo {
+   audit change_profile @{var} -> @{LIBVIRT}-[0-9a-f]*-[0-9a-f]*-[0-9a-f]*-[0-9a-f]*-[0-9a-f]*,
+}

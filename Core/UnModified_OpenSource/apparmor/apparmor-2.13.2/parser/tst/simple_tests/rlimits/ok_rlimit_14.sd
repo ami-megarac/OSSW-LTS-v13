@@ -1,0 +1,7 @@
+#
+#=DESCRIPTION simple msgqueue rlimit test
+#=EXRESULT PASS
+
+profile rlimit {
+  set rlimit msgqueue <= 4444,
+}

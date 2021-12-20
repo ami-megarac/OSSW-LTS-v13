@@ -1,0 +1,6 @@
+doc/*.html usr/share/doc/gnutls-doc/html
+doc/*.png usr/share/doc/gnutls-doc/html
+doc/reference/html/*.css usr/share/doc/gnutls-doc/api-reference
+doc/reference/html/*.devhelp* usr/share/doc/gnutls-doc/api-reference
+doc/reference/html/*html usr/share/doc/gnutls-doc/api-reference
+doc/reference/html/*png usr/share/doc/gnutls-doc/api-reference

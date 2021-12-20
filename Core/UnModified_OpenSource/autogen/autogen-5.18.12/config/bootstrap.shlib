@@ -1,0 +1,286 @@
+#! /bin/echo This_file_must_be_sourced,_not_executed
+# config/bootstrap.local --- maintainer's bootstrap script
+#
+# Author:            Bruce Korb <bkorb@gnu.org>
+##  This file is part of AutoGen.
+##  AutoGen Copyright (C) 1992-2015 by Bruce Korb - all rights reserved
+##
+##  AutoGen is free software: you can redistribute it and/or modify it
+##  under the terms of the GNU General Public License as published by the
+##  Free Software Foundation, either version 3 of the License, or
+##  (at your option) any later version.
+##
+##  AutoGen is distributed in the hope that it will be useful, but
+##  WITHOUT ANY WARRANTY; without even the implied warranty of
+##  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+##  See the GNU General Public License for more details.
+##
+##  You should have received a copy of the GNU General Public License along
+##  with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# This file contains various utility functions for the "bootstrap" scripts
+# that are scattered about.
+
+mainpid=$$
+
+die() {
+    echo "bootstrap failure:  $*" >&2
+    kill -9 ${mainpid}
+    exit 1
+}
+
+doit ()
+{
+    if test "x$1" != x:
+    then
+        echo "RUN:  $*"
+        eval "$@" || die "FAILURE $?:  $*"
+    fi
+}
+
+case `set -o` in
+*posix*) set -o posix  ;;
+*) exec bash $0 ${1+"$@"} ;;
+esac
+
+case "${SHELL}" in
+*[akz]sh) : ;;
+*)
+  while : ; do
+    SHELL=`which bash 2>/dev/null`
+    test -x "${SHELL}" && break
+
+    SHELL=`which ksh 2>/dev/null`
+    test -x "${SHELL}" && break
+
+    SHELL=/usr/xpg4/bin/sh
+    test -x "${SHELL}" && break
+
+    SHELL=`which sh 2>/dev/null`
+    test -x "${SHELL}" && break
+
+    die "unable to determine which shell to use"
+  done
+  ;;
+esac
+
+case "${VERBOSE}" in
+[tTyY1]* ) VERBOSE=true ;;
+[fFnN0]* ) VERBOSE=false ;;
+* )
+    case "$-" in
+    *x* )  VERBOSE=true ;;
+    *   )  VERBOSE=false ;;
+    esac
+esac
+
+if ${VERBOSE}
+then setx=set\ -x dashx=-x ; set -x
+else setx=:       dashx=   ; set +x
+fi
+
+test -z "${BASH_VERSION}" && \
+    local() { "$@" ; }
+
+# Setup run_ag
+f=$(\cd ${top_srcdir}/autoopts/tpl >/dev/null && pwd)
+g=$(\cd ${top_builddir}/autoopts/tpl >/dev/null && pwd)
+tpl_dir='-L'$f
+test "X$f" = "X$g" || tpl_dir=$tpl_dir' -L'$g
+readonly tpl_dir
+
+if ${VERBOSE}
+then
+    # vgopts='--suppressions=/old-home/bkorb/ag/valgrind.conf --leak-check=yes'
+    # valgrind ${vgopts} --log-file=${vgfile} \
+
+    run_ag()
+    {
+        local tag=${1} ; shift
+        # local vgfile=/tmp/vglog/${tag}-%p.txt
+        local tfile='>>'ag-${tag}-$$.log
+        if test -n "$DEPFILE"
+        then tag="-MTstamp-${tag} -MF${DEPFILE} -MP"
+        else tag="-MFstamp-${tag} -MP"
+        fi
+        tag="${tag} --trace=every --trace-out=${tfile}"
+
+        MALLOC_CHECK_=2 \
+            ${AGexe} ${tpl_dir} ${tag} "$@" || die "FAILED: ${AGexe} $*"
+    }
+else
+    run_ag()
+    {
+        # local vgfile=/tmp/vglog/${1}-%p.txt
+        if test -n "$DEPFILE"
+        then tag="-MTstamp-${1} -MF${DEPFILE} -MP"
+        else tag="-MFstamp-${1} -MP"
+        fi
+        shift
+
+        echo ${AGexe} ${tpl_dir} ${tag} "$@"
+        ${AGexe} ${tpl_dir} ${tag} "$@" || die "FAILED: ${AGexe} $*"
+    }
+fi
+
+trap 'die "trapped exit signal"' 0
+
+test "X${CDPATH}" = X || {
+    ( unset CDPATH ) > /dev/null 2>&1 && unset CDPATH || CDPATH=''
+}
+
+nl=$'\n'
+ht=$'\t'
+GREP=$(command -v grep)
+EGREP=${GREP}\ -E
+FGREP=${GREP}\ -F
+
+#  Check for AutoGen version 5.
+#
+skip_gen=false
+test -x "${AGexe}" || {
+    AGexe=${AGexe:-$(command -v autogen)}
+    test -x "$AGexe" || {
+        skip_gen=true
+        AGexe='die "AutoGen requires autogen to bootstrap"'
+        GDexe=${AGexe}
+        CLexe=${AGexe}
+    }
+}
+
+${skip_gen} || {
+    v="$($AGexe --version || :)"
+    v=$(echo "$v" | sed 's/.* //;1q')
+    case "$v" in
+    5.* ) : ;;
+    * ) die "OUT OF DATE AutoGen: $v" ;;
+    esac
+
+    GDexe=${AGexe%/*}/getdefs
+    CLexe=${AGexe%/*}/columns
+    test -x "${GDexe}" -a -x "${CLexe}" || \
+        die "autogen support programs are missing"
+}
+
+export AGexe GDexe CLexe setx dashx VERBOSE nl ht
+
+untar_touch() {
+    list=`tar -xzvf "$@"`
+    touch $list
+}
+
+# # # # # # # # # # # # # # # # # # #
+#
+# Make the option processing files:
+#
+make_opts()
+{
+    # Make the option processing files:
+    #
+    if ${skip_gen}
+    then untar_touch ${PWD##*/}-opts.tgz
+    else run_ag opts ${DEBUG_OPTS} *opts.def
+    fi
+}
+
+# # # # # # # # # # # # # # # # # # #
+#
+#  Make the proto.h header & make sure the static proc declarations
+#  are all current at the top of each module.
+#
+make_proto()
+{
+    local target=stamp-proto temp_proto=proto-h$$ proto_h=proto.h
+    echo '#' stamped `date` > ${target}-$$
+
+    exec 5> $temp_proto
+
+    local files=`ls -1 *.c | grep -v 'fsm\.c$'`
+    local locs=
+    local base_dir=`basename \`pwd\``
+    local marker=`echo ${base_dir} | tr '[a-z]' '[A-Z]'`_PROTO_H_GUARD
+    local ct=0
+
+    cat >&5 <<- _EOF_
+	/* -*- buffer-read-only: t -*- vi: set ro:
+	 *
+	 * Prototypes for ${base_dir}
+	 * Generated `date`
+	 */
+	#ifndef ${marker}
+	#define ${marker} 1
+
+	_EOF_
+
+    deplist=
+    for f in ${files}
+    do
+        test ! -f ${f} && echo "not a file:  $f" >&2 && continue
+        ct=`echo \`egrep '(START|END)-STATIC-FORWARD' $f | wc -l\` `
+
+        case ${ct} in
+        ( 2 )
+            rm -f $f.[XY]
+
+            exec 4> $f.X
+            sed '/START-STATIC-FORWARD/q' $f >&4
+            sed -n '/END-STATIC-FORWARD/,$p' $f > $f.Y
+            sed -n '/^static /,/^{/p' $f.Y | \
+                sed 's/^{.*//;s/)$/);/;$d' >&4
+            cat $f.Y >&4
+            exec 4>&-
+
+            cmp -s $f.X $f || {
+                echo WARNING: ${f} has been updated >&2
+                mv -f $f.X $f
+            }
+
+            rm -f $f.[XY]
+            deplist=$deplist' \'$nl$ht$f
+            ;;
+
+        ( 0 ) : ;;
+        ( * )
+            echo "bad marker line count:" $ct in $f >&2
+            continue
+        esac
+
+        egrep '^LOCAL ' $f >/dev/null && {
+            printf '/*\n *  Extracted from %s\n */\n' $f
+            sed -n '/^LOCAL /,/^{/p' $f | \
+                sed 's/^LOCAL /static /;s@)$@);@;s/^{.*//'
+        } >&5
+    done
+
+    test -d "$DEPDIR" && {
+        echo "${proto_h}  : stamp-proto"
+        echo "stamp-proto : $deplist"
+    } > $DEPDIR/stamp-proto.d
+
+    echo "#endif /* ${marker} */" >&5
+    exec 5>&-
+
+    if test -f ${proto_h} && cmp -s ${temp_proto} ${proto_h}
+    then
+        rm -f ${temp_proto}
+        if test -f ${target}
+        then
+            rm -f ${target}-$$
+        else
+            mv -f ${target}-$$ ${target}
+            touch ${proto_h}
+        fi
+    else
+        mv -f ${temp_proto} ${proto_h}
+        mv -f ${target}-$$  ${target}
+    fi
+}
+
+# Local Variables:
+# mode:shell-script
+# sh-indentation:4
+# sh-basic-offset:4
+# indent-tabs-mode: nil
+# End:
+
+# bootstrap.shlib ends here

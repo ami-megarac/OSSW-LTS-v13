@@ -1,0 +1,127 @@
+#
+# $Id$
+#=DESCRIPTION Basic test that named re local profile names are allowed
+#=EXRESULT PASS
+# vim:syntax=subdomain
+# Last Modified: Sun Apr 17 19:44:44 2005
+#
+/foo//local1 /** {
+  #include <includes/base>
+
+  /usr/X11R6/lib/lib*so* rrr,
+  /does/not/exist r,
+  /var/log/messages www,
+  /tmp/sd*.foo rwrwwrll,
+  /bin/cat pxpxpxpxpx,
+  /bin/ls ixixixix,
+  /bin/echo uxuxuxuxux,
+}
+
+/foo//local2 /* {
+  #include <includes/base>
+
+  /usr/X11R6/lib/lib*so* rrr,
+  /does/not/exist r,
+  /var/log/messages www,
+  /tmp/sd*.foo rwrwwrll,
+  /bin/cat pxpxpxpxpx,
+  /bin/ls ixixixix,
+  /bin/echo uxuxuxuxux,
+}
+
+/foo//local3 /? {
+  #include <includes/base>
+
+  /usr/X11R6/lib/lib*so* rrr,
+  /does/not/exist r,
+  /var/log/messages www,
+  /tmp/sd*.foo rwrwwrll,
+  /bin/cat pxpxpxpxpx,
+  /bin/ls ixixixix,
+  /bin/echo uxuxuxuxux,
+}
+
+/foo//local4 /[ab] {
+  #include <includes/base>
+
+  /usr/X11R6/lib/lib*so* rrr,
+  /does/not/exist r,
+  /var/log/messages www,
+  /tmp/sd*.foo rwrwwrll,
+  /bin/cat pxpxpxpxpx,
+  /bin/ls ixixixix,
+  /bin/echo uxuxuxuxux,
+}
+
+/foo//local5 /[^ab] {
+  #include <includes/base>
+
+  /usr/X11R6/lib/lib*so* rrr,
+  /does/not/exist r,
+  /var/log/messages www,
+  /tmp/sd*.foo rwrwwrll,
+  /bin/cat pxpxpxpxpx,
+  /bin/ls ixixixix,
+  /bin/echo uxuxuxuxux,
+}
+
+profile foo//local6 /** {
+  #include <includes/base>
+
+  /usr/X11R6/lib/lib*so* rrr,
+  /does/not/exist r,
+  /var/log/messages www,
+  /tmp/sd*.foo rwrwwrll,
+  /bin/cat pxpxpxpxpx,
+  /bin/ls ixixixix,
+  /bin/echo uxuxuxuxux,
+}
+
+profile foo//local7 /* {
+  #include <includes/base>
+
+  /usr/X11R6/lib/lib*so* rrr,
+  /does/not/exist r,
+  /var/log/messages www,
+  /tmp/sd*.foo rwrwwrll,
+  /bin/cat pxpxpxpxpx,
+  /bin/ls ixixixix,
+  /bin/echo uxuxuxuxux,
+}
+
+profile foo//local8 /? {
+  #include <includes/base>
+
+  /usr/X11R6/lib/lib*so* rrr,
+  /does/not/exist r,
+  /var/log/messages www,
+  /tmp/sd*.foo rwrwwrll,
+  /bin/cat pxpxpxpxpx,
+  /bin/ls ixixixix,
+  /bin/echo uxuxuxuxux,
+}
+
+profile foo//local9 /[ab] {
+  #include <includes/base>
+
+  /usr/X11R6/lib/lib*so* rrr,
+  /does/not/exist r,
+  /var/log/messages www,
+  /tmp/sd*.foo rwrwwrll,
+  /bin/cat pxpxpxpxpx,
+  /bin/ls ixixixix,
+  /bin/echo uxuxuxuxux,
+}
+
+profile foo//local10 /[^ab] {
+  #include <includes/base>
+
+  /usr/X11R6/lib/lib*so* rrr,
+  /does/not/exist r,
+  /var/log/messages www,
+  /tmp/sd*.foo rwrwwrll,
+  /bin/cat pxpxpxpxpx,
+  /bin/ls ixixixix,
+  /bin/echo uxuxuxuxux,
+}
+

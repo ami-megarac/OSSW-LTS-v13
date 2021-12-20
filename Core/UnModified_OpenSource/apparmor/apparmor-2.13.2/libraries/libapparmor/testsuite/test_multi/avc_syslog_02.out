@@ -1,0 +1,10 @@
+START
+File: avc_syslog_02.in
+Event type: AA_RECORD_STATUS
+Audit ID: 1279967081.455:42
+Operation: profile_replace
+Name: /sbin/dhclient3
+Command: apparmor_parser
+PID: 19610
+Epoch: 1279967081
+Audit subid: 42

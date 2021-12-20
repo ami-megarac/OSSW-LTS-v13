@@ -1,0 +1,35 @@
+New in 5.18.12 - August 2016
+
+* several configury fixes to enable cross platform building.
+* fompletion of a change in "char-mapper" to enable bootstrapping
+
+New in 5.18.11 May 2016
+
+* fix up tests that got broken in 5.18.10
+* in the make gperf script, LDFLAGS sometimes rely on CFLAGS
+* correct misuse of guile version information in configure
+
+New in 5.18.10 May 2016
+
+* NUL terminate CGI definitions text
+
+New in 5.18.9 April 2016
+
+* When parsing CGI, do not allow spaces to be lost
+* In producing usage text, check more rigorously that
+  option "values" are really not flag characters.
+
+New in 5.18.8 March 2016
+
+* Ensure testing vars start as unset for testing
+* happy new year & de-uglifications
+
+New in 5.18.7 December 2015
+
+* Guile 1.6 support was removed
+* bootstrapping was made idempotent
+* add --enable-static-autogen config option
+* add (max-file-time) scheme function (max source file time)
+* Allow MAN_PAGE_DATE to override using the date program in
+  man page templates
+* Enable byte-for-byte build reproducibility

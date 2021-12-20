@@ -1,0 +1,7 @@
+#
+#=DESCRIPTION basic network tests
+#=EXRESULT PASS
+#
+/usr/bin/foo {
+  network,
+}

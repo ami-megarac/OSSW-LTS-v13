@@ -1,0 +1,18 @@
+#=DESCRIPTION reference variables in dbus rules, multiple expansions
+#=EXRESULT PASS
+
+@{BUSES}=session system
+@{TLDS}=com org
+@{DOMAINS}=gnome freedesktop
+@{FOO}=bar baz
+@{BAR}=@{FOO}/blort
+@{MEMBERS}=Get Set
+
+/does/not/exist {
+   dbus (send, receive)
+       bus=@{BUSES}
+       path=/@{TLDS}/foo
+       member=@{MEMBERS}.bar
+       interface=@{TLDS}.@{DOMAINS}
+       peer=(name=@{TLDS}.@{DOMAINS} label=/@{TLDS}/@{BAR}),
+}

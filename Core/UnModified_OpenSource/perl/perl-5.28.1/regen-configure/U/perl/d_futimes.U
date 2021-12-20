@@ -1,0 +1,56 @@
+?RCS: $Id$
+?RCS:
+?RCS: Copyright (c) 2000 Jarkko Hietaniemi
+?RCS:
+?RCS: You may distribute under the terms of either the GNU General Public
+?RCS: License or the Artistic License, as specified in the README file.
+?RCS:
+?MAKE:d_futimes: Compile cat rm_try run
+?MAKE:	-pick add $@ %<
+?S:d_futimes:
+?S:	This variable conditionally defines the HAS_FUTIMES symbol, which
+?S:	indicates to the C program that the futimes() routine is available.
+?S:.
+?C:HAS_FUTIMES:
+?C:	This symbol, if defined, indicates that the futimes routine is
+?C:	available to change file descriptor time stamps with struct timevals.
+?C:.
+?H:#$d_futimes HAS_FUTIMES		/**/
+?H:.
+?T:rc
+?F:!try
+: check for a working futimes
+d_futimes="$undef"
+echo " "
+echo "Checking if you have a working futimes()" >&4
+$cat >try.c <<EOCP
+#include <stdio.h>
+#include <sys/time.h>
+#include <errno.h>
+#include <fcntl.h>
+
+int main ()
+{
+    int fd, rv;
+    fd = open ("try.c", O_RDWR);
+    if (-1 == fd) exit (1);
+    rv = futimes (fd, NULL);
+    exit (rv == -1 ? errno : 0);
+}
+EOCP
+set try
+if eval $compile; then
+    `$run ./try`
+    rc=$?
+    case "$rc" in
+	0)  echo "Yes, you have" >&4
+	    d_futimes="$define"
+	    ;;
+	*)  echo "No, you have futimes, but it isn't working ($rc) (probably harmless)" >&4
+	    ;;
+    esac
+else
+    echo "No, it does not (probably harmless)" >&4
+fi
+$rm_try
+

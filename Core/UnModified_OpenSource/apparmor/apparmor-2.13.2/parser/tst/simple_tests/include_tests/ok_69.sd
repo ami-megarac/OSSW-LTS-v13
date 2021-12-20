@@ -1,0 +1,8 @@
+#
+#=DESCRIPTION include if existss testing - test some "odd" locations of include if existss
+#=EXRESULT PASS
+#
+/does/not/exist {
+  /does/not/exist mr,   #include if exists <includes/base> /bin/true Px,
+  #include if exists ../tst/simple_tests/include_tests/includes_okay_helper.include #include if exists <includes/base>
+}

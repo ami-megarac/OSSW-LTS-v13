@@ -1,0 +1,91 @@
+Source: gmp
+Maintainer: Debian Science Team <debian-science-maintainers@lists.alioth.debian.org>
+Uploaders: Steve M. Robbins <smr@debian.org>
+Section: libs
+Priority: optional
+Build-Depends: m4,
+               debhelper (>= 9)
+Standards-Version: 4.1.3
+Vcs-Browser: https://salsa.debian.org/science-team/gmp
+Vcs-Git: https://salsa.debian.org/science-team/gmp.git
+Homepage: http://gmplib.org/
+
+Package: libgmp10
+Architecture: any
+Multi-Arch: same
+Section: libs
+Priority: optional
+Depends: ${shlibs:Depends},
+         ${misc:Depends}
+Pre-Depends: ${misc:Pre-Depends}
+Description: Multiprecision arithmetic library
+ GNU MP is a programmer's library for arbitrary precision
+ arithmetic (ie, a bignum package).  It can operate on signed
+ integer, rational, and floating point numeric types.
+ .
+ It has a rich set of functions, and the functions have a regular
+ interface.
+
+Package: libgmpxx4ldbl
+Architecture: any
+Multi-Arch: same
+Section: libs
+Priority: optional
+Depends: ${shlibs:Depends},
+         ${misc:Depends}
+Pre-Depends: ${misc:Pre-Depends}
+Conflicts: libgmp3,
+           libgmpxx4
+Replaces: libgmp3
+Description: Multiprecision arithmetic library (C++ bindings)
+ GNU MP is a programmer's library for arbitrary precision
+ arithmetic (ie, a bignum package).  It can operate on signed
+ integer, rational, and floating point numeric types.
+
+Package: libgmp-dev
+Architecture: any
+Multi-Arch: same
+Section: libdevel
+Priority: optional
+Depends: libgmp10 (= ${binary:Version}),
+         libgmpxx4ldbl (= ${binary:Version}),
+         ${misc:Depends}
+Suggests: gmp-doc,
+          libgmp10-doc,
+          libmpfr-dev
+Conflicts: libgmp10-dev
+Provides: libgmp10-dev
+Replaces: libgmp3-dev,
+          libgmp10-dev
+Description: Multiprecision arithmetic library developers tools
+ This development package provides the header files and the symbolic
+ links to allow compilation and linking of programs that use the libraries
+ provided in the libgmp10 package.
+ .
+ Both C and C++ bindings are present in this package.  Package
+ libstdc++-dev is required to use the C++ bindings.  
+ .
+ The MPFR library (multiple-precision floating-point) used to be
+ included, but has since been moved to package libmpfr-dev.
+
+Package: libgmp10-doc
+Architecture: all
+Multi-Arch: foreign
+Section: doc
+Priority: optional
+Depends: ${misc:Depends}
+Description: Multiprecision arithmetic library example code
+ This package provides example code illustrating the use of GMP.
+
+Package: libgmp3-dev
+Architecture: any
+Multi-Arch: same
+Section: libdevel
+Priority: optional
+Depends: ${misc:Depends},
+         libgmp-dev (= ${binary:Version})
+Conflicts: libgmp10-dev (<< 2:5.0.1+dfsg-7)
+Replaces: libgmp10-dev
+Description: Multiprecision arithmetic library developers tools
+ This is a dummy package that simply pulls in libgmp-dev.
+ It can safely be removed.

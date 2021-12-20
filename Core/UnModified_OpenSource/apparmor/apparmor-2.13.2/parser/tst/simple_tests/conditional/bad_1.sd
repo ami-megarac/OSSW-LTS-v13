@@ -1,0 +1,10 @@
+# taken from cond31.sd
+#=DESCRIPTION boolean assigned inside profile scope
+#=EXRESULT FAIL
+
+/bin/true {
+  $BAR=true
+  if $BAR {
+    /bin/true rix,
+  }
+}

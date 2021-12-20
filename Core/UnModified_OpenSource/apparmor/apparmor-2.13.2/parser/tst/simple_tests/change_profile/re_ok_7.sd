@@ -1,0 +1,65 @@
+#
+#=DESCRIPTION change_profile with just re, namespace
+#=EXRESULT PASS
+#
+
+
+/usr/bin/foo {
+   change_profile -> :ab:*,
+}
+
+/usr/bin/foo2 {
+   change_profile -> :ab:**,
+}
+
+/usr/bin/foo3 {
+   change_profile -> :ab:?,
+}
+
+/usr/bin/foo4 {
+   change_profile -> :ab:[ab],
+}
+
+/usr/bin/foo5 {
+   change_profile -> :ab:[^ab],
+}
+
+/usr/bin/foo6 {
+   change_profile -> :*:ab,
+}
+
+/usr/bin/foo7 {
+   change_profile -> :**:ab,
+}
+
+/usr/bin/foo8 {
+   change_profile -> :?:ab,
+}
+
+/usr/bin/foo9 {
+   change_profile -> :[ab]:ab,
+}
+
+/usr/bin/foo10 {
+   change_profile -> :[^ab]:ab,
+}
+
+/usr/bin/foo11 {
+   change_profile -> :*:*,
+}
+
+/usr/bin/foo12 {
+   change_profile -> :**:**,
+}
+
+/usr/bin/foo13 {
+   change_profile -> :?:?,
+}
+
+/usr/bin/foo14 {
+   change_profile -> :[ab]:[ab],
+}
+
+/usr/bin/foo15 {
+   change_profile -> :[^ab]:[^ab],
+}

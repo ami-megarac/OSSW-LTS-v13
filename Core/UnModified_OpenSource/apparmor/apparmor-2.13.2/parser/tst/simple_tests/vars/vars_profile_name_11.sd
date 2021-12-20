@@ -1,0 +1,9 @@
+#=DESCRIPTION profiles declared with the profile keyword have var and var attachment
+#=EXRESULT PASS
+
+@{FOO}=/bar /baz
+@{BAR}=baz foo
+
+profile /does/not/exist@{BAR} @{FOO} {
+  /does/not/exist r,
+}

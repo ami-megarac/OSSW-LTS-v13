@@ -1,0 +1,21 @@
+From a5ba7bd8c57cf5362b1245b7de1c3cf3439e7176 Mon Sep 17 00:00:00 2001
+From: Mikhail Gusarov <dottedmag@dottedmag.net>
+Date: Mon, 19 May 2014 10:12:10 +0200
+Subject: [PATCH] Do not expose private libraries nor link flags to users of
+ libssh2
+
+Reported in https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=747417
+---
+ libssh2.pc.in | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+--- a/libssh2.pc.in
++++ b/libssh2.pc.in
+@@ -12,6 +12,6 @@
+ Description: Library for SSH-based communication
+ Version: @LIBSSH2VER@
+ Requires.private: @LIBSREQUIRED@
+-Libs: -L${libdir} -lssh2 @LIBS@
++Libs: -L${libdir} -lssh2
+ Libs.private: @LIBS@ -lgpg-error
+ Cflags: -I${includedir}

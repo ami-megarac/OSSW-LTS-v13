@@ -1,0 +1,10 @@
+#=DESCRIPTION profiles declared with the profile keyword can begin with var
+#=EXRESULT FAIL
+#=TODO
+# This test needs check on @{FOO} attachment having leading / post var expansion
+
+@{FOO}=bar baz
+
+profile /does/not/exist @{FOO} {
+  /does/not/exist r,
+}

@@ -1,0 +1,46 @@
+#=DESCRIPTION conditional else
+#=EXRESULT PASS
+
+$FOO=true
+$BAR = false
+$FALSE = false
+
+/bin/true {
+  ^TRUE {
+    if $FOO {
+      /bin/true rix,
+    } else if $FALSE {
+      /bin/false rix,
+    } else if $BAR {
+      /dev/null r,
+    } else if not $FALSE {
+      /dev/null w,
+    } else if defined @B1 {
+      /tmp/1 rw,
+    } else if defined @B2 {
+      /tmp/2 rw,
+    } else if defined @B3 {
+      /tmp/3 rw,
+    } else {
+      /tmp/4 rw,
+    }
+  }
+
+  ^FALSE {
+    if not $FOO {
+      /bin/false rix,
+    } else if ${FALSE} {
+      /bin/true rix,
+    } else if $BAR {
+      /dev/null r,
+    } else if defined @B1 {
+      /tmp/1 rw,
+    } else if defined @B2 {
+      /tmp/2 rw,
+    } else if defined @B3 {
+      /tmp/3 rw,
+    } else {
+      /tmp/4 rw,
+    }
+  }
+}

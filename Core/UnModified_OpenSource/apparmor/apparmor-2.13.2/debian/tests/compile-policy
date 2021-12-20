@@ -1,0 +1,36 @@
+#!/bin/sh
+
+set -e
+
+PROFILES_NAMES="nvidia_modprobe \
+                system_tor \
+                usr.bin.evince \
+                usr.bin.man \
+                usr.bin.onioncircuits \
+                usr.bin.pidgin \
+                usr.bin.thunderbird \
+                usr.bin.totem \
+                usr.bin.totem-previewers \
+                usr.lib.libreoffice.program.oosplash \
+                usr.lib.libreoffice.program.senddoc \
+                usr.lib.libreoffice.program.soffice.bin \
+                usr.lib.libreoffice.program.xpdfimport \
+                usr.lib.libvirt.virt-aa-helper \
+                usr.sbin.apt-cacher-ng \
+                usr.sbin.cupsd \
+                usr.sbin.cups-browsed \
+                usr.sbin.haveged \
+                usr.sbin.named \
+                usr.sbin.ntpd \
+                usr.sbin.tcpdump \
+                usr.sbin.libvirtd"
+
+for profile_name in $PROFILES_NAMES ; do
+   echo "Testing $profile_name"
+   /sbin/apparmor_parser \
+       --add \
+       --skip-cache \
+       --skip-kernel-load \
+       --verbose \
+       "/etc/apparmor.d/$profile_name"
+done

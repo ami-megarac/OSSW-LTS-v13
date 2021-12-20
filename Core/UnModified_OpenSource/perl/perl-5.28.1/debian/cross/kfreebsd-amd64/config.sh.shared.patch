@@ -1,0 +1,24 @@
+--- config.sh.static	2018-11-30 17:53:49.187523594 +0200
++++ config.sh.shared	2018-11-30 17:53:49.179523426 +0200
+@@ -17 +17 @@
+-config_args='-Dusethreads -Duselargefiles -Dcc=x86_64-kfreebsd-gnu-gcc -Dcpp=x86_64-kfreebsd-gnu-cpp -Dld=x86_64-kfreebsd-gnu-gcc -Dccflags=-DDEBIAN -Wdate-time -D_FORTIFY_SOURCE=2 -g -O2 -fdebug-prefix-map=/build/perl-gbaxFn/perl-5.28.0=. -fstack-protector-strong -Wformat -Werror=format-security -Dldflags= -Wl,-z,relro -Dlddlflags=-shared -Wl,-z,relro -Dcccdlflags=-fPIC -Darchname=x86_64-kfreebsd-gnu -Dprefix=/usr -Dprivlib=/usr/share/perl/5.28 -Darchlib=/usr/lib/x86_64-kfreebsd-gnu/perl/5.28 -Dvendorprefix=/usr -Dvendorlib=/usr/share/perl5 -Dvendorarch=/usr/lib/x86_64-kfreebsd-gnu/perl5/5.28 -Dsiteprefix=/usr/local -Dsitelib=/usr/local/share/perl/5.28.0 -Dsitearch=/usr/local/lib/x86_64-kfreebsd-gnu/perl/5.28.0 -Dman1dir=/usr/share/man/man1 -Dman3dir=/usr/share/man/man3 -Dsiteman1dir=/usr/local/man/man1 -Dsiteman3dir=/usr/local/man/man3 -Duse64bitint -Dman1ext=1 -Dman3ext=3perl -Dpager=/usr/bin/sensible-pager -Uafs -Ud_csh -Ud_ualarm -Uusesfio -Uusenm -Ui_libutil -Ui_xlocale -Uversiononly -DDEBUGGING=-g -Doptimize=-O2 -dEs -Uuseshrplib -Dotherlibdirs=/usr/lib/x86_64-kfreebsd-gnu/perl-base'
++config_args='-Dusethreads -Duselargefiles -Dcc=x86_64-kfreebsd-gnu-gcc -Dcpp=x86_64-kfreebsd-gnu-cpp -Dld=x86_64-kfreebsd-gnu-gcc -Dccflags=-DDEBIAN -Wdate-time -D_FORTIFY_SOURCE=2 -g -O2 -fdebug-prefix-map=/build/perl-gbaxFn/perl-5.28.0=. -fstack-protector-strong -Wformat -Werror=format-security -Dldflags= -Wl,-z,relro -Dlddlflags=-shared -Wl,-z,relro -Dcccdlflags=-fPIC -Darchname=x86_64-kfreebsd-gnu -Dprefix=/usr -Dprivlib=/usr/share/perl/5.28 -Darchlib=/usr/lib/x86_64-kfreebsd-gnu/perl/5.28 -Dvendorprefix=/usr -Dvendorlib=/usr/share/perl5 -Dvendorarch=/usr/lib/x86_64-kfreebsd-gnu/perl5/5.28 -Dsiteprefix=/usr/local -Dsitelib=/usr/local/share/perl/5.28.0 -Dsitearch=/usr/local/lib/x86_64-kfreebsd-gnu/perl/5.28.0 -Dman1dir=/usr/share/man/man1 -Dman3dir=/usr/share/man/man3 -Dsiteman1dir=/usr/local/man/man1 -Dsiteman3dir=/usr/local/man/man3 -Duse64bitint -Dman1ext=1 -Dman3ext=3perl -Dpager=/usr/bin/sensible-pager -Uafs -Ud_csh -Ud_ualarm -Uusesfio -Uusenm -Ui_libutil -Ui_xlocale -Uversiononly -DDEBUGGING=-g -Doptimize=-O2 -dEs -Duseshrplib -Dlibperl=libperl.so.5.28.0'
+@@ -57,2 +57,2 @@
+-config_arg39='-Uuseshrplib'
+-config_arg40='-Dotherlibdirs=/usr/lib/x86_64-kfreebsd-gnu/perl-base'
++config_arg39='-Duseshrplib'
++config_arg40='-Dlibperl=libperl.so.5.28.0'
+@@ -474 +474 @@
+-d_perl_otherlibdirs='define'
++d_perl_otherlibdirs='undef'
+@@ -920 +920 @@
+-libperl='libperl.a'
++libperl='libperl.so.5.28.0'
+@@ -1003 +1003 @@
+-otherlibdirs='/usr/lib/x86_64-kfreebsd-gnu/perl-base'
++otherlibdirs=' '
+@@ -1203 +1203 @@
+-useshrplib='false'
++useshrplib='true'
+@@ -1254 +1253,0 @@
+-# Extracted from Debian package version 5.28.0-4

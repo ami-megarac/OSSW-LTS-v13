@@ -833,10 +833,10 @@ void ast_videocap_determine_syncs(unsigned long *hp, unsigned long *vp)
 int ast_videocap_auto_position_adjust(struct ast_videocap_engine_info_t *info)
 {
 	uint32_t reg;
-	unsigned long H_Start, H_End, V_Start, V_End, i, H_Temp = 0;
+	unsigned long __maybe_unused H_Start, H_End, V_Start, V_End, i, H_Temp = 0;
 //	unsigned long  V_Temp = 0;
-	unsigned long Mode_PixelClock = 0, mode_bandwidth, refresh_rate_index, color_depth_index;
-	unsigned long color_depth, mode_clock;
+	unsigned long __maybe_unused Mode_PixelClock = 0, mode_bandwidth, refresh_rate_index, color_depth_index;
+	unsigned long __maybe_unused color_depth, mode_clock;
 
 	ast_videocap_clear_reg_bits(AST_VIDEOCAP_MODE_DETECT_PARAM, 0x0000FF00);
 	ast_videocap_set_reg_bits(AST_VIDEOCAP_MODE_DETECT_PARAM, 0x65 << 8);
@@ -909,6 +909,17 @@ Redo:
 	if (((reg & 0xff00) >> 8) == 0xA8) { // Driver supports to get display information in scratch register
 		color_depth = (reg & 0xff0000) >> 16; //VGA's Color Depth is 0 when real color depth is less than 8
 		mode_clock = (reg & 0xff000000) >> 24;
+#ifdef SOC_AST2600 //Ref: (sdk7.1) drivers/soc/aspeed/ast_video.c > ast_video_vga_mode_detect()
+		if (color_depth < 15) { /* Disable direct mode for less than 15 bpp */
+			printk("Color Depth is less than 15 bpp\n");
+			info->INFData.DirectMode = 0;
+		}
+		else /* Enable direct mode for 15 bpp and higher */
+		{
+			printk("Color Depth is 15 bpp or higher\n");
+			info->INFData.DirectMode = 1;
+		}
+#else
 		if (color_depth == 0) {
 			printk("Color Depth is not 15 bpp or higher\n");
 			info->INFData.DirectMode = 0;
@@ -920,9 +931,33 @@ Redo:
 				info->INFData.DirectMode = 0;
 			}
 		}
+#endif
 	} else { /* old driver, get display information from table */
 		refresh_rate_index = (ast_videocap_read_reg(AST_VIDEOCAP_VGA_SCRATCH_8C8F) >> 8) & 0x0F;
 		color_depth_index = (ast_videocap_read_reg(AST_VIDEOCAP_VGA_SCRATCH_8C8F) >> 4) & 0x0F;
+#ifdef SOC_AST2600 //Ref: (sdk7.1) drivers/soc/aspeed/ast_video.c > ast_video_vga_mode_detect()
+		/* To fix AST2600 A0 Host VGA output tearing / noisy issue, ASPEED modified MCR74[31], MCR74[0] as 1.
+		** This change caused DRAM shortage side effect in USB controller (A1 and higher).
+		**
+		** USB bandwidth is increased (MCR44 Maximum Grant Length) to fix DRAM shortage issue.
+		** but it caused abnormal video screen with AST2600 A1/A2/A3 as side effect.
+		**
+		** To mitigate this abnormal video issue aspeed suggested to use direct fetch mode
+		** for host resolution >= 1024x768. */
+		if ((color_depth_index == 0xe) || (color_depth_index == 0xf)) { /* Disable direct mode for 14, 15 bpp */
+			info->INFData.DirectMode = 0;
+		} else { /* enable direct mode for host resolution >= 1024x768 */
+			if (color_depth_index > 2) {
+				if ((info->src_mode.x * info->src_mode.y) < (1024 * 768))
+					info->INFData.DirectMode = 0;
+				else
+					info->INFData.DirectMode = 1;
+			} else {
+				printk("Color Depth is less than 15bpp\n");
+				info->INFData.DirectMode = 0;
+			}
+		}
+#else
 		if ((color_depth_index == 2) || (color_depth_index == 3) || (color_depth_index == 4)) { // 15 bpp /16 bpp / 32 bpp
 			for (i = 0; i < InternalModeTableSize; i ++) { /* traverse table to find mode */
 				if ((info->src_mode.x == Internal_Mode[i].HorizontalActive) &&
@@ -951,6 +986,7 @@ Redo:
 			printk("Color Depth is not 15bpp or higher\n");
 			info->INFData.DirectMode = 0;
 		}
+#endif
 	}
 
 	return 0;
@@ -2255,7 +2291,15 @@ int partialjpeg(struct ast_videocap_engine_info_t *info, int X0, int Y0, int X1,
 
 	ast_videocap_set_reg_bits(AST_VIDEOCAP_SEQ_CTRL, AST_VIDEOCAP_SEQ_CTRL_JPEG);
 	ast_videocap_set_reg_bits(AST_VIDEOCAP_SEQ_CTRL, AST_VIDEOCAP_SEQ_CTRL_COMPRESS_JPEG_FRAME);
-	ast_videocap_clear_reg_bits(AST_VIDEOCAP_CTRL, AST_VIDEOCAP_CTRL_DIRECT_FETCH_FRAME_BUF);
+
+#ifdef SOC_AST2600
+	/* Fixes capture engine busy issue when direct mode is enabled for host resolution >= 1024x768 */
+	if (info->INFData.DirectMode == 0)
+#endif
+	{
+		ast_videocap_clear_reg_bits(AST_VIDEOCAP_CTRL, AST_VIDEOCAP_CTRL_DIRECT_FETCH_FRAME_BUF);
+	}
+
 	//Delay may required, But to avoid the engine busy it will be useful.
 	udelay(100);
 
@@ -2548,10 +2592,17 @@ int VideoCapture(struct ast_videocap_engine_info_t *info)
 
 	if (CaptureMode == VIDEOCAP_JPEG_SUPPORT)
 	{
-	    /* Capture engine busy happens in case of host resolution 1600x900 and higher.
-		** so force full screen capture for host video 1600x900 and higher. */
+		/* [AST2500] Capture engine busy happens in case of host resolution 1600x900 and higher.
+		** so force full screen capture for host video 1600x900 and higher.
+		**
+		** Issue fixed on AST2600 A1/A2/A3 */
+#ifdef SOC_AST2500
 		if(info->src_mode.x < 1600)
-			full_screen_capture = 0;
+#endif
+		{
+			full_screen_capture = 0; /* video driver will capture partial frame next time */
+		}
+
 		return (info->FrameHeader.NumberOfMB == 0) ? ASTCAP_IOCTL_NO_VIDEO_CHANGE : ASTCAP_IOCTL_SUCCESS;
 	}
 	return (info->CompressData.CompressSize == 12) ? ASTCAP_IOCTL_NO_VIDEO_CHANGE : ASTCAP_IOCTL_SUCCESS;

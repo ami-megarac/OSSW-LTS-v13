@@ -1,0 +1,31 @@
+#
+#=DESCRIPTION test audit flag for file rules
+#=EXRESULT PASS
+#
+/usr/bin/foo {
+
+  audit /foo rw,
+  audit /foo/** rw,
+
+  /tmp/** rw,
+
+  audit rw /bar,
+  audit rw /bar/**,
+
+  rw /var/tmp/**,
+
+  audit {
+    /one rw,
+    /one/** rw,
+
+    rw /two,
+    rw /two/**,
+  }
+
+  audit /audit r,
+
+  audit {
+
+  }
+
+}

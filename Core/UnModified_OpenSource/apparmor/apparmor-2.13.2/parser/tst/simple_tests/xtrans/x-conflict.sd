@@ -1,0 +1,10 @@
+#
+#=DESCRIPTION test for conflict resolution in minimization phase of dfa gen
+#=EXRESULT FAIL
+#
+/usr/bin/foo {
+  /b* px,
+  /* Pixr,
+  /a* Cx -> foo,
+}
+

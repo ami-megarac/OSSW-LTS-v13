@@ -1,0 +1,7 @@
+#
+#=DESCRIPTION Ux and ix conflict
+#=EXRESULT FAIL
+#
+/usr/bin/foo {
+  /bin/cat Uxix,
+}

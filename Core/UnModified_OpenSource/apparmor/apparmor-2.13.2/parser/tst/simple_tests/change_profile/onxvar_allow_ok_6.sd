@@ -1,0 +1,12 @@
+#
+#=DESCRIPTION allow change_profile @{var} with quotes
+#=EXRESULT PASS
+#
+@{var}=/test
+/usr/bin/foo {
+   allow change_profile @{var} -> "/bin/foo",
+}
+
+/usr/bin/foo2 {
+   allow change_profile @{var} -> "/bin/ foo",
+}

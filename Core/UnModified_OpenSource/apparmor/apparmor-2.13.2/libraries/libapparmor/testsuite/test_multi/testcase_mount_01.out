@@ -1,0 +1,16 @@
+START
+File: testcase_mount_01.in
+Event type: AA_RECORD_DENIED
+Audit ID: 1409700640.016:547457
+Operation: mount
+Profile: /home/ubuntu/bzr/apparmor/tests/regression/apparmor/mount
+Name: /tmp/sdtest.19033-29001-MPfz98/mountpoint/
+Command: mount
+Info: failed mntpnt match
+ErrorCode: 13
+PID: 19085
+FS Type: ext2
+Flags: rw, mand
+Src name: /dev/loop0/
+Epoch: 1409700640
+Audit subid: 547457

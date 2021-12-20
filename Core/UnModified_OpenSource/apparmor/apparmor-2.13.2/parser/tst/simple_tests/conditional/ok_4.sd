@@ -1,0 +1,20 @@
+#=DESCRIPTION basic conditional statements w/capabilities
+#=EXRESULT PASS
+
+$FOO=true
+$BAR = False
+
+/bin/true {
+  /bin/false rix,
+  capability net_raw,
+  if ${FOO} {
+    capability ipc_lock,
+  }
+  /bin/true rix,
+  if ${BAR} {
+    capability sys_admin,
+    /etc/shadow rw,
+  }
+  /bin/sh rix,
+  capability dac_override,
+}

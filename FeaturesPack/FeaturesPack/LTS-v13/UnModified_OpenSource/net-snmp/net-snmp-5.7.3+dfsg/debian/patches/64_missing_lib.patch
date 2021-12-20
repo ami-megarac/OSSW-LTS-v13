@@ -1,0 +1,54 @@
+From: Net-SNMP Packaging Team <pkg-net-snmp-devel@lists.alioth.debian.org>
+Date: Thu, 18 Jun 2015 06:12:05 +0900
+Subject: _missing_lib
+
+---
+ apps/Makefile.in | 6 ++++--
+ configure.ac     | 3 +++
+ 2 files changed, 7 insertions(+), 2 deletions(-)
+
+diff --git a/apps/Makefile.in b/apps/Makefile.in
+index 77404dd..c611e01 100644
+--- a/apps/Makefile.in
++++ b/apps/Makefile.in
+@@ -83,6 +83,8 @@ MIBLIB          = ../agent/libnetsnmpmibs.$(LIB_EXTENSION)$(LIB_VERSION)
+ USEAGENTLIBS	= $(MIBLIB) $(AGENTLIB) $(USELIBS)
+ MYSQL_LIBS	= @MYSQL_LIBS@
+ MYSQL_INCLUDES	= @MYSQL_INCLUDES@
++LIBCRYPTO       = @LIBCRYPTO@
++LIBWRAP         = @LIBWRAP@
+ 
+ VAL_LIBS	= @VAL_LIBS@
+ LIBS		= $(USELIBS) $(VAL_LIBS) @LIBS@
+@@ -170,7 +172,7 @@ snmptest$(EXEEXT):    snmptest.$(OSUFFIX) $(USELIBS)
+ 	$(LINK) ${CFLAGS} -o $@ snmptest.$(OSUFFIX) ${LDFLAGS} ${LIBS}
+ 
+ snmptrapd$(EXEEXT):    $(TRAPD_OBJECTS) $(USETRAPLIBS) $(INSTALLLIBS)
+-	$(LINK) ${CFLAGS} -o $@ $(TRAPD_OBJECTS) $(INSTALLLIBS) ${LDFLAGS} ${TRAPLIBS}
++	$(LINK) ${CFLAGS} -o $@ $(TRAPD_OBJECTS) $(INSTALLLIBS) ${LDFLAGS} ${TRAPLIBS} $(LIBWRAP)
+ 
+ snmptrap$(EXEEXT):    snmptrap.$(OSUFFIX) $(USELIBS)
+ 	$(LINK) ${CFLAGS} -o $@ snmptrap.$(OSUFFIX) ${LDFLAGS} ${LIBS}
+@@ -183,7 +185,7 @@ snmpset$(EXEEXT):    snmpset.$(OSUFFIX) $(USELIBS)
+ 	$(LINK) ${CFLAGS} -o $@ snmpset.$(OSUFFIX) ${LDFLAGS} ${LIBS}
+ 
+ snmpusm$(EXEEXT):    snmpusm.$(OSUFFIX) $(USELIBS)
+-	$(LINK) ${CFLAGS} -o $@ snmpusm.$(OSUFFIX) ${LDFLAGS} ${LIBS}
++	$(LINK) ${CFLAGS} -o $@ snmpusm.$(OSUFFIX) ${LDFLAGS} ${LIBS} $(LIBCRYPTO)
+ 
+ snmpvacm$(EXEEXT):    snmpvacm.$(OSUFFIX) $(USELIBS)
+ 	$(LINK) ${CFLAGS} -o $@ snmpvacm.$(OSUFFIX) ${LDFLAGS} ${LIBS}
+diff --git a/configure.ac b/configure.ac
+index ecf761f..6d28e67 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -78,6 +78,9 @@ AC_SUBST(DLLIBS)
+ 
+ AC_SUBST(PARTIALTARGETFLAGS)
+ AC_SUBST(ac_cv_NETSNMP_SYSTEM_INCLUDE_FILE)
++LIBWRAP="$_wraplibs"
++AC_SUBST(LIBWRAP)
++AC_SUBST(LIBCRYPTO)
+ 
+ AC_CONFIG_FILES([Makefile:Makefile.top:Makefile.in:Makefile.rules])
+ AC_CONFIG_FILES([snmplib/Makefile:Makefile.top:snmplib/Makefile.in:Makefile.rules:snmplib/Makefile.depend])

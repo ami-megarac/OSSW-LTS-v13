@@ -1,0 +1,13 @@
+Add AM_GNU_GETTEXT_VERSION to configure.ac so that autoreconf pulls in recent
+gettext auxiliary files.
+
+--- a/configure.ac
++++ b/configure.ac
+@@ -84,6 +84,7 @@
+ AC_CHECK_FUNCS(getuid geteuid iconv mtrace __secure_getenv secure_getenv setregid stpcpy strerror vasprintf srandom)
+ 
+ AM_GNU_GETTEXT([external])
++AM_GNU_GETTEXT_VERSION(0.19.3)
+ AM_ICONV_LINK
+ 
+ popt_sysconfdir="${sysconfdir}"

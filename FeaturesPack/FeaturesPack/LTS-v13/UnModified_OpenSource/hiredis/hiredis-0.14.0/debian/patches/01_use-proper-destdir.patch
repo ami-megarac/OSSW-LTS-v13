@@ -1,0 +1,21 @@
+From: Alessandro Ghedini <ghedo@debian.org>
+Date: Sun, 4 Nov 2018 22:59:09 +0000
+Subject: _use-proper-destdir
+
+---
+ Makefile | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Makefile b/Makefile
+index b2e45f0..de6d2c5 100644
+--- a/Makefile
++++ b/Makefile
+@@ -15,7 +15,7 @@ HIREDIS_PATCH=$(shell grep HIREDIS_PATCH hiredis.h | awk '{print $$3}')
+ HIREDIS_SONAME=$(shell grep HIREDIS_SONAME hiredis.h | awk '{print $$3}')
+ 
+ # Installation related variables and target
+-PREFIX?=/usr/local
++PREFIX?=$(DESTDIR)/usr
+ INCLUDE_PATH?=include/hiredis
+ LIBRARY_PATH?=lib
+ PKGCONF_PATH?=pkgconfig

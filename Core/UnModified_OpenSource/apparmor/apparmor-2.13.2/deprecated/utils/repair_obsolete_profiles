@@ -1,0 +1,201 @@
+#!/usr/bin/perl -wi
+# automatically repair apparmor profiles that have had their supporting
+# infrastructure refactored out from underneath them
+
+# note -i in shebang line -- this program will modify in-place
+# profiles or #include chunks specified on the command line without
+# backups. Please make some yourself and inspect the changes made by
+# this tool to ensure they look correct.
+
+# It'll try to fix up #include files (supplied by SUSE/Immunix) that have
+# moved; it will also inspect many #include files that exist solely
+# for netdomain rule separation, and either remove the #include line
+# from profiles/includes or suck in the contents of the specific file,
+# depending if there was any non-netdomain content.
+
+# If you haven't modified any of the files listed in the @useless array,
+# you probably don't have to concern yourself with the complicated part
+# of the previous paragraph. If you did modify any of those files, this
+# tool will inspect those for changes, try to update any lines in those
+# files for correctness, and insert those lines directly into the
+# referencing profiles.
+
+our %count_cache;
+
+# count the number of 'interesting' lines in the file
+sub numlines ($) {
+  my $name = $_[0];
+
+  return $count_cache{$name} if $count_cache{$name};
+
+  open FH, $name or return 1; # can't tell -> not empty
+
+  my $linecount=0;
+  while(<FH>) {
+    if (m/^[^#]*#include/) {
+      $linecount++;
+    } elsif (m/^\s*#/) {
+      # just a comment, skip it
+    } elsif (m/\s*tcp_/) {
+      # netdomain rules are unenforced, skip it
+    } elsif (m/\s*udp_/) {
+      # netdomain rules are unenforced, skip it
+    } elsif (m/\S+/) {
+      $linecount++;
+    }
+  }
+  close FH;
+
+  $count_cache{$name} = $linecount;
+
+  return $linecount;
+}
+
+# given a single line from a profile, perform some search/replace
+# operations to reflect new locations for old files.
+#
+# change #include lines that reference files in the @useless array:
+# don't print the #include any more, and either suck in the contents of
+# the referenced file (calling itself recursively to fix up _those_
+# files) or just leave well enough alone, if the file had no
+# 'interesting' lines as defined above.
+
+%transforms = (
+  # renamed around SuSE 9.3
+  "abstractions/kde3"            => "abstractions/kde",
+  "abstractions/user-GTK"        => "abstractions/gnome",
+  "abstractions/user-Xauthority" => "abstractions/X",
+  
+  # user-custom -> program-chunks around SHASS 1.1, but these changed dirs
+  "user-custom/fonts"           => "abstractions/fonts",
+  "user-custom/kde3"            => "abstractions/kde",
+  "user-custom/user-GTK"        => "abstractions/gnome",
+  "user-custom/user-mail"       => "abstractions/user-mail",
+  "user-custom/user-manpages"   => "abstractions/user-manpages",
+  "user-custom/user-Xauthority" => "abstractions/X",
+  "user-custom/user-tmp"        => "abstractions/user-tmp",
+  
+  # try to forget the -files
+  "program-chunks/base-files"          => "abstractions/base",
+  "program-chunks/nameservice-files"   => "abstractions/nameservice",
+  "immunix-standard/base-files"        => "abstractions/base",
+  "immunix-standard/nameservice-files" => "abstractions/nameservice",
+  
+  # immunix-standard -> program-chunks
+  "immunix-standard/postfix-bounce"     => "program-chunks/postfix-bounce",
+  "immunix-standard/postfix-cleanup"    => "program-chunks/postfix-cleanup",
+  "immunix-standard/postfix-common"     => "program-chunks/postfix-common",
+  "immunix-standard/postfix-flush"      => "program-chunks/postfix-flush",
+  "immunix-standard/postfix-local"      => "program-chunks/postfix-local",
+  "immunix-standard/postfix-master"     => "program-chunks/postfix-master",
+  "immunix-standard/postfix-nqmgr"      => "program-chunks/postfix-nqmgr",
+  "immunix-standard/postfix-pickup"     => "program-chunks/postfix-pickup",
+  "immunix-standard/postfix-proxymap"   => "program-chunks/postfix-proxymap",
+  "immunix-standard/postfix-qmgr"       => "program-chunks/postfix-qmgr",
+  "immunix-standard/postfix-showq"      => "program-chunks/postfix-showq",
+  "immunix-standard/postfix-smtp"       => "program-chunks/postfix-smtp",
+  "immunix-standard/postfix-smtpd"      => "program-chunks/postfix-smtpd",
+  "immunix-standard/postfix-trivial-rewrite" => "program-chunks/postfix-trivial-rewrite",
+  "immunix-standard/apache-default-uri" => "program-chunks/apache-default-uri",
+  "immunix-standard/at"                 => "program-chunks/at",
+);
+
+# chunks that immunix tools never populated -- lets remove the ones that
+# don't have any useful information
+my @useless = qw{
+  program-chunks/base-nd
+  program-chunks/portmap-nd
+  program-chunks/postfix-local-nd
+  program-chunks/postfix-master-nd
+  program-chunks/postfix-proxymap-nd
+  program-chunks/postfix-smtpd-nd
+  program-chunks/postfix-smtp-nd
+  user-custom/base-nd
+  user-custom/portmap-nd
+  user-custom/postfix-local-nd
+  user-custom/postfix-master-nd
+  user-custom/postfix-proxymap-nd
+  user-custom/postfix-smtpd-nd
+  user-custom/postfix-smtp-nd
+  immunix-standard/base-nd
+  immunix-standard/portmap-nd
+  immunix-standard/postfix-local-nd
+  immunix-standard/postfix-master-nd
+  immunix-standard/postfix-proxymap-nd
+  immunix-standard/postfix-smtpd-nd
+  immunix-standard/postfix-smtp-nd
+  program-chunks/at
+  program-chunks/fam
+  program-chunks/httpd
+  program-chunks/identd
+  program-chunks/imapd
+  program-chunks/ipop2d
+  program-chunks/ipop3d
+  program-chunks/lpd
+  program-chunks/mutt
+  program-chunks/named
+  program-chunks/nmbd
+  program-chunks/ntalkd
+  program-chunks/ntpd
+  program-chunks/postgres
+  program-chunks/rpc.lockd
+  program-chunks/rpc.nfsd
+  program-chunks/rpc.statd
+  program-chunks/samba
+  program-chunks/sendmail.sendmail
+  program-chunks/shells
+  program-chunks/slocate
+  program-chunks/snmpd
+  program-chunks/spamc
+  program-chunks/sshd
+  program-chunks/swat
+  program-chunks/syslogd
+  program-chunks/talk
+  program-chunks/xfs
+};
+
+# create an alternation to speed up the regexp below
+my $useless = join('|', @useless);
+
+sub fixup ($) {
+  $line = $_[0];
+
+  $line =~ s/#include\s+<([^>]+)>/$i = (exists $transforms{$1}) ? $transforms{$1} : "$1"; "#include <$i>"/e;
+
+  if ($line =~ m/\s*#include\s+<($useless)>/) {
+    my $file = $1;
+    if (numlines("/etc/subdomain.d/$file") > 0) {
+      my $succ = open INC, "/etc/subdomain.d/$file";
+      if (not $succ) {
+        print STDERR "Error opening /etc/subdomain.d/$file\n";
+      } else {
+        while(my $included_line = <INC>) {
+          print fixup_loop($included_line);
+        }
+        close INC;
+      }
+    }
+    $line = ""; # this line has been handled by the file
+  }
+
+  return $line;
+}
+
+# call fixup on a single entry repeatedly -- this way, we can encode
+# 'small' changes in the fixup routine when they are made, rather than
+# encoding all possible starting points and which specific end point
+# they should go to.
+sub fixup_loop ($) {
+  my $line = $_[0];
+  my $saved;
+  do {
+    $saved = $line;
+    $line = fixup($saved);
+  } until ($line eq $saved);
+  return $line;
+}
+
+# main entry point; fix each line in every file in argv.
+while(<>) {
+  print fixup_loop($_);
+}

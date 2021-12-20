@@ -1,0 +1,21 @@
+#=DESCRIPTION duplicated hats inside a conditional
+#=EXRESULT FAIL
+
+${FOO} = true
+${BAR} = true
+
+/bin/true {
+
+
+  if ${BAR} {
+    ^dupehat {
+      /bin/false rix,
+    }
+  }
+
+  if ${FOO} {
+    ^dupehat {
+      capability dac_override,
+    }
+  }
+}

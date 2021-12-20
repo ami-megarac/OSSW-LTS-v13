@@ -1,0 +1,4 @@
+#=DESCRIPTION invalid characters in variable names
+#=EXRESULT FAIL
+
+@{1} = blah

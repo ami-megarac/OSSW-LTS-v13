@@ -1,0 +1,11 @@
+#
+#=DESCRIPTION simple link access test
+#=EXRESULT PASS
+#
+
+@{var}=/test
+profile test {
+  @{var} rl,
+  /gamma/* rwl,
+}
+

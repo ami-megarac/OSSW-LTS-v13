@@ -1,0 +1,13 @@
+#
+#
+#
+/does/not/exist {
+  #include <includes/base>
+  #include <includes/base>
+  #include <includes/base>
+  #include <includes/base>
+
+  /bin/true rix,
+
+  #include <failure>
+}

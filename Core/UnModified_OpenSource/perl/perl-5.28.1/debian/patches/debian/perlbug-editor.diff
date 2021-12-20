@@ -1,0 +1,24 @@
+From 96c30aaa7e09b7eccede27dae733ffb4031b9d3e Mon Sep 17 00:00:00 2001
+From: Niko Tyni <ntyni@debian.org>
+Date: Sun, 24 Feb 2019 10:15:49 +0200
+Subject: Use "editor" as the default perlbug editor, as per Debian policy
+
+Bug-Debian: https://bugs.debian.org/922609
+Patch-Name: debian/perlbug-editor.diff
+---
+ utils/perlbug.PL | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/utils/perlbug.PL b/utils/perlbug.PL
+index d1eb1e04a8..4555d04494 100644
+--- a/utils/perlbug.PL
++++ b/utils/perlbug.PL
+@@ -272,7 +272,7 @@ sub Init {
+     $ed = $opt{e} || $ENV{VISUAL} || $ENV{EDITOR} || $ENV{EDIT}
+ 	|| ($Is_VMS && "edit/tpu")
+ 	|| ($Is_MSWin32 && "notepad")
+-	|| "vi";
++	|| "editor";
+ 
+     # Not OK - provide build failure template by finessing OK report
+     if ($opt{n}) {

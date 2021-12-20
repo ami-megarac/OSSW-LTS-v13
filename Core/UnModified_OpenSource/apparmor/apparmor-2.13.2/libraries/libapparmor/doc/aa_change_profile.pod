@@ -1,0 +1,209 @@
+# This publication is intellectual property of Canonical Ltd. Its contents
+# can be duplicated, either in part or in whole, provided that a copyright
+# label is visibly located on each copy.
+#
+# All information found in this book has been compiled with utmost
+# attention to detail. However, this does not guarantee complete accuracy.
+# Neither Canonical Ltd, the authors, nor the translators shall be held
+# liable for possible errors or the consequences thereof.
+#
+# Many of the software and hardware descriptions cited in this book
+# are registered trademarks. All trade names are subject to copyright
+# restrictions and may be registered trade marks. Canonical Ltd.
+# essentially adhere to the manufacturer's spelling.
+#
+# Names of products and trademarks appearing in this book (with or without
+# specific notation) are likewise subject to trademark and trade protection
+# laws and may thus fall under copyright restrictions.
+#
+
+
+=pod
+
+=head1 NAME
+
+aa_change_profile, aa_change_onexec - change a tasks profile
+
+=head1 SYNOPSIS
+
+B<#include E<lt>sys/apparmor.hE<gt>>
+
+B<int aa_change_profile(const char *profile);>
+
+B<int aa_change_onexec(const char *profile);>
+
+Link with B<-lapparmor> when compiling.
+
+=head1 DESCRIPTION
+
+An AppArmor profile applies to an executable program; if a portion of
+the program needs different access permissions than other portions,
+the program can "change profile" to a different profile. To change into a
+new profile, it can use the aa_change_profile() function to do so. It passes
+in a pointer to the I<profile> to transition to. Confined programs wanting to
+use aa_change_profile() need to have rules permitting changing to the named
+profile. See apparmor.d(8) for details.
+
+If a program wants to return out of the current profile to the
+original profile, it may use aa_change_hat(2). Otherwise, the two profiles must
+have rules permitting changing between the two profiles.
+
+Open file descriptors may not be remediated after a call to aa_change_profile()
+so the calling program must close(2) open file descriptors to ensure they
+are not available after calling aa_change_profile(). As aa_change_profile()
+is typically used just before execve(2), you may want to use open(2) or
+fcntl(2) with close-on-exec.
+
+The aa_change_onexec() function is like the aa_change_profile() function
+except it specifies that the profile transition should take place on the
+next exec instead of immediately.  The delayed profile change takes
+precedence over any exec transition rules within the confining profile.
+Delaying the profile boundary has a couple of advantages, it removes the
+need for stub transition profiles and the exec boundary is a natural security
+layer where potentially sensitive memory is unmapped.
+
+=head1 RETURN VALUE
+
+On success zero is returned. On error, -1 is returned, and
+errno(3) is set appropriately.
+
+=head1 ERRORS
+
+=over 4
+
+=item B<EINVAL>
+
+The apparmor kernel module is not loaded, neither a profile nor a namespace
+was specified, or the communication via the F</proc/*/attr/current> file did
+not conform to protocol.
+
+=item B<ENOMEM>
+
+Insufficient kernel memory was available.
+
+=item B<EPERM>
+
+The calling application is confined by apparmor and the no_new_privs bit is
+set.
+
+=item B<EACCES>
+
+The task does not have sufficient permissions to change its domain.
+
+=item B<ENOENT>
+
+The specified profile does not exist, or is not visible from the current
+Namespace.
+
+=back
+
+=head1 EXAMPLE
+
+The following example shows a simple, if contrived, use of
+aa_change_profile(); a typical use of aa_change_profile() will
+aa_change_profile() just before an execve(2) so that the new
+child process is permanently confined.
+
+ #include <stdlib.h>
+ #include <string.h>
+ #include <sys/apparmor.h>
+ #include <sys/types.h>
+ #include <sys/stat.h>
+ #include <fcntl.h>
+ #include <stdio.h>
+ #include <unistd.h>
+
+ int main(int argc, char * argv[])
+ {
+         int fd;
+         char buf[10];
+         char *execve_args[4];
+
+         printf("Before aa_change_profile():\n");
+         if ((fd=open("/etc/passwd", O_RDONLY)) < 0) {
+                perror("Failure opening /etc/passwd");
+                return 1;
+         }
+
+         /* Confirm for ourselves that we can really read /etc/passwd */
+         memset(&buf, 0, 10);
+         if (read(fd, &buf, 10) == -1) {
+                 perror("Failure reading /etc/passwd");
+                 return 1;
+         }
+         buf[9] = '\0';
+         printf("/etc/passwd: %s\n", buf);
+         close(fd);
+
+         printf("After aa_change_profile():\n");
+
+         /* change profile to the "i_cant_be_trusted_anymore" profile, which
+          * should not have read access to /etc/passwd. */
+         if (aa_change_profile("i_cant_be_trusted_anymore") < 0) {
+             perror("Failure changing profile -- aborting");
+             _exit(1);
+         }
+
+         /* confirm that we cannot read /etc/passwd */
+         execve_args[0] = "/usr/bin/head";
+         execve_args[1] = "-1";
+         execve_args[2] = "/etc/passwd";
+         execve_args[3] = NULL;
+         execve("/usr/bin/head", execve_args, NULL);
+         perror("execve");
+         _exit(1);
+ }
+
+This code example requires a profile similar to the following to be loaded
+with apparmor_parser(8):
+
+ profile i_cant_be_trusted_anymore {
+     /etc/ld.so.cache      mr,
+     /lib/ld-*.so*         mrix,
+     /lib/libc*.so*        mr,
+
+     /usr/bin/head ix,
+ }
+
+The output when run:
+
+ $ /tmp/change_p
+ Before aa_change_profile():
+ /etc/passwd: root:x:0:
+ After aa_change_profile():
+ /usr/bin/head: cannot open `/etc/passwd' for reading: Permission denied
+ $
+
+If /tmp/change_p is to be confined as well, then the following profile can be
+used (in addition to the one for 'i_cant_be_trusted_anymore', above):
+
+ # Confine change_p to be able to read /etc/passwd and aa_change_profile()
+ # to the 'i_cant_be_trusted_anymore' profile.
+ /tmp/change_p {
+     /etc/ld.so.cache          mr,
+     /lib/ld-*.so*             mrix,
+     /lib/libc*.so*            mr,
+
+     /etc/passwd               r,
+
+     # Needed for aa_change_profile()
+     /usr/lib/libapparmor*.so* mr,
+     /proc/[0-9]*/attr/current w,
+     change_profile -> i_cant_be_trusted_anymore,
+ }
+
+
+=head1 BUGS
+
+None known. If you find any, please report them at
+L<https://bugs.launchpad.net/apparmor/+filebug>. Note that using
+aa_change_profile(2) without execve(2) provides no memory barriers between
+different areas of a program; if address space separation is required, then
+separate processes should be used.
+
+=head1 SEE ALSO
+
+apparmor(7), apparmor.d(5), apparmor_parser(8), aa_change_hat(2) and
+L<https://wiki.apparmor.net>.
+
+=cut

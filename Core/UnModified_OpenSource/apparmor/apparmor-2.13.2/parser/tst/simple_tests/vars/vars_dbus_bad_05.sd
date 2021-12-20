@@ -1,0 +1,10 @@
+#
+#=DESCRIPTION missing reference variable in dbus bus modifier
+#=EXRESULT FAIL
+#
+
+/does/not/exist {
+  dbus (send)
+       member=@{MISSING_VAR}
+       path="/com/canonical/hud/applications/BAR",
+}

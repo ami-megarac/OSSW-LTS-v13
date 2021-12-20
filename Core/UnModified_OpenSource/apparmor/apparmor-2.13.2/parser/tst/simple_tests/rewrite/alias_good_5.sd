@@ -1,0 +1,15 @@
+#=DESCRIPTION Test of aliases within includes
+#=EXRESULT PASS
+
+alias /tmp -> /var/tmp,
+#include <includes-preamble/vars>
+#include <includes-preamble/aliases>
+@{FOO} += /etc/
+alias /etc/ -> /Config/,
+
+
+/bin/foo {
+  #include <includes/base>
+  /tmp/meep rw,
+  @{FOO}/some/other/thing r,
+}

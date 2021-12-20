@@ -1,0 +1,72 @@
+From: Daiki Ueno <ueno@gnu.org>
+Date: Tue, 2 Jun 2020 20:53:11 +0200
+Subject: stek: differentiate initial state from valid time window of
+ TOTP
+Origin: https://gitlab.com/gnutls/gnutls/-/commit/c2646aeee94e71cb15c90a3147cf3b5b0ca158ca
+Bug: https://gnutls.org/security-new.html#GNUTLS-SA-2020-06-03
+Bug-Debian: https://bugs.debian.org/962289
+Bug-Debian-Security: https://security-tracker.debian.org/tracker/CVE-2020-13777
+Bug: https://gitlab.com/gnutls/gnutls/-/issues/1011
+
+There was a confusion in the TOTP implementation in stek.c.  When the
+mechanism is initialized at the first time, it records the timestamp
+but doesn't initialize the key.  This removes the timestamp recording
+at the initialization phase, so the key is properly set later.
+
+Signed-off-by: Daiki Ueno <ueno@gnu.org>
+[Salvatore Bonaccorso: Drop test changes in tests/tls13/prf-early.c
+which are not applicble in version 3.6.7]
+---
+ lib/stek.c                        | 17 +++++------------
+ tests/resume-with-previous-stek.c |  4 ++--
+ tests/tls13/prf-early.c           |  8 ++++----
+ 3 files changed, 11 insertions(+), 18 deletions(-)
+
+diff --git a/lib/stek.c b/lib/stek.c
+index 2f885cee372d..5ab9e7d2d1ce 100644
+--- a/lib/stek.c
++++ b/lib/stek.c
+@@ -323,20 +323,13 @@ int _gnutls_initialize_session_ticket_key_rotation(gnutls_session_t session, con
+ 	if (unlikely(session == NULL || key == NULL))
+ 		return gnutls_assert_val(GNUTLS_E_INTERNAL_ERROR);
+ 
+-	if (session->key.totp.last_result == 0) {
+-		int64_t t;
+-		memcpy(session->key.initial_stek, key->data, key->size);
+-		t = totp_next(session);
+-		if (t < 0)
+-			return gnutls_assert_val(t);
++	if (unlikely(session->key.totp.last_result != 0))
++		return GNUTLS_E_INVALID_REQUEST;
+ 
+-		session->key.totp.last_result = t;
+-		session->key.totp.was_rotated = 0;
+-
+-		return GNUTLS_E_SUCCESS;
+-	}
++	memcpy(session->key.initial_stek, key->data, key->size);
+ 
+-	return GNUTLS_E_INVALID_REQUEST;
++	session->key.totp.was_rotated = 0;
++	return 0;
+ }
+ 
+ /*
+diff --git a/tests/resume-with-previous-stek.c b/tests/resume-with-previous-stek.c
+index f212b188b9b6..05c1c90868db 100644
+--- a/tests/resume-with-previous-stek.c
++++ b/tests/resume-with-previous-stek.c
+@@ -196,8 +196,8 @@ static void server(int fd, unsigned rounds, const char *prio)
+ 		serverx509cred = NULL;
+ 	}
+ 
+-	if (num_stek_rotations != 2)
+-		fail("STEK should be rotated exactly twice (%d)!\n", num_stek_rotations);
++	if (num_stek_rotations != 3)
++		fail("STEK should be rotated exactly three times (%d)!\n", num_stek_rotations);
+ 
+ 	if (serverx509cred)
+ 		gnutls_certificate_free_credentials(serverx509cred);
+-- 
+2.27.0
+

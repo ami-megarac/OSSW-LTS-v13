@@ -1,0 +1,10 @@
+#!/bin/sed -f
+# read a Debian changelog on stdin
+# output the first entry on stderr
+# output the rest on stdout
+1 { h; d }
+2,/^perl/ {
+    /^perl/ { x; w /dev/stderr
+    x; b }
+    H; d
+}

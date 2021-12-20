@@ -1,0 +1,5 @@
+#=DESCRIPTION set variable assignment using set variable as rvalue
+#=EXRESULT PASS
+
+@{FOO}=bar baz
+@{BAR}=${FOO} blort

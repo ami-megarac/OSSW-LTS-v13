@@ -1,0 +1,10 @@
+#
+#=Description basic rules to test the "diratime" mount option
+#=EXRESULT PASS
+/usr/bin/foo {
+  mount options=diratime /a -> /1,
+  mount options=(diratime) /b -> /2,
+  mount options=(rw,diratime) /c -> /3,
+  mount options in (diratime) /d -> /4,
+  mount options in (ro,diratime) /e -> /5,
+}

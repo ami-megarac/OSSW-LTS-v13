@@ -1,0 +1,80 @@
+# ------------------------------------------------------------------
+#
+#    Copyright (C) 2002-2005 Novell/SUSE
+#
+#    This program is free software; you can redistribute it and/or
+#    modify it under the terms of version 2 of the GNU General Public
+#    License published by the Free Software Foundation.
+#
+# ------------------------------------------------------------------
+
+
+
+  # (Note that the ldd profile has inlined this file; if you make
+  # modifications here, please consider including them in the ldd
+  # profile as well.)
+
+  # The __canary_death_handler function writes a time-stamped log
+  # message to /dev/log for logging by syslogd. So, /dev/log, timezones,
+  # and localisations of date should be available EVERYWHERE, so
+  # StackGuard, FormatGuard, etc., alerts can be properly logged.
+  /dev/log                       w,
+  /dev/urandom                   r,
+  /etc/locale/**                 r,
+  /etc/localtime                 r,
+  /usr/share/locale/**           r,
+  /usr/share/zoneinfo/**         r,
+
+  /usr/lib64/locale/**           r,
+  /usr/lib64/gconv/*.so          r,
+  /usr/lib64/gconv/gconv-modules*  r,
+  /usr/lib/locale/**             r,
+  /usr/lib/gconv/*.so            r,
+  /usr/lib/gconv/gconv-modules*  r,
+
+  # used by glibc when binding to ephemeral ports
+  /etc/bindresvport.blacklist    r,
+
+  # ld.so.cache and ld are used to load shared libraries; they are best
+  # available everywhere
+  /etc/ld.so.cache               r,
+  # 'px' requires a profile to be available for the transition to
+  # function; without a loaded profile, the kernel will fail the exec.
+  /lib/ld-*.so                   px,
+  /lib64/ld-*.so                 px,
+  /opt/*-linux-uclibc/lib/ld-uClibc*so* px,
+
+  # we might as well allow everything to use common libraries
+  /lib/lib*.so*                  r,
+  /lib/tls/lib*.so*              r,
+  /lib/power4/lib*.so*           r,
+  /lib/power5/lib*.so*           r,
+  /lib/power5+/lib*.so*          r,
+  /lib64/power4/lib*.so*         r,
+  /lib64/power5/lib*.so*         r,
+  /lib64/power5+/lib*.so*        r,
+  /usr/lib/*.so*                 r,
+  /usr/lib/tls/lib*.so*          r,
+  /usr/lib/power4/lib*.so*       r,
+  /usr/lib/power5/lib*.so*       r,
+  /usr/lib/power5+/lib*.so*      r,
+  /lib64/lib*.so*                r,
+  /lib64/tls/lib*.so*            r,
+  /usr/lib64/*.so*               r,
+  /usr/lib64/tls/lib*.so*        r,
+
+  # /dev/null is pretty harmless and frequently used
+  /dev/null                      rw,
+  # as is /dev/zero
+  /dev/zero                      rw,
+
+  # Sometimes used to determine kernel/user interfaces to use
+  /proc/sys/kernel/version       r,
+  # Depending on which glibc routine uses this file, base may not be the
+  # best place -- but many profiles require it, and it is quite harmless.
+  /proc/sys/kernel/ngroups_max   r,
+
+  # glibc's sysconf(3) routine to determine free memory, etc
+  /proc/meminfo                  r,
+  /proc/stat                     r,
+  /proc/cpuinfo                  r,

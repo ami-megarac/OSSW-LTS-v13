@@ -1,0 +1,9 @@
+#
+#=DESCRIPTION only pix is allowed as a multiple x modifier
+#=EXRESULT FAIL
+#
+/usr/bin/foo {
+
+  rppx /bin/ls,
+}
+

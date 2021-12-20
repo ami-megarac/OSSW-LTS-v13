@@ -1,0 +1,1 @@
+Jul 24 12:24:41 spriggan kernel: [42364.269117] type=1400 audit(1279967081.455:42): apparmor="STATUS" operation="profile_replace" name="/sbin/dhclient3" pid=19610 comm="apparmor_parser"

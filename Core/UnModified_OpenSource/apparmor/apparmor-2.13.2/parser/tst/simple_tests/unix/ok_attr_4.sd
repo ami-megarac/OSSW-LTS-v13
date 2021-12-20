@@ -1,0 +1,7 @@
+#
+#=DESCRIPTION simple unix setattr acceptance test
+#=EXRESULT PASS
+
+profile a_profile {
+  unix (setattr),
+}

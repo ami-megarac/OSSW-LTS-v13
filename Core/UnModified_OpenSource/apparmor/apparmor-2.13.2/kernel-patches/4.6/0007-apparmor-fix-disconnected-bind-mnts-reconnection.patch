@@ -1,0 +1,36 @@
+From 9caa96e30a1b2bb191a29af872285c8d0b078c10 Mon Sep 17 00:00:00 2001
+From: John Johansen <john.johansen@canonical.com>
+Date: Fri, 25 Jul 2014 04:02:08 -0700
+Subject: [PATCH 07/27] apparmor: fix disconnected bind mnts reconnection
+
+Bind mounts can fail to be properly reconnected when PATH_CONNECT is
+specified. Ensure that when PATH_CONNECT is specified the path has
+a root.
+
+BugLink: http://bugs.launchpad.net/bugs/1319984
+
+Signed-off-by: John Johansen <john.johansen@canonical.com>
+Acked-by: Seth Arnold <seth.arnold@canonical.com>
+---
+ security/apparmor/path.c | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/security/apparmor/path.c b/security/apparmor/path.c
+index 71e0e3a..bb2f2c6 100644
+--- a/security/apparmor/path.c
++++ b/security/apparmor/path.c
+@@ -141,7 +141,10 @@ static int d_namespace_path(struct path *path, char *buf, int buflen,
+ 			error = -EACCES;
+ 			if (*res == '/')
+ 				*name = res + 1;
+-		}
++		} else if (*res != '/')
++			/* CONNECT_PATH with missing root */
++			error = prepend(name, *name - buf, "/", 1);
++
+ 	}
+ 
+ out:
+-- 
+2.7.4
+

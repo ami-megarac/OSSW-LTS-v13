@@ -1,0 +1,161 @@
+Source: libselinux
+VCS-Git: https://salsa.debian.org/selinux-team/libselinux.git
+VCS-Browser: https://salsa.debian.org/selinux-team/libselinux
+Priority: optional
+Section: libs
+Maintainer: Debian SELinux maintainers <selinux-devel@lists.alioth.debian.org>
+Uploaders: Laurent Bigonville <bigon@debian.org>,
+           Russell Coker <russell@coker.com.au>
+Standards-Version: 4.1.4
+Build-Depends: debhelper (>= 10),
+               dh-python <!nopython>,
+               file,
+               gem2deb (>= 0.5.0~) <!noruby>,
+               libsepol1-dev (>= 2.8),
+               libpcre3-dev,
+               pkg-config,
+               python-all-dev (>= 2.6.6-3~) <!nopython>,
+               python3-all-dev <!nopython>,
+               swig <!nopython> <!noruby>
+XS-Ruby-Versions: all
+Homepage: http://userspace.selinuxproject.org/
+
+Package: selinux-utils
+Architecture: linux-any
+Section: admin
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Description: SELinux utility programs
+ This package provides various utility programs for a Security-enhanced
+ Linux system. Security-enhanced Linux is a patch of the Linux kernel
+ and a number of utilities with enhanced security functionality
+ designed to add mandatory access controls to Linux. This package
+ provides utility programs to get and set process and file security
+ contexts and to obtain security policy decisions.
+
+Package: libselinux1
+Architecture: linux-any
+Multi-Arch: same
+Pre-Depends: ${misc:Pre-Depends}
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Description: SELinux runtime shared libraries
+ This package provides the shared libraries for Security-enhanced
+ Linux that provides interfaces (e.g. library functions for the
+ SELinux kernel APIs like getcon(), other support functions like
+ getseuserbyname()) to SELinux-aware applications. Security-enhanced
+ Linux is a patch of the Linux kernel and a number of utilities with
+ enhanced security functionality designed to add mandatory access
+ controls to Linux.  The Security-enhanced Linux kernel contains new
+ architectural components originally developed to improve the security
+ of the Flask operating system. These architectural components provide
+ general support for the enforcement of many kinds of mandatory access
+ control policies, including those based on the concepts of Type
+ Enforcement, Role-based Access Control, and Multi-level Security.
+ .
+ libselinux1 provides an API for SELinux applications to get and set
+ process and file security contexts and to obtain security policy
+ decisions.  Required for any applications that use the SELinux
+ API. libselinux may use the shared libsepol to manipulate the binary
+ policy if necessary (e.g. to downgrade the policy format to an older
+ version supported by the kernel) when loading policy.
+
+Package: libselinux1-dev
+Architecture: linux-any
+Depends: libselinux1 (= ${binary:Version}),
+         libsepol1-dev (>= 2.8),
+         libpcre3-dev,
+         ${misc:Depends}
+Section: libdevel
+Multi-Arch: same
+Provides: libselinux-dev
+Conflicts: libselinux-dev
+Description: SELinux development headers
+ This package provides the  static libraries and header files
+ needed for developing SELinux applications.  Security-enhanced Linux
+ is a patch of the Linux kernel and a number of utilities with
+ enhanced security functionality designed to add mandatory access
+ controls to Linux.  The Security-enhanced Linux kernel contains new
+ architectural components originally developed to improve the security
+ of the Flask operating system. These architectural components provide
+ general support for the enforcement of many kinds of mandatory access
+ control policies, including those based on the concepts of Type
+ Enforcement, Role-based Access Control, and Multi-level Security.
+
+Package: libselinux1-udeb
+Architecture: linux-any
+Section: debian-installer
+Package-Type: udeb
+Pre-Depends: ${misc:Pre-Depends}
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Description: SELinux runtime shared libraries
+ This package provides the shared libraries for Security-enhanced
+ Linux that provides interfaces (e.g. library functions for the
+ SELinux kernel APIs like getcon(), other support functions like
+ getseuserbyname()) to SELinux-aware applications. Security-enhanced
+ Linux is a patch of the Linux kernel and a number of utilities with
+ enhanced security functionality designed to add mandatory access
+ controls to Linux.  The Security-enhanced Linux kernel contains new
+ architectural components originally developed to improve the security
+ of the Flask operating system. These architectural components provide
+ general support for the enforcement of many kinds of mandatory access
+ control policies, including those based on the concepts of Type
+ Enforcement, Role-based Access Control, and Multi-level Security.
+ .
+ libselinux1-udeb provides the libselinux shared library for use within
+ the Debian installer. Do not install it on a normal system.
+
+Package: ruby-selinux
+Architecture: linux-any
+Depends: ruby | ruby-interpreter, ${misc:Depends}, ${shlibs:Depends}
+Section: ruby
+Build-Profiles: <!noruby>
+Description: Ruby bindings to SELinux shared libraries
+ This package provides the Ruby bindings needed for developing Ruby
+ SELinux applications.  Security-enhanced Linux is a patch of the
+ Linux kernel and a number of utilities with enhanced security
+ functionality designed to add mandatory access controls to Linux.
+ The Security-enhanced Linux kernel contains new architectural
+ components originally developed to improve the security of the Flask
+ operating system. These architectural components provide general
+ support for the enforcement of many kinds of mandatory access control
+ policies, including those based on the concepts of Type Enforcement,
+ Role-based Access Control, and Multi-level Security.
+
+Package: python-selinux
+Architecture: linux-any
+Depends: ${misc:Depends}, ${python:Depends}, ${shlibs:Depends}
+Built-Using: ${Built-Using}
+Section: python
+Provides: ${python:Provides}
+Build-Profiles: <!nopython>
+Description: Python bindings to SELinux shared libraries
+ This package provides the Python bindings needed for developing Python
+ SELinux applications.
+ .
+ Security-enhanced Linux is a patch of the Linux kernel and a number
+ of utilities with enhanced security functionality designed to add mandatory
+ access controls to Linux. The Security-enhanced Linux kernel contains
+ new architectural components originally developed to improve the security
+ of the Flask operating system. These architectural components provide
+ general support for the enforcement of many kinds of mandatory access
+ control policies, including those based on the concepts of Type Enforcement,
+ Role-based Access Control, and Multi-level Security.
+
+Package: python3-selinux
+Architecture: linux-any
+Depends: ${misc:Depends}, ${python3:Depends}, ${shlibs:Depends}
+Built-Using: ${Built-Using}
+Section: python
+Provides: ${python3:Provides}
+Build-Profiles: <!nopython>
+Description: Python3 bindings to SELinux shared libraries
+ This package provides the Python3 bindings needed for developing Python
+ SELinux applications.
+ .
+ Security-enhanced Linux is a patch of the Linux kernel and a number
+ of utilities with enhanced security functionality designed to add mandatory
+ access controls to Linux. The Security-enhanced Linux kernel contains
+ new architectural components originally developed to improve the security
+ of the Flask operating system. These architectural components provide
+ general support for the enforcement of many kinds of mandatory access
+ control policies, including those based on the concepts of Type Enforcement,
+ Role-based Access Control, and Multi-level Security.

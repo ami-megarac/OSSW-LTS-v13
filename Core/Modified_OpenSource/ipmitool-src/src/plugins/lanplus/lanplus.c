@@ -82,7 +82,8 @@
 extern uint8 UDS_ReceiveData( UDS_CHANNEL_T *UDSInfo, char *szBuffer, uint32* pdwSize, int timeout);
 extern uint32 FillUDSMessagePacket(IPMI20_SESSION_T *pSession, uint8 *Buffer,
                                                         uint8 byNetFnLUN, uint8 byCommand,
-                                                        uint8 *pbyReqData, uint32 dwReqDataLen,INT8U AuthEnable,int timeout);
+                                                        uint8 *pbyReqData, uint32 dwReqDataLen,INT8U AuthEnable);
+
 
 extern IPMI20_SESSION_T hSession;
 extern unsigned int local_session;
@@ -2388,8 +2389,7 @@ ipmi_lanplus_send_payload(
                                         memcpy(&ipmi_request->msg.data[0],&buffer[0],ipmi_request->msg.data_len);
                                         memset(&buffer[0],0,sizeof(buffer));
                                      }
-
-                                     length = FillUDSMessagePacket(&hSession, (uint8*)&buffer[0], ipmi_request->msg.netfn << 2, ipmi_request->msg.cmd, ipmi_request->msg.data, ipmi_request->msg.data_len, 0,0);
+				     length = FillUDSMessagePacket(&hSession, (uint8*)&buffer[0], ipmi_request->msg.netfn << 2, ipmi_request->msg.cmd, ipmi_request->msg.data, ipmi_request->msg.data_len, 0);
 				}
 
 				if (entry == NULL) {

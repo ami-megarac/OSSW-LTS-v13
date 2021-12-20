@@ -1,0 +1,10 @@
+#
+#=Description basic rules to test the "slave" mount option
+#=EXRESULT PASS
+/usr/bin/foo {
+  mount options=slave -> /1,
+  mount options=(slave) -> /2,
+  mount options=(rw,slave) -> /3,
+  mount options in (slave) -> /4,
+  mount options in (ro,slave) -> /5,
+}

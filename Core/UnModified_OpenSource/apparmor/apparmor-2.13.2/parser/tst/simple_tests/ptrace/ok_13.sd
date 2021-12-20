@@ -1,0 +1,13 @@
+#
+#=Description basic ptrace all perms rule
+#=EXRESULT PASS
+#
+/usr/bin/foo {
+  ptrace (read readby trace write tracedby r w rw) ,
+  ptrace (w read, r rw, write) ,
+  ptrace r,
+  ptrace rw,
+  ptrace w,
+  ptrace write,
+
+  }

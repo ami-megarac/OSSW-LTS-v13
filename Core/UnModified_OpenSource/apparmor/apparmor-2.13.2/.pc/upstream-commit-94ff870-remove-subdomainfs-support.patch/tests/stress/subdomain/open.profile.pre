@@ -1,0 +1,15 @@
+BASE/open {
+/lib/libc-*.so				rm,
+/lib/libc-*.so.*			rm,
+/lib/ld-*.so				rix,
+/lib/ld-*.so.*				rix,
+/{usr/,}lib/libAA*			rm,
+/etc/ld.so.*				r,
+BASE/open				r,
+/bin/ls					r,
+/dev/pts/*				rw,
+/dev/tty*				rw,
+/tmp/foobar				rw,
+/tmp/baz				rw,
+/tmp/{a,b,c,d,e,f,g}			rw,
+}

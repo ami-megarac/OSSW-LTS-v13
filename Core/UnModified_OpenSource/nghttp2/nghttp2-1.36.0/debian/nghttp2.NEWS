@@ -1,0 +1,9 @@
+nghttp2 (1.3.4-2) unstable; urgency=medium
+
+  This release introduces a split into 3 subpackages: nghttp2-client,
+  nghttp2-server and nghttp2-proxy. The nghttp2 package depends on all
+  of them, but provides no files on its own. You can customize your
+  nghttp2 installation by removing nghttp2-* packages that you don't
+  use and/or removing the generic nghttp2 package.
+
+ -- Tomasz Buchert <tomasz@debian.org>  Fri, 23 Oct 2015 17:39:22 +0200

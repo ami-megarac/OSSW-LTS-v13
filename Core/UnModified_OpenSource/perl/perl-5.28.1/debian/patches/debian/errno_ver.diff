@@ -1,0 +1,44 @@
+From bc115c4fc6804981531156ab87ef4ab1d99d6a60 Mon Sep 17 00:00:00 2001
+From: Brendan O'Dea <bod@debian.org>
+Date: Fri, 16 Dec 2005 01:32:14 +1100
+Subject: Remove Errno version check due to upgrade problems with long-running
+ processes.
+
+Bug-Debian: http://bugs.debian.org/343351
+
+Remove version check which can cause problems for long running
+processes embedding perl when upgrading to a newer version,
+compatible, but built on a different machine.
+
+Patch-Name: debian/errno_ver.diff
+---
+ ext/Errno/Errno_pm.PL | 16 ----------------
+ 1 file changed, 16 deletions(-)
+
+diff --git a/ext/Errno/Errno_pm.PL b/ext/Errno/Errno_pm.PL
+index d565f31b2f..6a0031f0f7 100644
+--- a/ext/Errno/Errno_pm.PL
++++ b/ext/Errno/Errno_pm.PL
+@@ -288,22 +288,6 @@ package Errno;
+ require Exporter;
+ use strict;
+ 
+-EDQ
+-
+-    # Errno only needs Config to make sure it hasn't changed platforms.
+-    # If someone set $ENV{PERL_BUILD_EXPAND_CONFIG_VARS} at build time,
+-    # they've already declared perl doesn't need to worry about this risk.
+-    if(!$ENV{'PERL_BUILD_EXPAND_CONFIG_VARS'}) {
+-        print <<"CONFIG_CHECK_END";
+-use Config;
+-"\$Config{'archname'}-\$Config{'osvers'}" eq
+-"$archname-$Config{'osvers'}" or
+-	die "Errno architecture ($archname-$Config{'osvers'}) does not match executable architecture (\$Config{'archname'}-\$Config{'osvers'})";
+-
+-CONFIG_CHECK_END
+-}
+-
+-    print <<"EDQ";
+ our \$VERSION = "$VERSION";
+ \$VERSION = eval \$VERSION;
+ our \@ISA = 'Exporter';

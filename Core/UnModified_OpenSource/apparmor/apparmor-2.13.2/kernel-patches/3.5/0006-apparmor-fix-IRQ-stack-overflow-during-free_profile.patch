@@ -1,0 +1,70 @@
+From f58c91bc1871d604f88d0056099dc34f8ce3ae21 Mon Sep 17 00:00:00 2001
+From: John Johansen <john.johansen@canonical.com>
+Date: Wed, 24 Oct 2012 06:27:32 -0700
+Subject: [PATCH 6/6] apparmor: fix IRQ stack overflow during free_profile
+
+BugLink: http://bugs.launchpad.net/bugs/1056078
+
+Profile replacement can cause long chains of profiles to build up when
+the profile being replaced is pinned. When the pinned profile is finally
+freed, it puts the reference to its replacement, which may in turn nest
+another call to free_profile on the stack. Because this may happen for
+each profile in the replacedby chain this can result in a recusion that
+causes the stack to overflow.
+
+Break this nesting by directly walking the chain of replacedby profiles
+(ie. use iteration instead of recursion to free the list). This results
+in at most 2 levels of free_profile being called, while freeing a
+replacedby chain.
+
+Signed-off-by: John Johansen <john.johansen@canonical.com>
+Signed-off-by: James Morris <james.l.morris@oracle.com>
+---
+ security/apparmor/policy.c |   24 +++++++++++++++++++++++-
+ 1 file changed, 23 insertions(+), 1 deletion(-)
+
+diff --git a/security/apparmor/policy.c b/security/apparmor/policy.c
+index 27c8161..56e5304 100644
+--- a/security/apparmor/policy.c
++++ b/security/apparmor/policy.c
+@@ -724,6 +724,8 @@ fail:
+  */
+ static void free_profile(struct aa_profile *profile)
+ {
++	struct aa_profile *p;
++
+ 	AA_DEBUG("%s(%p)\n", __func__, profile);
+ 
+ 	if (!profile)
+@@ -752,7 +754,27 @@ static void free_profile(struct aa_profile *profile)
+ 	aa_put_dfa(profile->xmatch);
+ 	aa_put_dfa(profile->policy.dfa);
+ 
+-	aa_put_profile(profile->replacedby);
++	/* put the profile reference for replacedby, but not via
++	 * put_profile(kref_put).
++	 * replacedby can form a long chain that can result in cascading
++	 * frees that blows the stack because kref_put makes a nested fn
++	 * call (it looks like recursion, with free_profile calling
++	 * free_profile) for each profile in the chain lp#1056078.
++	 */
++	for (p = profile->replacedby; p; ) {
++		if (atomic_dec_and_test(&p->base.count.refcount)) {
++			/* no more refs on p, grab its replacedby */
++			struct aa_profile *next = p->replacedby;
++			/* break the chain */
++			p->replacedby = NULL;
++			/* now free p, chain is broken */
++			free_profile(p);
++
++			/* follow up with next profile in the chain */
++			p = next;
++		} else
++			break;
++	}
+ 
+ 	kzfree(profile);
+ }
+-- 
+1.7.10.4
+

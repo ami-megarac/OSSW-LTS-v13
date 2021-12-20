@@ -1,0 +1,63 @@
+?MAKE:d_procselfexe procselfexe: \
+	Oldconfig Setvar rm ls contains issymlink d_readlink test
+?MAKE:	-pick add $@ %<
+?S:d_procselfexe:
+?S:	Defined if $procselfexe is symlink to the absolute
+?S:	pathname of the executing program.
+?S:.
+?S:procselfexe:
+?S:	If d_procselfexe is defined, $procselfexe is the filename
+?S:	of the symbolic link pointing to the absolute pathname of
+?S:	the executing program.
+?S:.
+?C:HAS_PROCSELFEXE:
+?C:	This symbol is defined if PROCSELFEXE_PATH is a symlink
+?C:	to the absolute pathname of the executing program.
+?C:.
+?C:PROCSELFEXE_PATH:
+?C:	If HAS_PROCSELFEXE is defined this symbol is the filename
+?C:	of the symbolic link pointing to the absolute pathname of
+?C:	the executing program.
+?C:.
+?H:#$d_procselfexe HAS_PROCSELFEXE	/**/
+?H:?%<:#if defined(HAS_PROCSELFEXE) && !defined(PROCSELFEXE_PATH)
+?H:?%<:#define PROCSELFEXE_PATH	$procselfexe	/**/
+?H:?%<:#endif
+?H:.
+?T:try type
+?LINT: set d_procselfexe
+: Check if there is a /proc symlink to the abs path of
+: the executing program.  We will honor hints of d_procselfexe=$undef
+: or procselfexe being non-empty, otherwise will try to determine both
+: if we have readlink.
+: AmigaOS will attempt to mount proc: aka /proc, if /proc/... is
+: referenced, and AmigaOS does not have a proc filesystem anyway.
+echo " "
+val="$undef"
+if $test "X$d_procselfexe" = Xundef; then
+	procselfexe=''
+elif $test "X$procselfexe" != X -a "X$procselfexe" != 'X '; then
+	val="$define"
+elif $test "X$d_readlink" = Xdefine; then
+        : NetBSD first as /proc/self is a symlink to /proc/curproc,
+        : and it feels more tidy to avoid an extra level of symlink
+	set NetBSD /proc/curproc/exe Linux /proc/self/exe FreeBSD /proc/curproc/file Solaris /proc/self/path/a.out
+	while test $# -gt 0; do
+	    type=$1; try=$2
+	    shift; shift
+	    if $issymlink $try; then
+		$ls -l $try > reflect
+		if $contains /`basename $ls` reflect >/dev/null 2>&1; then
+		    echo "You have $type-like $try."
+		    procselfexe='"'$try'"'
+		    val="$define"
+		    : This will break out of the loop
+		    set X; shift
+		fi
+	    fi
+	done
+fi
+$rm -f reflect
+set d_procselfexe
+eval $setvar
+

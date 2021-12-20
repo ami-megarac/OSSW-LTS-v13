@@ -1,0 +1,109 @@
+?RCS: $Id: sitelib.U,v 1.1 1999/07/08 18:32:57 doughera Exp doughera $
+?RCS:
+?RCS: Copyright (c) 1996-1998, Andy Dougherty
+?RCS: Copyright (c) 1991-1993, Raphael Manfredi
+?RCS:
+?RCS: You may redistribute only under the terms of the Artistic License,
+?RCS: as specified in the README file that comes with the distribution.
+?RCS: You may reuse parts of this distribution only within the terms of
+?RCS: that same Artistic License; a copy of which may be found at the root
+?RCS: of the source tree for dist 3.0.
+?RCS:
+?RCS: $Log: sitelib.U,v $
+?RCS: Revision 1.1  1999/07/08 18:32:57  doughera
+?RCS: Initial revision
+?RCS:
+?RCS: Revision 3.0.1.1  1997/02/28  16:21:35  ram
+?RCS: patch61: created
+?RCS:
+?MAKE:sitelib sitelibexp installsitelib sitelib_stem: cat Getfile Oldconfig \
+	Setprefixvar Prefixit package version sed installstyle siteprefix
+?MAKE:	-pick add $@ %<
+?Y:TOP
+?D:sitelib=''
+?S:sitelib:
+?S:	This variable contains the eventual value of the SITELIB symbol,
+?S:	which is the name of the private library for this package.  It may
+?S:	have a ~ on the front. It is up to the makefile to eventually create
+?S:	this directory while performing installation (with ~ substitution).
+?S:	The standard distribution will put nothing in this directory.
+?S:	After perl has been installed, users may install their own local
+?S:	architecture-independent modules in this directory with
+?S:		MakeMaker Makefile.PL
+?S:	or equivalent.  See INSTALL for details.
+?S:.
+?D:sitelibexp=''
+?S:sitelibexp:
+?S:	This variable is the ~name expanded version of sitelib, so that you
+?S:	may use it directly in Makefiles or shell scripts.
+?S:.
+?D:installsitelib=''
+?S:installsitelib:
+?S:	This variable is really the same as sitelibexp but may differ on
+?S:	those systems using AFS. For extra portability, only this variable
+?S:	should be used in makefiles.
+?S:.
+?S:sitelib_stem:
+?S:	This variable is $sitelibexp with any trailing version-specific component
+?S:	removed.  The elements in inc_version_list (inc_version_list.U) can
+?S:	be tacked onto this variable to generate a list of directories to search.
+?S:.
+?C:SITELIB:
+?C:	This symbol contains the name of the private library for this package.
+?C:	The library is private in the sense that it needn't be in anyone's
+?C:	execution path, but it should be accessible by the world.  The program
+?C:	should be prepared to do ~ expansion.
+?C:	The standard distribution will put nothing in this directory.
+?C:	After perl has been installed, users may install their own local
+?C:	architecture-independent modules in this directory with
+?C:		MakeMaker Makefile.PL
+?C:	or equivalent.  See INSTALL for details.
+?C:.
+?C:SITELIB_EXP:
+?C:	This symbol contains the ~name expanded version of SITELIB, to be used
+?C:	in programs that are not prepared to deal with ~ expansion at run-time.
+?C:.
+?C:SITELIB_STEM:
+?C:	This define is SITELIB_EXP with any trailing version-specific component
+?C:	removed.  The elements in inc_version_list (inc_version_list.U) can
+?C:	be tacked onto this variable to generate a list of directories to search.
+?C:.
+?H:#define SITELIB "$sitelib"		/**/
+?H:#define SITELIB_EXP "$sitelibexp"		/**/
+?H:#define SITELIB_STEM "$sitelib_stem"		/**/
+?H:.
+?T:prog
+?LINT:change prefixvar
+?LINT:set installsitelib
+?LINT:set sitelib
+?LINT:set sitelibexp
+: determine where site specific libraries go.
+: Usual default is /usr/local/lib/perl5/site_perl/$version
+: The default "style" setting is made in installstyle.U
+: XXX No longer works with Prefixit stuff.
+?X: remove any trailing -3.0 or other version identification
+prog=`echo $package | $sed 's/-*[0-9.]*$//'`
+case "$sitelib" in
+'') case "$installstyle" in
+	*lib/perl5*) dflt=$siteprefix/lib/$package/site_$prog/$version ;;
+	*)	 dflt=$siteprefix/lib/site_$prog/$version ;;
+	esac
+	;;
+*)	dflt="$sitelib"
+	;;
+esac
+$cat <<EOM
+
+The installation process will create a directory for
+site-specific extensions and modules.  Most users find it convenient
+to place all site-specific files in this directory rather than in the
+main distribution directory.
+
+EOM
+fn=d~+
+rp='Pathname for the site-specific library files?'
+. ./getfile
+prefixvar=sitelib
+. ./setprefixvar
+sitelib_stem=`echo "$sitelibexp" | sed "s,/$version$,,"`
+

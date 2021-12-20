@@ -1,0 +1,4 @@
+/bin/ping {
+  capability setuid,
+
+}

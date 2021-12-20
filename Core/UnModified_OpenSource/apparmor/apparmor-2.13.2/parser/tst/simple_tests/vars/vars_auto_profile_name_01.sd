@@ -1,0 +1,9 @@
+#=DESCRIPTION reference auto profile_name variable in rules
+#=EXRESULT PASS
+
+/a/test/profile {
+  /a/test/profile rix,
+
+  /var/run/@{profile_name} rwk,
+
+}

@@ -1,0 +1,2 @@
+rm_conffile /etc/apparmor.d/local/usr.lib.apache2.mpm-prefork.apache2 2.8.0-0ubuntu21~
+rm_conffile /etc/apparmor.d/usr.lib.apache2.mpm-prefork.apache2 2.8.0-0ubuntu21~

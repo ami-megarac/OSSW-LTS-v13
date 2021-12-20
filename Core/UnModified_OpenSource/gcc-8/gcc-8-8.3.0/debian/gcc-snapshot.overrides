@@ -1,0 +1,10 @@
+gcc-snapshot binary: bad-permissions-for-ali-file
+
+# keep patched ltdl copy
+gcc-snapshot binary: embedded-library
+
+gcc-snapshot binary: binary-from-other-architecture
+gcc-snapshot binary: extra-license-file
+gcc-snapshot binary: jar-not-in-usr-share
+gcc-snapshot binary: triplet-dir-and-architecture-mismatch
+gcc-snapshot binary: unstripped-binary-or-object

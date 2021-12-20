@@ -1,0 +1,7 @@
+#
+#=DESCRIPTION deny change_profile to a hat
+#=EXRESULT PASS
+#
+/usr/bin/foo {
+   deny change_profile -> /bin/foo//bar,
+}

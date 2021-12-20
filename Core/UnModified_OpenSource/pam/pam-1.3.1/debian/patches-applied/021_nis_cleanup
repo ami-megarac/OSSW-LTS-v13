@@ -1,0 +1,24 @@
+Patch from Philippe Troin    <phil@fifi.org>
+
+Originally this included a bunch of changes to locking, but the more
+recent code pulled from Linux_pam CVS seems to fix that issue.
+
+Index: pam/modules/pam_unix/pam_unix_passwd.c
+===================================================================
+--- pam.orig/modules/pam_unix/pam_unix_passwd.c
++++ pam/modules/pam_unix/pam_unix_passwd.c
+@@ -708,9 +708,12 @@
+ 				    "password - (old) token not obtained");
+ 				return retval;
+ 			}
+-			/* verify that this is the password for this user */
++			/* verify that this is the password for this user
++			 * if we're not using NIS */
+ 
+-			retval = _unix_verify_password(pamh, user, pass_old, ctrl);
++			if (off(UNIX_NIS, ctrl)) {
++				retval = _unix_verify_password(pamh, user, pass_old, ctrl);
++			}
+ 		} else {
+ 			D(("process run by root so do nothing this time around"));
+ 			pass_old = NULL;

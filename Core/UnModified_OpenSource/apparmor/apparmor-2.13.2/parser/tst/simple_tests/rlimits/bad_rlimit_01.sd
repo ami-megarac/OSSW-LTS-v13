@@ -1,0 +1,7 @@
+#
+#=DESCRIPTION realtime time rlimit test with ambiguous unit 'm' which could mean 'ms' or 'minutes'
+#=EXRESULT FAIL
+
+profile rlimit {
+  set rlimit rttime <= 60m,
+}

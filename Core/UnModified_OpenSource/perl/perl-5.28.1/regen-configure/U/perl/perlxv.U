@@ -1,0 +1,684 @@
+?RCS: $Id: perlxv.U,v 1.1 2000/08/31 17:53:56 jhi Exp jhi $
+?RCS:
+?RCS: Copyright (c) 1999 Jarkko Hietaniemi
+?RCS:
+?RCS: You may distribute under the terms of either the GNU General Public
+?RCS: License or the Artistic License, as specified in the README file.
+?RCS:
+?MAKE:ivtype uvtype nvtype ivsize uvsize nvsize \
+      i8type u8type i16type u16type i32type u32type i64type u64type \
+      i8size u8size i16size u16size i32size u32size i64size u64size \
+      d_nv_preserves_uv nv_preserves_uv_bits nv_overflows_integers_at \
+      d_nv_zero_is_allbits_zero: \
+	echo rm_try use64bitint d_quad quadtype uquadtype usequadmath \
+	d_longdbl uselongdouble longdblsize doublesize i_quadmath \
+	shortsize intsize longsize i_stdlib libs gccversion \
+	cat Compile i_inttypes test signal_t run
+?MAKE:	-pick add $@ %<
+?S:ivtype:
+?S:	This variable contains the C type used for Perl's IV.
+?S:.
+?S:uvtype:
+?S:	This variable contains the C type used for Perl's UV.
+?S:.
+?S:nvtype:
+?S:	This variable contains the C type used for Perl's NV.
+?S:.
+?S:i8type:
+?S:	This variable contains the C type used for Perl's I8.
+?S:.
+?S:u8type:
+?S:	This variable contains the C type used for Perl's U8.
+?S:.
+?S:i16type:
+?S:	This variable contains the C type used for Perl's I16.
+?S:.
+?S:u16type:
+?S:	This variable contains the C type used for Perl's U16.
+?S:.
+?S:i32type:
+?S:	This variable contains the C type used for Perl's I32.
+?S:.
+?S:u32type:
+?S:	This variable contains the C type used for Perl's U32.
+?S:.
+?S:i64type:
+?S:	This variable contains the C type used for Perl's I64.
+?S:.
+?S:u64type:
+?S:	This variable contains the C type used for Perl's U64.
+?S:.
+?S:ivsize:
+?S:	This variable is the size of an IV in bytes.
+?S:.
+?S:uvsize:
+?S:	This variable is the size of a UV in bytes.
+?S:.
+?S:i8size:
+?S:	This variable is the size of an I8 in bytes.
+?S:.
+?S:u8size:
+?S:	This variable is the size of an U8 in bytes.
+?S:.
+?S:i16size:
+?S:	This variable is the size of an I16 in bytes.
+?S:.
+?S:u16size:
+?S:	This variable is the size of an U16 in bytes.
+?S:.
+?S:i32size:
+?S:	This variable is the size of an I32 in bytes.
+?S:.
+?S:u32size:
+?S:	This variable is the size of an U32 in bytes.
+?S:.
+?S:i64size:
+?S:	This variable is the size of an I64 in bytes.
+?S:.
+?S:u64size:
+?S:	This variable is the size of an U64 in bytes.
+?S:.
+?S:nvsize:
+?S:	This variable is the size of a Perl NV in bytes.
+?S:	Note that some floating point formats have unused bytes.
+?S:.
+?S:d_nv_preserves_uv:
+?S:	This variable indicates whether a variable of type nvtype
+?S:	can preserve all the bits a variable of type uvtype.
+?S:.
+?S:nv_preserves_uv_bits:
+?S:	This variable indicates how many of bits type uvtype
+?S:	a variable nvtype can preserve.
+?S:.
+?S:nv_overflows_integers_at:
+?S:	This variable gives the largest integer value that NVs can hold
+?S:	as a constant floating point expression.
+?S:	If it could not be determined, it holds the value 0.
+?S:.
+?S:d_nv_zero_is_allbits_zero:
+?S:	This variable indicates whether a variable of type nvtype
+?S:	stores 0.0 in memory as all bits zero.
+?S:.
+?C:IVTYPE:
+?C:	This symbol defines the C type used for Perl's IV.
+?C:.
+?C:UVTYPE:
+?C:	This symbol defines the C type used for Perl's UV.
+?C:.
+?C:I8TYPE:
+?C:	This symbol defines the C type used for Perl's I8.
+?C:.
+?C:U8TYPE:
+?C:	This symbol defines the C type used for Perl's U8.
+?C:.
+?C:I16TYPE:
+?C:	This symbol defines the C type used for Perl's I16.
+?C:.
+?C:U16TYPE:
+?C:	This symbol defines the C type used for Perl's U16.
+?C:.
+?C:I32TYPE:
+?C:	This symbol defines the C type used for Perl's I32.
+?C:.
+?C:U32TYPE:
+?C:	This symbol defines the C type used for Perl's U32.
+?C:.
+?C:I64TYPE:
+?C:	This symbol defines the C type used for Perl's I64.
+?C:.
+?C:U64TYPE:
+?C:	This symbol defines the C type used for Perl's U64.
+?C:.
+?C:NVTYPE:
+?C:	This symbol defines the C type used for Perl's NV.
+?C:.
+?C:IVSIZE:
+?C:	This symbol contains the sizeof(IV).
+?C:.
+?C:UVSIZE:
+?C:	This symbol contains the sizeof(UV).
+?C:.
+?C:I8SIZE:
+?C:	This symbol contains the sizeof(I8).
+?C:.
+?C:U8SIZE:
+?C:	This symbol contains the sizeof(U8).
+?C:.
+?C:I16SIZE:
+?C:	This symbol contains the sizeof(I16).
+?C:.
+?C:U16SIZE:
+?C:	This symbol contains the sizeof(U16).
+?C:.
+?C:I32SIZE:
+?C:	This symbol contains the sizeof(I32).
+?C:.
+?C:U32SIZE:
+?C:	This symbol contains the sizeof(U32).
+?C:.
+?C:I64SIZE:
+?C:	This symbol contains the sizeof(I64).
+?C:.
+?C:U64SIZE:
+?C:	This symbol contains the sizeof(U64).
+?C:.
+?C:NVSIZE:
+?C:	This symbol contains the sizeof(NV).
+?C:	Note that some floating point formats have unused bytes.
+?C:	The most notable example is the x86* 80-bit extended precision
+?C:	which comes in byte sizes of 12 and 16 (for 32 and 64 bit
+?C:	platforms, respectively), but which only uses 10 bytes.
+?C:	Perl compiled with -Duselongdouble on x86* is like this.
+?C:.
+?C:NV_PRESERVES_UV:
+?C:	This symbol, if defined, indicates that a variable of type NVTYPE
+?C:	can preserve all the bits of a variable of type UVTYPE.
+?C:.
+?C:NV_PRESERVES_UV_BITS:
+?C:	This symbol contains the number of bits a variable of type NVTYPE
+?C:	can preserve of a variable of type UVTYPE.
+?C:.
+?C:NV_OVERFLOWS_INTEGERS_AT:
+?C:	This symbol gives the largest integer value that NVs can hold. This
+?C:	value + 1.0 cannot be stored accurately. It is expressed as constant
+?C:	floating point expression to reduce the chance of decimal/binary
+?C:	conversion issues. If it can not be determined, the value 0 is given.
+?C:.
+?C:NV_ZERO_IS_ALLBITS_ZERO:
+?C:	This symbol, if defined, indicates that a variable of type NVTYPE
+?C:	stores 0.0 in memory as all bits zero.
+?C:.
+?H:#define	IVTYPE		$ivtype		/**/
+?H:#define	UVTYPE		$uvtype		/**/
+?H:#define	I8TYPE		$i8type		/**/
+?H:#define	U8TYPE		$u8type		/**/
+?H:#define	I16TYPE		$i16type	/**/
+?H:#define	U16TYPE		$u16type	/**/
+?H:#define	I32TYPE		$i32type	/**/
+?H:#define	U32TYPE		$u32type	/**/
+?H:?%<:#ifdef HAS_QUAD
+?H:?%<:#define	I64TYPE		$i64type	/**/
+?H:?%<:#define	U64TYPE		$u64type	/**/
+?H:?%<:#endif
+?H:#define	NVTYPE		$nvtype		/**/
+?H:#define	IVSIZE		$ivsize		/**/
+?H:#define	UVSIZE		$uvsize		/**/
+?H:#define	I8SIZE		$i8size		/**/
+?H:#define	U8SIZE		$u8size		/**/
+?H:#define	I16SIZE		$i16size	/**/
+?H:#define	U16SIZE		$u16size	/**/
+?H:#define	I32SIZE		$i32size	/**/
+?H:#define	U32SIZE		$u32size	/**/
+?H:?%<:#ifdef HAS_QUAD
+?H:?%<:#define	I64SIZE		$i64size	/**/
+?H:?%<:#define	U64SIZE		$u64size	/**/
+?H:?%<:#endif
+?H:#define	NVSIZE		$nvsize		/**/
+?H:#$d_nv_preserves_uv	NV_PRESERVES_UV
+?H:#define	NV_PRESERVES_UV_BITS	$nv_preserves_uv_bits
+?H:#define	NV_OVERFLOWS_INTEGERS_AT	($nv_overflows_integers_at)
+?H:#$d_nv_zero_is_allbits_zero	NV_ZERO_IS_ALLBITS_ZERO
+?H:?%<:#if UVSIZE == 8
+?H:?%<:#   ifdef BYTEORDER
+?H:?%<:#       if BYTEORDER == 0x1234
+?H:?%<:#           undef BYTEORDER
+?H:?%<:#           define BYTEORDER 0x12345678
+?H:?%<:#       else
+?H:?%<:#           if BYTEORDER == 0x4321
+?H:?%<:#               undef BYTEORDER
+?H:?%<:#               define BYTEORDER 0x87654321
+?H:?%<:#           endif
+?H:?%<:#       endif
+?H:?%<:#   endif
+?H:?%<:#endif
+?H:.
+?T:xxx
+?T:d
+?F:!try
+: Check basic sizes
+echo " "
+$echo "Choosing the C types to be used for Perl's internal types..." >&4
+
+case "$use64bitint:$d_quad:$quadtype" in
+define:define:?*)
+	ivtype="$quadtype"
+	uvtype="$uquadtype"
+	ivsize=8
+	uvsize=8
+	;;
+*)	ivtype="long"
+	uvtype="unsigned long"
+	ivsize=$longsize
+	uvsize=$longsize
+	;;
+esac
+
+case "$uselongdouble:$d_longdbl" in
+define:define)
+	nvtype="long double"
+	nvsize=$longdblsize
+	;;
+*)	nvtype=double
+	nvsize=$doublesize
+	;;
+esac
+
+case "$usequadmath:$i_quadmath" in
+define:define)
+  nvtype="__float128"
+  nvsize=16
+  case "$libs" in
+  *quadmath*) ;;
+  *) $cat <<EOM >&4
+
+*** You requested the use of the quadmath library, but you
+*** do not seem to have the quadmath library installed.
+*** Cannot continue, aborting.
+EOM
+    exit 1
+    ;;
+  esac
+  ;;
+define:*) $cat <<EOM >&4
+
+*** You requested the use of the quadmath library, but you
+*** do not seem to have the required header, <quadmath.h>.
+EOM
+  case "$gccversion" in
+  [23].*|4.[0-5]*)
+   $cat <<EOM >&4
+*** Your gcc looks a bit old:
+*** $gccversion
+EOM
+    ;;
+  '')
+   $cat <<EOM >&4
+*** You are not running a gcc.
+EOM
+    ;;
+  esac
+  $cat <<EOM >&4
+*** For the quadmath library you need at least gcc 4.6.
+*** Cannot continue, aborting.
+EOM
+  exit 1
+  ;;
+esac
+
+$echo "(IV will be "$ivtype", $ivsize bytes)"
+$echo "(UV will be "$uvtype", $uvsize bytes)"
+$echo "(NV will be "$nvtype", $nvsize bytes)"
+
+$cat >try.c <<EOCP
+#$i_inttypes I_INTTYPES
+#ifdef I_INTTYPES
+#include <inttypes.h>
+#endif
+#include <stdio.h>
+int main() {
+#ifdef INT8
+   int8_t i =  INT8_MAX;
+  uint8_t u = UINT8_MAX;
+  printf("int8_t\n");
+#endif
+#ifdef INT16
+   int16_t i =  INT16_MAX;
+  uint16_t u = UINT16_MAX;
+  printf("int16_t\n");
+#endif
+#ifdef INT32
+   int32_t i =  INT32_MAX;
+  uint32_t u = UINT32_MAX;
+  printf("int32_t\n");
+#endif
+}
+EOCP
+
+i8type="signed char"
+u8type="unsigned char"
+i8size=1
+u8size=1
+
+case "$i16type" in
+'')	case "$shortsize" in
+	2)	i16type=short
+		u16type="unsigned short"
+		i16size=$shortsize
+		u16size=$shortsize
+		;;
+	esac
+	;;
+esac
+case "$i16type" in
+'')	set try -DINT16
+	if eval $compile; then
+		case "`$run ./try`" in
+		int16_t)
+			i16type=int16_t
+			u16type=uint16_t
+			i16size=2
+			u16size=2
+			;;
+		esac
+	fi
+	;;
+esac
+case "$i16type" in
+'')	if $test $shortsize -ge 2; then
+		i16type=short
+		u16type="unsigned short"
+		i16size=$shortsize
+		u16size=$shortsize
+	fi
+	;;
+esac
+
+case "$i32type" in
+'')	case "$longsize" in
+	4)	i32type=long
+		u32type="unsigned long"
+		i32size=$longsize
+		u32size=$longsize
+		;;
+	*)	case "$intsize" in
+		4)	i32type=int
+			u32type="unsigned int"
+			i32size=$intsize
+			u32size=$intsize
+			;;
+		esac
+		;;
+	esac
+	;;
+esac
+case "$i32type" in
+'')	set try -DINT32
+	if eval $compile; then
+		case "`$run ./try`" in
+		int32_t)
+			i32type=int32_t
+			u32type=uint32_t
+			i32size=4
+			u32size=4
+			;;
+		esac
+	fi
+	;;
+esac
+case "$i32type" in
+'')	if $test $intsize -ge 4; then
+		i32type=int
+		u32type="unsigned int"
+		i32size=$intsize
+		u32size=$intsize
+	fi
+	;;
+esac
+
+case "$i64type" in
+'')	case "$d_quad:$quadtype" in
+	define:?*)
+		i64type="$quadtype"
+		u64type="$uquadtype"
+		i64size=8
+		u64size=8
+		;;
+	esac
+	;;
+esac
+
+$echo "Checking how many bits of your UVs your NVs can preserve..." >&4
+$cat <<EOP >try.c
+#include <stdio.h>
+#$i_stdlib I_STDLIB
+#ifdef I_STDLIB
+#include <stdlib.h>
+#endif
+#include <sys/types.h>
+#include <signal.h>
+#ifdef SIGFPE
+/* volatile so that the compiler has to store it out to memory */
+volatile int bletched = 0;
+$signal_t blech(int s) { bletched = 1; }
+#endif
+int main() {
+    $uvtype u = 0;
+    $nvtype d;
+    int     n = 8 * $uvsize;
+    int     i;
+#ifdef SIGFPE
+    signal(SIGFPE, blech);
+#endif
+
+    for (i = 0; i < n; i++) {
+      u = u << 1 | ($uvtype)1;
+      d = ($nvtype)u;
+      if (($uvtype)d != u)
+        break;
+      if (d <= 0)
+	break;
+      d = ($nvtype)(u - 1);
+      if (($uvtype)d != (u - 1))
+        break;
+#ifdef SIGFPE
+      if (bletched)
+	break;
+#endif
+    }
+    printf("%d\n", ((i == n) ? -n : i));
+    exit(0);
+}
+EOP
+set try
+
+d_nv_preserves_uv="$undef"
+if eval $compile; then
+	nv_preserves_uv_bits="`$run ./try`"
+fi
+case "$nv_preserves_uv_bits" in
+\-[1-9]*)
+	nv_preserves_uv_bits=`expr 0 - $nv_preserves_uv_bits`
+	$echo "Your NVs can preserve all $nv_preserves_uv_bits bits of your UVs."  2>&1
+	d_nv_preserves_uv="$define"
+	;;
+[1-9]*)	$echo "Your NVs can preserve only $nv_preserves_uv_bits bits of your UVs."  2>&1
+	d_nv_preserves_uv="$undef" ;;
+*)	$echo "Can't figure out how many bits your NVs preserve." 2>&1
+	nv_preserves_uv_bits="0" ;;
+esac
+$rm_try
+
+$echo "Checking to find the largest integer value your NVs can hold..." >&4
+$cat <<EOP >try.c
+#include <stdio.h>
+
+typedef $nvtype NV;
+
+int
+main() {
+  NV value = 2;
+  int count = 1;
+
+  while(count < 256) {
+    /* volatile so that the compiler has to store it out to memory */
+    volatile NV up = value + 1.0;
+    volatile NV negated = -value;
+    volatile NV down = negated - 1.0;
+    volatile NV got_up = up - value;
+    int up_good = got_up == 1.0;
+    int got_down = down - negated;
+    int down_good = got_down == -1.0;
+
+    if (down_good != up_good) {
+      fprintf(stderr,
+	      "Inconsistency - up %d %f; down %d %f; for 2**%d (%.20f)\n",
+	      up_good, (double) got_up, down_good, (double) got_down,
+	      count, (double) value);
+      return 1;
+    }
+    if (!up_good) {
+      while (1) {
+	if (count > 8) {
+	  count -= 8;
+	  fputs("256.0", stdout);
+	} else {
+	  count--;
+	  fputs("2.0", stdout);
+	}
+	if (!count) {
+	  puts("");
+	  return 0;
+	}
+	fputs("*", stdout);
+      }
+    }
+    value *= 2;
+    ++count;
+  }
+  fprintf(stderr, "Cannot overflow integer range, even at 2**%d (%.20f)\n",
+	  count, (double) value);
+  return 1;
+}
+EOP
+set try
+
+nv_overflows_integers_at='0'
+if eval $compile; then
+    xxx="`$run ./try`"
+    case "$?" in
+	0)
+	    case "$xxx" in
+		2*)  cat >&4 <<EOM
+The largest integer your NVs can preserve is equal to $xxx
+EOM
+		    nv_overflows_integers_at="$xxx"
+		    ;;
+		*)  cat >&4 <<EOM
+Cannot determine the largest integer value your NVs can hold, unexpected output
+'$xxx'
+EOM
+		    ;;
+	    esac
+	    ;;
+	*)  cat >&4 <<EOM
+Cannot determine the largest integer value your NVs can hold
+EOM
+	    ;;
+    esac
+fi
+$rm_try
+
+$echo "Checking whether NV 0.0 is all bits zero in memory..." >&4
+$cat <<EOP >try.c
+#include <stdio.h>
+#$i_stdlib I_STDLIB
+#ifdef I_STDLIB
+#include <stdlib.h>
+#endif
+#include <string.h>
+#include <sys/types.h>
+#include <signal.h>
+#ifdef SIGFPE
+/* volatile so that the compiler has to store it out to memory */
+volatile int bletched = 0;
+$signal_t blech(int s) { bletched = 1; }
+#endif
+
+int checkit($nvtype d, const char *where) {
+    void *v = &d;
+    unsigned char *p = (unsigned char *)v;
+    unsigned char *end = p + sizeof(d);
+    int fail = 0;
+
+    while (p < end)
+	fail += *p++;
+
+    if (!fail)
+	return 0;
+
+    p = (unsigned char *)v;
+    printf("No - %s: 0x", where);
+    while (p < end)
+	printf ("%02X", *p++);
+    printf("\n");
+    return 1;
+}
+
+int main(int argc, char **argv) {
+    $nvtype d = 0.0;
+    int fail = 0;
+    fail += checkit(d, "0.0");
+
+    /* The compiler shouldn't be assuming that bletched is 0  */
+    d = bletched;
+
+    fail += checkit(d, "bleched");
+
+#ifdef SIGFPE
+    signal(SIGFPE, blech);
+#endif
+
+    /* Paranoia - the compiler should have no way of knowing that ANSI says
+       that argv[argc] will always be NULL.  Actually, if it did assume this it
+       would be buggy, as this is C and main() can be called from elsewhere in
+       the program.  */
+    d = argv[argc] ? 1 : 0;
+
+    if (d) {
+	printf("Odd argv[argc]=%p, d=%g\n", argv[argc], d);
+    }
+
+    fail += checkit(d, "ternary");
+
+    memset(&d, sizeof(d), argv[argc] ? 1 : 0);
+
+    if (d != 0.0) {
+	printf("No - memset doesn't give 0.0\n");
+	/* This might just blow up:  */
+	printf("(gives %g)\n", d);
+	return 1;
+    }
+
+#ifdef SIGFPE
+    if (bletched) {
+	printf("No - something bleched\n");
+	return 1;
+    }
+#endif
+    if (fail) {
+      printf("No - %d fail(s)\n", fail);
+      return 1;
+    }
+    printf("Yes\n");
+    return 0;
+}
+EOP
+set try
+
+d_nv_zero_is_allbits_zero="$undef"
+if eval $compile; then
+    xxx="`$run ./try`"
+    case "$?" in
+	0)
+	    case "$xxx" in
+		Yes)  cat >&4 <<EOM
+0.0 is represented as all bits zero in memory
+EOM
+		    d_nv_zero_is_allbits_zero="$define"
+		    ;;
+		*)  cat >&4 <<EOM
+0.0 is not represented as all bits zero in memory
+EOM
+		    d_nv_zero_is_allbits_zero="$undef"
+		    ;;
+	    esac
+	    ;;
+	*)  cat >&4 <<EOM
+0.0 is not represented as all bits zero in memory
+EOM
+	    d_nv_zero_is_allbits_zero="$undef"
+	    ;;
+    esac
+fi
+$rm_try
+

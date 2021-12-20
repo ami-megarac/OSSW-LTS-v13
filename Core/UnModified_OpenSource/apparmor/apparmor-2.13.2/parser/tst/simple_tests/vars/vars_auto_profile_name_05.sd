@@ -1,0 +1,40 @@
+#=DESCRIPTION reference auto profile_name variable in rules w/hats
+#=EXRESULT PASS
+
+profile idf3s2A6GX8vrk /simple/profile {
+  /test/profile rix,
+
+  /run/@{profile_name}/tmp rwk,
+
+  ^spork {
+    owner /tmp/* r,
+    /spork/@{profile_name}/** rw,
+  }
+
+  ^spelunkk {
+    owner /tmp/* r,
+    /spelunk/@{profile_name}/** rw,
+  }
+}
+
+profile LzdZb9bKTMN6y /not/simple/profile {
+  /test/profile rix,
+
+  /run/@{profile_name}/tmp rwk,
+
+  ^spork {
+    owner /tmp/* r,
+    /run/@{profile_name}/** rw,
+  }
+
+  ^spelunkk {
+    owner /tmp/* r,
+    /run/@{profile_name}/** rw,
+  }
+
+  ^spry {
+    owner /tmp/* r,
+    /run/@{profile_name}/** rw,
+  }
+
+}

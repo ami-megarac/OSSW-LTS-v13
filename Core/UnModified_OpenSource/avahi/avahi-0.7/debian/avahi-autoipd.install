@@ -1,0 +1,5 @@
+usr/sbin/avahi-autoipd
+usr/share/man/man8/avahi-autoipd.8
+usr/share/man/man8/avahi-autoipd.action.8
+etc/avahi/avahi-autoipd.action
+etc/dhcp/

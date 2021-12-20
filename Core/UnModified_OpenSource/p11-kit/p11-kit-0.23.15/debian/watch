@@ -1,0 +1,4 @@
+version=3
+opts=pgpsigurlmangle=s/$/.sig/ \
+https://github.com/p11-glue/p11-kit/releases \
+.*/p11-kit-@ANY_VERSION@@ARCHIVE_EXT@

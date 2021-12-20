@@ -1,0 +1,11 @@
+#
+#=DESCRIPTION audit change_profile with name space with quotes
+#=EXRESULT PASS
+#
+/usr/bin/foo {
+   audit change_profile -> ":foo:/bin/foo",
+}
+
+/usr/bin/foo2 {
+   audit change_profile -> ":foo:/bin/ foo",
+}

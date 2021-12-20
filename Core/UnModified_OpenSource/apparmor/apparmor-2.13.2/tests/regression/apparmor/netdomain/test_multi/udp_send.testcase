@@ -1,0 +1,8 @@
+send_ip=127.0.0.1
+send_port=9200
+send_profile=udp_send from 127.0.0.1:9200 to 127.0.0.1:9201,
+receive_ip=127.0.0.1
+receive_port=9201
+receive_profile=udp_receive from 127.0.0.1:9200 to 127.0.0.1:9201,
+message=udp_send pass
+proto=udp

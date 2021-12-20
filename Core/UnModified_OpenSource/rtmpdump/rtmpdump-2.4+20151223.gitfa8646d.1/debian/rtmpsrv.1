@@ -1,0 +1,25 @@
+.TH RTMPSRV 1 "2016-04-27" "RTMPDump v2.4"
+.SH NAME
+rtmsrv \- a stub server
+.SH SYNOPSIS
+.B rtmsrv
+[\c
+.BR \-z ]
+.br
+.SH DESCRIPTION
+.B rtmsrv
+is useful for obtaining all the parameters
+that a real Flash client would send to an RTMP server, so that they can be
+used with
+.B rtmpdump.
+.B rtmpdump
+is invoked automatically after parsing a client request.
+.SH OPTIONS
+.B \-z
+Debug level output. Extremely verbose.
+.SH "SEE ALSO"
+.BR rtmpdump (1)
+.SH AUTHORS
+Andrej Stepanchuk, Howard Chu
+.br
+<http://rtmpdump.mplayerhq.hu>

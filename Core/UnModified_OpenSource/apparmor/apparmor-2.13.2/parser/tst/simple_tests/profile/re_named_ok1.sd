@@ -1,0 +1,66 @@
+#
+# $Id$
+#=DESCRIPTION Basic test that named profiles with re attachment are allowed
+#=EXRESULT PASS
+# vim:syntax=subdomain
+# Last Modified: Sun Apr 17 19:44:44 2005
+#
+profile one /** {
+  #include <includes/base>
+
+  /usr/X11R6/lib/lib*so* rrr,
+  /does/not/exist r,
+  /var/log/messages www,
+  /tmp/sd*.foo rwrwwrll,
+  /bin/cat pxpxpxpxpx,
+  /bin/ls ixixixix,
+  /bin/echo uxuxuxuxux,
+}
+
+profile two /* {
+  #include <includes/base>
+
+  /usr/X11R6/lib/lib*so* rrr,
+  /does/not/exist r,
+  /var/log/messages www,
+  /tmp/sd*.foo rwrwwrll,
+  /bin/cat pxpxpxpxpx,
+  /bin/ls ixixixix,
+  /bin/echo uxuxuxuxux,
+}
+
+profile three /? {
+  #include <includes/base>
+
+  /usr/X11R6/lib/lib*so* rrr,
+  /does/not/exist r,
+  /var/log/messages www,
+  /tmp/sd*.foo rwrwwrll,
+  /bin/cat pxpxpxpxpx,
+  /bin/ls ixixixix,
+  /bin/echo uxuxuxuxux,
+}
+
+profile four /[ab] {
+  #include <includes/base>
+
+  /usr/X11R6/lib/lib*so* rrr,
+  /does/not/exist r,
+  /var/log/messages www,
+  /tmp/sd*.foo rwrwwrll,
+  /bin/cat pxpxpxpxpx,
+  /bin/ls ixixixix,
+  /bin/echo uxuxuxuxux,
+}
+
+profile five /[^ab] {
+  #include <includes/base>
+
+  /usr/X11R6/lib/lib*so* rrr,
+  /does/not/exist r,
+  /var/log/messages www,
+  /tmp/sd*.foo rwrwwrll,
+  /bin/cat pxpxpxpxpx,
+  /bin/ls ixixixix,
+  /bin/echo uxuxuxuxux,
+}

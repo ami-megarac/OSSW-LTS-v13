@@ -1,0 +1,9 @@
+#
+#=DESCRIPTION A simple syntax error -- no program
+#=EXRESULT FAIL
+#
+{
+  /usr/bin/foo r,
+  /blah rw,
+}
+

@@ -1,0 +1,18 @@
+#
+#=DESCRIPTION k and other perms do not conflict
+#=EXRESULT PASS
+# vim:syntax=apparmor
+#
+/usr/bin/foo {
+  allow /{usr/,}bin/a k,
+  allow /{usr/,}bin/b rk,
+  allow /{usr/,}bin/c wk,
+  allow /{usr/,}bin/d ak,
+  allow /{usr/,}bin/e lk,
+  allow /{usr/,}bin/e mk,
+  allow /{usr/,}bin/f pxk,
+  allow /{usr/,}bin/g Pxk,
+  allow /{usr/,}bin/h ixk,
+  allow /{usr/,}bin/i uxk,
+  allow /{usr/,}bin/j Uxk,
+}

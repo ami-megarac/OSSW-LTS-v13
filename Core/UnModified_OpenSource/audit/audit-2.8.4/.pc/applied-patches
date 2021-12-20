@@ -1,0 +1,6 @@
+01-no-refusemanualstop.patch
+02-restorecon-path.patch
+03-Set-log_group-adm.patch
+04-fix_ftbfs_tests.patch
+05-use_bin_sh.patch
+06-do_not_hardcode_stdint_path.patch

@@ -1,0 +1,29 @@
+Description: bzdiff: properly pass -I (ignore regex) option to diff
+ This patch is far from sufficient. See the bug log for details.
+Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/bzip2/+bug/735675
+Origin: ubuntu, https://bugs.launchpad.net/ubuntu/+source/bzip2/+bug/735675
+
+--- a/bzdiff
++++ b/bzdiff
+@@ -24,7 +24,11 @@
+ for ARG
+ do
+     case "$ARG" in
+-    -*)	OPTIONS="$OPTIONS $ARG";;
++    -*)	if test -z "$OPTIONS"; then
++	    OPTIONS="$ARG"
++        else
++            OPTIONS="$OPTIONS $ARG"
++        fi ;;
+      *)	if test -f "$ARG"; then
+             FILES="$FILES $ARG"
+         else
+@@ -54,7 +58,7 @@
+ 			      exit 1
+ 			}
+                         bzip2 -cdfq "$2" > "$tmp"
+-                        bzip2 -cdfq "$1" | $comp $OPTIONS - "$tmp"
++                        bzip2 -cdfq "$1" | $comp "$OPTIONS" - "$tmp"
+                         STAT="$?"
+ 			/bin/rm -f "$tmp";;
+ 

@@ -1,0 +1,26 @@
+From dab88c66f4d16e6356007b0509f162f69e1bad61 Mon Sep 17 00:00:00 2001
+From: Niko Tyni <ntyni@debian.org>
+Date: Thu, 28 Apr 2016 16:31:39 +0300
+Subject: Fix t/op/stat.t failures on hurd
+
+We already do this on GNU/kFreeBSD, and GNU/Hurd seems to need same
+treatment.
+
+Bug-Debian: https://bugs.debian.org/822735
+Patch-Name: debian/hurd-softupdates.diff
+---
+ t/op/stat.t | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/t/op/stat.t b/t/op/stat.t
+index 8dcb3d3fd5..aa16fe7399 100644
+--- a/t/op/stat.t
++++ b/t/op/stat.t
+@@ -100,6 +100,7 @@ print FOO "Now is the time for all good men to come to.\n";
+ close(FOO);
+ 
+ stat($tmpfile) if $^O =~ /^gnukfreebsd/;	# Work around Debian Bug#796798
++stat($tmpfile) if $^O eq 'gnu';         	# Work around Debian Bug#822735
+ sleep 2;
+ 
+ my $has_link = 1;

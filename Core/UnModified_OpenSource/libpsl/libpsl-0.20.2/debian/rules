@@ -1,0 +1,35 @@
+#!/usr/bin/make -f
+
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+
+%:
+	dh $@
+
+override_dh_autoreconf-arch:
+	dh_autoreconf ./autogen.sh
+
+override_dh_auto_configure-arch:
+	dh_auto_configure -- \
+		--enable-builtin=libidn2 \
+		--enable-gtk-doc \
+		--enable-man \
+		--enable-ld-version-script \
+		--enable-runtime=libidn2 \
+		--with-packager=Debian \
+		--with-packager-bug-reports=https://bugs.debian.org/ \
+		--with-packager-version="$(DEB_VERSION)" \
+		--with-psl-distfile=/usr/share/publicsuffix/public_suffix_list.dafsa \
+		--with-psl-file=/usr/share/publicsuffix/public_suffix_list.dat \
+		--with-psl-testfile=/usr/share/doc/publicsuffix/examples/test_psl.txt
+
+override_dh_installchangelogs:
+	dh_installchangelogs NEWS
+
+	# do nothing during an arch-independent build
+override_dh_autoreconf-indep:
+override_dh_auto_configure-indep:
+override_dh_auto_build-indep:
+
+override_dh_clean:
+	[ -e missing ] || ln -sf /usr/share/libtool/build-aux/missing missing
+	dh_clean

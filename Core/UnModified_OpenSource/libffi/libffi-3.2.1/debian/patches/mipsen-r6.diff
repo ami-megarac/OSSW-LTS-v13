@@ -1,0 +1,14 @@
+diff --git a/src/mips/n32.S b/src/mips/n32.S
+index edc6905c..1a940b6d 100644
+--- a/src/mips/n32.S
++++ b/src/mips/n32.S
+@@ -47,7 +47,9 @@
+ #ifdef __GNUC__
+ 	.abicalls
+ #endif
++#if !defined(__mips_isa_rev) || (__mips_isa_rev<6)
+ 	.set mips4
++#endif
+ 	.text
+ 	.align	2
+ 	.globl	ffi_call_N32

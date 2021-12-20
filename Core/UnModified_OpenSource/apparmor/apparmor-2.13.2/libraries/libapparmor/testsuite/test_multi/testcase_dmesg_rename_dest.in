@@ -1,0 +1,1 @@
+[  878.663418] audit: type=1502 audit(1282626827.320:413): operation="rename_dest" pid=1881 parent=650 profile="/usr/sbin/sshd" requested_mask="wc::" denied_mask="wc::" fsuid=0 ouid=0 name="/var/run/motd"

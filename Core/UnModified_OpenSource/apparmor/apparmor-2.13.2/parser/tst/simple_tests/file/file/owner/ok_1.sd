@@ -1,0 +1,25 @@
+#
+#=DESCRIPTION test owner flag for file rules
+#=EXRESULT PASS
+#
+/usr/bin/foo {
+
+  owner file /foo rw,
+  owner file /foo/** rw,
+
+  owner file rw /bar,
+  owner file rw /bar/**,
+
+  owner {
+    file /one rw,
+    file /one/** rw,
+
+    file rw /two,
+    file rw /two/**,
+  }
+
+  owner {
+
+  }
+
+}

@@ -1,0 +1,21 @@
+From: Hideki Yamane <henrich@debian.org>
+Date: Fri, 29 Jan 2016 20:54:57 +0900
+Subject: fix #455707 traptoemail use FQDN
+
+---
+ local/traptoemail | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/local/traptoemail b/local/traptoemail
+index cadc18b..3694c3a 100755
+--- a/local/traptoemail
++++ b/local/traptoemail
+@@ -17,7 +17,7 @@ use POSIX qw(strftime);
+ $ENV{LANG} = 'C';
+ 
+ $opts{'s'} = "localhost";
+-$opts{'f'} = 'root@' . `hostname`;
++$opts{'f'} = 'root@' . `hostname -f`;
+ chomp($opts{'f'});
+ getopts("hs:f:", \%opts);
+ 

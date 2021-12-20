@@ -1,0 +1,1 @@
+type=APPARMOR msg=audit(1173790298.983:1669): REJECTING access to syscall 'sysctl (write)' (syscall_sysctl(25423) profile /home/steve/svn/trunk-forge/tests/regression/subdomain/syscall_sysctl active /home/steve/svn/trunk-forge/tests/regression/subdomain/syscall_sysctl)

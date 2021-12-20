@@ -1,0 +1,29 @@
+#=DESCRIPTION basic conditional statements w/hats
+#=EXRESULT PASS
+
+$FOO=true
+$BAR = False
+
+/bin/true {
+  /bin/false rix,
+  capability net_raw,
+  if ${FOO} {
+    capability ipc_lock,
+    ^hat1 {
+      /usr/bin/sendmail rix,
+    }
+  }
+  /bin/true rix,
+  if ${BAR} {
+    capability sys_admin,
+    /etc/shadow rw,
+    ^hat2 {
+      /usr/bin/passwd rix,
+    }
+  }
+  /bin/sh rix,
+  capability dac_override,
+  ^hat3 {
+    /tmp/** rw,
+  }
+}

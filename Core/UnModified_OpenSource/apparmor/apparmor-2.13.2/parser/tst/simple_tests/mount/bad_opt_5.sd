@@ -1,0 +1,6 @@
+#
+#=Description basic rule to test the invalid "relative" mount option
+#=EXRESULT FAIL
+/usr/bin/foo {
+  mount options=(relative) /a -> /1,
+}

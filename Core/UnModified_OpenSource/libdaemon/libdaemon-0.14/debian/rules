@@ -1,0 +1,22 @@
+#!/usr/bin/make -f
+
+export DEB_LDFLAGS_MAINT_APPEND = -Wl,-z,defs
+
+include /usr/share/dpkg/default.mk
+
+%:
+	dh $@
+
+override_dh_auto_build-indep:
+	dh_auto_build
+	$(MAKE) doxygen
+
+override_dh_missing:
+	dh_missing --list-missing
+
+override_dh_auto_clean:
+	dh_auto_clean
+	rm -rf doc/reference
+
+override_dh_strip:
+	dh_strip --dbgsym-migration='libdaemon0-dbg (<< 0.14-7~)'

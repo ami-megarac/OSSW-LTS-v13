@@ -1,0 +1,5 @@
+#
+#=DESCRIPTION simple cpu rlimit rule outside of a profile
+#=EXRESULT FAIL
+
+set rlimit cpu <= 1024,

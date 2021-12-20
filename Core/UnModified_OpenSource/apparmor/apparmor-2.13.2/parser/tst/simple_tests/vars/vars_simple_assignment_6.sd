@@ -1,0 +1,11 @@
+#=DESCRIPTION multiple references to variables within vars
+#=EXRESULT PASS
+
+@{FOO} = blah @{BAR}
+@{FOO} += @{BAZ}
+@{BAZ} = @{BAR}
+@{BAR} = 2006
+
+/bin/foo {
+  /@{FOO} r,
+}

@@ -1,0 +1,2 @@
+debian/session.conf-system.conf-include-legacy-files-as-.dpkg-ba.patch
+debian/tests-Multiply-timeouts-by-20-on-riscv64.patch

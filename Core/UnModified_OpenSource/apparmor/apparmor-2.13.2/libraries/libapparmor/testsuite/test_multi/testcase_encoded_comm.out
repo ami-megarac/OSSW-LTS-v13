@@ -1,0 +1,16 @@
+START
+File: testcase_encoded_comm.in
+Event type: AA_RECORD_ALLOWED
+Audit ID: 1322676143.201:455
+Operation: open
+Mask: r
+Denied Mask: r
+fsuid: 1000
+ouid: 1000
+Profile: /home/steve/tmp/my prog.sh
+Name: /home/steve/tmp/my prog.sh
+Command: my prog.sh
+Parent: 10357
+PID: 22918
+Epoch: 1322676143
+Audit subid: 455

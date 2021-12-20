@@ -44,7 +44,8 @@ typedef unsigned long DWORD;
 #define TDO_PIN	57
 #define TCK_PIN	58
 #define TMS_PIN	59
-#define OPTIONALT_FUN "do_real_time_isp=1"
+#define DO_REAL_TIME_ISP "do_real_time_isp=1"
+#define DO_READ_USERCODE "do_read_usercode=1"
 
 typedef enum {
 	SET_GPIO_LOW = 0,
@@ -119,7 +120,14 @@ int jbi_jtag_io(int tms, int tdi, int read_tdo)
     //write second , clock H and clock low  
 
     Pin_ctrl(TCK_PIN, 1);
+	#ifdef CONFIG_SPX_FEATURE_ENABLE_CPLD_EXTEND_TCK_HOLD_TIME
+	    ndelay(CONFIG_SPX_FEATURE_ALTERA_CPLD_EXTEND_CLK_HOLD_TIME);
+    #endif
+	
     Pin_ctrl(TCK_PIN, 0);
+	#ifdef CONFIG_SPX_FEATURE_ENABLE_CPLD_EXTEND_TCK_HOLD_TIME
+	    ndelay(CONFIG_SPX_FEATURE_ALTERA_CPLD_EXTEND_CLK_HOLD_TIME);
+    #endif
 
 	return (tdo);
 }
@@ -315,11 +323,11 @@ int jbcmain(char* jbc_action,unsigned long *buf, unsigned long data_size,unsigne
 	char *exit_string = NULL;
 	int reset_jtag = 1;
 	int execute_program = 1;
-  	char optional[]={OPTIONALT_FUN};
-  	char *init_list[10];
+  	char optional[10][50]={DO_REAL_TIME_ISP,DO_READ_USERCODE};
+    char *init_list[50];
 
   	memset(init_list,0,sizeof(init_list));
-  
+ 
 	/* print out the version string and copyright message */
 	dbgprintf("Jam STAPL ByteCode Player Version 2.2\nCopyright (C) 1998-2001 Altera Corporation\n\n");
 
@@ -330,11 +338,22 @@ int jbcmain(char* jbc_action,unsigned long *buf, unsigned long data_size,unsigne
 	// get memory buffer size
 	file_length = data_size;
 
+    #ifdef CONFIG_SPX_FEATURE_ALTERA_CPLD_EXTEND_CLK_HOLD_TIME
+    dbgprintf("EXTEND CLOCK HOLD TIME=%02xh\n",CONFIG_SPX_FEATURE_ALTERA_CPLD_EXTEND_CLK_HOLD_TIME);
+    #endif
+
   	if(IsBackground!=0)
   	{	
-    	init_list[0] = &optional[0];
-    	dbgprintf("%s\n",init_list[0]);
-  	}
+    	init_list[0] = &optional[0][0];
+    	init_list[1] = &optional[1][0];
+        dbgprintf("%s\n",init_list[0]);
+  	    //dbgprintf("%s\n",init_list[1]);
+    }
+    else
+    {
+        init_list[0] = &optional[1][0];
+        //dbgprintf("%s\n",init_list[0]);    
+    }
 
 	if ( (workspace_size > 0) && ((workspace = (char *) jbi_malloc((size_t) workspace_size)) == NULL) )
 	{
@@ -358,37 +377,32 @@ int jbcmain(char* jbc_action,unsigned long *buf, unsigned long data_size,unsigne
 			crc_result = jbi_check_crc(file_buffer, file_length,
 				&expected_crc, &actual_crc);
 
-			if (crc_result == JBIC_CRC_ERROR)
-			{
 				switch (crc_result)
 				{
 				case JBIC_SUCCESS:
-					dbgprintf("CRC matched: CRC value = %04X\n", actual_crc);
+					dbgprintf("CRC matched: expected %04X, actual %04X\n",expected_crc, actual_crc);
 					break;
 
 				case JBIC_CRC_ERROR:
-					dbgprintf("CRC mismatch: expected %04X, actual %04X\n",
-						expected_crc, actual_crc);
+					dbgprintf("CRC mismatch: expected %04X, actual %04X\n",expected_crc, actual_crc);
 					break;
 
 				case JBIC_UNEXPECTED_END:
-					dbgprintf("Expected CRC not found, actual CRC value = %04X\n",
-						actual_crc);
+					dbgprintf("Expected CRC not found, actual CRC value = %04X\n",actual_crc);
 					break;
 
 				case JBIC_IO_ERROR:
 					dbgprintf("Error: File format is not recognized.\n");
 					//exit(1);
-                    			exec_result = JBIC_IO_ERROR;
+ 					exec_result = JBIC_IO_ERROR;
 					exit_status = 1;
-                    			continue;
+ 					continue;
 					break;
 
 				default:
 					dbgprintf("CRC function returned error code %d\n", crc_result);
 					break;
 				}
-			}
 
 			if (execute_program)
 			{
@@ -483,7 +497,6 @@ int jbcmain(char* jbc_action,unsigned long *buf, unsigned long data_size,unsigne
 
 void initialize_jtag_hardware()
 {
-    //For gpio pin.
 	Pin_ctrl(TDI_PIN, SET_GPIO_DIR_OUT);
 	Pin_ctrl(TDO_PIN, SET_GPIO_DIR_IN);
 	Pin_ctrl(TCK_PIN, SET_GPIO_DIR_OUT);

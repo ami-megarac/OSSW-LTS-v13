@@ -1,0 +1,116 @@
+#! /usr/bin/python3
+# ------------------------------------------------------------------
+#
+#    Copyright (C) 2011-2015 Canonical Ltd.
+#
+#    This program is free software; you can redistribute it and/or
+#    modify it under the terms of version 2 of the GNU General Public
+#    License published by the Free Software Foundation.
+#
+# ------------------------------------------------------------------
+
+import apparmor.easyprof
+from apparmor.easyprof import error
+import os
+import sys
+
+# setup exception handling
+from apparmor.fail import enable_aa_exception_handler
+enable_aa_exception_handler()
+
+if __name__ == "__main__":
+    def usage():
+        '''Return usage information'''
+        return 'USAGE: %s [options] <path to binary>' % \
+               os.path.basename(sys.argv[0])
+
+    (opt, args) = apparmor.easyprof.parse_args()
+    binary = None
+    manifest = None
+
+    m = usage()
+    if opt.show_policy_group and not opt.policy_groups:
+        error("Must specify -p with --show-policy-group")
+    elif not opt.template and not opt.policy_groups and len(args) < 1:
+        error("Must specify full path to binary\n%s" % m)
+
+    binary = None
+    if len(args) >= 1:
+        binary = args[0]
+
+    # parse_manifest() returns a list of tuples (binary, options). Create a
+    # list of these profile tuples to support multiple profiles in one manifest
+    profiles = []
+    if opt.manifest:
+        try:
+            # should hide this in a common function
+            if sys.version_info[0] >= 3:
+                f = open(opt.manifest, "r", encoding="utf-8")
+            else:
+                f = open(opt.manifest, "r")
+            manifest = f.read()
+        except EnvironmentError as e:
+            error("Could not read '%s': %s (%d)\n" % (opt.manifest,
+                                                      os.strerror(e.errno),
+                                                      e.errno))
+        profiles = apparmor.easyprof.parse_manifest(manifest, opt)
+    else: # fake up a tuple list when processing command line args
+        profiles.append( (binary, opt) )
+
+    count = 0
+    for (binary, options) in profiles:
+        if len(profiles) > 1:
+            count += 1
+        easyp = apparmor.easyprof.AppArmorEasyProfile(binary, options)
+
+        if options.list_templates:
+            apparmor.easyprof.print_basefilenames(easyp.get_templates())
+            sys.exit(0)
+        elif options.template and options.show_template:
+            sys_t = os.path.join(easyp.dirs['templates'], options.template)
+            inc_t = None
+            if options.include_templates_dir:
+                inc_t = os.path.join(easyp.dirs['templates_include'],
+                                     options.template)
+
+            if os.path.exists(sys_t):
+                apparmor.easyprof.print_files([sys_t])
+            elif os.path.exists(inc_t):
+                apparmor.easyprof.print_files([inc_t])
+            else:
+                error("Could not find '%s'" % options.template)
+            sys.exit(0)
+        elif options.list_policy_groups:
+            apparmor.easyprof.print_basefilenames(easyp.get_policy_groups())
+            sys.exit(0)
+        elif options.policy_groups and options.show_policy_group:
+            files = []
+            for g in options.policy_groups.split(','):
+                sys_g = os.path.join(easyp.dirs['policygroups'], g)
+                inc_g = None
+                if options.include_policy_groups_dir:
+                    inc_g = os.path.join(easyp.dirs['policygroups_include'], g)
+
+                if os.path.exists(sys_g):
+                    files.append(sys_g)
+                elif os.path.exists(inc_g):
+                    files.append(inc_g)
+                else:
+                    error("Could not find '%s'" % g)
+
+            apparmor.easyprof.print_files(files)
+            sys.exit(0)
+        elif binary == None and not options.profile_name and \
+             not options.manifest:
+            error("Must specify binary and/or profile name\n%s" % m)
+
+        params = apparmor.easyprof.gen_policy_params(binary, options)
+        if options.manifest and options.verify_manifest and \
+           not apparmor.easyprof.verify_manifest(params):
+            error("Manifest file requires review")
+
+        if options.output_format == "json":
+            sys.stdout.write('%s\n' % easyp.gen_manifest(params))
+        else:
+            params['no_verify'] = options.no_verify
+            easyp.output_policy(params, count, opt.output_directory)

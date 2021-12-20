@@ -1,0 +1,25 @@
+From: Helmut Grohne <helmut@subdivi.de>
+Date: Mon, 21 Jan 2019 09:56:41 +0000
+Subject: fix cross compialtion
+
+Bug-Debian: https://bugs.debian.org/792851
+Last-Update: 2015-07-19
+
+ * Remove SASL_DB_LIB as it expands to -ldb and make fails to find a build arch
+   -ldb.
+---
+ sasldb/Makefile.am | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/sasldb/Makefile.am b/sasldb/Makefile.am
+index a27645f..1348945 100644
+--- a/sasldb/Makefile.am
++++ b/sasldb/Makefile.am
+@@ -54,6 +54,6 @@ noinst_LTLIBRARIES = libsasldb.la
+ 
+ libsasldb_la_SOURCES = allockey.c sasldb.h
+ EXTRA_libsasldb_la_SOURCES = $(extra_common_sources)
+-libsasldb_la_DEPENDENCIES = $(SASL_DB_BACKEND) $(SASL_DB_LIB)
++libsasldb_la_DEPENDENCIES = $(SASL_DB_BACKEND)
+ libsasldb_la_LIBADD = $(SASL_DB_BACKEND) $(SASL_DB_LIB)
+ libsasldb_la_LDFLAGS = -no-undefined

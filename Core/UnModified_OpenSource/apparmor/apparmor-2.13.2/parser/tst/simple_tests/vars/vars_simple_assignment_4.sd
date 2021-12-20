@@ -1,0 +1,4 @@
+#=DESCRIPTION four value set variable assignment
+#=EXRESULT PASS
+
+@{FOO}=foo bar baz blort

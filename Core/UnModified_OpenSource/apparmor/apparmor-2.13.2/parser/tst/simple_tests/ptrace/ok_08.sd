@@ -1,0 +1,8 @@
+#
+#=Description basic ptrace tracedby all rule
+#=EXRESULT PASS
+#
+/usr/bin/foo {
+  ptrace tracedby,
+
+  }

@@ -1,0 +1,7 @@
+#
+#=DESCRIPTION simple rss rlimit test
+#=EXRESULT PASS
+
+profile rlimit {
+  set rlimit rss <= infinity,
+}

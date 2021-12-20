@@ -1,0 +1,1 @@
+Oct 22 15:57:38 NR021AA kernel: [   69.827705] audit: type=1400 audit(1445522258.769:1054): apparmor="DENIED" operation="file_inherit" profile="/usr/lib/NetworkManager/nm-dhcp-client.action" pid=2407 comm="nm-dhcp-client." lport=10580 family="inet6" sock_type="dgram" protocol=17

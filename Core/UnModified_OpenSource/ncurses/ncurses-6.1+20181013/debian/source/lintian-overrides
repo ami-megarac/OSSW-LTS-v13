@@ -1,0 +1,4 @@
+# Those are all transitional packages pulling in the same binary
+# package, no point in describing them differently.
+ncurses source: duplicate-short-description libtinfo-dev libncurses5-dev libncursesw5-dev
+ncurses source: duplicate-long-description libtinfo-dev libncurses5-dev libncursesw5-dev

@@ -1,0 +1,22 @@
+--- a/aclocal.m4
++++ b/aclocal.m4
+@@ -36,7 +36,7 @@ AC_CACHE_VAL(lsh_cv_sys_ccpic,[
+ 	solaris*)	CCPIC="-fPIC" ;;
+ 	cygwin*)	CCPIC="" ;;
+ 	mingw32*)	CCPIC="" ;;
+-	*)		CCPIC="-fpic" ;;
++	*)		CCPIC="-fPIC" ;;
+       esac
+     else
+       case "$host_os" in
+--- a/configure
++++ b/configure
+@@ -7072,7 +7072,7 @@ else
+ 	solaris*)	CCPIC="-fPIC" ;;
+ 	cygwin*)	CCPIC="" ;;
+ 	mingw32*)	CCPIC="" ;;
+-	*)		CCPIC="-fpic" ;;
++	*)		CCPIC="-fPIC" ;;
+       esac
+     else
+       case "$host_os" in

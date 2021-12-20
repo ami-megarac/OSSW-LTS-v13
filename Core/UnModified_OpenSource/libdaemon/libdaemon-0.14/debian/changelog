@@ -1,0 +1,240 @@
+libdaemon (0.14-7) unstable; urgency=medium
+
+  * Team upload
+  * Add a trivial build/run autopkgtest
+  * debian/gbp.conf: Configure for DEP-14 branch names
+  * Upgrade to debhelper 11 compat level
+    - Stop running dh-autoreconf explicitly, it is now the default
+    - libdaemon-doc Breaks older libdaemon-dev because developer
+      documentation is now in /usr/share/doc/libdaemon-dev
+  * Replace libdaemon0-dbg with automatic dbgsym package
+  * Use dh_missing instead of deprecated dh_install --list-missing
+  * Switch Vcs-* to salsa.debian.org
+  * Stop using deprecated Priority: extra
+  * Only install README in libdaemon-doc
+  * Only run doxygen and lynx if building libdaemon-doc (Closes: #870765)
+  * Use default dpkg build flags
+  * Bump Standards-Version to 4.1.4. No further changes.
+  * Mark documentation as Multi-Arch: foreign
+
+ -- Simon McVittie <smcv@debian.org>  Fri, 27 Apr 2018 12:35:47 +0100
+
+libdaemon (0.14-6) unstable; urgency=medium
+
+  * Use dh-autoreconf to update the autotools generated files in order to
+    build on new ports like ppc64el. (Closes: #745787)
+
+ -- Michael Biebl <biebl@debian.org>  Fri, 25 Apr 2014 08:25:13 +0200
+
+libdaemon (0.14-5) unstable; urgency=medium
+
+  * Move the man pages into libdaemon-doc as well. (Closes: #743590)
+
+ -- Michael Biebl <biebl@debian.org>  Fri, 04 Apr 2014 01:19:30 +0200
+
+libdaemon (0.14-4) unstable; urgency=medium
+
+  * Move the API documentation out of libdaemon-dev into a separate arch-all
+    package libdaemon-doc and make libdaemon-dev suggest that package.
+    Doxygen embeds timestamps into the documentation which makes those files
+    architecture-dependent. (Closes: #742984)
+
+ -- Michael Biebl <biebl@debian.org>  Thu, 03 Apr 2014 00:37:00 +0200
+
+libdaemon (0.14-3) unstable; urgency=low
+
+  * Switch to source format 3.0 (quilt)
+    - Add debian/source/format.
+    - Drop Build-Depends on quilt.
+    - Remove /usr/share/cdbs/1/rules/patchsys-quilt.mk include.
+    - Remove debian/README.source.
+  * Move from cdbs to dh
+    - Drop Build-Depends on cdbs.
+    - Convert debian/rules to use dh.
+  * Bump Standards-Version to 3.9.5. No further changes.
+  * Bump debhelper compatibility level to 9. Update Build-Depends accordingly.
+  * Convert to multi-arch. Mark libdaemon0 and libdaemon-dev as
+    Multi-Arch: same. (Closes: #742839)
+  * Tighten list of installed man pages to work around a bug in doxygen which
+    now generates an oddly named Directory Reference man page.
+
+ -- Michael Biebl <biebl@debian.org>  Fri, 28 Mar 2014 13:30:41 +0100
+
+libdaemon (0.14-2) unstable; urgency=low
+
+  * debian/control
+    - Add ${misc:Depends} to all binary packages.
+    - Add Build-Depends on cdbs.
+    - Add Build-Depends on quilt.
+  * debian/rules
+    - Switch to cdbs.
+  * debian/patches/01-man-page-typo-fix.patch
+    - Fix a typo in the man page detected by lintian.
+  * debian/README.source
+    - Add a reference to the quilt patch management system documentation.
+
+ -- Michael Biebl <biebl@debian.org>  Sun, 17 Jan 2010 08:45:17 +0100
+
+libdaemon (0.14-1) unstable; urgency=low
+
+  * New upstream release.
+  * debian/control
+    - Set the Utopia Maintenance Team as new maintainer. (Closes: #551883)
+    - Add myself to Uploaders.
+    - Update Vcs-* fields. Package is now managed using Git on git.debian.org.
+    - Bump Standards-Version to 3.8.3. No further changes.
+    - Bump Build-Depends on debhelper to (>= 7).
+  * debian/libdaemon0.{shlibs,symbols}
+    - Update symbols file for new API additions.
+    - Bump shlibs file accordingly.
+  * debian/rules
+    - No longer mangle the man pages using sed. The generated man pages are
+      properly formatted now.
+    - Use dh_prep instead of deprecated dh_clean -k.
+  * debian/compat
+    - Bump debhelper compat level to 7.
+  * debian/copyright
+    - Update copyright notice.
+
+ -- Michael Biebl <biebl@debian.org>  Mon, 26 Oct 2009 23:37:18 +0100
+
+libdaemon (0.13-3) unstable; urgency=low
+
+  * Update Maintainer to official Debian ID
+  * Remove DM-Upload-Allowed: yes
+  * Change libdaemon0-dbg section to debug from libdevel
+  * Update Standards-Version to 3.8.1 (no changes required)
+  * Added a libdaemon0.symbols file for dpkg-gensymbols
+
+ -- Y Giridhar Appaji Nag <appaji@debian.org>  Wed, 18 Mar 2009 08:33:12 +0530
+
+libdaemon (0.13-2) unstable; urgency=low
+
+  * Add DM-Upload-Allowed: yes
+  * configure with --localstatedir=/var to create the default pid file in
+    /var and not in /usr/var.  Thanks Rene Engelhard <rene@debian.org> for
+    the bug report (Closes: #500555)
+
+ -- Y Giridhar Appaji Nag <giridhar@appaji.net>  Tue, 30 Sep 2008 17:37:47 +0530
+
+libdaemon (0.13-1) unstable; urgency=low
+
+  * New upstream release
+    + Remove patches 01_sighandler_errno and 02_pid_file_O_RDONLY that were
+      based on upstream commits, hence remove dpatch build dependency also.
+    + Includes two new functions, bump up shlibs dependency to 0.13
+    + libdaemon.spec is not included upstream anymore, so no need to save and
+      restore the file.
+  * Update Standards-Version to 3.8.0, no changes required.
+
+ -- Y Giridhar Appaji Nag <giridhar@appaji.net>  Thu, 07 Aug 2008 01:53:45 +0530
+
+libdaemon (0.12-2) unstable; urgency=low
+
+  * Improved package description, per dev-ref (v3.3.9) Section 6.2.2 etc.
+  * Use dpatch for the following debian/patches patches from upstream
+    + 01_sighandler_errno to save and restore errno in signal hanlder
+    + 02_pid_file_O_RDONLY to fallback to O_RDONLY for PID file if O_RDWR
+      doesn't work.
+  * Fix lintian W: manpage-has-errors-from-man that was resulting in not
+    showing the help text of daemon_exec's last argument.
+
+ -- Y Giridhar Appaji Nag <giridhar@appaji.net>  Mon, 14 Apr 2008 00:56:12 +0530
+
+libdaemon (0.12-1) unstable; urgency=low
+
+  * Adopted by Y Giridhar Appaji Nag <giridhar@appaji.net> (Closes: #452187)
+  * debian/control: Add Homepage: and Vcs-*: fields
+  * Add a debian/watch file
+  * Bump up Standards-Version to 3.7.3.  s/Source-Version/binary:Version/
+  * Add autotools-dev to Build-Depends and remove lynx-ssl (provided by lynx).
+  * Update debian/compat to 5, update Build-Depends with debhelper (>= 5)
+  * debian/copyright: Update upstream author email address and URL
+  * Use .docs and .examples file rather than specifying them in debian/rules
+  * debian/control: Change Section of libdaemon-dev to libdevel
+  * debian/rules: Modify the doxygen generated man pages to prevent lintian I:
+    hyphen-used-as-minus-sign
+  * Install upstream README as upstream changelog for libdaemon-dev
+  * Provide a libdaemon0-dbg package with the debugging symbols in it.
+
+ -- Y Giridhar Appaji Nag <giridhar@appaji.net>  Fri, 21 Dec 2007 15:53:37 +0530
+
+libdaemon (0.12-0.1) unstable; urgency=low
+
+  * NMU
+  * New upstream release
+  * Patch applied to 0.11-0.2 merged upstream.
+
+ -- Sjoerd Simons <sjoerd@debian.org>  Tue, 10 Jul 2007 20:46:12 +0200
+
+libdaemon (0.11-0.2) unstable; urgency=low
+
+  * NMU
+  * Added patch to fix daemon_close_all implementation.
+
+ -- Sjoerd Simons <sjoerd@debian.org>  Sat, 07 Jul 2007 11:45:30 +0200
+
+libdaemon (0.11-0.1) unstable; urgency=low
+
+  * NMU
+  * New upstream release (Closes: #430163)
+  * No longer uses PATH_MAX unconditionnally (Closes: #407867)
+  * debian/libdaemon0.shlibs, added
+  * debian/control, indicate that the source package should be in Section libs
+  * debian/rules, pass CFLAGS that could have been changed as a result of
+    DEB_BUILD_OPTIONS to configure (Closes: #328774)
+  * debian/libdaemon-dev.install, don't install .la files
+
+ -- Sjoerd Simons <sjoerd@debian.org>  Fri, 06 Jul 2007 13:54:23 +0200
+
+libdaemon (0.10-1) unstable; urgency=low
+
+  * new upstream, relicensed under LGPL 2.1
+
+ -- Oliver Kurth <oku@debian.org>  Mon, 28 Nov 2005 10:23:53 -0800
+
+libdaemon (0.8-1) unstable; urgency=low
+
+  * new upstream (closes: #314615)
+
+ -- Oliver Kurth <oku@debian.org>  Fri, 17 Jun 2005 10:14:17 -0700
+
+libdaemon (0.7-1) unstable; urgency=low
+
+  * new upstream
+    - documentation error for daemon_signal_init corrected
+      (closes: #280833)
+  * build-depends on lynx|lynx-ssl (closes: #265980)
+
+ -- Oliver Kurth <oku@debian.org>  Mon, 20 Dec 2004 17:10:04 -0800
+
+libdaemon (0.6-1) unstable; urgency=low
+
+  * new upstream
+
+ -- Oliver Kurth <oku@debian.org>  Wed, 07 Apr 2004 23:03:53 +0200
+
+libdaemon (0.5-1) unstable; urgency=low
+
+  * new upstream
+
+ -- Oliver Kurth <oku@debian.org>  Sat, 28 Feb 2004 20:59:58 -0800
+
+libdaemon (0.4-1) unstable; urgency=low
+
+  * new upstream
+
+ -- Oliver Kurth <oku@debian.org>  Tue, 27 Jan 2004 21:41:44 +0100
+
+libdaemon (0.3-1) unstable; urgency=low
+
+  * new upstreaam
+
+ -- Oliver Kurth <oku@debian.org>  Fri, 11 Jul 2003 22:03:30 +0200
+
+libdaemon (0.2-1) unstable; urgency=low
+
+  * Initial Release. Closes: #200793
+
+ -- Oliver Kurth <oku@debian.org>  Fri, 11 Jul 2003 22:03:30 +0200
+

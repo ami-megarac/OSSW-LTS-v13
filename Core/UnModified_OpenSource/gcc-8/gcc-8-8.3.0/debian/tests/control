@@ -1,0 +1,24 @@
+Tests: runtime-libs
+Depends: apt, python3-minimal
+Restrictions: allow-stderr
+
+Tests: libc-link
+Depends: gcc-8, libc6-dev | libc-dev
+
+Tests: libstdcxx-link
+Depends: g++-8
+
+Tests: libgfortran-link
+Depends: gfortran-8
+
+Tests: libgo-link
+Depends: gccgo-8
+
+Tests: libgomp-link
+Depends: gfortran-8, gcc-8
+
+Tests: libgnat-link
+Depends: gnat-8
+
+Tests: shlib-build
+Depends: gcc-8, libc6-dev | libc-dev

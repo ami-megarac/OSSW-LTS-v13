@@ -1,0 +1,14 @@
+#!/bin/sh
+set -e
+
+#DEBHELPER#
+
+# Modified dh_systemd_start snippet that's not added automatically due /etc/init.d/mysql
+if [ -d /run/systemd/system ]; then
+	deb-systemd-invoke stop mariadb.service >/dev/null
+# Modified dh_installinit snippet to only run with sysvinit
+elif [ -x "/etc/init.d/mysql" ]; then
+	invoke-rc.d mysql stop || exit $?
+fi
+
+exit 0

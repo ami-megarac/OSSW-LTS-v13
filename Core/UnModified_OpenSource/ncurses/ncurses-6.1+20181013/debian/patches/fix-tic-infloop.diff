@@ -1,0 +1,30 @@
+Author: Sven Joachim <svenjoac@gmx.de>
+Description: Fix an infinite loop in tic on invalid input
+ Modify tic to exit if it cannot remove a conflicting name, because
+ treating that as a partial success can cause an infinite loop in
+ use-resolution.
+ .
+ Fix cherry-picked from upstream patchlevel 20191019.
+Bug: https://lists.gnu.org/archive/html/bug-ncurses/2019-10/msg00050.html
+Forwarded: not-needed
+Last-Update: 2019-11-02
+
+---
+ ncurses/tinfo/comp_parse.c |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+--- a/ncurses/tinfo/comp_parse.c
++++ b/ncurses/tinfo/comp_parse.c
+@@ -180,11 +180,11 @@ remove_collision(char *n1, char *n2)
+ 			++qend;
+ 		    while ((*qstart++ = *qend++) != '\0') ;
+ 		    fprintf(stderr, "...now\t%s\n", p2);
++		    removed = TRUE;
+ 		} else {
+ 		    fprintf(stderr, "Cannot remove alias '%.*s'\n",
+ 			    (int) (qend - qstart), qstart);
+ 		}
+-		removed = TRUE;
+ 		break;
+ 	    }
+ 	}

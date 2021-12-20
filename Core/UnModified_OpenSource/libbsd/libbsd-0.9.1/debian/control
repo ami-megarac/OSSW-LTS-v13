@@ -1,0 +1,101 @@
+Source: libbsd
+Priority: optional
+Section: libs
+Maintainer: Guillem Jover <guillem@debian.org>
+Vcs-Browser: https://git.hadrons.org/cgit/debian/pkgs/libbsd.git
+Vcs-Git: https://git.hadrons.org/git/debian/pkgs/libbsd.git
+Homepage: https://libbsd.freedesktop.org/
+Standards-Version: 4.3.0
+Rules-Requires-Root: no
+Build-Depends:
+ debhelper (>= 11),
+# Consider readding the following once and if it moves out of non-free.
+# libtestu01-0-dev <!nocheck>,
+
+Package: libbsd-dev
+Section: libdevel
+Architecture: any
+Multi-Arch: same
+Depends:
+ libbsd0 (= ${binary:Version}),
+ ${misc:Depends},
+Replaces:
+ libfreebsd-dev (<< 0.0-8),
+Description: utility functions from BSD systems - development files
+ This library provides some functions commonly available on BSD systems but
+ not on others like GNU systems.
+ .
+ The currently provided functions are:
+ .
+  * _time32_to_time, _time_to_time32, _time64_to_time, _time_to_time64,
+    _time_to_long, _long_to_time, _time_to_int, _int_to_time.
+  * TIMEVAL_TO_TIMESPEC, TIMESPEC_TO_TIMEVAL.
+  * MD5Data, MD5End, MD5File, MD5FileChunk, MD5Final, MD5Init, MD5Pad,
+    MD5Transform, MD5Update.
+  * arc4random, arc4random_addrandom, arc4random_buf, arc4random_stir,
+    arc4random_uniform.
+  * bsd_getopt.
+  * be16dec, be32dec, be64dec, le16dec, le32dec, le64dec.
+  * be16enc, be32enc, be64enc, le16enc, le32enc, le64enc.
+  * bit_alloc, bit_decl, bit_clear, bit_ffc, bit_ffs, bit_nclear, bit_nset,
+    bit_set, bitstr_size, bit_test.
+  * closefrom.
+  * expand_number, dehumanize_number, humanize_number.
+  * explicit_bzero.
+  * errc, verrc, vwarnc, warnc.
+  * fmtcheck.
+  * fgetln, fparseln, fgetwln, flopen, flopenat, fpurge, funopen.
+  * getbsize.
+  * getmode, setmode, strmode,
+  * getpeereid.
+  * getprogname, setprogname.
+  * heapsort, radixsort, mergesort, sradixsort.
+  * nlist (ELF and a.out support).
+  * pidfile_open, ppidfile_filen, oidfile_write, pidfile_close, pidfile_remove.
+  * readpassphrase.
+  * reallocarray, reallocf.
+  * setproctitle (initialized via libbsd-ctor or setproctitle_init).
+  * sl_init, sl_add, sl_free, sl_find.
+  * strlcpy, strlcat.
+  * strnstr.
+  * nvis, snvis, stravis, strenvisx, strnunvis, strnunvisx, strnvis,
+    strsenvisx, strsnvis, strsnvisx, strsvis, strsvisx, strunvis, strunvisx,
+    strvis, strvisx, svis, unvis, vis.
+  * strtoi, strtonum, strtou.
+  * timeradd, timersub, timerclear, timerisset, timercmp.
+  * timespecadd, timespecsub, timespecclear, timespecisset, timespeccmp.
+  * wcslcat, wcslcpy.
+ .
+ Also included are some queue macro definitions not present on includes
+ from glibc.
+
+Package: libbsd0
+Architecture: any
+Multi-Arch: same
+Pre-Depends:
+ ${misc:Pre-Depends},
+Depends:
+ ${shlibs:Depends},
+ ${misc:Depends},
+Conflicts:
+ net-tools (<< 7.0-2) [kfreebsd-any],
+Description: utility functions from BSD systems - shared library
+ This library provides some C functions such as strlcpy() that are commonly
+ available on BSD systems but not on others like GNU systems.
+ .
+ For a detailed list of the provided functions, please see the libbsd-dev
+ package description.
+
+Package: libbsd0-udeb
+Package-Type: udeb
+Section: debian-installer
+Architecture: any
+Depends:
+ ${shlibs:Depends},
+ ${misc:Depends},
+Description: utility functions from BSD systems - shared library
+ This library provides some C functions such as strlcpy() that are commonly
+ available on BSD systems but not on others like GNU systems.
+ .
+ For a detailed list of the provided functions, please see the libbsd-dev
+ package description.

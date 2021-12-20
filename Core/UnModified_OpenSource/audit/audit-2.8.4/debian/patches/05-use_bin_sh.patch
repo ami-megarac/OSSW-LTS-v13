@@ -1,0 +1,38 @@
+From: Andrej Shadura <andrew.shadura@collabora.co.uk>
+Subject: Port auditd.init and augenrules to the POSIX shell
+Date: Wed, 20 Feb 2019 16:22:43 +0100
+
+--- a/init.d/auditd.init
++++ b/init.d/auditd.init
+@@ -1,4 +1,4 @@
+-#!/bin/bash
++#!/bin/sh
+ #
+ # auditd        This starts and stops auditd
+ #
+@@ -39,7 +39,7 @@
+ fi
+ 
+ # Check that we are root ... so non-root users stop here
+-test $EUID = 0  ||  exit 4
++test $(id -u) = 0  ||  exit 4
+ 
+ # Check config
+ test -f /etc/sysconfig/auditd && . /etc/sysconfig/auditd
+@@ -136,7 +136,7 @@
+ 	printf "Getting auditd internal state: "	
+ 	killproc $prog -CONT
+ 	RETVAL=$?
+-	echo -e "\n"
++	printf "\n"
+ 	if [ $? -eq 0 ] ; then
+ 		if [ -e $state_file ] ; then
+ 			cat $state_file
+--- a/init.d/augenrules
++++ b/init.d/augenrules
+@@ -1,4 +1,4 @@
+-#!/bin/bash
++#!/bin/sh
+ 
+ # Script to concatenate rules files found in a base audit rules directory
+ # to form a single /etc/audit/audit.rules file suitable for loading into

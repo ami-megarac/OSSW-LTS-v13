@@ -1,0 +1,3 @@
+debian/changelog			perl-modules-5.28/changelog.Debian
+debian/copyright			perl-modules-5.28/copyright
+debian/perl-modules-5.28.README.Debian	perl-modules-5.28/README.Debian

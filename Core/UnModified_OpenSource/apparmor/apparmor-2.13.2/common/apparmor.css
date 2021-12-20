@@ -1,0 +1,30 @@
+BODY {background:rgb(000,000,000); color:rgb(225,225,225);
+margin-left: 1%; margin-right: 5%}
+H1 {color:rgb(240,240,240); font-size:115%;}
+H2 {color:rgb(240,240,240); font-size:109%;}
+H3 {color:rgb(240,240,240); font-size:104%;}
+TD.sidebar {width:18em; background:rgb(020,020,020); vertical-align:top;}
+TD.main {width:250em; background:rgb(020,020,020); padding-top:5px;
+padding-bottom:5px; padding-left:10px; padding-right:10px; }
+TD.sidebarhead {background:rgb(038,038,038);}
+TD.footer {background:rgb(020,020,020); padding:5px; }
+TD.block {background: #9c9c9c; color:rgb(000,000,000)}
+
+P {font-size:102%}
+P {margin-left:.5em; margin-right:.5em}
+P {color:rgb(225,225,225)}
+
+P.sidebar {font-size:98% }
+P.sidebarhead {font-size:98%; font-weight:bold; }
+
+UL {font-size:102%}
+UL {margin-left:.5em; margin-right:.5em}
+UL {color:rgb(225,225,225)}
+
+IMG {border:none}
+ 
+:link, :visited, :active { text-decoration:underline; }
+
+:link { color: white }
+:visited { color: rgb(225,225,225)}
+:active { color: gray }

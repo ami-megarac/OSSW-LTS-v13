@@ -1,0 +1,8 @@
+#
+#=Description basic ptrace read rule
+#=EXRESULT PASS
+#
+/usr/bin/foo {
+  ptrace read,
+
+  }

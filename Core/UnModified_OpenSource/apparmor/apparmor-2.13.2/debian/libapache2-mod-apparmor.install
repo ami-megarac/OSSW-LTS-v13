@@ -1,0 +1,2 @@
+etc/apparmor.d/local/usr.sbin.apache2
+etc/apparmor.d/usr.sbin.apache2

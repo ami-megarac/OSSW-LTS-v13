@@ -1,0 +1,1 @@
+type=APPARMOR_DENIED msg=audit(1190503205.837:27088):  type=1503 operation="socket_create" family="packet" sock_type="raw" protocol=6 pid=16196 profile="/home/steve/aa-regression-tests/changehat_wrapper//net_raw"

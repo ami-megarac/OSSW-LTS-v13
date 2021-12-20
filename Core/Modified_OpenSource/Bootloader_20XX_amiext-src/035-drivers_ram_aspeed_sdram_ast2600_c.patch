@@ -1,0 +1,61 @@
+--- uboot.old/drivers/ram/aspeed/sdram_ast2600.c	2021-08-10 14:43:00.271884254 +0800
++++ uboot/drivers/ram/aspeed/sdram_ast2600.c	2021-08-11 15:40:01.000000000 +0800
+@@ -43,6 +43,10 @@
+ /* bit-field of AST_SCU_HANDSHAKE */
+ #define SCU_SDRAM_INIT_READY_MASK	BIT(6)
+ #define SCU_SDRAM_INIT_BY_SOC_MASK	BIT(7)
++#define SCU_P2A_BRIDGE_DISABLE		BIT(12)
++#define SCU_HANDSHAKE_MASK                                                     \
++	(SCU_SDRAM_INIT_READY_MASK | SCU_SDRAM_INIT_BY_SOC_MASK |              \
++	 SCU_P2A_BRIDGE_DISABLE)
+ 
+ /* bit-field of AST_SCU_MPLL */
+ #define SCU_MPLL_RESET			BIT(25)
+@@ -150,8 +154,8 @@
+ static const u32 ddr4_ac_timing[4] = {0x040e0307, 0x0f4711f1, 0x0e060304,
+                                       0x00001240};
+ 
+-static const u32 ddr_max_grant_params[4] = {0x44444444, 0x44444466, 0x44444444,
+-                                            0x44444444};
++static const u32 ddr_max_grant_params[4] = { 0x44444488, 0xee4444ee, 0x44444444,
++					     0x44444444 };
+ #endif
+ 
+ struct dram_info {
+@@ -757,8 +761,14 @@
+ 
+         writel(MCR34_MREQI_DIS | MCR34_RESETN_DIS, &regs->power_ctrl);
+         writel(SDRAM_VIDEO_UNLOCK_KEY, &regs->gm_protection_key);
+-	writel(0x101010, &regs->arbitration_ctrl);
+-	writel(0x0FFFFCFC, &regs->req_limit_mask);
++	/* [6:0] : Group 1 request queued number = 20
++	 * [14:8] : Group 2 request queued number = 20
++	 * [20:16] : R/W max-grant count for RQ output arbitration = 16
++	 */
++	writel(0x101414, &regs->arbitration_ctrl);
++	/* Request Queued Limitation for REQ8/9 USB1/2 */
++	writel(0x0FFF3CFF, &regs->req_limit_mask);
++
+ 
+ 	for (i = 0; i < ARRAY_SIZE(ddr_max_grant_params); ++i)
+                 writel(ddr_max_grant_params[i], &regs->max_grant_len[i]);
+@@ -892,6 +902,7 @@
+ 
+ 	if (readl(priv->scu + AST_SCU_HANDSHAKE) & SCU_SDRAM_INIT_READY_MASK) {
+ 		printf("already initialized, ");
++		setbits_le32(priv->scu + AST_SCU_HANDSHAKE, SCU_HANDSHAKE_MASK);
+ 		ast2600_sdrammc_update_size(priv);
+ 		return 0;
+ 	}
+@@ -962,10 +973,7 @@
+ #ifdef CONFIG_DRAM_ECC
+ 	ast2600_sdrammc_ecc_enable(priv);
+ #endif
+-
+-	writel(readl(priv->scu + AST_SCU_HANDSHAKE) | SCU_SDRAM_INIT_READY_MASK,
+-	       priv->scu + AST_SCU_HANDSHAKE);
+-
++	setbits_le32(priv->scu + AST_SCU_HANDSHAKE, SCU_HANDSHAKE_MASK);
+ 	clrbits_le32(&regs->intr_ctrl, MCR50_RESET_ALL_INTR);
+ 	ast2600_sdrammc_lock(priv);
+ 	return 0;

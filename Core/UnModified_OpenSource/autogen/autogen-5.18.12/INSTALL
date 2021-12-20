@@ -1,0 +1,47 @@
+This is the build instructions for autogen.  If you're viewing it with
+Emacs, try doing Ctl-C Ctl-t and browsing through the outline headers.
+Ctl-C Ctl-a will unfold them again.
+
+** Building from a release tarball
+
+If you have downloaded a release tarball,
+
+   configure; make; make install
+
+should do it. The usual configure options are available, notably inckuding
+the --prefix option.  The generated Makefile inckludes both "install" and
+"uninstall" instructions.
+
+** Building from a repository clone
+
+To build from a repository clone, you must first have gperf (the GNU
+Perfect Hash Function Generator) and gnulib (the GNU
+Portability Library) installed. Then run
+
+   bootstrap
+
+in the top-level directory.  Note that for this to work, a precompiled
+autogen binary needs to be in your $PATH.
+
+[To be continued]]
+
+** Known issues
+
+1. Whatever's going on with local-install
+
+2. autogen requiring itself to build is a problem we need to solve.
+   The standard way to solve this is check in its build products,
+   then rebuild those only when the *.def or *tpl files change. Of
+   course the INSTALL file needs to explicit about which stuff is
+   generated 
+
+3. I'm going to want an easy, documented way to produce a *static*
+   build outogen so I can experiment with NTP builds without
+   colliding with an older shared library.  bkorb replies:
+   '"cd $top_builddir/agen5 ; rm autogen ; make LDFLAGS=-static"
+   will do what you ask.'. 
+
+Local variables:
+mode: outline
+paragraph-separate: "[ 	]*$"
+end:

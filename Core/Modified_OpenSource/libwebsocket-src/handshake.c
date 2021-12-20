@@ -28,21 +28,58 @@ SOFTWARE.
 #include "Encode.h"
 
 #define QDECODER_LIB "/usr/local/lib/libqdecoder.so"
-#define MAX_LINEBUF 1024
+#define MAX_LINE_BUF 1024
+#define QSESSION_KEY "QSESSIONID"
+#define CSRFTOKEN_KEY "garc"
+
+#define AUTH_SUCCESS 0
+#define ERROR_BUFFER_OVERFLOW -1
+#define ERROR_INVALID_AUTH -2
+#define ERROR_INTERNAL_ERROR -3
+
+static int GetAuthTokenInCookie(char *token, char *key, char *value) {
+    char temp[MAX_LINE_BUF];
+    int tempret = snprintf(temp, MAX_LINE_BUF, "%s", token);
+    if (tempret < 0 || tempret >= MAX_LINE_BUF) {
+        return ERROR_BUFFER_OVERFLOW;
+    }
+
+    char *start = strstr(temp, key);
+    if (start == NULL) {
+        return ERROR_INVALID_AUTH;
+    } else {
+        char *query = start, *p;
+        char **tokens = &query;
+
+        // Assume value contains no as same special character as below delimiter
+        p = strsep(tokens, ";");
+        char *val = p, *var;
+        if ((var = strsep(&val, "="))) {
+            if (strncasecmp(key, var, strnlen(key, MAX_LINE_BUF)) == 0) {
+                tempret = snprintf(value, MAX_LINE_BUF, "%s", val);
+                if (tempret < 0 || tempret >= MAX_LINE_BUF) {
+                    return ERROR_BUFFER_OVERFLOW;
+                }
+            } else {
+                return ERROR_INTERNAL_ERROR;
+            }
+        } else {
+            return ERROR_INVALID_AUTH;
+        }
+    }
+    return AUTH_SUCCESS;
+}
+
 
 /**
  * Returns whether x is a integral multiple of y.
  */
 uint32_t isIntergralMultiple(long x, int y) {
-	double d = (double)(x/y);
-
 	if (y == 1) {
 		return (uint32_t) x;
-	} else if (d == (int) d) {
+	} else {
 		return (uint32_t) x/y;
 	}
-
-	return 0;
 }
 
 uint32_t generateKey(char *key, int length) {	
@@ -149,73 +186,82 @@ char *read_file (const char *file_name) {
 	return contents;
 }
 
-int isNeedleInHaystack(char *needle, char *file_name, int port){
-	int i = 0, amount = 0, ok = 0;
-	char *err = NULL, *file = NULL, *tok = NULL;
+int isNeedleInHaystack(char *needle, char *file_name, int port) {
+    int i = 0, amount = 0, ok = 0;
+    char *err = NULL, *file = NULL, *tok = NULL;
 
-	file = read_file(file_name);
+    file = read_file(file_name);
 
-	if (file != NULL) {
-	   	tok	= strtok(file, "\r\n");
-		amount = strtol(tok, &err, 10);
-		
-		if (err[0] == '\0' && amount > 0) {
-			char *haystack[amount];
-			for(i = amount-1; i > -1; i--) {
-				tok = strtok(NULL, "\r\n");	
-				if (tok == NULL) {
-					return ok; /* SCA Fix [Resource leaks]:: False Positive */
-			        /* Reason for False Positive - Can not free the Resource , need the Resource for further operation use*/
-				} else {
-					haystack[i] = (char *) malloc(strlen(tok) + sizeof(port) + 
-							sizeof(char) + 1);
-					if (haystack[i] == NULL) {
-						return ok;	
-					}
-					memset(haystack[i], '\0', strlen(tok) + sizeof(port) + 
-							sizeof(char) + 1);
-					memcpy(haystack[i], tok, strlen(tok));
-					if (port > 1024 && port < 65535) {
-						memcpy(haystack[i] + strlen(tok), ":", sizeof(char));
-						sprintf(haystack[i] + strlen(tok) + sizeof(char), "%d", port);
-					}
-				}
-			}
+    if (file != NULL) {
+        tok = strtok(file, "\r\n");
+        if (tok == NULL) {
+            return ok;
+        } else {
+            amount = strtol(tok, &err, 10);
 
-			for(i = amount-1; i > -1; i--) {
-				if ( needle != NULL && haystack[i] != NULL ) {
-					if ( strncasecmp(haystack[i], needle, strlen(needle)) == 0 ) {
-						ok = 0;
-						break;
-					} else {
-						ok = -1;
-					}
-				}
-			}
+            if (err[0] == '\0' && amount > 0) {
+                char *haystack[amount];
+                for (i = amount - 1; i > -1; i--) {
+                    tok = strtok(NULL, "\r\n");
+                    if (tok == NULL) {
+                        free(file);
+                        return ok;
+                    } else {
+                        haystack[i] =
+                            (char *)malloc(strlen(tok) + sizeof(port) + sizeof(char) + 1);
+                        if (haystack[i] == NULL) {
+                            free(file);
+                            return ok;
+                        }
+                        memset(haystack[i], '\0',
+                               strlen(tok) + sizeof(port) + sizeof(char) + 1);
+                        memcpy(haystack[i], tok, strlen(tok));
+                        if (port > 1024 && port < 65535) {
+                            memcpy(haystack[i] + strlen(tok), ":", sizeof(char));
+                            sprintf(haystack[i] + strlen(tok) + sizeof(char), "%d", port);
+                        }
+                    }
+                }
 
-			for(i = amount-1; i > -1; i--) {
-				free(haystack[i]);
-			}
+                for (i = amount - 1; i > -1; i--) {
+                    if (needle != NULL && haystack[i] != NULL) {
+                        if (strncasecmp(haystack[i], needle, strlen(needle)) == 0) {
+                            ok = 0;
+                            break;
+                        } else {
+                            ok = -1;
+                        }
+                    }
+                }
 
-		} else {
-			return ok; /* SCA Fix [Resource leaks]:: False Positive */
-	        /* Reason for False Positive - Can not free the Resource , need the Resource for further operation use*/
-		}
-	}	
+                for (i = amount - 1; i > -1; i--) {
+                    free(haystack[i]);
+                }
 
-	free(file);
-	return ok;
+            } else {
+                free(file);
+                return ok;
+            }
+        }
+    }
+
+    free(file);
+    return ok;
 }
 
 int parseHeaders(char *string, ws_client *n, int port){
+	if (n == NULL) {
+		printf("Parsing Headers went wrong\n");
+		return -1;
+	}
+
 	ws_header *h = n->headers;
-	char qsession[MAX_LINEBUF] = {0}, csrftoken[MAX_LINEBUF] = {0};
+	char qsession[MAX_LINE_BUF] = {0}, csrftoken[MAX_LINE_BUF] = {0};
 	char *token = strtok(string, "\r\n");
 	char *resource;
-	int i, tempret = 0;
+	int i, rc = 0;
 
 	void *dl_handle = NULL;
-	int (*get_auth_str)(char *, int, char *);
 	int (*is_valid_authorization)(char *, char *);
 
 	/**
@@ -228,51 +274,17 @@ int parseHeaders(char *string, ws_client *n, int port){
 
 		if ( strncasecmp("GET /", h->get, 5) != 0 || 
 				strncasecmp(" HTTP/1.1", h->get+(h->get_len-9), 9) != 0 ) {
-			if(n != NULL)
-			{
-				handshake_error("The headerline of the request was invalid.", ERROR_BAD, 
+			handshake_error("The headerline of the request was invalid.", ERROR_BAD, 
 						n);
-			}
 			return -1;
 		}
 		
 		resource = (char *) getMemory(h->get+4, h->get_len-12);
 		if (resource == NULL) {
-			if(n != NULL)
-			{
-				handshake_error("Couldn't allocate memory.", ERROR_INTERNAL, n);
-			}
+			handshake_error("Couldn't allocate memory.", ERROR_INTERNAL, n);
 			return -1;
 		}
 		resource[h->get_len-13] = '\0';
-
-		dl_handle = dlopen(QDECODER_LIB, RTLD_NOW | RTLD_NODELETE);
-		if(dl_handle == NULL)
-		{
-			if(n != NULL)
-			{
-				handshake_error("Library not found.", ERROR_INTERNAL, n);
-			}
-			return -1;
-		}    
-
-		get_auth_str = dlsym(dl_handle,"get_auth_str");
-
-		if(get_auth_str)
-		{    
-			get_auth_str(resource, h->get_len-13 +1 /* increment for NULL terminator */, csrftoken);
-			if(csrftoken == NULL)
-			{
-				if(n != NULL)
-				{
-					handshake_error("Invalid Authentication.", ERROR_NOT_AUTH, n);
-				}
-				dlclose(dl_handle);
-				return -1;	
-			}
-		}    
-
-		dlclose(dl_handle);
 
 		h->resourcename = resource;
 		h->resourcename_len = strlen(h->resourcename);
@@ -303,7 +315,7 @@ int parseHeaders(char *string, ws_client *n, int port){
 					if (h->protocol_string == NULL) {
 						handshake_error("Couldn't allocate memory.", 
 								ERROR_INTERNAL, n);
-						return -1;					
+						return -1;
 					}
 					h->protocol_len = strlen(h->protocol_string);
 				} else if ( strstr(token+24, "echo") != NULL ) {
@@ -312,7 +324,7 @@ int parseHeaders(char *string, ws_client *n, int port){
 					if (h->protocol_string == NULL) {
 						handshake_error("Couldn't allocate memory.", 
 								ERROR_INTERNAL, n);
-						return -1;					
+						return -1;
 					}
 					h->protocol_len = strlen(h->protocol_string);
 				}
@@ -337,7 +349,7 @@ int parseHeaders(char *string, ws_client *n, int port){
 					if (h->protocol_string == NULL) {
 						handshake_error("Couldn't allocate memory.", 
 								ERROR_INTERNAL, n);
-						return -1;					
+						return -1;
 					}
 					h->protocol_len = strlen(h->protocol_string);
 				} else if ( strstr(token+20, "echo") != NULL ) {
@@ -356,37 +368,42 @@ int parseHeaders(char *string, ws_client *n, int port){
 			} else if ( strncasecmp("Sec-WebSocket-Key2: ", token, 20) == 0 ) {
 				h->type = HYBI00;
 				h->key2 = token + 20;
-			} else if ( strncasecmp("Cookie: ", token, 8) == 0 ) { // we check cookie here instead of query string parameter because our cookie is with httponly flag
-				char temp[MAX_LINEBUF];
-				tempret = snprintf(temp, MAX_LINEBUF, "%s", token);
-				if(tempret < 0 || tempret >= MAX_LINEBUF)
-					return -1;
-				char *start = strstr(temp, "QSESSIONID");
-				if(start == NULL)
-				{
-					handshake_error("Invalid Authentication.", ERROR_NOT_AUTH, n);
-					return -1;	
-				}
-				else
-				{
-					char *query = start, *p;
-					char **tokens = &query;
-
-					// Assume value contains no as same special character as below delimiter
-					p = strsep (tokens, ";");
-					char *val=p, *var;
-					if ((var = strsep(&val, "=")))
-					{
-						if(strncasecmp("QSESSIONID", var, 10) == 0)
-						{
-							tempret = snprintf(qsession, MAX_LINEBUF, "%s", val);
-							if(tempret < 0 || tempret >= MAX_LINEBUF)
-							{
-								handshake_error("Invalid Authentication.", ERROR_NOT_AUTH, n);
-								return -1; 
-							}
-						}
+			} else if ( strncasecmp("Cookie: ", token, 8) == 0 ) {
+				rc = GetAuthTokenInCookie(token, QSESSION_KEY, qsession);
+				if (rc != AUTH_SUCCESS) {
+					switch (rc) {
+						case ERROR_BUFFER_OVERFLOW:
+							handshake_error("Buffer Overflow.", ERROR_NOT_AUTH, n);
+							break;
+						case ERROR_INVALID_AUTH:
+							handshake_error("Invalid Authentication.", ERROR_NOT_AUTH, n);
+							break;
+						case ERROR_INTERNAL_ERROR:
+							handshake_error("Internal Error.", ERROR_NOT_AUTH, n);
+							break;
+						default:
+							handshake_error("Internal Error.", ERROR_NOT_AUTH, n);
+							break;
 					}
+					return -1;
+				}
+				rc = GetAuthTokenInCookie(token, CSRFTOKEN_KEY, csrftoken);
+				if (rc != 0) {
+					switch (rc) {
+						case ERROR_BUFFER_OVERFLOW:
+							handshake_error("Buffer Overflow.", ERROR_NOT_AUTH, n);
+								break;
+						case ERROR_INVALID_AUTH:
+							handshake_error("Invalid Authentication.", ERROR_NOT_AUTH, n);
+							break;
+						case ERROR_INTERNAL_ERROR:
+							handshake_error("Internal Error.", ERROR_NOT_AUTH, n);
+							break;
+						default:
+							handshake_error("Internal Error.", ERROR_NOT_AUTH, n);
+							break;
+					}
+					return -1;
 				}
 			}
 			
@@ -664,7 +681,10 @@ int sendHandshake(ws_client *n) {
 
 		if(response != NULL)
 		{
-			printf("Server responds with the following headers:\n%s\n", response);
+			/* SCA Fix [String not null terminated]:: False Positive */ 
+			/* Reason for False Positive - we limit the size to print even if it's not null-terminated. 
+			 * And making response null-terminated will cause http response error */
+			printf("Server responds with the following headers:\n%.*s\n", memlen, response);
 			fflush(stdout);
 		}
 
@@ -848,7 +868,10 @@ int sendHandshake(ws_client *n) {
 
 		if(response != NULL)
 		{
-			printf("Server responds with the following headers:\n%s\n", response);
+			/* SCA Fix [String not null terminated]:: False Positive */ 
+			/* Reason for False Positive - we limit the size to print even if it's not null-terminated. 
+			 * And making response null-terminated will cause http response error */
+			printf("Server responds with the following headers:\n%.*s\n", memlen, response);
 			fflush(stdout);
 		}
 
@@ -865,6 +888,7 @@ int sendHandshake(ws_client *n) {
 		printf("Error in send function\n");
 		if (response != NULL) {
 			free(response);
+			response = NULL;
 		}
 	}
 

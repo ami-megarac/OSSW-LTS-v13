@@ -1,0 +1,12 @@
+#
+#=Description basic signal w/multiple signal set rule
+#=EXRESULT PASS
+#
+/usr/bin/signal-test1 {
+  audit signal send set=hup set=int set=quit set=ill set=trap,
+  deny signal receive set=abrt set=bus set=fpe set=kill set=usr1 set=segv,
+  allow signal receive set=usr2 set=pipe set=alrm set=term set=stkflt,
+  audit allow signal set=chld set=cont set=stop set=stp set=ttin,
+  audit deny signal set=(ttou, urg) set=(xcpu xfsz vtalrm , prof) set=winch set=io set=pwr set=sys set=emt set=exists,
+}
+

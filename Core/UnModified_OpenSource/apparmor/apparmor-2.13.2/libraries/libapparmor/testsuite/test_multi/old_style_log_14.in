@@ -1,0 +1,1 @@
+type=APPARMOR msg=audit(1177962426.395:2107): AUDITING mr access to /lib/ld-2.4.so (open(7139) profile /home/steve/svn/apparmor-forge/tests/regression/subdomain/changehat_wrapper active open)

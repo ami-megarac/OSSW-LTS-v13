@@ -1,0 +1,3 @@
+version=3
+opts=pgpsigurlmangle=s/$/.sig/ \
+     https://ftp.gnu.org/gnu/libidn/ libidn2-(\d\S+).tar.gz

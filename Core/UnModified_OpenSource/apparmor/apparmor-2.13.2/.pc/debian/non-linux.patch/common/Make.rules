@@ -1,0 +1,171 @@
+# ------------------------------------------------------------------
+#
+#    Copyright (C) 2002-2005 Novell/SUSE
+#    Copyright (C) 2010-2015 Canonical, Ltd.
+#
+#    This program is free software; you can redistribute it and/or
+#    modify it under the terms of version 2 of the GNU General Public 
+#    License published by the Free Software Foundation.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program; if not, contact Novell, Inc.
+# ------------------------------------------------------------------
+# Make.rules - common make targets and variables for building AppArmor
+#
+# NOTES:
+#   Before including this file in your Makefile, you should
+#   - define COMMONDIR (the location of the common/ directory)
+#   - define the default rule (usually 'all:'). (Note: you can redefine
+#     it later in your Makefile)
+
+.PHONY: common_Make.rules_is_a_bad_target
+common_Make.rules_is_a_bad_target:
+	@echo "*** default target in common/Make.rules hit - either you did something strange, or something is broken... ***"
+	exit 1
+
+DISTRIBUTION=AppArmor
+VERSION=$(shell cat $(COMMONDIR)/Version)
+
+# Convenience functions
+pathsearch = $(firstword $(wildcard $(addsuffix /$(1),$(subst :, ,$(PATH)))))
+map = $(foreach a,$(2),$(call $(1),$(a)))
+
+AWK:=$(shell which awk)
+ifndef AWK
+$(error awk utility required for build but not available)
+endif
+
+define nl
+
+endef
+
+REPO_VERSION_CMD=[ -x /usr/bin/git ] && /usr/bin/git describe --tags --long --abbrev=16 --match 'v*' 2> /dev/null || awk '{ print $2 }' common/.stamp_rev
+
+ifndef PYTHON_VERSIONS
+PYTHON_VERSIONS = $(call map, pathsearch, python2 python3)
+endif
+
+ifndef PYTHON
+PYTHON = $(firstword ${PYTHON_VERSIONS})
+endif
+
+#Helper function to be used with $(call pyalldo, run_test_with_all.py)
+pyalldo=set -e; $(foreach py, $(PYTHON_VERSIONS), $(py) $(1);)
+
+.PHONY: version
+.SILENT: version
+version:
+	echo $(VERSION)
+
+.PHONY: repo_version
+.SILENT: repo_version
+repo_version:
+	echo $(shell $(value REPO_VERSION_CMD))
+
+.PHONY: pod_clean
+ifndef VERBOSE
+.SILENT: pod_clean
+endif
+pod_clean:
+	-rm -f ${MANPAGES} *.[0-9].gz ${HTMLMANPAGES} pod2htm*.tmp
+
+# =====================
+# generate list of capabilities based on
+# /usr/include/linux/capabilities.h for use in multiple locations in
+# the source tree
+# =====================
+
+# emits defined capabilities in a simple list, e.g. "CAP_NAME CAP_NAME2"
+CAPABILITIES=$(shell echo "\#include <linux/capability.h>" | cpp -dM | LC_ALL=C sed -n -e '/CAP_EMPTY_SET/d' -e 's/^\#define[ \t]\+CAP_\([A-Z0-9_]\+\)[ \t]\+\([0-9xa-f]\+\)\(.*\)$$/CAP_\1/p' | LC_ALL=C sort)
+
+.PHONY: list_capabilities
+list_capabilities: /usr/include/linux/capability.h
+	@echo "$(CAPABILITIES)"
+
+# =====================
+# generate list of network protocols based on
+# sys/socket.h for use in multiple locations in
+# the source tree
+# =====================
+
+# These are the families that it doesn't make sense for apparmor
+# to mediate. We use PF_ here since that is what is required in
+# bits/socket.h, but we will rewrite these as AF_.
+
+FILTER_FAMILIES=PF_UNIX
+
+__FILTER=$(shell echo $(strip $(FILTER_FAMILIES)) | sed -e 's/ /\\\|/g')
+
+# emits the AF names in a "AF_NAME NUMBER," pattern
+AF_NAMES=$(shell echo "\#include <sys/socket.h>" | cpp -dM | LC_ALL=C sed -n -e '/$(__FILTER)/d' -e 's/PF_LOCAL/PF_UNIX/' -e 's/^\#define[ \t]\+PF_\([A-Z0-9_]\+\)[ \t]\+\([0-9]\+\).*$$/AF_\1 \2,/p' | sort -n -k2)
+
+.PHONY: list_af_names
+list_af_names:
+	@echo "$(AF_NAMES)"
+
+# =====================
+# manpages
+# =====================
+
+POD2MAN                         = /usr/bin/pod2man
+POD2HTML                        = /usr/bin/pod2html
+MANDIR                          = /usr/share/man
+DOCDIR                          = /usr/share/doc/${NAME}-${VERSION}
+
+# get list of directory numbers based on definition of MANPAGES variable
+MANDIRS=$(sort $(foreach dir, 1 2 3 4 5 6 7 8, $(patsubst %.${dir}, ${dir}, $(filter %.${dir}, ${MANPAGES}))))
+HTMLMANPAGES=$(foreach manpage, ${MANPAGES}, ${manpage}.html)
+
+.PHONY: install_manpages
+install_manpages: $(MANPAGES)
+	$(foreach dir, ${MANDIRS}, \
+	     install -d ${DESTDIR}/${MANDIR}/man${dir} ; \
+	     install -m 644 $(filter %.${dir}, ${MANPAGES}) ${DESTDIR}/${MANDIR}/man${dir}; \
+	)
+
+MAN_RELEASE="AppArmor ${VERSION}"
+
+%.1 %.2 %.3 %.4 %.5 %.6 %.7 %.8: %.pod
+	$(POD2MAN) $< --release=$(MAN_RELEASE) --center=AppArmor --stderr --section=$(subst .,,$(suffix $@)) > $@
+
+%.1.html: %.pod
+	$(POD2HTML) --header --css apparmor.css --infile=$< --outfile=$@
+
+%.2.html: %.pod
+	$(POD2HTML) --header --css apparmor.css --infile=$< --outfile=$@
+
+%.3.html: %.pod
+	$(POD2HTML) --header --css apparmor.css --infile=$< --outfile=$@
+
+%.4.html: %.pod
+	$(POD2HTML) --header --css apparmor.css --infile=$< --outfile=$@
+
+%.5.html: %.pod
+	$(POD2HTML) --header --css apparmor.css --infile=$< --outfile=$@
+
+%.6.html: %.pod
+	$(POD2HTML) --header --css apparmor.css --infile=$< --outfile=$@
+
+%.7.html: %.pod
+	$(POD2HTML) --header --css apparmor.css --infile=$< --outfile=$@
+
+%.8.html: %.pod
+	$(POD2HTML) --header --css apparmor.css --infile=$< --outfile=$@
+
+A2PS_ARGS=-Ec -g --line-numbers=1
+ENSCRIPT_ARGS=-C -2jGr -f Courier6 -E
+%.c.ps: %.c
+	#a2ps ${A2PS_ARGS} $< -o $@
+	enscript ${ENSCRIPT_ARGS} -o $@ $<
+
+%.pm.ps: %.pm
+	enscript ${ENSCRIPT_ARGS} -o $@ $<
+
+.PHONY: check_pod_files
+check_pod_files:
+	LANG=C podchecker -warning -warning *.pod

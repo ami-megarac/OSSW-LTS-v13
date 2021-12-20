@@ -1,0 +1,1 @@
+type=AVC msg=audit(1495217772.047:4471): apparmor="DENIED" operation="ptrace" profile="/usr/bin/pidgin" pid=21704 comm="pidgin" peer="unconfined"

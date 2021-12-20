@@ -1,0 +1,216 @@
+#!/usr/bin/perl
+# ----------------------------------------------------------------------
+#    Copyright (c) 2005 Novell, Inc. All Rights Reserved.
+#
+#    This program is free software; you can redistribute it and/or
+#    modify it under the terms of version 2 of the GNU General Public
+#    License as published by the Free Software Foundation.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program; if not, contact Novell, Inc.
+#
+#    To contact Novell about this file by physical or electronic mail,
+#    you may find current contact information at www.novell.com.
+# ----------------------------------------------------------------------
+
+use strict;
+use Getopt::Long;
+
+use Immunix::AppArmor;
+
+use Data::Dumper;
+
+use Locale::gettext;
+use POSIX;
+
+sub sysctl_read($) {
+    my $path = shift;
+    my $value = undef;
+    if (open(SYSCTL, "<$path")) {
+        $value = int(<SYSCTL>);
+    }
+    close(SYSCTL);
+    return $value;
+}
+
+sub sysctl_write($$) {
+    my $path = shift;
+    my $value = shift;
+    return if (!defined($value));
+    if (open(SYSCTL, ">$path")) {
+        print SYSCTL $value;
+        close(SYSCTl);
+    }
+}
+
+# force $PATH to be sane
+$ENV{PATH} = "/bin:/sbin:/usr/bin:/usr/sbin";
+
+# initialize the local poo
+setlocale(LC_MESSAGES, "");
+textdomain("apparmor-utils");
+
+# options variables
+my $help = '';
+
+GetOptions(
+    'file|f=s' => \$filename,
+    'dir|d=s'  => \$profiledir,
+    'help|h'   => \$help,
+);
+
+# tell 'em how to use it...
+&usage && exit if $help;
+
+my $sd_mountpoint = check_for_subdomain();
+unless ($sd_mountpoint) {
+    fatal_error(gettext("AppArmor does not appear to be started. Please enable AppArmor and try again."));
+}
+
+# let's convert it to full path...
+$profiledir = get_full_path($profiledir);
+
+unless (-d $profiledir) {
+    fatal_error "Can't find AppArmor profiles in $profiledir.";
+}
+
+# what are we profiling?
+my $profiling = shift;
+
+unless ($profiling) {
+    $profiling = UI_GetString(gettext("Please enter the program to profile: "), "")
+      || exit 0;
+}
+
+my $fqdbin;
+if (-e $profiling) {
+    $fqdbin = get_full_path($profiling);
+    chomp($fqdbin);
+} else {
+    if ($profiling !~ /\//) {
+        my $which = which($profiling);
+        if ($which) {
+            $fqdbin = get_full_path($which);
+        }
+    }
+}
+
+unless ($fqdbin && -e $fqdbin) {
+    if ($profiling =~ /^[^\/]+$/) {
+        fatal_error(sprintf(gettext('Can\'t find %s in the system path list.  If the name of the application is correct, please run \'which %s\' in the other window in order to find the fully-qualified path.'), $profiling, $profiling));
+    } else {
+        fatal_error(sprintf(gettext('%s does not exist, please double-check the path.'), $profiling));
+    }
+}
+
+
+# make sure that the app they're requesting to profile is not marked as
+# not allowed to have it's own profile
+check_qualifiers($fqdbin);
+
+# load all the include files
+loadincludes();
+
+my $profilefilename = getprofilefilename($fqdbin);
+if (-e $profilefilename) {
+    $helpers{$fqdbin} = getprofileflags($profilefilename) || "enforce";
+} else {
+    autodep($fqdbin);
+    $helpers{$fqdbin} = "enforce";
+}
+
+if ($helpers{$fqdbin} eq "enforce") {
+    complain($fqdbin);
+    reload($fqdbin);
+}
+
+# When reading from syslog, it is possible to hit the default kernel
+# printk ratelimit. This will result in audit entries getting skipped,
+# making profile generation inaccurate. When using genprof, disable
+# the printk ratelimit, and restore it on exit.
+my $ratelimit_sysctl = "/proc/sys/kernel/printk_ratelimit";
+my $ratelimit_saved = sysctl_read($ratelimit_sysctl);
+END { sysctl_write($ratelimit_sysctl, $ratelimit_saved); }
+sysctl_write($ratelimit_sysctl, 0);
+
+UI_Info(gettext("\nBefore you begin, you may wish to check if a\nprofile already exists for the application you\nwish to confine. See the following wiki page for\nmore information:\nhttps://gitlab.com/apparmor/apparmor/wikis/Profiles"));
+
+UI_Important(gettext("Please start the application to be profiled in \nanother window and exercise its functionality now.\n\nOnce completed, select the \"Scan\" button below in \norder to scan the system logs for AppArmor events.  \n\nFor each AppArmor event, you will be given the  \nopportunity to choose whether the access should be  \nallowed or denied."));
+
+my $syslog         = 1;
+my $logmark        = "";
+my $done_profiling = 0;
+
+$syslog = 0 if (-e "/var/log/audit/audit.log");
+
+while (not $done_profiling) {
+    if ($syslog) {
+        $logmark = `date | md5sum`;
+        chomp $logmark;
+        $logmark = $1 if $logmark =~ /^([0-9a-f]+)/;
+        system("$logger -p kern.warn 'GenProf: $logmark'");
+    } else {
+        $logmark = last_audit_entry_time();
+    }
+    eval {
+
+        my $q = {};
+        $q->{headers} = [ gettext("Profiling"), $fqdbin ];
+        $q->{functions} = [ "CMD_SCAN", "CMD_FINISHED" ];
+        $q->{default} = "CMD_SCAN";
+
+        my ($ans, $arg) = UI_PromptUser($q);
+
+        if ($ans eq "CMD_SCAN") {
+
+            my $lp_ret = do_logprof_pass($logmark);
+
+            $done_profiling = 1 if $lp_ret eq "FINISHED";
+
+        } else {
+
+            $done_profiling = 1;
+
+        }
+    };
+    if ($@) {
+        if ($@ =~ /FINISHING/) {
+            $done_profiling = 1;
+        } else {
+            die $@;
+        }
+    }
+}
+
+for my $p (sort keys %helpers) {
+    if ($helpers{$p} eq "enforce") {
+        enforce($p);
+        reload($p);
+    }
+}
+
+UI_Info(gettext("Reloaded AppArmor profiles in enforce mode."));
+UI_Info(gettext("\nPlease consider contributing your new profile! See\nthe following wiki page for more information:\nhttps://gitlab.com/apparmor/apparmor/wikis/Profiles\n"));
+UI_Info(sprintf(gettext('Finished generating profile for %s.'), $fqdbin));
+exit 0;
+
+sub usage {
+    UI_Info(sprintf(gettext("usage: \%s [ -d /path/to/profiles ] [ -f /path/to/logfile ] [ program to profile ]"), $0));
+    exit 0;
+}
+
+sub last_audit_entry_time {
+    local $_ = `tail -1 /var/log/audit/audit.log`;
+    my $logmark;
+    if (/^*msg\=audit\((\d+\.\d+\:\d+).*\).*$/) {
+        $logmark = $1;
+    } else {
+        $logmark = "";
+    }
+    return $logmark;
+}

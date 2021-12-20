@@ -1,0 +1,30 @@
+From: Tyler Hicks <tyhicks@canonical.com>
+Date: Tue, 12 Mar 2019 23:43:48 +0000
+Subject: libapparmor: Fix segfault when loading policy cache files
+
+qsort()'s _size_ parameter is used to indicate the size of the elements
+in the _base_ array parameter. Adjust the third argument to qsort() to
+indicate that we're dealing with an array of struct dirent pointers
+rather than an array of struct dirent.
+
+PR: https://gitlab.com/apparmor/apparmor/merge_requests/348
+(cherry picked from commit 8b218718204062efa2dd093d95d2b05e0d722f92)
+Signed-off-by: Tyler Hicks <tyhicks@canonical.com>
+Signed-off-by: John Johansen <john.johansen@canonical.com>
+---
+ libraries/libapparmor/src/private.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/libraries/libapparmor/src/private.c b/libraries/libapparmor/src/private.c
+index 225762e..fd88a46 100644
+--- a/libraries/libapparmor/src/private.c
++++ b/libraries/libapparmor/src/private.c
+@@ -366,7 +366,7 @@ static ssize_t readdirfd(int dirfd, struct dirent ***out,
+ 	}
+ 
+ 	if (dircmp)
+-		qsort(dents, n, sizeof(*dent), (int (*)(const void *, const void *))dircmp);
++		qsort(dents, n, sizeof(struct dirent *), (int (*)(const void *, const void *))dircmp);
+ 
+ 	*out = dents;
+ 	closedir(dir);

@@ -1,0 +1,12 @@
+#
+#=DESCRIPTION validate some uses of the profile flags.
+#=EXRESULT PASS
+# vim:syntax=subdomain
+# Last Modified: Sun Apr 17 19:44:44 2005
+#
+/does/not/exist flags=(chroot_relative, mediate_deleted, attach_disconnected, chroot_attach) {
+  #include <includes/base>
+
+  /usr/X11R6/lib/lib*so* r,
+  /does/not/exist r,
+}

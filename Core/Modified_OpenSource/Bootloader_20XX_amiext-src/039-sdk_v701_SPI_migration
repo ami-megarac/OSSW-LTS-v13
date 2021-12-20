@@ -1,0 +1,262 @@
+diff -Naur uboot_old/drivers/mtd/spi/spi-nor-core.c uboot/drivers/mtd/spi/spi-nor-core.c
+--- uboot_old/drivers/mtd/spi/spi-nor-core.c	2021-09-08 14:01:02.996122582 +0800
++++ uboot/drivers/mtd/spi/spi-nor-core.c	2021-09-08 16:31:16.430971138 +0800
+@@ -164,6 +164,20 @@
+ 	return val;
+ }
+ 
++static int read_winbond_sr2(struct spi_nor *nor)
++{
++	int ret;
++	u8 val;
++
++	ret = nor->read_reg(nor, SPINOR_OP_WINBOND_RDSR2, &val, 1);
++	if (ret < 0) {
++		pr_debug("error %d reading SR2\n", (int)ret);
++		return ret;
++	}
++
++	return val;
++}
++
+ /*
+  * Read the flag status register, returning its value in the location
+  * Return the status register value.
+@@ -214,6 +228,12 @@
+ 	return nor->write_reg(nor, SPINOR_OP_WRSR, nor->cmd_buf, 1);
+ }
+ 
++static int write_winbond_sr2(struct spi_nor *nor, u8 val)
++{
++	nor->cmd_buf[0] = val;
++	return nor->write_reg(nor, SPINOR_OP_WINBOND_WRSR2, nor->cmd_buf, 1);
++}
++
+ /*
+  * Set write enable latch with Write Enable command.
+  * Returns negative if error occurred.
+@@ -595,6 +615,78 @@
+ 	return ret;
+ }
+ 
++static int micron_read_nvcr(struct spi_nor *nor)
++{
++	int ret;
++	int val;
++
++	ret = nor->read_reg(nor, SPINOR_OP_MICRON_RDNVCR, (u8 *)&val, 2);
++	if (ret < 0) {
++		dev_err(nor->dev, "[Micron] error %d reading NVCR\n", ret);
++		return ret;
++	}
++
++	return val;
++}
++
++static int micron_write_nvcr(struct spi_nor *nor, int val)
++{
++	int ret;
++
++	write_enable(nor);
++
++	nor->cmd_buf[0] = val & 0xff;
++	nor->cmd_buf[1] = (val >> 8) & 0xff;
++
++	ret = nor->write_reg(nor, SPINOR_OP_MICRON_WRNVCR, nor->cmd_buf, 2);
++	if (ret < 0) {
++		dev_err(nor->dev,
++			"[Micron] error while writing configuration register\n");
++		return -EINVAL;
++	}
++
++	ret = spi_nor_wait_till_ready(nor);
++	if (ret) {
++		dev_err(nor->dev,
++			"[Micron] timeout while writing configuration register\n");
++		return ret;
++	}
++
++	return 0;
++}
++
++static int micron_read_cr_quad_enable(struct spi_nor *nor)
++{
++	int ret;
++
++	/* Check current Quad Enable bit value. */
++	ret = micron_read_nvcr(nor);
++	if (ret < 0) {
++		dev_err(dev, "[Micron] error while reading nonvolatile configuration register\n");
++		return -EINVAL;
++	}
++
++	if ((ret & MICRON_RST_HOLD_CTRL) == 0)
++		return 0;
++
++	ret &= ~MICRON_RST_HOLD_CTRL;
++
++	/* Keep the current value of the Status Register. */
++	ret = micron_write_nvcr(nor, ret);
++	if (ret < 0) {
++		dev_err(dev, "[Micron] error while writing nonvolatile configuration register\n");
++		return -EINVAL;
++	}
++
++	ret = micron_read_nvcr(nor);
++	if (ret > 0 && (ret & MICRON_RST_HOLD_CTRL)) {
++		dev_err(nor->dev, "[Micron] Quad bit not set\n");
++		return -EINVAL;
++	}
++
++	return 0;
++}
++
+ #ifdef CONFIG_SPI_FLASH_SPANSION
+ /*
+  * Erase for Spansion/Cypress Flash devices that has overlaid 4KB sectors at
+@@ -1275,7 +1367,7 @@
+ 	/* Check current Quad Enable bit value. */
+ 	ret = read_cr(nor);
+ 	if (ret < 0) {
+-		dev_dbg(dev, "error while reading configuration register\n");
++		dev_dbg(nor->dev, "error while reading configuration register\n");
+ 		return -EINVAL;
+ 	}
+ 
+@@ -1287,7 +1379,7 @@
+ 	/* Keep the current value of the Status Register. */
+ 	ret = read_sr(nor);
+ 	if (ret < 0) {
+-		dev_dbg(dev, "error while reading status register\n");
++		dev_dbg(nor->dev, "error while reading status register\n");
+ 		return -EINVAL;
+ 	}
+ 	sr_cr[0] = ret;
+@@ -1306,6 +1398,56 @@
+ 	return 0;
+ }
+ 
++/**
++ * sr2_bit1_quad_enable() - set QE bit in Status Register 2.
++ * @nor:	pointer to a 'struct spi_nor'
++ *
++ * Set the Quad Enable (QE) bit in the Status Register 2.
++ *
++ * Return: 0 on success, -errno otherwise.
++ */
++static int winbond_sr2_bit1_quad_enable(struct spi_nor *nor)
++{
++	u8 sr2 = 0;
++	int ret;
++
++	/* Check current Quad Enable bit value. */
++	ret = read_winbond_sr2(nor);
++	if (ret < 0) {
++		dev_err(nor->dev, "error while reading status register 2\n");
++		return -EINVAL;
++	}
++
++	if (ret & SR2_QUAD_EN_BIT1)
++		return 0;
++
++	/* Update the Quad Enable bit. */
++	sr2 = (u8)(ret | SR2_QUAD_EN_BIT1);
++
++	write_enable(nor);
++
++	ret = write_winbond_sr2(nor, sr2);
++	if (ret < 0) {
++		dev_err(nor->dev, "error while writing status register 2\n");
++		return -EINVAL;
++	}
++
++	ret = spi_nor_wait_till_ready(nor);
++	if (ret < 0) {
++		dev_err(nor->dev, "timeout while writing status register 2\n");
++		return ret;
++	}
++
++	/* Read back and check it. */
++	ret = read_winbond_sr2(nor);
++	if (ret < 0 || !(ret & SR2_QUAD_EN_BIT1)) {
++		dev_err(nor->dev, "SR2 Quad bit not set\n");
++		return -EINVAL;
++	}
++
++	return 0;
++}
++
+ #if CONFIG_IS_ENABLED(SPI_FLASH_SFDP_SUPPORT)
+ /**
+  * spansion_no_read_cr_quad_enable() - set QE bit in Configuration Register.
+@@ -2165,6 +2307,13 @@
+ 			}
+ #endif
+ 		}
++
++		/* need to disable hold/reset pin feature */
++		if (JEDEC_MFR(info) == SNOR_MFR_ST)
++			params->quad_enable = micron_read_cr_quad_enable;
++
++		if (JEDEC_MFR(info) == SNOR_MFR_GIGADEVICE)
++			params->quad_enable = winbond_sr2_bit1_quad_enable;
+ 	}
+ 
+ 	return 0;
+@@ -2393,6 +2542,7 @@
+ 
+ 	if (nor->addr_width == 4 &&
+ 	    (JEDEC_MFR(nor->info) != SNOR_MFR_SPANSION)) {
++
+ 		/*
+ 		 * If the RESET# pin isn't hooked up properly, or the system
+ 		 * otherwise doesn't perform a reset command in the boot
+diff -Naur uboot_old/drivers/spi/aspeed_spi.c uboot/drivers/spi/aspeed_spi.c
+--- uboot_old/drivers/spi/aspeed_spi.c	2021-09-08 14:01:02.796122578 +0800
++++ uboot/drivers/spi/aspeed_spi.c	2021-09-08 14:17:30.392144334 +0800
+@@ -951,6 +951,7 @@
+ 			CE_CTRL_CMD(flash->spi->read_opcode) |
+ 			CE_CTRL_DUMMY((flash->spi->read_dummy/8)) |
+ 			CE_CTRL_FREADMODE;
++		flash->ce_ctrl_user |= CE_G6_CTRL_CLOCK_FREQ(read_hclk);
+ 	} else {
+ 		flash->ce_ctrl_fread = CE_CTRL_CLOCK_FREQ(read_hclk) |
+ 			flash->read_iomode |
+diff -Naur uboot_old/include/linux/mtd/spi-nor.h uboot/include/linux/mtd/spi-nor.h
+--- uboot_old/include/linux/mtd/spi-nor.h	2021-09-08 14:02:18.176124238 +0800
++++ uboot/include/linux/mtd/spi-nor.h	2021-09-08 14:15:22.116141508 +0800
+@@ -105,6 +105,9 @@
+ #define SPINOR_OP_EN4B		0xb7	/* Enter 4-byte mode */
+ #define SPINOR_OP_EX4B		0xe9	/* Exit 4-byte mode */
+ 
++#define SPINOR_OP_WINBOND_RDSR2		0x35
++#define SPINOR_OP_WINBOND_WRSR2		0x31
++
+ /* Used for Spansion flashes only. */
+ #define SPINOR_OP_BRWR		0x17	/* Bank register write */
+ #define SPINOR_OP_BRRD		0x16	/* Bank register read */
+@@ -115,6 +118,8 @@
+ /* Used for Micron flashes only. */
+ #define SPINOR_OP_RD_EVCR      0x65    /* Read EVCR register */
+ #define SPINOR_OP_WD_EVCR      0x61    /* Write EVCR register */
++#define SPINOR_OP_MICRON_RDNVCR 0xB5   /* Read nonvolatile configuration register */
++#define SPINOR_OP_MICRON_WRNVCR 0xB1   /* Write nonvolatile configuration register */
+ 
+ /* Status Register bits. */
+ #define SR_WIP			BIT(0)	/* Write in progress */
+@@ -133,6 +138,7 @@
+ 
+ /* Enhanced Volatile Configuration Register bits */
+ #define EVCR_QUAD_EN_MICRON	BIT(7)	/* Micron Quad I/O */
++#define MICRON_RST_HOLD_CTRL BIT(4)
+ 
+ /* Flag Status Register bits */
+ #define FSR_READY		BIT(7)	/* Device status, 0 = Busy, 1 = Ready */
+@@ -145,6 +151,7 @@
+ 
+ /* Status Register 2 bits. */
+ #define SR2_QUAD_EN_BIT7	BIT(7)
++#define SR2_QUAD_EN_BIT1	BIT(1)
+ 
+ /* Supported SPI protocols */
+ #define SNOR_PROTO_INST_MASK	GENMASK(23, 16)

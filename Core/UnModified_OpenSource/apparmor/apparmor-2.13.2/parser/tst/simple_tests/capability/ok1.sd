@@ -1,0 +1,156 @@
+#
+#=DESCRIPTION validate some uses of capabilties.
+#=EXRESULT PASS
+# vim:syntax=subdomain
+# Last Modified: Sun Apr 17 19:44:44 2005
+#
+/does/not/exist {
+  capability chown,
+  capability dac_override,
+  capability dac_read_search,
+  capability fowner,
+  capability fsetid,
+  capability kill,
+  capability setgid,
+  capability setuid,
+  capability setpcap,
+  capability linux_immutable,
+  capability net_bind_service,
+  capability net_broadcast,
+  capability net_admin,
+  capability net_raw,
+  capability ipc_lock,
+  capability ipc_owner,
+  capability sys_module,
+  capability sys_rawio,
+  capability sys_chroot,
+  capability sys_ptrace,
+  capability sys_pacct,
+  capability sys_admin,
+  capability sys_boot,
+  capability sys_nice,
+  capability sys_resource,
+  capability sys_time,
+  capability sys_tty_config,
+  capability mknod,
+  capability lease,
+  capability audit_write,
+  capability audit_control,
+  capability setfcap,
+  capability mac_override,
+}
+
+/does/not/exist2 {
+  ^chown { 
+    capability chown,
+  }
+  ^dac_override { 
+    capability dac_override,
+  }
+  ^dac_read_search { 
+    capability dac_read_search,
+  }
+  ^fowner { 
+    capability fowner,
+  }
+  ^fsetid { 
+    capability fsetid,
+  }
+  ^kill { 
+    capability kill,
+  }
+  ^setgid { 
+    capability setgid,
+  }
+  ^setuid { 
+    capability setuid,
+  }
+  ^setpcap { 
+    capability setpcap,
+  }
+  ^linux_immutable { 
+    capability linux_immutable,
+  }
+  ^net_bind_service { 
+    capability net_bind_service,
+  }
+  ^net_broadcast { 
+    capability net_broadcast,
+  }
+  ^net_admin { 
+    capability net_admin,
+  }
+  ^net_raw { 
+    capability net_raw,
+  }
+  ^ipc_lock { 
+    capability ipc_lock,
+  }
+  ^ipc_owner { 
+    capability ipc_owner,
+  }
+  ^sys_module { 
+    capability sys_module,
+  }
+  ^sys_rawio { 
+    capability sys_rawio,
+  }
+  ^sys_chroot { 
+    capability sys_chroot,
+  }
+  ^sys_ptrace { 
+    capability sys_ptrace,
+  }
+  ^sys_pacct { 
+    capability sys_pacct,
+  }
+  ^sys_admin { 
+    capability sys_admin,
+  }
+  ^sys_boot { 
+    capability sys_boot,
+  }
+  ^sys_nice { 
+    capability sys_nice,
+  }
+  ^sys_resource { 
+    capability sys_resource,
+  }
+  ^sys_time { 
+    capability sys_time,
+  }
+  ^sys_tty_config { 
+    capability sys_tty_config,
+  }
+  ^mknod { 
+    capability mknod,
+  }
+  ^lease { 
+    capability lease,
+  }
+  ^audit_write {
+    capability audit_write,
+  }
+  ^audit_control {
+    capability audit_control,
+  }
+}
+
+# Test for duplicates?
+/does/not/exist3 {
+  capability mknod,
+  capability mknod,
+}
+
+/does/not/exit101 {
+  capability chown dac_override dac_read_search fowner fsetid kill setgid setuid setpcap linux_immutable net_bind_service net_broadcast net_admin net_raw ipc_lock ipc_owner sys_module sys_rawio sys_chroot sys_ptrace sys_pacct sys_admin sys_boot sys_nice sys_resource sys_time sys_tty_config mknod lease audit_write audit_control,
+
+}
+
+/does/not/exit102 {
+  capability chown dac_override dac_read_search fowner fsetid kill setgid setuid setpcap linux_immutable net_bind_service net_broadcast net_admin net_raw ipc_lock ipc_owner sys_module sys_rawio sys_chroot sys_ptrace sys_pacct sys_admin sys_boot sys_nice sys_resource sys_time sys_tty_config mknod lease audit_write audit_control,
+
+  capability chown dac_override dac_read_search fowner fsetid kill setgid setuid setpcap linux_immutable net_bind_service net_broadcast net_admin net_raw ipc_lock ipc_owner sys_module sys_rawio sys_chroot sys_ptrace sys_pacct sys_admin sys_boot sys_nice sys_resource sys_time sys_tty_config mknod lease audit_write audit_control,
+
+}
+

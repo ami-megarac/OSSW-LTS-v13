@@ -1,0 +1,10 @@
+#=DESCRIPTION conditional around only mode
+#=EXRESULT FAIL
+
+$FOO=true
+
+/bin/true {
+  /bin/true if $FOO {
+      r,
+  }
+}

@@ -1,0 +1,69 @@
+#!/bin/bash
+#
+# This test was written in response to http://bugs.debian.org/785075 to
+# attempt to automatically catch when/if it happens again.
+# It seems something in the build toolchain is sometimes producing lots
+# of embedded zeroes in the executables.
+# For example in util-linux 2.26.2-2 the /sbin/fstrim was over 2MB in size
+# instead of normal ~ 40kB.
+#
+# Copyright (c) 2015, Andreas Henriksson <andreas@fatal.se>
+set -e
+set -u
+#set -x
+
+PACKAGES="util-linux bsdutils mount"
+# 10k should be large enough to not trigger false positives. Bump this
+# up if needed.
+CHUNKSIZELIMIT="10000"
+
+CURRENT=""
+LAST=""
+RET=0
+
+
+for FILE in $(dpkg -L $PACKAGES | egrep '/s?bin/') ; do
+
+if [ ! -e "$FILE" ]; then
+	#echo "E: target file '$FILE' not found." >&2
+	exit 1
+fi
+
+function chunk_size
+{
+	#echo "DEBUG: start => $1, stop => $2" >&2
+	SIZE=$(echo ibase=16 \; ${2^^} - ${1^^} | bc)
+	#echo "I: Calculated chunk size $SIZE ($2 - $1)" >&2
+	echo $SIZE
+}
+
+hd $FILE | grep -C1 '^\*' | while read -a CURRENT
+do
+	if [ "${CURRENT[0]}" = "--" ]; then
+		#echo "I: Skipping separator" >&2
+		continue
+	fi
+
+	if [ "${CURRENT[0]}" = "*" ]; then
+		#echo "I: Found chunk indicator." >&2
+		START="$LAST"
+	fi
+
+	if [ "$LAST" = "*" ]; then
+		#echo "I: Both start and stop should now be located." >&2
+		STOP="${CURRENT[0]}"
+		CHUNKSIZE=$(chunk_size "$START" "$STOP")
+		if [ "$CHUNKSIZE" -gt "$CHUNKSIZELIMIT" ]; then
+			echo "E: oversized chunk found in $FILE !"
+			((RET++))
+		fi
+	fi
+
+	#echo "I: Yet another line processed." >&2
+	LAST="${CURRENT[0]}"
+
+done
+
+done
+
+exit $RET

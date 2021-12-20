@@ -1,0 +1,12 @@
+#!/bin/sh
+set -e
+
+update-alternatives --install /usr/bin/pager pager /bin/more 50 \
+	--slave /usr/share/man/man1/pager.1.gz pager.1.gz \
+	/usr/share/man/man1/more.1.gz
+
+# We stopped shipping the 'pg' utility, so remove it as a pager
+# alternative on upgrades from Stretch.
+update-alternatives --remove pager /usr/bin/pg
+
+#DEBHELPER#

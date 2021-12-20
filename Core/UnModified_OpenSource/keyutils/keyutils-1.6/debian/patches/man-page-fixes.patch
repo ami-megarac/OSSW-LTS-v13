@@ -1,0 +1,32 @@
+From: Christian Kastner <ckk@debian.org>
+Date: Sat, 9 Feb 2019 22:29:12 +0100
+Subject: man page fixes
+
+Forwarded: yes
+Last-Update: 2019-02-09
+
+---
+ man/keyctl_pkey_verify.3 | 2 +-
+ man/request-key.8        | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/man/keyctl_pkey_verify.3 b/man/keyctl_pkey_verify.3
+index 6b2927a..0535113 100644
+--- a/man/keyctl_pkey_verify.3
++++ b/man/keyctl_pkey_verify.3
+@@ -1 +1 @@
+-.so keyctl_pkey_verify.3
++.so keyctl_pkey_sign.3
+diff --git a/man/request-key.8 b/man/request-key.8
+index 50a7506..4fb837c 100644
+--- a/man/request-key.8
++++ b/man/request-key.8
+@@ -25,7 +25,7 @@ line:
+ Turn on debugging mode.  In this mode, no attempts are made to access any keys
+ and, if a handler program is selected, it won't be executed; instead, this
+ program will print a message and exit 0.
+-.IP \fB-D <description>\fP
++.IP "\fB-D <description>\fP"
+ In debugging mode, use the proposed key description specified with this rather
+ than the sample ("user;0;0;1f0000;debug:1234") built into the program.
+ .IP \fB-l\fP

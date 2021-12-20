@@ -103,16 +103,20 @@ static int strtod_buffer_size(const char *s)
 
 /* Similar to strtod(), but must be passed the current locale's decimal point
  * character. Guaranteed to be called at the start of any valid number in a string */
-double fpconv_strtod(const char *nptr, char **endptr)
+double fpconv_strtod(const char *nptr, char **endptr, char *str_token)
 {
     char localbuf[FPCONV_G_FMT_BUFSIZE];
     char *buf, *endbuf, *dp;
     int buflen;
     double value;
+    long long int long_integer;
 
     /* System strtod() is fine when decimal point is '.' */
-    if (locale_decimal_point == '.')
+    if (locale_decimal_point == '.'){
+        sscanf(nptr, "%lld",&long_integer);
+        snprintf(str_token, 24,"%lld",long_integer );
         return strtod(nptr, endptr);
+    }
 
     buflen = strtod_buffer_size(nptr);
     if (!buflen) {

@@ -1,0 +1,11 @@
+--- a/backends/riscv_retval.c
++++ b/backends/riscv_retval.c
+@@ -111,7 +111,7 @@
+ 		       Dwarf_Die *arg1 __attribute__ ((unused)))
+ {
+   /* ??? */
+-  return 1;
++  return 0;
+ }
+ 
+ static int

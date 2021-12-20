@@ -1,0 +1,228 @@
+#
+#=DESCRIPTION validate some uses of the profile flags.
+#=EXRESULT PASS
+# vim:syntax=subdomain
+# Last Modified: Sun Apr 17 19:44:44 2005
+#
+
+#==============================
+/does/not/exist flags=(chroot_relative, mediate_deleted) {
+
+  /usr/X11R6/lib/lib*so* r,
+  /does/not/exist r,
+}
+
+/does/not/exist1 flags=(audit, chroot_relative, mediate_deleted) {
+  
+
+  /usr/X11R6/lib/lib*so* r,
+  /does/not/exist r,
+}
+
+/does/not/exist2 flags=(chroot_relative, mediate_deleted, audit) {
+  
+
+  /usr/X11R6/lib/lib*so* r,
+  /does/not/exist r,
+}
+
+/does/not/exist3 flags=(complain, chroot_relative, mediate_deleted) {
+  
+
+  /usr/X11R6/lib/lib*so* r,
+  /does/not/exist r,
+}
+
+/does/not/exist4 flags=(chroot_relative, mediate_deleted, complain) {
+  
+
+  /usr/X11R6/lib/lib*so* r,
+  /does/not/exist r,
+}
+
+
+#-------
+
+/does/not/exist11 flags=(chroot_relative, delegate_deleted) {
+  
+
+  /usr/X11R6/lib/lib*so* r,
+  /does/not/exist r,
+}
+
+/does/not/exist12 flags=(audit, chroot_relative, delegate_deleted) {
+  
+
+  /usr/X11R6/lib/lib*so* r,
+  /does/not/exist r,
+}
+
+/does/not/exist13 flags=(chroot_relative, delegate_deleted, audit) {
+  
+
+  /usr/X11R6/lib/lib*so* r,
+  /does/not/exist r,
+}
+
+/does/not/exist14 flags=(complain, chroot_relative, delegate_deleted) {
+  
+
+  /usr/X11R6/lib/lib*so* r,
+  /does/not/exist r,
+}
+
+/does/not/exist15 flags=(chroot_relative, delegate_deleted, complain) {
+  
+
+  /usr/X11R6/lib/lib*so* r,
+  /does/not/exist r,
+}
+
+
+#-------
+
+/does/not/exist21 flags=(chroot_relative, attach_disconnected) {
+  
+
+  /usr/X11R6/lib/lib*so* r,
+  /does/not/exist r,
+}
+
+/does/not/exist22 flags=(audit, chroot_relative, attach_disconnected) {
+  
+
+  /usr/X11R6/lib/lib*so* r,
+  /does/not/exist r,
+}
+
+/does/not/exist23 flags=(chroot_relative, attach_disconnected, audit) {
+  
+
+  /usr/X11R6/lib/lib*so* r,
+  /does/not/exist r,
+}
+
+/does/not/exist24 flags=(complain, chroot_relative, attach_disconnected) {
+  
+
+  /usr/X11R6/lib/lib*so* r,
+  /does/not/exist r,
+}
+
+/does/not/exist25 flags=(chroot_relative, attach_disconnected, complain) {
+  
+
+  /usr/X11R6/lib/lib*so* r,
+  /does/not/exist r,
+}
+
+#-------
+
+/does/not/exist31 flags=(chroot_relative, no_attach_disconnected) {
+  
+
+  /usr/X11R6/lib/lib*so* r,
+  /does/not/exist r,
+}
+
+/does/not/exist32 flags=(audit, chroot_relative, no_attach_disconnected) {
+  
+
+  /usr/X11R6/lib/lib*so* r,
+  /does/not/exist r,
+}
+
+/does/not/exist33 flags=(chroot_relative, no_attach_disconnected, audit) {
+  
+
+  /usr/X11R6/lib/lib*so* r,
+  /does/not/exist r,
+}
+
+/does/not/exist34 flags=(complain, chroot_relative, no_attach_disconnected) {
+  
+
+  /usr/X11R6/lib/lib*so* r,
+  /does/not/exist r,
+}
+
+/does/not/exist35 flags=(chroot_relative, no_attach_disconnected, complain) {
+  
+
+  /usr/X11R6/lib/lib*so* r,
+  /does/not/exist r,
+}
+
+#-------
+
+/does/not/exist41 flags=(chroot_relative, chroot_attach) {
+  
+
+  /usr/X11R6/lib/lib*so* r,
+  /does/not/exist r,
+}
+
+/does/not/exist42 flags=(audit, chroot_relative, chroot_attach) {
+  
+
+  /usr/X11R6/lib/lib*so* r,
+  /does/not/exist r,
+}
+
+/does/not/exist43 flags=(chroot_relative, chroot_attach, audit) {
+  
+
+  /usr/X11R6/lib/lib*so* r,
+  /does/not/exist r,
+}
+
+/does/not/exist44 flags=(complain, chroot_relative, chroot_attach) {
+  
+
+  /usr/X11R6/lib/lib*so* r,
+  /does/not/exist r,
+}
+
+/does/not/exist45 flags=(chroot_relative, chroot_attach, complain) {
+  
+
+  /usr/X11R6/lib/lib*so* r,
+  /does/not/exist r,
+}
+
+#-------
+
+/does/not/exist51 flags=(chroot_relative, chroot_no_attach) {
+  
+
+  /usr/X11R6/lib/lib*so* r,
+  /does/not/exist r,
+}
+
+/does/not/exist52 flags=(audit, chroot_relative, chroot_no_attach) {
+  
+
+  /usr/X11R6/lib/lib*so* r,
+  /does/not/exist r,
+}
+
+/does/not/exist53 flags=(chroot_relative, chroot_no_attach, audit) {
+  
+
+  /usr/X11R6/lib/lib*so* r,
+  /does/not/exist r,
+}
+
+/does/not/exist54 flags=(complain, chroot_relative, chroot_no_attach) {
+  
+
+  /usr/X11R6/lib/lib*so* r,
+  /does/not/exist r,
+}
+
+/does/not/exist55 flags=(chroot_relative, chroot_no_attach, complain) {
+
+  /usr/X11R6/lib/lib*so* r,
+  /does/not/exist r,
+}
+

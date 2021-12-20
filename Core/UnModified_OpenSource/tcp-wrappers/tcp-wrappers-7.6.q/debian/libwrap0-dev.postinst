@@ -1,0 +1,22 @@
+#!/bin/sh -e
+
+upgrade_quirks() {
+  # replaced by a symlink in 7.6.q-20 but dpkg fails to do it on upgrades
+  if [ -d /usr/share/doc/libwrap0-dev -a \
+      ! -L /usr/share/doc/libwrap0-dev ]; then
+    rmdir /usr/share/doc/libwrap0-dev
+    ln -s /usr/share/doc/libwrap0 /usr/share/doc/libwrap0-dev
+  fi
+
+  return 0
+}
+
+case "$1" in
+    configure)
+    upgrade_quirks "$@"
+    ;;
+esac
+
+#DEBHELPER#
+
+exit 0

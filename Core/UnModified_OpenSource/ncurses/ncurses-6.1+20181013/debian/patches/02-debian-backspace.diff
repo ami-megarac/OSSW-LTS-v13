@@ -1,0 +1,32 @@
+Author: Daniel Jacobowitz <dan@debian.org>
+Author: Sven Joachim <svenjoac@gmx.de>
+Description: Fix backspace key description in some terminfo entries
+Bug-Debian: https://bugs.debian.org/237997
+Bug-Debian: https://bugs.debian.org/602300
+Forwarded: not-needed
+Last-Update: 2018-01-28
+
+---
+ misc/terminfo.src |    4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+--- a/misc/terminfo.src
++++ b/misc/terminfo.src
+@@ -5970,7 +5970,7 @@ Eterm|Eterm-color|Eterm with xterm-style
+ 	ich1=\E[@, il=\E[%p1%dL, il1=\E[L, ind=\n,
+ 	is1=\E[?47l\E>\E[?1l,
+ 	is2=\E[r\E[m\E[2J\E[H\E[?7h\E[?1;3;4;6l\E[4l, kNXT@,
+-	kPRV@, ka1=\E[7~, ka3=\E[5~, kb2=\EOu, kbeg=\EOu, kbs=^H,
++	kPRV@, ka1=\E[7~, ka3=\E[5~, kb2=\EOu, kbeg=\EOu, kbs=^?,
+ 	kc1=\E[8~, kc3=\E[6~, kent=\EOM, khlp=\E[28~, kmous=\E[M,
+ 	mc4=\E[4i, mc5=\E[5i, rc=\E8, rev=\E[7m, ri=\EM, rmacs=^O,
+ 	rmam=\E[?7l, rmcup=\E[2J\E[?47l\E8, rmir=\E[4l, rmkx=,
+@@ -6763,7 +6763,7 @@ screen|VT 100/ANSI X3.64 virtual termina
+ 	dl=\E[%p1%dM, dl1=\E[M, ed=\E[J, el=\E[K, el1=\E[1K,
+ 	enacs=\E(B\E)0, flash=\Eg, home=\E[H, hpa=\E[%i%p1%dG,
+ 	ht=^I, hts=\EH, ich=\E[%p1%d@, il=\E[%p1%dL, il1=\E[L,
+-	ind=\n, indn=\E[%p1%dS, is2=\E)0, kbs=^H, kcbt=\E[Z,
++	ind=\n, indn=\E[%p1%dS, is2=\E)0, kbs=^?, kcbt=\E[Z,
+ 	kcub1=\EOD, kcud1=\EOB, kcuf1=\EOC, kcuu1=\EOA,
+ 	kdch1=\E[3~, kend=\E[4~, kf1=\EOP, kf10=\E[21~,
+ 	kf11=\E[23~, kf12=\E[24~, kf2=\EOQ, kf3=\EOR, kf4=\EOS,

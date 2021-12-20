@@ -1,0 +1,10 @@
+#
+#=DESCRIPTION audit change_profile with a variable (LP: #390810)
+#=EXRESULT PASS
+#
+
+@{LIBVIRT}="libvirt"
+
+/usr/bin/foo {
+   audit change_profile -> @{LIBVIRT}-foo,
+}

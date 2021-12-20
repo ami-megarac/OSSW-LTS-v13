@@ -1,0 +1,2 @@
+rm_conffile /etc/dbus-1/session.conf 1.10.0-4~ dbus
+rm_conffile /etc/dbus-1/system.conf 1.10.0-4~ dbus

@@ -1,0 +1,37 @@
+=pod
+
+=head1 NAME
+
+aa-mergeprof - merge AppArmor security profiles.
+
+=head1 SYNOPSIS
+
+B<aa-mergeprof I<file> [I<file> ...] [I<-d /path/to/profiles>]>
+
+=head1 OPTIONS
+
+B<file>
+
+   One or more files containing profiles to merge into the profile directory (see -d).
+
+B<-d --dir  /path/to/profiles>
+
+   Specifies the target directory for the merged AppArmor security profile set.
+   Defaults to /etc/apparmor.d.
+
+=head1 DESCRIPTION
+
+B<aa-mergeprof>
+
+=head1 BUGS
+
+If you find any bugs, please report them at
+L<https://bugs.launchpad.net/apparmor/+filebug>.
+
+=head1 SEE ALSO
+
+apparmor(7), apparmor.d(5), aa_change_hat(2), aa-genprof(1), 
+aa-logprof(1), aa-enforce(1), aa-audit(1), aa-complain(1),
+aa-disable(1), and L<https://wiki.apparmor.net>.
+
+=cut

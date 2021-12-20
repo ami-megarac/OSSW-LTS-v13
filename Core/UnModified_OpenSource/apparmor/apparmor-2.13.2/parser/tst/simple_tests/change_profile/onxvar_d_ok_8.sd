@@ -1,0 +1,12 @@
+#
+#=DESCRIPTION deny change_profile @{var} with name space with quotes
+#=EXRESULT PASS
+#
+@{var}=/test
+/usr/bin/foo {
+   deny change_profile @{var} -> ":foo:/bin/foo",
+}
+
+/usr/bin/foo2 {
+   deny change_profile @{var} -> ":foo:/bin/ foo",
+}

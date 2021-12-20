@@ -1,0 +1,8 @@
+#
+#=DESCRIPTION includes testing - non-existent include should fail
+#=EXRESULT FAIL
+#
+/does/not/exist {
+  #include <includes/base>
+  #include <does-not-exist/does-not-exist>
+}

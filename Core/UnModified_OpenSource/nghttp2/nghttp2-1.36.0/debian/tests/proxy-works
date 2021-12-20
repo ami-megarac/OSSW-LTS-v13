@@ -1,0 +1,17 @@
+#!/bin/bash
+
+# Nghttpx should proxy the port 80 by default.
+
+exec 2>&1
+set -eux
+
+PROXY=http://localhost:3000
+
+# Verify that we can connect
+nghttp ${PROXY} > /dev/null
+
+# Extract HTTP error code
+STATUS=$(nghttp ${PROXY} -v | grep -Po '(?<=:status: )(\d+)')
+
+# Verify it's OK (200).
+echo ${STATUS} | grep 200

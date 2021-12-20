@@ -1,0 +1,262 @@
+# This publication is intellectual property of Novell Inc. and Canonical
+# Ltd. Its contents can be duplicated, either in part or in whole, provided
+# that a copyright label is visibly located on each copy.
+#
+# All information found in this book has been compiled with utmost
+# attention to detail. However, this does not guarantee complete accuracy.
+# Neither SUSE LINUX GmbH, Canonical Ltd, the authors, nor the translators
+# shall be held liable for possible errors or the consequences thereof.
+#
+# Many of the software and hardware descriptions cited in this book
+# are registered trademarks. All trade names are subject to copyright
+# restrictions and may be registered trade marks. SUSE LINUX GmbH
+# and Canonical Ltd. essentially adhere to the manufacturer's spelling.
+#
+# Names of products and trademarks appearing in this book (with or without
+# specific notation) are likewise subject to trademark and trade protection
+# laws and may thus fall under copyright restrictions.
+#
+
+
+=pod
+
+=head1 NAME
+
+aa_change_hat  - change to or from a "hat" within a AppArmor profile
+
+=head1 SYNOPSIS
+
+B<#include E<lt>sys/apparmor.hE<gt>>
+
+B<int aa_change_hat (char *subprofile, unsigned long magic_token);>
+
+B<int aa_change_hatv (char *subprofiles[], unsigned long magic_token);>
+
+B<int aa_change_hat_vargs (unsigned long magic_token, ...);>
+
+Link with B<-lapparmor> when compiling.
+
+=head1 DESCRIPTION
+
+An AppArmor profile applies to an executable program; if a portion of
+the program needs different access permissions than other portions,
+the program can "change hats" to a different role, also known as a
+subprofile.
+
+To change into a new hat, it calls one of the family of change_hat
+functions to do so. It passes in a pointer to the I<subprofile> which it
+wants to change into, and a 64bit I<magic_token>.  The I<magic_token>
+is used to return out of the subprofile at a later time.
+
+The aa_change_hat() function allows specifying the name of a single
+I<subprofile> that the application wants to change into.  A pointer to the
+name of the I<subprofile> is passed along with the I<magic_token>.  If the
+profile is not present the call will fail with the appropriate error.
+
+The aa_change_hatv() function allows passing a I<NULL> terminated vector
+of pointers to I<subprofile> names which will be tried in order.  The
+first I<subprofile> in the vector that exists will be transitioned to
+and if none of the I<subprofiles> exist the call will fail with the
+appropriate error.
+
+The aa_change_hat_vargs() function is a convenience wrapper for the
+aa_change_hatv() function.  After the I<magic_token> it takes an arbitrary
+number of pointers to I<subprofile> names.  Similar to execl(3),
+aa_change_hat_vargs() assembles the list of I<subprofile> names into a
+vector and calls aa_change_hatv().
+
+If a program wants to return out of the current subprofile to the
+original profile, it calls aa_change_hat() with a pointer to NULL as
+the I<subprofile>, and the original I<magic_token> value. If the
+I<magic_token> does not match the original I<magic_token> passed into the
+kernel when the program entered the subprofile, the change back to the
+original profile will not happen, and the current task will be killed.
+If the I<magic_token> matches the original token, then the process will
+change back to the original profile.
+
+
+As both read(2) and write(2) are mediated, a file must be listed in a
+subprofile definition if the file is to be accessed while the process
+is in a "hat".
+
+=head1 RETURN VALUE
+
+On success zero is returned. On error, -1 is returned, and
+errno(3) is set appropriately.
+
+=head1 ERRORS
+
+=over 4
+
+=item B<EINVAL>
+
+The apparmor kernel module is not loaded or the communication via the
+F</proc/*/attr/current> file did not conform to protocol.
+
+=item B<ENOMEM>
+
+Insufficient kernel memory was available.
+
+=item B<EPERM>
+
+The calling application is not confined by apparmor, the specified
+I<subprofile> is not a I<hat profile>, the task is being ptraced and the
+tracing task does not have permission to trace the specified I<subprofile> or the no_new_privs execution bit is
+enabled.
+
+=item B<ECHILD>
+
+The application's profile has no hats defined for it.
+
+=item B<ENOENT>
+
+The specified I<subprofile> does not exist in this profile but other hats
+are defined.
+
+=item B<EACCES>
+
+The specified magic token did not match, and permissions to change to
+the specified I<subprofile> has been denied. This will in most situations
+also result in the task being killed, to prevent brute force attacks.
+
+=back 
+
+=head1 EXAMPLE
+
+The following code examples shows simple, if contrived, uses of
+aa_change_hat(); a typical use of aa_change_hat() will separate
+privileged portions of a process from unprivileged portions of a process,
+such as keeping unauthenticated network traffic handling separate
+from authenticated network traffic handling in OpenSSH or executing
+user-supplied CGI scripts in apache.
+
+The use of random(3) is simply illustrative. Use of F</dev/urandom> is
+recommended.
+
+First, a simple high-level overview of aa_change_hat() use:
+
+ void foo (void) {
+ 	unsigned long magic_token;
+  
+ 	/* get a random magic token value
+ 	from our huge entropy pool */
+ 	magic_token = random_function();
+ 
+ 	/* change into the subprofile while
+ 	 * we do stuff we don't trust */
+ 	aa_change_hat("stuff_we_dont_trust", magic_token);
+
+ 	/* Go do stuff we don't trust -- this is all
+ 	 * done in *this* process space, no separate
+ 	 * fork()/exec()'s are done. */
+ 	interpret_perl_stuff(stuff_from_user);
+
+ 	/* now change back to our original profile */
+ 	aa_change_hat(NULL, magic_token);
+ }
+
+Second, an example to show that files not listed in a subprofile ("hat")
+aren't accessible after an aa_change_hat() call:
+
+ #include <stdlib.h>
+ #include <string.h>
+ #include <sys/apparmor.h>
+ #include <sys/types.h>
+ #include <sys/stat.h>
+ #include <fcntl.h>
+ #include <stdio.h>
+ #include <unistd.h>
+ 
+ 
+ int main(int argc, char *argv[]) {
+        int fd;
+        unsigned long tok;
+        char buf[10];
+ 
+        /* random() is a poor choice */
+        tok = random();
+ 
+        /* open /etc/passwd outside of any hat */
+        if ((fd=open("/etc/passwd", O_RDONLY)) < 0)
+                perror("Failure opening /etc/passwd");
+ 
+        /* confirm for ourselves that we can really read /etc/passwd */
+        memset(&buf, 0, 10);
+        if (read(fd, &buf, 10) == -1) {
+                perror("Failure reading /etc/passwd pre-hat");
+                _exit(1);
+        }
+        buf[9] = '\0';
+        printf("/etc/passwd: %s\n", buf);
+ 
+        /* change hat to the "hat" subprofile, which should not have
+         * read access to /etc/passwd -- even though we have a valid
+         * file descriptor at the time of the aa_change_hat() call. */
+        if (aa_change_hat("hat", tok)) {
+                perror("Failure changing hat -- aborting");
+                _exit(1);
+        }
+ 
+        /* confirm that we cannot read /etc/passwd */
+        lseek(fd,0,SEEK_SET);
+        memset(&buf, 0, 10);
+        if (read(fd, &buf, 10) == -1)
+                perror("Failure reading /etc/passwd post-hat");
+        buf[9] = '\0';
+        printf("/etc/passwd: %s\n", buf);
+ 
+        return 0;
+ }
+
+
+This code example requires the following profile to be loaded with
+apparmor_parser(8):
+
+ /tmp/ch {
+   /etc/ld.so.cache               mr,
+   /etc/locale/**                 r,
+   /etc/localtime                 r,
+   /usr/share/locale/**           r,
+   /usr/share/zoneinfo/**         r,
+   /usr/lib/locale/**             mr,
+   /usr/lib/gconv/*.so            mr,
+   /usr/lib/gconv/gconv-modules*  mr,
+
+   /lib/ld-*.so*         mrix,
+   /lib/libc*.so*        mr,
+   /lib/libapparmor*.so* mr,
+   /dev/pts/*            rw,
+   /tmp/ch               mr,
+
+   /etc/passwd           r,
+
+   ^hat {
+     /dev/pts/*     rw,
+   }
+ }
+
+
+The output when run:
+
+ $ /tmp/ch
+ /etc/passwd: root:x:0:
+ Failure reading /etc/passwd post-hat: Permission denied
+ /etc/passwd:
+ $
+
+
+=head1 BUGS
+
+None known. If you find any, please report them at
+L<https://bugs.launchpad.net/apparmor/+filebug>. Note that
+aa_change_hat(2) provides no memory barriers between different areas of a
+program; if address space separation is required, then separate processes
+should be used.
+
+=head1 SEE ALSO
+
+apparmor(7), apparmor.d(5), apparmor_parser(8), aa_change_profile(2),
+aa_getcon(2) and
+L<https://wiki.apparmor.net>.
+
+=cut

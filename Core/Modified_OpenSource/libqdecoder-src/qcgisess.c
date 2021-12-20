@@ -204,6 +204,10 @@ qentry_t *qcgisess_init(qentry_t *request, const char *dirpath)
                     racsessinfo_unregister_session(racsession_id, SESSION_UNREGISTER_REASON_LOGOUT);
                     _q_unlink(session_storage_path);
                     _q_unlink(session_timeout_path);
+			
+                    free(sessionkey);
+                    session->putint(session, "authorized", 0, true);
+                    return session;
                 }
 
             	// remake storage path

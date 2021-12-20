@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="changeHatValve" default="jar" basedir=".">
+    <property name="src" location="src"/>
+    <property name="jni_src" location="src/jni_src"/>
+    <property name="build" location="build"/>
+    <property name="install_root" location="/"/>
+    <property name="catalina_home" location="/usr/share/tomcat5"/>
+    <property name="lib" location="lib"/>
+    <property name="install_lib" value="/lib"/>
+    <property name="dist" location="dist"/>
+    <property name="jarfile" location="${dist}/${ant.project.name}.jar"/>
+    <property name="compile.debug" value="false"/>
+    <property name="target" value="1.4"/>
+    <property name="version" value="2.0"/>
+    <property name="release" value="1"/>
+
+    <fileset id="lib.jars" dir="${lib}">
+        <include name="**/*.jar"/>
+    </fileset>
+
+    <fileset id="tomcat.jars" dir="/usr/share/tomcat5/server/lib">
+	   <include name="**/*.jar"/>
+	</fileset>
+    <fileset id="servlet.jars" dir="/usr/share/tomcat5/common/lib">
+	   <include name="**/*.jar"/>
+	</fileset>
+	
+    <path id="lib.path">
+		<fileset refid="lib.jars"/>
+		<fileset refid="servlet.jars"/>
+		<fileset refid="tomcat.jars"/>
+    </path>
+    <path id="servlet.path">
+		<fileset refid="servlet.jars"/>
+    </path>
+    <path id="tomcat.path">
+		<fileset refid="tomcat.jars"/>
+    </path>
+
+    <target name="compile" description="Compile code">
+        <mkdir dir="${build}"/>
+        <mkdir dir="${lib}"/>
+        <javac srcdir="${src}" destdir="${build}" includeAntRuntime="no"
+               classpathref="lib.path" debug="${compile.debug}" 
+               source="${target}" target="${target}">
+        </javac>
+    </target>
+
+<!--
+    <target name="jni_header" depends="compile" description="Generate JNI headers">
+        <javah destdir="${jni_src}" class="com.novell.apparmor.JNIChangeHat"/>
+    </target>   
+-->
+    <target name="jni_so" depends="compile" description="Build JNI library">
+        <mkdir dir="${dist}"/>
+        <exec dir="${jni_src}" executable="/usr/bin/make">
+              <arg value="DESTDIR=${dist}"/>
+              <arg value="VERSION=${version}"/>
+              <arg value="RELEASE=${release}"/>
+        </exec>
+    </target>
+
+    <target name="jar" depends="compile" description="Build jar">
+        <mkdir dir="${dist}"/>
+        <jar jarfile="${jarfile}" basedir="${build}" manifest="Manifest">
+            <!-- Merge library jars into final jar file -->
+            <zipgroupfileset refid="lib.jars"/>
+        </jar>
+    </target>
+
+    <target name="install_jni" depends="jni_so" description="Install jni so">
+        <exec dir="${jni_src}" executable="/usr/bin/make">
+              <arg value="install"/>
+              <arg value="DESTDIR=${install_root}"/>
+              <arg value="LIB=${install_lib}"/>
+              <arg value="VERSION=${version}"/>
+              <arg value="RELEASE=${release}"/>
+        </exec>
+    </target>
+
+    <target name="install_jar" depends="jni_so" description="Install jar file">
+        <mkdir dir="${install_root}/${catalina_home}/server/lib/"/>
+        <copy file="${jarfile}" tofile="${install_root}/${catalina_home}/server/lib/${ant.project.name}.jar"/>
+        <chmod perm="644" file="${install_root}/${catalina_home}/server/lib/${ant.project.name}.jar"/>
+    </target>
+
+    <target name="clean" description="Remove build and dist directories">
+        <delete dir="${build}"/>
+        <delete dir="${dist}"/>
+        <exec dir="${jni_src}" executable="/usr/bin/make">
+              <arg value="clean"/>
+        </exec>
+    </target>
+</project>

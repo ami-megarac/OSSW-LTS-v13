@@ -1,0 +1,162 @@
+From de4ca46ec035283928e8fa40797897cefcf6ec3e Mon Sep 17 00:00:00 2001
+From: John Johansen <john.johansen@canonical.com>
+Date: Wed, 22 Jun 2016 18:01:08 -0700
+Subject: [PATCH 20/25] apparmor: fix module parameters can be changed after
+ policy is locked
+
+the policy_lock parameter is a one way switch that prevents policy
+from being further modified. Unfortunately some of the module parameters
+can effectively modify policy by turning off enforcement.
+
+split policy_admin_capable into a view check and a full admin check,
+and update the admin check to test the policy_lock parameter.
+
+Signed-off-by: John Johansen <john.johansen@canonical.com>
+---
+ security/apparmor/include/policy.h |  2 ++
+ security/apparmor/lsm.c            | 22 ++++++++++------------
+ security/apparmor/policy.c         | 18 +++++++++++++++++-
+ 3 files changed, 29 insertions(+), 13 deletions(-)
+
+diff --git a/security/apparmor/include/policy.h b/security/apparmor/include/policy.h
+index c28b0f2..52275f0 100644
+--- a/security/apparmor/include/policy.h
++++ b/security/apparmor/include/policy.h
+@@ -403,6 +403,8 @@ static inline int AUDIT_MODE(struct aa_profile *profile)
+ 	return profile->audit;
+ }
+ 
++bool policy_view_capable(void);
++bool policy_admin_capable(void);
+ bool aa_may_manage_policy(int op);
+ 
+ #endif /* __AA_POLICY_H */
+diff --git a/security/apparmor/lsm.c b/security/apparmor/lsm.c
+index 7798e16..e83eefb 100644
+--- a/security/apparmor/lsm.c
++++ b/security/apparmor/lsm.c
+@@ -728,51 +728,49 @@ __setup("apparmor=", apparmor_enabled_setup);
+ /* set global flag turning off the ability to load policy */
+ static int param_set_aalockpolicy(const char *val, const struct kernel_param *kp)
+ {
+-	if (!capable(CAP_MAC_ADMIN))
++	if (!policy_admin_capable())
+ 		return -EPERM;
+-	if (aa_g_lock_policy)
+-		return -EACCES;
+ 	return param_set_bool(val, kp);
+ }
+ 
+ static int param_get_aalockpolicy(char *buffer, const struct kernel_param *kp)
+ {
+-	if (!capable(CAP_MAC_ADMIN))
++	if (!policy_view_capable())
+ 		return -EPERM;
+ 	return param_get_bool(buffer, kp);
+ }
+ 
+ static int param_set_aabool(const char *val, const struct kernel_param *kp)
+ {
+-	if (!capable(CAP_MAC_ADMIN))
++	if (!policy_admin_capable())
+ 		return -EPERM;
+ 	return param_set_bool(val, kp);
+ }
+ 
+ static int param_get_aabool(char *buffer, const struct kernel_param *kp)
+ {
+-	if (!capable(CAP_MAC_ADMIN))
++	if (!policy_view_capable())
+ 		return -EPERM;
+ 	return param_get_bool(buffer, kp);
+ }
+ 
+ static int param_set_aauint(const char *val, const struct kernel_param *kp)
+ {
+-	if (!capable(CAP_MAC_ADMIN))
++	if (!policy_admin_capable())
+ 		return -EPERM;
+ 	return param_set_uint(val, kp);
+ }
+ 
+ static int param_get_aauint(char *buffer, const struct kernel_param *kp)
+ {
+-	if (!capable(CAP_MAC_ADMIN))
++	if (!policy_view_capable())
+ 		return -EPERM;
+ 	return param_get_uint(buffer, kp);
+ }
+ 
+ static int param_get_audit(char *buffer, struct kernel_param *kp)
+ {
+-	if (!capable(CAP_MAC_ADMIN))
++	if (!policy_view_capable())
+ 		return -EPERM;
+ 
+ 	if (!apparmor_enabled)
+@@ -784,7 +782,7 @@ static int param_get_audit(char *buffer, struct kernel_param *kp)
+ static int param_set_audit(const char *val, struct kernel_param *kp)
+ {
+ 	int i;
+-	if (!capable(CAP_MAC_ADMIN))
++	if (!policy_admin_capable())
+ 		return -EPERM;
+ 
+ 	if (!apparmor_enabled)
+@@ -805,7 +803,7 @@ static int param_set_audit(const char *val, struct kernel_param *kp)
+ 
+ static int param_get_mode(char *buffer, struct kernel_param *kp)
+ {
+-	if (!capable(CAP_MAC_ADMIN))
++	if (!policy_admin_capable())
+ 		return -EPERM;
+ 
+ 	if (!apparmor_enabled)
+@@ -817,7 +815,7 @@ static int param_get_mode(char *buffer, struct kernel_param *kp)
+ static int param_set_mode(const char *val, struct kernel_param *kp)
+ {
+ 	int i;
+-	if (!capable(CAP_MAC_ADMIN))
++	if (!policy_admin_capable())
+ 		return -EPERM;
+ 
+ 	if (!apparmor_enabled)
+diff --git a/security/apparmor/policy.c b/security/apparmor/policy.c
+index 7807125..179e68d 100644
+--- a/security/apparmor/policy.c
++++ b/security/apparmor/policy.c
+@@ -918,6 +918,22 @@ static int audit_policy(int op, gfp_t gfp, const char *name, const char *info,
+ 			&sa, NULL);
+ }
+ 
++bool policy_view_capable(void)
++{
++	struct user_namespace *user_ns = current_user_ns();
++	bool response = false;
++
++	if (ns_capable(user_ns, CAP_MAC_ADMIN))
++		response = true;
++
++	return response;
++}
++
++bool policy_admin_capable(void)
++{
++	return policy_view_capable() && !aa_g_lock_policy;
++}
++
+ /**
+  * aa_may_manage_policy - can the current task manage policy
+  * @op: the policy manipulation operation being done
+@@ -932,7 +948,7 @@ bool aa_may_manage_policy(int op)
+ 		return 0;
+ 	}
+ 
+-	if (!capable(CAP_MAC_ADMIN)) {
++	if (!policy_admin_capable()) {
+ 		audit_policy(op, GFP_KERNEL, NULL, "not policy admin", -EACCES);
+ 		return 0;
+ 	}
+-- 
+2.7.4
+

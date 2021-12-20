@@ -1,0 +1,8 @@
+START
+File: old_style_log_01.in
+Event type: AA_RECORD_INVALID
+Audit ID: 1157215966.604:46
+Operation: APPARMOR
+Info: REJECTING r access to /bin/df (sh(7902) profile /usr/sbin/httpd2-prefork active SYSINFO)
+Epoch: 1157215966
+Audit subid: 46

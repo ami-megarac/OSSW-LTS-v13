@@ -1,0 +1,67 @@
+#
+#=DESCRIPTION deny change_profile with name space
+#=EXRESULT PASS
+#
+/usr/bin/foo {
+   deny change_profile -> :foo:/bin/foo,
+}
+
+/usr/bin/foo2 {
+   deny change_profile -> :foo:/bin/fo*,
+}
+
+/usr/bin/foo3 {
+   deny change_profile -> :foo:/bin/fo**,
+}
+
+/usr/bin/foo4 {
+   deny change_profile -> :foo:/bin/fo?,
+}
+
+/usr/bin/foo5 {
+   deny change_profile -> :foo:/bin/fo[ab],
+}
+
+/usr/bin/foo6 {
+   deny change_profile -> :foo:/bin/fo[^ab],
+}
+
+/usr/bin/foo7 {
+   deny change_profile -> :fo*:/bin/foo,
+}
+
+/usr/bin/foo8 {
+   deny change_profile -> :fo**:/bin/foo,
+}
+
+/usr/bin/foo9 {
+   deny change_profile -> :fo?:/bin/foo,
+}
+
+/usr/bin/foo10 {
+   deny change_profile -> :fo[ab]:/bin/foo,
+}
+
+/usr/bin/foo11 {
+   deny change_profile -> :fo[^ab]:/bin/foo,
+}
+
+/usr/bin/foo12 {
+   deny change_profile -> :fo*:/bin/fo*,
+}
+
+/usr/bin/foo13 {
+   deny change_profile -> :fo**:/bin/fo**,
+}
+
+/usr/bin/foo14 {
+   deny change_profile -> :fo?:/bin/fo?,
+}
+
+/usr/bin/foo15 {
+   deny change_profile -> :fo[ab]:/bin/fo[ab],
+}
+
+/usr/bin/foo16 {
+   deny change_profile -> :fo[^ab]:/bin/fo[^ab],
+}

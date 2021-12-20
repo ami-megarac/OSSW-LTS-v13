@@ -1,0 +1,7 @@
+#
+#=DESCRIPTION simple unix setattr w/peer test
+#=EXRESULT FAIL
+
+profile a_profile {
+  unix setattr peer=(label=orange),
+}

@@ -1,0 +1,107 @@
+#=DESCRIPTION conditional else
+#=EXRESULT PASS
+
+$FOO=true
+$BAR = false
+$FALSE = false
+
+/bin/true {
+
+#empty clauses
+  if $FOO {
+  }
+
+  if $BAR {
+  }
+
+  if $FOO {
+  } else {
+  }
+
+  if $BAR {
+  } else {
+  }
+
+  if $FOO {
+    if $FALSE {
+    }
+    if not $FALSE {
+    } else {
+    }
+  } else {
+    if $BAR {
+    } else {
+    }
+    if $BAR {
+    } else if not $FALSE {
+    }
+  }
+
+#unempty clauses
+  if $FOO {
+    /tmp/1 r,
+  }
+
+  if $BAR {
+    /tmp/2 r,
+  }
+
+  if $FOO {
+    /tmp/3 r,
+  } else {
+    /tmp/4 r,
+  }
+
+  if $BAR {
+    /tmp/5 r,
+  } else {
+    /tmp/6 r,
+  }
+
+  if $FOO {
+    /tmp/7 r,
+    if $FALSE {
+      /tmp/8 r,
+    }
+    if not $FALSE {
+      /tmp/9 r,
+    } else {
+      /tmp/10 r,
+    }
+  } else {
+    /tmp/11 r,
+    if $BAR {
+      /tmp/12 r,
+    } else {
+      /tmp/13 r,
+    }
+    if $BAR {
+      /tmp/14 r,
+    } else if not $FALSE {
+      /tmp/15 r,
+    }
+  }
+  if $BAR {
+    /tmp/16 r,
+    if $FALSE {
+      /tmp/17 r,
+    }
+    if not $FALSE {
+      /tmp/18 r,
+    } else {
+      /tmp/19 r,
+    }
+  } else {
+    /tmp/20 r,
+    if $BAR {
+      /tmp/21 r,
+    } else {
+      /tmp/22 r,
+    }
+    if $BAR {
+      /tmp/23 r,
+    } else if not $FALSE {
+      /tmp/24 r,
+    }
+  }
+}

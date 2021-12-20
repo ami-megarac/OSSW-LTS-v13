@@ -1,0 +1,10 @@
+#
+#=Description basic rules to test the "nouser" mount option
+#=EXRESULT PASS
+/usr/bin/foo {
+  mount options=nouser /a -> /1,
+  mount options=(nouser) /b -> /2,
+  mount options=(rw,nouser) /c -> /3,
+  mount options in (nouser) /d -> /4,
+  mount options in (ro,nouser) /e -> /5,
+}

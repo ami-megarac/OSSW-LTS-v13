@@ -1,0 +1,148 @@
+#!/bin/sh
+
+# we use a different method to get old site versions into @INC
+sitelib_stem=
+
+# no versions under vendorlib
+vendorlib_stem=
+
+# remove -rpath (shared libperl is moved to /usr/lib/<triplet> by rules)
+tmp=
+for t in $ccdlflags
+do
+    case $t in
+	-Wl,-rpath,*) ;;
+	*) tmp="$tmp${tmp:+ }$t"
+    esac
+done
+
+ccdlflags="$tmp"
+
+# set previous version dirs
+inc_version_list=
+inc_version_list_init=0
+while read ver
+do
+    dpkg --compare-versions "$ver" lt "$version"	    || break
+    dpkg --compare-versions "$ver" lt "$api_versionstring"  && continue
+    inc_version_list="$ver $ver/$archname${inc_version_list:+ }$inc_version_list"
+    inc_version_list_init="\"$ver\",\"$ver/$archname\",$inc_version_list_init"
+done <debian/released-versions
+if [ -n "$inc_version_list" ]; then
+    d_inc_version_list=define
+fi
+
+# we always want the Berkeley DB support
+if [ "$i_db" != "$define" ]; then
+    echo "debian/config.over: Berkeley DB support not enabled, aborting!" 1>&2
+    exit 1
+fi
+
+# force /usr/lib/<triplet> into $Config{libpth} if it's not there yet
+# see #630399
+multiarch_dir=/usr/lib/`dpkg-architecture -qDEB_HOST_MULTIARCH`
+if ! echo $libpth | grep -q "$multiarch_dir"
+then
+    libpth="$libpth $multiarch_dir"
+fi
+
+# set configuration time to latest debian/changelog entry
+cf_time=$(LC_ALL=C date --utc -d "$(dpkg-parsechangelog | sed -n -e 's/^Date: //p')")
+# set generic email addresses, host/domain names
+cf_by="$(dpkg-vendor --query vendor)"
+cf_email=perl@packages.debian.org
+perladmin=root@localhost
+mydomain=
+myhostname=localhost
+
+host_arch=${DEB_HOST_ARCH:-$(dpkg-architecture -qDEB_HOST_ARCH)}
+
+# emulate 'uname -m' output for reproducibility regardless of (for example)
+# 32-bit vs 64-bit kernel
+#
+# this is silly but oh well
+# see #821182
+
+case "$host_arch" in
+    # hardcoded machine names on known architectures based on debian/cross results
+    alpha)
+        machine_uname=alpha
+        ;;
+    amd64|kfreebsd-amd64|x32)
+        machine_uname=x86_64
+        ;;
+    arm64)
+        machine_uname=aarch64
+        ;;
+    armel|armhf)
+        machine_uname=armv7l
+        ;;
+    hppa)
+        machine_uname=parisc64
+        ;;
+    hurd-i386)
+        machine_uname=i686-at386
+        ;;
+    i386)
+        machine_uname=i686
+        ;;
+    kfreebsd-i386)
+        machine_uname=i386
+        ;;
+    mips64el)
+        machine_uname=mips64
+        ;;
+    mips|mipsel)
+        machine_uname=mips
+        ;;
+    kfreebsd-i386)
+        machine_uname=i686
+        ;;
+    m68k)
+        machine_uname=m68k
+        ;;
+    powerpc|powerpcspe)
+        machine_uname=ppc
+        ;;
+    ppc64)
+        machine_uname=ppc64
+        ;;
+    ppc64el)
+        machine_uname=ppc64le
+        ;;
+    s390x)
+        machine_uname=s390x
+        ;;
+    sh4)
+        machine_uname=sh4a
+        ;;
+    sparc64)
+        machine_uname=sparc64
+        ;;
+    *)
+        # default to what Configure does
+        machine_uname=$(uname -m | tr '[A-Z]' '[a-z]' | sed -e "s,['/],,g")
+        ;;
+esac
+
+case "$osname" in
+  linux)
+      osvers=4.9.0
+      osdesc="#1 smp debian $osvers"
+      os=gnulinux
+      ;;
+  gnu)
+      osvers=0.9
+      osdesc="gnu-mach"
+      os=gnu
+      ;;
+  gnukfreebsd)
+      osvers=10.1
+      osdesc="#0"
+      os=gnukfreebsd
+      ;;
+esac
+if [ -n "$osdesc" ]; then
+  myarchname="${machine_uname}-${osname}"
+  myuname="$osname $myhostname $osvers $osdesc $machine_uname $os "
+fi

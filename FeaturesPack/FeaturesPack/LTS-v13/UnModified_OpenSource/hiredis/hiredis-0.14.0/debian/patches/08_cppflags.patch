@@ -1,0 +1,23 @@
+From: Thomas Lee <debian@tomlee.co>
+Date: Sun, 4 Nov 2018 22:59:09 +0000
+Subject: Add CPPFLAGS to REAL_CFLAGS
+
+Forwarded: https://github.com/redis/hiredis/pull/614
+Last-Update: 2018-09-26
+---
+ Makefile | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Makefile b/Makefile
+index 3fcf515..4332831 100644
+--- a/Makefile
++++ b/Makefile
+@@ -45,7 +45,7 @@ CXX:=$(shell sh -c 'type $${CXX%% *} >/dev/null 2>/dev/null && echo $(CXX) || ec
+ OPTIMIZATION?=-O3
+ WARNINGS=-Wall -W -Wstrict-prototypes -Wwrite-strings
+ DEBUG_FLAGS?= -g -ggdb
+-REAL_CFLAGS=$(OPTIMIZATION) -fPIC $(CFLAGS) $(WARNINGS) $(DEBUG_FLAGS)
++REAL_CFLAGS=$(OPTIMIZATION) -fPIC $(CPPFLAGS) $(CFLAGS) $(WARNINGS) $(DEBUG_FLAGS)
+ REAL_LDFLAGS=$(LDFLAGS)
+ 
+ DYLIBSUFFIX=so

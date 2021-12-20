@@ -1,0 +1,23 @@
+mariadb-10.1 (10.1.20-1) unstable; urgency=low
+
+    MariaDB is now the default MySQL variant in Debian, at version 10.1. The
+    Stretch release introduces a new mechanism for switching the default
+    variant, using metapackages created from the 'mysql-defaults' source
+    package. For example, installing the metapackage 'default-mysql-server' will
+    install 'mariadb-server-10.1'. Users who had 'mysql-server-5.5' or
+    'mysql-server-5.6' will have it removed and replaced by the MariaDB
+    equivalent. Similarly, installing 'default-mysql-client' will install
+    'mariadb-client-10.1'.
+
+    Note that the database binary data file formats are not backwards
+    compatible, so once you have upgraded to MariaDB 10.1 you will not be able
+    to switch back to any previous version of MariaDB or MySQL unless you have a
+    proper database dump. Therefore, before upgrading, please make backups of
+    all important databases with an appropriate tool such as 'mysqldump'.
+
+    The 'virtual-mysql-*' and 'default-mysql-*' packages will continue to exist.
+    MySQL continues to be maintained in Debian, in the unstable release. See the
+    page https://wiki.debian.org/Teams/MySQL more information about the
+    mysql-related software available in Debian.
+
+ -- Otto Kekäläinen <otto@debian.org>  Tue, 14 Mar 2017 16:21:58 +0200

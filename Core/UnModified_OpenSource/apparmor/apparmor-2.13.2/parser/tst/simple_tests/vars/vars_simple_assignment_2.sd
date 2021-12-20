@@ -1,0 +1,4 @@
+#=DESCRIPTION two-value set variable assignment
+#=EXRESULT PASS
+
+@{FOO}=bar baz

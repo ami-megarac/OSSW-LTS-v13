@@ -1,0 +1,10 @@
+#
+#=Description basic rules to test the "mand" mount option
+#=EXRESULT PASS
+/usr/bin/foo {
+  mount options=mand /a -> /1,
+  mount options=(mand) /b -> /2,
+  mount options=(rw,mand) /c -> /3,
+  mount options in (mand) /d -> /4,
+  mount options in (ro,mand) /e -> /5,
+}

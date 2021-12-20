@@ -1,0 +1,6 @@
+#=DESCRIPTION Boolean assignments inside policy should fail
+#=EXRESULT FAIL
+
+/bin/foo {
+  $BLAH = false
+}

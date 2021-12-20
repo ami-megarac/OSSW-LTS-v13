@@ -1,0 +1,5 @@
+12_lessdeps_libgcrypt-config.diff
+15_multiarchpath_in_-L.diff
+25_norevisionfromgit.diff
+30_doc-Fix-library-initialization-examples.patch
+31_cipher-Fix-ElGamal-encryption-for-other-implementati.patch

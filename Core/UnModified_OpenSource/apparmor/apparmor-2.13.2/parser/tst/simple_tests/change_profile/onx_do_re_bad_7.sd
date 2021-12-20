@@ -1,0 +1,9 @@
+#
+#=DESCRIPTION owner not allowed in change_profile rule
+#=EXRESULT FAIL
+#
+
+
+/usr/bin/foo {
+   deny owner change_profile /onexec -> :ab:*,
+}

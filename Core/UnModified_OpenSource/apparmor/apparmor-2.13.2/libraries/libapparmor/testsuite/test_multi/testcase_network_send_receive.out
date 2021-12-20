@@ -1,0 +1,19 @@
+START
+File: testcase_network_send_receive.in
+Event type: AA_RECORD_ALLOWED
+Audit ID: 1469785325.122:21021
+Operation: file_inherit
+Mask: send receive
+Denied Mask: send receive
+Profile: /usr/bin/nginx-amplify-agent.py//null-/bin/dash
+Command: sh
+PID: 18239
+Network family: inet
+Socket type: stream
+Protocol: tcp
+Local addr: 192.168.10.3
+Foreign addr: 54.153.70.241
+Local port: 50758
+Foreign port: 443
+Epoch: 1469785325
+Audit subid: 21021

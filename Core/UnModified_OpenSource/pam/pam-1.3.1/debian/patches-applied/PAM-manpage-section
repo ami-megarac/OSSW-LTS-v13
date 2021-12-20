@@ -1,0 +1,1802 @@
+Patch to put the PAM manpage in section 7 (general topics) instead of 8
+(system administration commands)
+
+Authors: Steve Langasek <vorlon@debian.org>
+
+Upstream status: maybe provide a backwards-compatibility link first?
+
+Index: pam/doc/man/pam.8.xml
+===================================================================
+--- pam.orig/doc/man/pam.8.xml
++++ pam/doc/man/pam.8.xml
+@@ -6,7 +6,7 @@
+ 
+   <refmeta>
+     <refentrytitle>pam</refentrytitle>
+-    <manvolnum>8</manvolnum>
++    <manvolnum>7</manvolnum>
+     <refmiscinfo class='setdesc'>Linux-PAM Manual</refmiscinfo>
+   </refmeta>
+ 
+@@ -196,7 +196,7 @@
+         <refentrytitle>pam_strerror</refentrytitle><manvolnum>3</manvolnum>
+       </citerefentry>,
+       <citerefentry>
+-        <refentrytitle>PAM</refentrytitle><manvolnum>8</manvolnum>
++        <refentrytitle>PAM</refentrytitle><manvolnum>7</manvolnum>
+       </citerefentry>
+     </para>
+   </refsect1>
+Index: pam/doc/man/PAM.8
+===================================================================
+--- pam.orig/doc/man/PAM.8
++++ pam/doc/man/PAM.8
+@@ -7,7 +7,7 @@
+ .\"    Source: Linux-PAM Manual
+ .\"  Language: English
+ .\"
+-.TH "PAM" "8" "05/18/2018" "Linux-PAM Manual" "Linux-PAM Manual"
++.TH "PAM" "7" "05/18/2018" "Linux-PAM Manual" "Linux-PAM Manual"
+ .\" -----------------------------------------------------------------
+ .\" * Define some portability stuff
+ .\" -----------------------------------------------------------------
+@@ -135,4 +135,4 @@
+ \fBpam_authenticate\fR(3),
+ \fBpam_sm_setcred\fR(3),
+ \fBpam_strerror\fR(3),
+-\fBPAM\fR(8)
++\fBPAM\fR(7)
+Index: pam/modules/pam_access/access.conf.5.xml
+===================================================================
+--- pam.orig/modules/pam_access/access.conf.5.xml
++++ pam/modules/pam_access/access.conf.5.xml
+@@ -227,7 +227,7 @@
+     <para>
+       <citerefentry><refentrytitle>pam_access</refentrytitle><manvolnum>8</manvolnum></citerefentry>,
+       <citerefentry><refentrytitle>pam.d</refentrytitle><manvolnum>5</manvolnum></citerefentry>,
+-      <citerefentry><refentrytitle>pam</refentrytitle><manvolnum>8</manvolnum></citerefentry>
++      <citerefentry><refentrytitle>pam</refentrytitle><manvolnum>7</manvolnum></citerefentry>
+     </para>
+   </refsect1>
+ 
+Index: pam/modules/pam_access/access.conf.5
+===================================================================
+--- pam.orig/modules/pam_access/access.conf.5
++++ pam/modules/pam_access/access.conf.5
+@@ -204,7 +204,7 @@
+ .PP
+ \fBpam_access\fR(8),
+ \fBpam.d\fR(5),
+-\fBpam\fR(8)
++\fBpam\fR(7)
+ .SH "AUTHORS"
+ .PP
+ Original
+Index: pam/modules/pam_env/pam_env.conf.5.xml
+===================================================================
+--- pam.orig/modules/pam_env/pam_env.conf.5.xml
++++ pam/modules/pam_env/pam_env.conf.5.xml
+@@ -122,7 +122,7 @@
+     <para>
+       <citerefentry><refentrytitle>pam_env</refentrytitle><manvolnum>8</manvolnum></citerefentry>,
+       <citerefentry><refentrytitle>pam.d</refentrytitle><manvolnum>5</manvolnum></citerefentry>,
+-      <citerefentry><refentrytitle>pam</refentrytitle><manvolnum>8</manvolnum></citerefentry>,
++      <citerefentry><refentrytitle>pam</refentrytitle><manvolnum>7</manvolnum></citerefentry>,
+       <citerefentry><refentrytitle>environ</refentrytitle><manvolnum>7</manvolnum></citerefentry>
+     </para>
+   </refsect1>
+Index: pam/modules/pam_env/pam_env.conf.5
+===================================================================
+--- pam.orig/modules/pam_env/pam_env.conf.5
++++ pam/modules/pam_env/pam_env.conf.5
+@@ -125,7 +125,7 @@
+ .PP
+ \fBpam_env\fR(8),
+ \fBpam.d\fR(5),
+-\fBpam\fR(8),
++\fBpam\fR(7),
+ \fBenviron\fR(7)
+ .SH "AUTHOR"
+ .PP
+Index: pam/modules/pam_group/group.conf.5.xml
+===================================================================
+--- pam.orig/modules/pam_group/group.conf.5.xml
++++ pam/modules/pam_group/group.conf.5.xml
+@@ -128,7 +128,7 @@
+     <para>
+       <citerefentry><refentrytitle>pam_group</refentrytitle><manvolnum>8</manvolnum></citerefentry>,
+       <citerefentry><refentrytitle>pam.d</refentrytitle><manvolnum>5</manvolnum></citerefentry>,
+-      <citerefentry><refentrytitle>pam</refentrytitle><manvolnum>8</manvolnum></citerefentry>
++      <citerefentry><refentrytitle>pam</refentrytitle><manvolnum>7</manvolnum></citerefentry>
+     </para>
+   </refsect1>
+ 
+Index: pam/modules/pam_group/group.conf.5
+===================================================================
+--- pam.orig/modules/pam_group/group.conf.5
++++ pam/modules/pam_group/group.conf.5
+@@ -113,7 +113,7 @@
+ .PP
+ \fBpam_group\fR(8),
+ \fBpam.d\fR(5),
+-\fBpam\fR(8)
++\fBpam\fR(7)
+ .SH "AUTHOR"
+ .PP
+ pam_group was written by Andrew G\&. Morgan <morgan@kernel\&.org>\&.
+Index: pam/modules/pam_limits/limits.conf.5.xml
+===================================================================
+--- pam.orig/modules/pam_limits/limits.conf.5.xml
++++ pam/modules/pam_limits/limits.conf.5.xml
+@@ -346,7 +346,7 @@
+     <para>
+       <citerefentry><refentrytitle>pam_limits</refentrytitle><manvolnum>8</manvolnum></citerefentry>,
+       <citerefentry><refentrytitle>pam.d</refentrytitle><manvolnum>5</manvolnum></citerefentry>,
+-      <citerefentry><refentrytitle>pam</refentrytitle><manvolnum>8</manvolnum></citerefentry>,
++      <citerefentry><refentrytitle>pam</refentrytitle><manvolnum>7</manvolnum></citerefentry>,
+       <citerefentry><refentrytitle>getrlimit</refentrytitle><manvolnum>2</manvolnum></citerefentry>,
+       <citerefentry><refentrytitle>getrlimit</refentrytitle><manvolnum>3p</manvolnum></citerefentry>
+     </para>
+Index: pam/modules/pam_limits/limits.conf.5
+===================================================================
+--- pam.orig/modules/pam_limits/limits.conf.5
++++ pam/modules/pam_limits/limits.conf.5
+@@ -340,7 +340,7 @@
+ .PP
+ \fBpam_limits\fR(8),
+ \fBpam.d\fR(5),
+-\fBpam\fR(8),
++\fBpam\fR(7),
+ \fBgetrlimit\fR(2),
+ \fBgetrlimit\fR(3p)
+ .SH "AUTHOR"
+Index: pam/modules/pam_namespace/namespace.conf.5.xml
+===================================================================
+--- pam.orig/modules/pam_namespace/namespace.conf.5.xml
++++ pam/modules/pam_namespace/namespace.conf.5.xml
+@@ -204,7 +204,7 @@
+     <para>
+       <citerefentry><refentrytitle>pam_namespace</refentrytitle><manvolnum>8</manvolnum></citerefentry>,
+       <citerefentry><refentrytitle>pam.d</refentrytitle><manvolnum>5</manvolnum></citerefentry>,
+-      <citerefentry><refentrytitle>pam</refentrytitle><manvolnum>8</manvolnum></citerefentry>
++      <citerefentry><refentrytitle>pam</refentrytitle><manvolnum>7</manvolnum></citerefentry>
+     </para>
+   </refsect1>
+ 
+Index: pam/modules/pam_namespace/namespace.conf.5
+===================================================================
+--- pam.orig/modules/pam_namespace/namespace.conf.5
++++ pam/modules/pam_namespace/namespace.conf.5
+@@ -155,7 +155,7 @@
+ .PP
+ \fBpam_namespace\fR(8),
+ \fBpam.d\fR(5),
+-\fBpam\fR(8)
++\fBpam\fR(7)
+ .SH "AUTHORS"
+ .PP
+ The namespace\&.conf manual page was written by Janak Desai <janak@us\&.ibm\&.com>\&. More features added by Tomas Mraz <tmraz@redhat\&.com>\&.
+Index: pam/modules/pam_time/time.conf.5.xml
+===================================================================
+--- pam.orig/modules/pam_time/time.conf.5.xml
++++ pam/modules/pam_time/time.conf.5.xml
+@@ -130,7 +130,7 @@
+     <para>
+       <citerefentry><refentrytitle>pam_time</refentrytitle><manvolnum>8</manvolnum></citerefentry>,
+       <citerefentry><refentrytitle>pam.d</refentrytitle><manvolnum>5</manvolnum></citerefentry>,
+-      <citerefentry><refentrytitle>pam</refentrytitle><manvolnum>8</manvolnum></citerefentry>
++      <citerefentry><refentrytitle>pam</refentrytitle><manvolnum>7</manvolnum></citerefentry>
+     </para>
+   </refsect1>
+ 
+Index: pam/modules/pam_time/time.conf.5
+===================================================================
+--- pam.orig/modules/pam_time/time.conf.5
++++ pam/modules/pam_time/time.conf.5
+@@ -107,7 +107,7 @@
+ .PP
+ \fBpam_time\fR(8),
+ \fBpam.d\fR(5),
+-\fBpam\fR(8)
++\fBpam\fR(7)
+ .SH "AUTHOR"
+ .PP
+ pam_time was written by Andrew G\&. Morgan <morgan@kernel\&.org>\&.
+Index: pam/modules/pam_access/pam_access.8.xml
+===================================================================
+--- pam.orig/modules/pam_access/pam_access.8.xml
++++ pam/modules/pam_access/pam_access.8.xml
+@@ -246,7 +246,7 @@
+         <refentrytitle>pam.d</refentrytitle><manvolnum>5</manvolnum>
+       </citerefentry>,
+       <citerefentry>
+-        <refentrytitle>pam</refentrytitle><manvolnum>8</manvolnum>
++        <refentrytitle>pam</refentrytitle><manvolnum>7</manvolnum>
+       </citerefentry>.
+     </para>
+   </refsect1>
+Index: pam/modules/pam_access/pam_access.8
+===================================================================
+--- pam.orig/modules/pam_access/pam_access.8
++++ pam/modules/pam_access/pam_access.8
+@@ -133,7 +133,7 @@
+ .PP
+ \fBaccess.conf\fR(5),
+ \fBpam.d\fR(5),
+-\fBpam\fR(8)\&.
++\fBpam\fR(7)\&.
+ .SH "AUTHORS"
+ .PP
+ The logdaemon style login access control scheme was designed and implemented by Wietse Venema\&. The pam_access PAM module was developed by Alexei Nogin <alexei@nogin\&.dnttm\&.ru>\&. The IPv6 support and the network(address) / netmask feature was developed and provided by Mike Becher <mike\&.becher@lrz\-muenchen\&.de>\&.
+Index: pam/modules/pam_cracklib/pam_cracklib.8.xml
+===================================================================
+--- pam.orig/modules/pam_cracklib/pam_cracklib.8.xml
++++ pam/modules/pam_cracklib/pam_cracklib.8.xml
+@@ -577,7 +577,7 @@
+ 	<refentrytitle>pam.d</refentrytitle><manvolnum>5</manvolnum>
+       </citerefentry>,
+       <citerefentry>
+-	<refentrytitle>pam</refentrytitle><manvolnum>8</manvolnum>
++	<refentrytitle>pam</refentrytitle><manvolnum>7</manvolnum>
+       </citerefentry>
+     </para>
+   </refsect1>
+Index: pam/modules/pam_cracklib/pam_cracklib.8
+===================================================================
+--- pam.orig/modules/pam_cracklib/pam_cracklib.8
++++ pam/modules/pam_cracklib/pam_cracklib.8
+@@ -357,7 +357,7 @@
+ .PP
+ \fBpam.conf\fR(5),
+ \fBpam.d\fR(5),
+-\fBpam\fR(8)
++\fBpam\fR(7)
+ .SH "AUTHOR"
+ .PP
+ pam_cracklib was written by Cristian Gafton <gafton@redhat\&.com>
+Index: pam/modules/pam_debug/pam_debug.8.xml
+===================================================================
+--- pam.orig/modules/pam_debug/pam_debug.8.xml
++++ pam/modules/pam_debug/pam_debug.8.xml
+@@ -216,7 +216,7 @@
+ 	<refentrytitle>pam.d</refentrytitle><manvolnum>5</manvolnum>
+       </citerefentry>,
+       <citerefentry>
+-	<refentrytitle>pam</refentrytitle><manvolnum>8</manvolnum>
++	<refentrytitle>pam</refentrytitle><manvolnum>7</manvolnum>
+       </citerefentry>
+     </para>
+   </refsect1>
+Index: pam/modules/pam_debug/pam_debug.8
+===================================================================
+--- pam.orig/modules/pam_debug/pam_debug.8
++++ pam/modules/pam_debug/pam_debug.8
+@@ -138,7 +138,7 @@
+ .PP
+ \fBpam.conf\fR(5),
+ \fBpam.d\fR(5),
+-\fBpam\fR(8)
++\fBpam\fR(7)
+ .SH "AUTHOR"
+ .PP
+ pam_debug was written by Andrew G\&. Morgan <morgan@kernel\&.org>\&.
+Index: pam/modules/pam_deny/pam_deny.8.xml
+===================================================================
+--- pam.orig/modules/pam_deny/pam_deny.8.xml
++++ pam/modules/pam_deny/pam_deny.8.xml
+@@ -120,7 +120,7 @@
+ 	<refentrytitle>pam.d</refentrytitle><manvolnum>5</manvolnum>
+       </citerefentry>,
+       <citerefentry>
+-	<refentrytitle>pam</refentrytitle><manvolnum>8</manvolnum>
++	<refentrytitle>pam</refentrytitle><manvolnum>7</manvolnum>
+       </citerefentry>
+     </para>
+   </refsect1>
+Index: pam/modules/pam_deny/pam_deny.8
+===================================================================
+--- pam.orig/modules/pam_deny/pam_deny.8
++++ pam/modules/pam_deny/pam_deny.8
+@@ -96,7 +96,7 @@
+ .PP
+ \fBpam.conf\fR(5),
+ \fBpam.d\fR(5),
+-\fBpam\fR(8)
++\fBpam\fR(7)
+ .SH "AUTHOR"
+ .PP
+ pam_deny was written by Andrew G\&. Morgan <morgan@kernel\&.org>
+Index: pam/modules/pam_echo/pam_echo.8.xml
+===================================================================
+--- pam.orig/modules/pam_echo/pam_echo.8.xml
++++ pam/modules/pam_echo/pam_echo.8.xml
+@@ -159,7 +159,7 @@
+       <refentrytitle>pam.d</refentrytitle><manvolnum>5</manvolnum>
+     </citerefentry>,
+     <citerefentry>
+-      <refentrytitle>pam</refentrytitle><manvolnum>8</manvolnum>
++      <refentrytitle>pam</refentrytitle><manvolnum>7</manvolnum>
+     </citerefentry></para>
+   </refsect1>
+ 
+Index: pam/modules/pam_echo/pam_echo.8
+===================================================================
+--- pam.orig/modules/pam_echo/pam_echo.8
++++ pam/modules/pam_echo/pam_echo.8
+@@ -126,7 +126,7 @@
+ .PP
+ \fBpam.conf\fR(8),
+ \fBpam.d\fR(5),
+-\fBpam\fR(8)
++\fBpam\fR(7)
+ .SH "AUTHOR"
+ .PP
+ Thorsten Kukuk <kukuk@thkukuk\&.de>
+Index: pam/modules/pam_env/pam_env.8.xml
+===================================================================
+--- pam.orig/modules/pam_env/pam_env.8.xml
++++ pam/modules/pam_env/pam_env.8.xml
+@@ -246,7 +246,7 @@
+         <refentrytitle>pam.d</refentrytitle><manvolnum>5</manvolnum>
+       </citerefentry>,
+       <citerefentry>
+-        <refentrytitle>pam</refentrytitle><manvolnum>8</manvolnum>
++        <refentrytitle>pam</refentrytitle><manvolnum>7</manvolnum>
+       </citerefentry>,
+       <citerefentry>
+         <refentrytitle>environ</refentrytitle><manvolnum>7</manvolnum>
+Index: pam/modules/pam_exec/pam_exec.8.xml
+===================================================================
+--- pam.orig/modules/pam_exec/pam_exec.8.xml
++++ pam/modules/pam_exec/pam_exec.8.xml
+@@ -258,7 +258,7 @@
+ 	<refentrytitle>pam.d</refentrytitle><manvolnum>5</manvolnum>
+       </citerefentry>,
+       <citerefentry>
+-	<refentrytitle>pam</refentrytitle><manvolnum>8</manvolnum>
++	<refentrytitle>pam</refentrytitle><manvolnum>7</manvolnum>
+       </citerefentry>
+     </para>
+   </refsect1>
+Index: pam/modules/pam_exec/pam_exec.8
+===================================================================
+--- pam.orig/modules/pam_exec/pam_exec.8
++++ pam/modules/pam_exec/pam_exec.8
+@@ -162,7 +162,7 @@
+ .PP
+ \fBpam.conf\fR(5),
+ \fBpam.d\fR(5),
+-\fBpam\fR(8)
++\fBpam\fR(7)
+ .SH "AUTHOR"
+ .PP
+ pam_exec was written by Thorsten Kukuk <kukuk@thkukuk\&.de> and Josh Triplett <josh@joshtriplett\&.org>\&.
+Index: pam/modules/pam_faildelay/pam_faildelay.8.xml
+===================================================================
+--- pam.orig/modules/pam_faildelay/pam_faildelay.8.xml
++++ pam/modules/pam_faildelay/pam_faildelay.8.xml
+@@ -121,7 +121,7 @@
+ 	<refentrytitle>pam.d</refentrytitle><manvolnum>5</manvolnum>
+       </citerefentry>,
+       <citerefentry>
+-	<refentrytitle>pam</refentrytitle><manvolnum>8</manvolnum>
++	<refentrytitle>pam</refentrytitle><manvolnum>7</manvolnum>
+       </citerefentry>
+     </para>
+   </refsect1>
+Index: pam/modules/pam_faildelay/pam_faildelay.8
+===================================================================
+--- pam.orig/modules/pam_faildelay/pam_faildelay.8
++++ pam/modules/pam_faildelay/pam_faildelay.8
+@@ -87,7 +87,7 @@
+ \fBpam_fail_delay\fR(3),
+ \fBpam.conf\fR(5),
+ \fBpam.d\fR(5),
+-\fBpam\fR(8)
++\fBpam\fR(7)
+ .SH "AUTHOR"
+ .PP
+ pam_faildelay was written by Darren Tucker <dtucker@zip\&.com\&.au>\&.
+Index: pam/modules/pam_filter/pam_filter.8.xml
+===================================================================
+--- pam.orig/modules/pam_filter/pam_filter.8.xml
++++ pam/modules/pam_filter/pam_filter.8.xml
+@@ -246,7 +246,7 @@
+ 	<refentrytitle>pam.d</refentrytitle><manvolnum>5</manvolnum>
+       </citerefentry>,
+       <citerefentry>
+-	<refentrytitle>pam</refentrytitle><manvolnum>8</manvolnum>
++	<refentrytitle>pam</refentrytitle><manvolnum>7</manvolnum>
+       </citerefentry>
+     </para>
+   </refsect1>
+Index: pam/modules/pam_filter/pam_filter.8
+===================================================================
+--- pam.orig/modules/pam_filter/pam_filter.8
++++ pam/modules/pam_filter/pam_filter.8
+@@ -166,7 +166,7 @@
+ .PP
+ \fBpam.conf\fR(5),
+ \fBpam.d\fR(5),
+-\fBpam\fR(8)
++\fBpam\fR(7)
+ .SH "AUTHOR"
+ .PP
+ pam_filter was written by Andrew G\&. Morgan <morgan@kernel\&.org>\&.
+Index: pam/modules/pam_ftp/pam_ftp.8.xml
+===================================================================
+--- pam.orig/modules/pam_ftp/pam_ftp.8.xml
++++ pam/modules/pam_ftp/pam_ftp.8.xml
+@@ -168,7 +168,7 @@
+ 	<refentrytitle>pam.d</refentrytitle><manvolnum>5</manvolnum>
+       </citerefentry>,
+       <citerefentry>
+-	<refentrytitle>pam</refentrytitle><manvolnum>8</manvolnum>
++	<refentrytitle>pam</refentrytitle><manvolnum>7</manvolnum>
+       </citerefentry>
+     </para>
+   </refsect1>
+Index: pam/modules/pam_ftp/pam_ftp.8
+===================================================================
+--- pam.orig/modules/pam_ftp/pam_ftp.8
++++ pam/modules/pam_ftp/pam_ftp.8
+@@ -119,7 +119,7 @@
+ .PP
+ \fBpam.conf\fR(5),
+ \fBpam.d\fR(5),
+-\fBpam\fR(8)
++\fBpam\fR(7)
+ .SH "AUTHOR"
+ .PP
+ pam_ftp was written by Andrew G\&. Morgan <morgan@kernel\&.org>\&.
+Index: pam/modules/pam_group/pam_group.8.xml
+===================================================================
+--- pam.orig/modules/pam_group/pam_group.8.xml
++++ pam/modules/pam_group/pam_group.8.xml
+@@ -148,7 +148,7 @@
+         <refentrytitle>pam.d</refentrytitle><manvolnum>5</manvolnum>
+       </citerefentry>,
+       <citerefentry>
+-        <refentrytitle>pam</refentrytitle><manvolnum>8</manvolnum>
++        <refentrytitle>pam</refentrytitle><manvolnum>7</manvolnum>
+       </citerefentry>.
+     </para>
+   </refsect1>
+Index: pam/modules/pam_group/pam_group.8
+===================================================================
+--- pam.orig/modules/pam_group/pam_group.8
++++ pam/modules/pam_group/pam_group.8
+@@ -103,7 +103,7 @@
+ .PP
+ \fBgroup.conf\fR(5),
+ \fBpam.d\fR(5),
+-\fBpam\fR(8)\&.
++\fBpam\fR(7)\&.
+ .SH "AUTHORS"
+ .PP
+ pam_group was written by Andrew G\&. Morgan <morgan@kernel\&.org>\&.
+Index: pam/modules/pam_issue/pam_issue.8.xml
+===================================================================
+--- pam.orig/modules/pam_issue/pam_issue.8.xml
++++ pam/modules/pam_issue/pam_issue.8.xml
+@@ -219,7 +219,7 @@
+ 	<refentrytitle>pam.d</refentrytitle><manvolnum>5</manvolnum>
+       </citerefentry>,
+       <citerefentry>
+-	<refentrytitle>pam</refentrytitle><manvolnum>8</manvolnum>
++	<refentrytitle>pam</refentrytitle><manvolnum>7</manvolnum>
+       </citerefentry>
+     </para>
+   </refsect1>
+Index: pam/modules/pam_issue/pam_issue.8
+===================================================================
+--- pam.orig/modules/pam_issue/pam_issue.8
++++ pam/modules/pam_issue/pam_issue.8
+@@ -152,7 +152,7 @@
+ .PP
+ \fBpam.conf\fR(5),
+ \fBpam.d\fR(5),
+-\fBpam\fR(8)
++\fBpam\fR(7)
+ .SH "AUTHOR"
+ .PP
+ pam_issue was written by Ben Collins <bcollins@debian\&.org>\&.
+Index: pam/modules/pam_keyinit/pam_keyinit.8.xml
+===================================================================
+--- pam.orig/modules/pam_keyinit/pam_keyinit.8.xml
++++ pam/modules/pam_keyinit/pam_keyinit.8.xml
+@@ -223,7 +223,7 @@
+ 	<refentrytitle>pam.d</refentrytitle><manvolnum>5</manvolnum>
+       </citerefentry>,
+       <citerefentry>
+-	<refentrytitle>pam</refentrytitle><manvolnum>8</manvolnum>
++	<refentrytitle>pam</refentrytitle><manvolnum>7</manvolnum>
+       </citerefentry>
+       <citerefentry>
+ 	<refentrytitle>keyctl</refentrytitle><manvolnum>1</manvolnum>
+Index: pam/modules/pam_keyinit/pam_keyinit.8
+===================================================================
+--- pam.orig/modules/pam_keyinit/pam_keyinit.8
++++ pam/modules/pam_keyinit/pam_keyinit.8
+@@ -130,7 +130,7 @@
+ .PP
+ \fBpam.conf\fR(5),
+ \fBpam.d\fR(5),
+-\fBpam\fR(8)\fBkeyctl\fR(1)
++\fBpam\fR(7)\fBkeyctl\fR(1)
+ .SH "AUTHOR"
+ .PP
+ pam_keyinit was written by David Howells, <dhowells@redhat\&.com>\&.
+Index: pam/modules/pam_lastlog/pam_lastlog.8.xml
+===================================================================
+--- pam.orig/modules/pam_lastlog/pam_lastlog.8.xml
++++ pam/modules/pam_lastlog/pam_lastlog.8.xml
+@@ -298,7 +298,7 @@
+ 	<refentrytitle>pam.d</refentrytitle><manvolnum>5</manvolnum>
+       </citerefentry>,
+       <citerefentry>
+-	<refentrytitle>pam</refentrytitle><manvolnum>8</manvolnum>
++	<refentrytitle>pam</refentrytitle><manvolnum>7</manvolnum>
+       </citerefentry>
+     </para>
+   </refsect1>
+Index: pam/modules/pam_lastlog/pam_lastlog.8
+===================================================================
+--- pam.orig/modules/pam_lastlog/pam_lastlog.8
++++ pam/modules/pam_lastlog/pam_lastlog.8
+@@ -173,7 +173,7 @@
+ .PP
+ \fBpam.conf\fR(5),
+ \fBpam.d\fR(5),
+-\fBpam\fR(8)
++\fBpam\fR(7)
+ .SH "AUTHOR"
+ .PP
+ pam_lastlog was written by Andrew G\&. Morgan <morgan@kernel\&.org>\&.
+Index: pam/modules/pam_limits/pam_limits.8.xml
+===================================================================
+--- pam.orig/modules/pam_limits/pam_limits.8.xml
++++ pam/modules/pam_limits/pam_limits.8.xml
+@@ -241,7 +241,7 @@
+         <refentrytitle>pam.d</refentrytitle><manvolnum>5</manvolnum>
+       </citerefentry>,
+       <citerefentry>
+-        <refentrytitle>pam</refentrytitle><manvolnum>8</manvolnum>
++        <refentrytitle>pam</refentrytitle><manvolnum>7</manvolnum>
+       </citerefentry>.
+     </para>
+   </refsect1>
+Index: pam/modules/pam_limits/pam_limits.8
+===================================================================
+--- pam.orig/modules/pam_limits/pam_limits.8
++++ pam/modules/pam_limits/pam_limits.8
+@@ -146,7 +146,7 @@
+ .PP
+ \fBlimits.conf\fR(5),
+ \fBpam.d\fR(5),
+-\fBpam\fR(8)\&.
++\fBpam\fR(7)\&.
+ .SH "AUTHORS"
+ .PP
+ pam_limits was initially written by Cristian Gafton <gafton@redhat\&.com>
+Index: pam/modules/pam_listfile/pam_listfile.8.xml
+===================================================================
+--- pam.orig/modules/pam_listfile/pam_listfile.8.xml
++++ pam/modules/pam_listfile/pam_listfile.8.xml
+@@ -281,7 +281,7 @@
+ 	<refentrytitle>pam.d</refentrytitle><manvolnum>5</manvolnum>
+       </citerefentry>,
+       <citerefentry>
+-	<refentrytitle>pam</refentrytitle><manvolnum>8</manvolnum>
++	<refentrytitle>pam</refentrytitle><manvolnum>7</manvolnum>
+       </citerefentry>
+     </para>
+   </refsect1>
+Index: pam/modules/pam_listfile/pam_listfile.8
+===================================================================
+--- pam.orig/modules/pam_listfile/pam_listfile.8
++++ pam/modules/pam_listfile/pam_listfile.8
+@@ -205,7 +205,7 @@
+ .PP
+ \fBpam.conf\fR(5),
+ \fBpam.d\fR(5),
+-\fBpam\fR(8)
++\fBpam\fR(7)
+ .SH "AUTHOR"
+ .PP
+ pam_listfile was written by Michael K\&. Johnson <johnsonm@redhat\&.com> and Elliot Lee <sopwith@cuc\&.edu>\&.
+Index: pam/modules/pam_localuser/pam_localuser.8.xml
+===================================================================
+--- pam.orig/modules/pam_localuser/pam_localuser.8.xml
++++ pam/modules/pam_localuser/pam_localuser.8.xml
+@@ -158,7 +158,7 @@
+ 	<refentrytitle>pam.d</refentrytitle><manvolnum>5</manvolnum>
+       </citerefentry>,
+       <citerefentry>
+-	<refentrytitle>pam</refentrytitle><manvolnum>8</manvolnum>
++	<refentrytitle>pam</refentrytitle><manvolnum>7</manvolnum>
+       </citerefentry>
+     </para>
+   </refsect1>
+Index: pam/modules/pam_localuser/pam_localuser.8
+===================================================================
+--- pam.orig/modules/pam_localuser/pam_localuser.8
++++ pam/modules/pam_localuser/pam_localuser.8
+@@ -102,7 +102,7 @@
+ .PP
+ \fBpam.conf\fR(5),
+ \fBpam.d\fR(5),
+-\fBpam\fR(8)
++\fBpam\fR(7)
+ .SH "AUTHOR"
+ .PP
+ pam_localuser was written by Nalin Dahyabhai <nalin@redhat\&.com>\&.
+Index: pam/modules/pam_loginuid/pam_loginuid.8.xml
+===================================================================
+--- pam.orig/modules/pam_loginuid/pam_loginuid.8.xml
++++ pam/modules/pam_loginuid/pam_loginuid.8.xml
+@@ -121,7 +121,7 @@
+ 	<refentrytitle>pam.d</refentrytitle><manvolnum>5</manvolnum>
+       </citerefentry>,
+       <citerefentry>
+-	<refentrytitle>pam</refentrytitle><manvolnum>8</manvolnum>
++	<refentrytitle>pam</refentrytitle><manvolnum>7</manvolnum>
+       </citerefentry>,
+       <citerefentry>
+ 	<refentrytitle>auditctl</refentrytitle><manvolnum>8</manvolnum>
+Index: pam/modules/pam_loginuid/pam_loginuid.8
+===================================================================
+--- pam.orig/modules/pam_loginuid/pam_loginuid.8
++++ pam/modules/pam_loginuid/pam_loginuid.8
+@@ -85,7 +85,7 @@
+ .PP
+ \fBpam.conf\fR(5),
+ \fBpam.d\fR(5),
+-\fBpam\fR(8),
++\fBpam\fR(7),
+ \fBauditctl\fR(8),
+ \fBauditd\fR(8)
+ .SH "AUTHOR"
+Index: pam/modules/pam_mail/pam_mail.8.xml
+===================================================================
+--- pam.orig/modules/pam_mail/pam_mail.8.xml
++++ pam/modules/pam_mail/pam_mail.8.xml
+@@ -265,7 +265,7 @@
+ 	<refentrytitle>pam.d</refentrytitle><manvolnum>5</manvolnum>
+       </citerefentry>,
+       <citerefentry>
+-	<refentrytitle>pam</refentrytitle><manvolnum>8</manvolnum>
++	<refentrytitle>pam</refentrytitle><manvolnum>7</manvolnum>
+       </citerefentry>
+     </para>
+   </refsect1>
+Index: pam/modules/pam_mail/pam_mail.8
+===================================================================
+--- pam.orig/modules/pam_mail/pam_mail.8
++++ pam/modules/pam_mail/pam_mail.8
+@@ -153,7 +153,7 @@
+ .PP
+ \fBpam.conf\fR(5),
+ \fBpam.d\fR(5),
+-\fBpam\fR(8)
++\fBpam\fR(7)
+ .SH "AUTHOR"
+ .PP
+ pam_mail was written by Andrew G\&. Morgan <morgan@kernel\&.org>\&.
+Index: pam/modules/pam_mkhomedir/pam_mkhomedir.8.xml
+===================================================================
+--- pam.orig/modules/pam_mkhomedir/pam_mkhomedir.8.xml
++++ pam/modules/pam_mkhomedir/pam_mkhomedir.8.xml
+@@ -189,7 +189,7 @@
+         <refentrytitle>pam.d</refentrytitle><manvolnum>5</manvolnum>
+       </citerefentry>,
+       <citerefentry>
+-        <refentrytitle>pam</refentrytitle><manvolnum>8</manvolnum>
++        <refentrytitle>pam</refentrytitle><manvolnum>7</manvolnum>
+       </citerefentry>.
+     </para>
+   </refsect1>
+Index: pam/modules/pam_mkhomedir/pam_mkhomedir.8
+===================================================================
+--- pam.orig/modules/pam_mkhomedir/pam_mkhomedir.8
++++ pam/modules/pam_mkhomedir/pam_mkhomedir.8
+@@ -123,7 +123,7 @@
+ .SH "SEE ALSO"
+ .PP
+ \fBpam.d\fR(5),
+-\fBpam\fR(8)\&.
++\fBpam\fR(7)\&.
+ .SH "AUTHOR"
+ .PP
+ pam_mkhomedir was written by Jason Gunthorpe <jgg@debian\&.org>\&.
+Index: pam/modules/pam_motd/pam_motd.8.xml
+===================================================================
+--- pam.orig/modules/pam_motd/pam_motd.8.xml
++++ pam/modules/pam_motd/pam_motd.8.xml
+@@ -129,7 +129,7 @@
+ 	<refentrytitle>pam.d</refentrytitle><manvolnum>5</manvolnum>
+       </citerefentry>,
+       <citerefentry>
+-	<refentrytitle>pam</refentrytitle><manvolnum>8</manvolnum>
++	<refentrytitle>pam</refentrytitle><manvolnum>7</manvolnum>
+       </citerefentry>
+     </para>
+   </refsect1>
+Index: pam/modules/pam_motd/pam_motd.8
+===================================================================
+--- pam.orig/modules/pam_motd/pam_motd.8
++++ pam/modules/pam_motd/pam_motd.8
+@@ -122,7 +122,7 @@
+ \fBmotd\fR(5),
+ \fBpam.conf\fR(5),
+ \fBpam.d\fR(5),
+-\fBpam\fR(8)
++\fBpam\fR(7)
+ .SH "AUTHOR"
+ .PP
+ pam_motd was written by Ben Collins <bcollins@debian\&.org>\&.
+Index: pam/modules/pam_namespace/pam_namespace.8.xml
+===================================================================
+--- pam.orig/modules/pam_namespace/pam_namespace.8.xml
++++ pam/modules/pam_namespace/pam_namespace.8.xml
+@@ -399,7 +399,7 @@
+         <refentrytitle>mount</refentrytitle><manvolnum>8</manvolnum>
+       </citerefentry>,
+       <citerefentry>
+-        <refentrytitle>pam</refentrytitle><manvolnum>8</manvolnum>
++        <refentrytitle>pam</refentrytitle><manvolnum>7</manvolnum>
+       </citerefentry>.
+     </para>
+   </refsect1>
+Index: pam/modules/pam_namespace/pam_namespace.8
+===================================================================
+--- pam.orig/modules/pam_namespace/pam_namespace.8
++++ pam/modules/pam_namespace/pam_namespace.8
+@@ -178,7 +178,7 @@
+ \fBnamespace.conf\fR(5),
+ \fBpam.d\fR(5),
+ \fBmount\fR(8),
+-\fBpam\fR(8)\&.
++\fBpam\fR(7)\&.
+ .SH "AUTHORS"
+ .PP
+ The namespace setup scheme was designed by Stephen Smalley, Janak Desai and Chad Sellers\&. The pam_namespace PAM module was developed by Janak Desai <janak@us\&.ibm\&.com>, Chad Sellers <csellers@tresys\&.com> and Steve Grubb <sgrubb@redhat\&.com>\&. Additional improvements by Xavier Toth <txtoth@gmail\&.com> and Tomas Mraz <tmraz@redhat\&.com>\&.
+Index: pam/modules/pam_nologin/pam_nologin.8.xml
+===================================================================
+--- pam.orig/modules/pam_nologin/pam_nologin.8.xml
++++ pam/modules/pam_nologin/pam_nologin.8.xml
+@@ -160,7 +160,7 @@
+ 	<refentrytitle>pam.d</refentrytitle><manvolnum>5</manvolnum>
+       </citerefentry>,
+       <citerefentry>
+-	<refentrytitle>pam</refentrytitle><manvolnum>8</manvolnum>
++	<refentrytitle>pam</refentrytitle><manvolnum>7</manvolnum>
+       </citerefentry>
+     </para>
+   </refsect1>
+Index: pam/modules/pam_nologin/pam_nologin.8
+===================================================================
+--- pam.orig/modules/pam_nologin/pam_nologin.8
++++ pam/modules/pam_nologin/pam_nologin.8
+@@ -124,7 +124,7 @@
+ \fBnologin\fR(5),
+ \fBpam.conf\fR(5),
+ \fBpam.d\fR(5),
+-\fBpam\fR(8)
++\fBpam\fR(7)
+ .SH "AUTHOR"
+ .PP
+ pam_nologin was written by Michael K\&. Johnson <johnsonm@redhat\&.com>\&.
+Index: pam/modules/pam_permit/pam_permit.8.xml
+===================================================================
+--- pam.orig/modules/pam_permit/pam_permit.8.xml
++++ pam/modules/pam_permit/pam_permit.8.xml
+@@ -91,7 +91,7 @@
+ 	<refentrytitle>pam.d</refentrytitle><manvolnum>5</manvolnum>
+       </citerefentry>,
+       <citerefentry>
+-	<refentrytitle>pam</refentrytitle><manvolnum>8</manvolnum>
++	<refentrytitle>pam</refentrytitle><manvolnum>7</manvolnum>
+       </citerefentry>
+     </para>
+   </refsect1>
+Index: pam/modules/pam_permit/pam_permit.8
+===================================================================
+--- pam.orig/modules/pam_permit/pam_permit.8
++++ pam/modules/pam_permit/pam_permit.8
+@@ -78,7 +78,7 @@
+ .PP
+ \fBpam.conf\fR(5),
+ \fBpam.d\fR(5),
+-\fBpam\fR(8)
++\fBpam\fR(7)
+ .SH "AUTHOR"
+ .PP
+ pam_permit was written by Andrew G\&. Morgan, <morgan@kernel\&.org>\&.
+Index: pam/modules/pam_rhosts/pam_rhosts.8.xml
+===================================================================
+--- pam.orig/modules/pam_rhosts/pam_rhosts.8.xml
++++ pam/modules/pam_rhosts/pam_rhosts.8.xml
+@@ -156,7 +156,7 @@
+ 	<refentrytitle>pam.d</refentrytitle><manvolnum>5</manvolnum>
+       </citerefentry>,
+       <citerefentry>
+-	<refentrytitle>pam</refentrytitle><manvolnum>8</manvolnum>
++	<refentrytitle>pam</refentrytitle><manvolnum>7</manvolnum>
+       </citerefentry>
+     </para>
+   </refsect1>
+Index: pam/modules/pam_rhosts/pam_rhosts.8
+===================================================================
+--- pam.orig/modules/pam_rhosts/pam_rhosts.8
++++ pam/modules/pam_rhosts/pam_rhosts.8
+@@ -122,7 +122,7 @@
+ \fBrhosts\fR(5),
+ \fBpam.conf\fR(5),
+ \fBpam.d\fR(5),
+-\fBpam\fR(8)
++\fBpam\fR(7)
+ .SH "AUTHOR"
+ .PP
+ pam_rhosts was written by Thorsten Kukuk <kukuk@thkukuk\&.de>
+Index: pam/modules/pam_rootok/pam_rootok.8.xml
+===================================================================
+--- pam.orig/modules/pam_rootok/pam_rootok.8.xml
++++ pam/modules/pam_rootok/pam_rootok.8.xml
+@@ -116,7 +116,7 @@
+ 	<refentrytitle>pam.d</refentrytitle><manvolnum>5</manvolnum>
+       </citerefentry>,
+       <citerefentry>
+-	<refentrytitle>pam</refentrytitle><manvolnum>8</manvolnum>
++	<refentrytitle>pam</refentrytitle><manvolnum>7</manvolnum>
+       </citerefentry>
+     </para>
+   </refsect1>
+Index: pam/modules/pam_rootok/pam_rootok.8
+===================================================================
+--- pam.orig/modules/pam_rootok/pam_rootok.8
++++ pam/modules/pam_rootok/pam_rootok.8
+@@ -99,7 +99,7 @@
+ \fBsu\fR(1),
+ \fBpam.conf\fR(5),
+ \fBpam.d\fR(5),
+-\fBpam\fR(8)
++\fBpam\fR(7)
+ .SH "AUTHOR"
+ .PP
+ pam_rootok was written by Andrew G\&. Morgan, <morgan@kernel\&.org>\&.
+Index: pam/modules/pam_securetty/pam_securetty.8.xml
+===================================================================
+--- pam.orig/modules/pam_securetty/pam_securetty.8.xml
++++ pam/modules/pam_securetty/pam_securetty.8.xml
+@@ -168,7 +168,7 @@
+ 	<refentrytitle>pam.d</refentrytitle><manvolnum>5</manvolnum>
+       </citerefentry>,
+       <citerefentry>
+-	<refentrytitle>pam</refentrytitle><manvolnum>8</manvolnum>
++	<refentrytitle>pam</refentrytitle><manvolnum>7</manvolnum>
+       </citerefentry>
+     </para>
+   </refsect1>
+Index: pam/modules/pam_securetty/pam_securetty.8
+===================================================================
+--- pam.orig/modules/pam_securetty/pam_securetty.8
++++ pam/modules/pam_securetty/pam_securetty.8
+@@ -119,7 +119,7 @@
+ \fBsecuretty\fR(5),
+ \fBpam.conf\fR(5),
+ \fBpam.d\fR(5),
+-\fBpam\fR(8)
++\fBpam\fR(7)
+ .SH "AUTHOR"
+ .PP
+ pam_securetty was written by Elliot Lee <sopwith@cuc\&.edu>\&.
+Index: pam/modules/pam_selinux/pam_selinux.8.xml
+===================================================================
+--- pam.orig/modules/pam_selinux/pam_selinux.8.xml
++++ pam/modules/pam_selinux/pam_selinux.8.xml
+@@ -258,7 +258,7 @@
+ 	<refentrytitle>pam.d</refentrytitle><manvolnum>5</manvolnum>
+       </citerefentry>,
+       <citerefentry>
+-	<refentrytitle>pam</refentrytitle><manvolnum>8</manvolnum>
++	<refentrytitle>pam</refentrytitle><manvolnum>7</manvolnum>
+       </citerefentry>,
+       <citerefentry>
+ 	<refentrytitle>selinux</refentrytitle><manvolnum>8</manvolnum>
+Index: pam/modules/pam_selinux/pam_selinux.8
+===================================================================
+--- pam.orig/modules/pam_selinux/pam_selinux.8
++++ pam/modules/pam_selinux/pam_selinux.8
+@@ -7,7 +7,7 @@
+ .\"    Source: Linux-PAM Manual
+ .\"  Language: English
+ .\"
+-.TH "PAM_SELINUX" "8" "05/18/2017" "Linux-PAM Manual" "Linux\-PAM Manual"
++.TH "PAM_SELINUX" "7" "05/18/2017" "Linux-PAM Manual" "Linux\-PAM Manual"
+ .\" -----------------------------------------------------------------
+ .\" * Define some portability stuff
+ .\" -----------------------------------------------------------------
+@@ -144,7 +144,7 @@
+ \fBexecve\fR(2),
+ \fBtty\fR(4),
+ \fBpam.d\fR(5),
+-\fBpam\fR(8),
++\fBpam\fR(7),
+ \fBselinux\fR(8)
+ .SH "AUTHOR"
+ .PP
+Index: pam/modules/pam_sepermit/pam_sepermit.8.xml
+===================================================================
+--- pam.orig/modules/pam_sepermit/pam_sepermit.8.xml
++++ pam/modules/pam_sepermit/pam_sepermit.8.xml
+@@ -176,7 +176,7 @@
+ 	<refentrytitle>pam.d</refentrytitle><manvolnum>5</manvolnum>
+       </citerefentry>,
+       <citerefentry>
+-	<refentrytitle>pam</refentrytitle><manvolnum>8</manvolnum>
++	<refentrytitle>pam</refentrytitle><manvolnum>7</manvolnum>
+       </citerefentry>
+       <citerefentry>
+ 	<refentrytitle>selinux</refentrytitle><manvolnum>8</manvolnum>
+Index: pam/modules/pam_sepermit/pam_sepermit.8
+===================================================================
+--- pam.orig/modules/pam_sepermit/pam_sepermit.8
++++ pam/modules/pam_sepermit/pam_sepermit.8
+@@ -124,7 +124,7 @@
+ \fBsepermit.conf\fR(5),
+ \fBpam.conf\fR(5),
+ \fBpam.d\fR(5),
+-\fBpam\fR(8)\fBselinux\fR(8)
++\fBpam\fR(7)\fBselinux\fR(8)
+ .SH "AUTHOR"
+ .PP
+ pam_sepermit and this manual page were written by Tomas Mraz <tmraz@redhat\&.com>\&.
+Index: pam/modules/pam_shells/pam_shells.8.xml
+===================================================================
+--- pam.orig/modules/pam_shells/pam_shells.8.xml
++++ pam/modules/pam_shells/pam_shells.8.xml
+@@ -102,7 +102,7 @@
+ 	<refentrytitle>pam.d</refentrytitle><manvolnum>5</manvolnum>
+       </citerefentry>,
+       <citerefentry>
+-	<refentrytitle>pam</refentrytitle><manvolnum>8</manvolnum>
++	<refentrytitle>pam</refentrytitle><manvolnum>7</manvolnum>
+       </citerefentry>
+     </para>
+   </refsect1>
+Index: pam/modules/pam_shells/pam_shells.8
+===================================================================
+--- pam.orig/modules/pam_shells/pam_shells.8
++++ pam/modules/pam_shells/pam_shells.8
+@@ -85,7 +85,7 @@
+ \fBshells\fR(5),
+ \fBpam.conf\fR(5),
+ \fBpam.d\fR(5),
+-\fBpam\fR(8)
++\fBpam\fR(7)
+ .SH "AUTHOR"
+ .PP
+ pam_shells was written by Erik Troan <ewt@redhat\&.com>\&.
+Index: pam/modules/pam_succeed_if/pam_succeed_if.8.xml
+===================================================================
+--- pam.orig/modules/pam_succeed_if/pam_succeed_if.8.xml
++++ pam/modules/pam_succeed_if/pam_succeed_if.8.xml
+@@ -295,7 +295,7 @@
+         <refentrytitle>glob</refentrytitle><manvolnum>7</manvolnum>
+       </citerefentry>,
+       <citerefentry>
+-        <refentrytitle>pam</refentrytitle><manvolnum>8</manvolnum>
++        <refentrytitle>pam</refentrytitle><manvolnum>7</manvolnum>
+       </citerefentry>
+     </para>
+   </refsect1>
+Index: pam/modules/pam_succeed_if/pam_succeed_if.8
+===================================================================
+--- pam.orig/modules/pam_succeed_if/pam_succeed_if.8
++++ pam/modules/pam_succeed_if/pam_succeed_if.8
+@@ -220,7 +220,7 @@
+ .SH "SEE ALSO"
+ .PP
+ \fBglob\fR(7),
+-\fBpam\fR(8)
++\fBpam\fR(7)
+ .SH "AUTHOR"
+ .PP
+ Nalin Dahyabhai <nalin@redhat\&.com>
+Index: pam/modules/pam_tally/pam_tally.8.xml
+===================================================================
+--- pam.orig/modules/pam_tally/pam_tally.8.xml
++++ pam/modules/pam_tally/pam_tally.8.xml
+@@ -444,7 +444,7 @@
+ 	<refentrytitle>pam.d</refentrytitle><manvolnum>5</manvolnum>
+       </citerefentry>,
+       <citerefentry>
+-	<refentrytitle>pam</refentrytitle><manvolnum>8</manvolnum>
++	<refentrytitle>pam</refentrytitle><manvolnum>7</manvolnum>
+       </citerefentry>
+     </para>
+   </refsect1>
+Index: pam/modules/pam_tally/pam_tally.8
+===================================================================
+--- pam.orig/modules/pam_tally/pam_tally.8
++++ pam/modules/pam_tally/pam_tally.8
+@@ -248,7 +248,7 @@
+ \fBfaillog\fR(8),
+ \fBpam.conf\fR(5),
+ \fBpam.d\fR(5),
+-\fBpam\fR(8)
++\fBpam\fR(7)
+ .SH "AUTHOR"
+ .PP
+ pam_tally was written by Tim Baverstock and Tomas Mraz\&.
+Index: pam/modules/pam_time/pam_time.8.xml
+===================================================================
+--- pam.orig/modules/pam_time/pam_time.8.xml
++++ pam/modules/pam_time/pam_time.8.xml
+@@ -169,7 +169,7 @@
+         <refentrytitle>pam.d</refentrytitle><manvolnum>5</manvolnum>
+       </citerefentry>,
+       <citerefentry>
+-        <refentrytitle>pam</refentrytitle><manvolnum>8</manvolnum>
++        <refentrytitle>pam</refentrytitle><manvolnum>7</manvolnum>
+       </citerefentry>.
+     </para>
+   </refsect1>
+Index: pam/modules/pam_time/pam_time.8
+===================================================================
+--- pam.orig/modules/pam_time/pam_time.8
++++ pam/modules/pam_time/pam_time.8
+@@ -109,7 +109,7 @@
+ .PP
+ \fBtime.conf\fR(5),
+ \fBpam.d\fR(5),
+-\fBpam\fR(8)\&.
++\fBpam\fR(7)\&.
+ .SH "AUTHOR"
+ .PP
+ pam_time was written by Andrew G\&. Morgan <morgan@kernel\&.org>\&.
+Index: pam/modules/pam_umask/pam_umask.8.xml
+===================================================================
+--- pam.orig/modules/pam_umask/pam_umask.8.xml
++++ pam/modules/pam_umask/pam_umask.8.xml
+@@ -201,7 +201,7 @@
+ 	<refentrytitle>pam.d</refentrytitle><manvolnum>5</manvolnum>
+       </citerefentry>,
+       <citerefentry>
+-	<refentrytitle>pam</refentrytitle><manvolnum>8</manvolnum>
++	<refentrytitle>pam</refentrytitle><manvolnum>7</manvolnum>
+       </citerefentry>
+     </para>
+   </refsect1>
+Index: pam/modules/pam_umask/pam_umask.8
+===================================================================
+--- pam.orig/modules/pam_umask/pam_umask.8
++++ pam/modules/pam_umask/pam_umask.8
+@@ -150,7 +150,7 @@
+ .PP
+ \fBpam.conf\fR(5),
+ \fBpam.d\fR(5),
+-\fBpam\fR(8)
++\fBpam\fR(7)
+ .SH "AUTHOR"
+ .PP
+ pam_umask was written by Thorsten Kukuk <kukuk@thkukuk\&.de>\&.
+Index: pam/modules/pam_unix/pam_unix.8.xml
+===================================================================
+--- pam.orig/modules/pam_unix/pam_unix.8.xml
++++ pam/modules/pam_unix/pam_unix.8.xml
+@@ -537,7 +537,7 @@
+ 	<refentrytitle>pam.d</refentrytitle><manvolnum>5</manvolnum>
+       </citerefentry>,
+       <citerefentry>
+-	<refentrytitle>pam</refentrytitle><manvolnum>8</manvolnum>
++	<refentrytitle>pam</refentrytitle><manvolnum>7</manvolnum>
+       </citerefentry>
+     </para>
+   </refsect1>
+Index: pam/modules/pam_unix/pam_unix.8
+===================================================================
+--- pam.orig/modules/pam_unix/pam_unix.8
++++ pam/modules/pam_unix/pam_unix.8
+@@ -294,7 +294,7 @@
+ \fBlogin.defs\fR(5),
+ \fBpam.conf\fR(5),
+ \fBpam.d\fR(5),
+-\fBpam\fR(8)
++\fBpam\fR(7)
+ .SH "AUTHOR"
+ .PP
+ pam_unix was written by various people\&.
+Index: pam/doc/man/misc_conv.3.xml
+===================================================================
+--- pam.orig/doc/man/misc_conv.3.xml
++++ pam/doc/man/misc_conv.3.xml
+@@ -171,7 +171,7 @@
+         <refentrytitle>pam_conv</refentrytitle><manvolnum>3</manvolnum>
+       </citerefentry>,
+       <citerefentry>
+-        <refentrytitle>pam</refentrytitle><manvolnum>8</manvolnum>
++        <refentrytitle>pam</refentrytitle><manvolnum>7</manvolnum>
+       </citerefentry>
+     </para>
+   </refsect1>
+Index: pam/doc/man/misc_conv.3
+===================================================================
+--- pam.orig/doc/man/misc_conv.3
++++ pam/doc/man/misc_conv.3
+@@ -117,7 +117,7 @@
+ .SH "SEE ALSO"
+ .PP
+ \fBpam_conv\fR(3),
+-\fBpam\fR(8)
++\fBpam\fR(7)
+ .SH "STANDARDS"
+ .PP
+ The
+Index: pam/doc/man/pam_acct_mgmt.3.xml
+===================================================================
+--- pam.orig/doc/man/pam_acct_mgmt.3.xml
++++ pam/doc/man/pam_acct_mgmt.3.xml
+@@ -138,7 +138,7 @@
+         <refentrytitle>pam_strerror</refentrytitle><manvolnum>3</manvolnum>
+       </citerefentry>,
+       <citerefentry>
+-        <refentrytitle>pam</refentrytitle><manvolnum>8</manvolnum>
++        <refentrytitle>pam</refentrytitle><manvolnum>7</manvolnum>
+       </citerefentry>
+     </para>
+   </refsect1>
+Index: pam/doc/man/pam_acct_mgmt.3
+===================================================================
+--- pam.orig/doc/man/pam_acct_mgmt.3
++++ pam/doc/man/pam_acct_mgmt.3
+@@ -97,4 +97,4 @@
+ \fBpam_authenticate\fR(3),
+ \fBpam_chauthtok\fR(3),
+ \fBpam_strerror\fR(3),
+-\fBpam\fR(8)
++\fBpam\fR(7)
+Index: pam/doc/man/pam_authenticate.3.xml
+===================================================================
+--- pam.orig/doc/man/pam_authenticate.3.xml
++++ pam/doc/man/pam_authenticate.3.xml
+@@ -162,7 +162,7 @@
+         <refentrytitle>pam_strerror</refentrytitle><manvolnum>3</manvolnum>
+       </citerefentry>,
+       <citerefentry>
+-        <refentrytitle>pam</refentrytitle><manvolnum>8</manvolnum>
++        <refentrytitle>pam</refentrytitle><manvolnum>7</manvolnum>
+       </citerefentry>
+     </para>
+   </refsect1>
+Index: pam/doc/man/pam_authenticate.3
+===================================================================
+--- pam.orig/doc/man/pam_authenticate.3
++++ pam/doc/man/pam_authenticate.3
+@@ -107,4 +107,4 @@
+ \fBpam_setcred\fR(3),
+ \fBpam_chauthtok\fR(3),
+ \fBpam_strerror\fR(3),
+-\fBpam\fR(8)
++\fBpam\fR(7)
+Index: pam/doc/man/pam_chauthtok.3.xml
+===================================================================
+--- pam.orig/doc/man/pam_chauthtok.3.xml
++++ pam/doc/man/pam_chauthtok.3.xml
+@@ -157,7 +157,7 @@
+         <refentrytitle>pam_strerror</refentrytitle><manvolnum>3</manvolnum>
+       </citerefentry>,
+       <citerefentry>
+-        <refentrytitle>pam</refentrytitle><manvolnum>8</manvolnum>
++        <refentrytitle>pam</refentrytitle><manvolnum>7</manvolnum>
+       </citerefentry>
+     </para>
+   </refsect1>
+Index: pam/doc/man/pam_chauthtok.3
+===================================================================
+--- pam.orig/doc/man/pam_chauthtok.3
++++ pam/doc/man/pam_chauthtok.3
+@@ -106,4 +106,4 @@
+ \fBpam_setcred\fR(3),
+ \fBpam_get_item\fR(3),
+ \fBpam_strerror\fR(3),
+-\fBpam\fR(8)
++\fBpam\fR(7)
+Index: pam/doc/man/pam_conv.3.xml
+===================================================================
+--- pam.orig/doc/man/pam_conv.3.xml
++++ pam/doc/man/pam_conv.3.xml
+@@ -221,7 +221,7 @@
+         <refentrytitle>pam_strerror</refentrytitle><manvolnum>3</manvolnum>
+       </citerefentry>,
+       <citerefentry>
+-        <refentrytitle>pam</refentrytitle><manvolnum>8</manvolnum>
++        <refentrytitle>pam</refentrytitle><manvolnum>7</manvolnum>
+       </citerefentry>
+     </para>
+   </refsect1>
+Index: pam/doc/man/pam_conv.3
+===================================================================
+--- pam.orig/doc/man/pam_conv.3
++++ pam/doc/man/pam_conv.3
+@@ -174,4 +174,4 @@
+ \fBpam_set_item\fR(3),
+ \fBpam_get_item\fR(3),
+ \fBpam_strerror\fR(3),
+-\fBpam\fR(8)
++\fBpam\fR(7)
+Index: pam/doc/man/pam_error.3.xml
+===================================================================
+--- pam.orig/doc/man/pam_error.3.xml
++++ pam/doc/man/pam_error.3.xml
+@@ -105,7 +105,7 @@
+         <refentrytitle>pam_vprompt</refentrytitle><manvolnum>3</manvolnum>
+       </citerefentry>,
+       <citerefentry>
+-        <refentrytitle>pam</refentrytitle><manvolnum>8</manvolnum>
++        <refentrytitle>pam</refentrytitle><manvolnum>7</manvolnum>
+       </citerefentry>
+     </para>
+   </refsect1>
+Index: pam/doc/man/pam_error.3
+===================================================================
+--- pam.orig/doc/man/pam_error.3
++++ pam/doc/man/pam_error.3
+@@ -80,7 +80,7 @@
+ \fBpam_vinfo\fR(3),
+ \fBpam_prompt\fR(3),
+ \fBpam_vprompt\fR(3),
+-\fBpam\fR(8)
++\fBpam\fR(7)
+ .SH "STANDARDS"
+ .PP
+ The
+Index: pam/doc/man/pam_getenv.3.xml
+===================================================================
+--- pam.orig/doc/man/pam_getenv.3.xml
++++ pam/doc/man/pam_getenv.3.xml
+@@ -60,7 +60,7 @@
+         <refentrytitle>pam_putenv</refentrytitle><manvolnum>3</manvolnum>
+       </citerefentry>,
+       <citerefentry>
+-        <refentrytitle>pam</refentrytitle><manvolnum>8</manvolnum>
++        <refentrytitle>pam</refentrytitle><manvolnum>7</manvolnum>
+       </citerefentry>
+     </para>
+   </refsect1>
+Index: pam/doc/man/pam_getenv.3
+===================================================================
+--- pam.orig/doc/man/pam_getenv.3
++++ pam/doc/man/pam_getenv.3
+@@ -57,4 +57,4 @@
+ \fBpam_start\fR(3),
+ \fBpam_getenvlist\fR(3),
+ \fBpam_putenv\fR(3),
+-\fBpam\fR(8)
++\fBpam\fR(7)
+Index: pam/doc/man/pam_getenvlist.3.xml
+===================================================================
+--- pam.orig/doc/man/pam_getenvlist.3.xml
++++ pam/doc/man/pam_getenvlist.3.xml
+@@ -78,7 +78,7 @@
+         <refentrytitle>pam_putenv</refentrytitle><manvolnum>3</manvolnum>
+       </citerefentry>,
+       <citerefentry>
+-        <refentrytitle>pam</refentrytitle><manvolnum>8</manvolnum>
++        <refentrytitle>pam</refentrytitle><manvolnum>7</manvolnum>
+       </citerefentry>
+     </para>
+   </refsect1>
+Index: pam/doc/man/pam_getenvlist.3
+===================================================================
+--- pam.orig/doc/man/pam_getenvlist.3
++++ pam/doc/man/pam_getenvlist.3
+@@ -63,4 +63,4 @@
+ \fBpam_start\fR(3),
+ \fBpam_getenv\fR(3),
+ \fBpam_putenv\fR(3),
+-\fBpam\fR(8)
++\fBpam\fR(7)
+Index: pam/doc/man/pam_info.3.xml
+===================================================================
+--- pam.orig/doc/man/pam_info.3.xml
++++ pam/doc/man/pam_info.3.xml
+@@ -93,7 +93,7 @@
+     <title>SEE ALSO</title>
+     <para>
+       <citerefentry>
+-        <refentrytitle>pam</refentrytitle><manvolnum>8</manvolnum>
++        <refentrytitle>pam</refentrytitle><manvolnum>7</manvolnum>
+       </citerefentry>
+     </para>
+   </refsect1>
+Index: pam/doc/man/pam_info.3
+===================================================================
+--- pam.orig/doc/man/pam_info.3
++++ pam/doc/man/pam_info.3
+@@ -76,7 +76,7 @@
+ .RE
+ .SH "SEE ALSO"
+ .PP
+-\fBpam\fR(8)
++\fBpam\fR(7)
+ .SH "STANDARDS"
+ .PP
+ The
+Index: pam/doc/man/pam_misc_drop_env.3.xml
+===================================================================
+--- pam.orig/doc/man/pam_misc_drop_env.3.xml
++++ pam/doc/man/pam_misc_drop_env.3.xml
+@@ -46,7 +46,7 @@
+         <refentrytitle>pam_getenvlist</refentrytitle><manvolnum>3</manvolnum>
+       </citerefentry>,
+       <citerefentry>
+-        <refentrytitle>pam</refentrytitle><manvolnum>8</manvolnum>
++        <refentrytitle>pam</refentrytitle><manvolnum>7</manvolnum>
+       </citerefentry>
+     </para>
+   </refsect1>
+Index: pam/doc/man/pam_misc_drop_env.3
+===================================================================
+--- pam.orig/doc/man/pam_misc_drop_env.3
++++ pam/doc/man/pam_misc_drop_env.3
+@@ -52,7 +52,7 @@
+ .SH "SEE ALSO"
+ .PP
+ \fBpam_getenvlist\fR(3),
+-\fBpam\fR(8)
++\fBpam\fR(7)
+ .SH "STANDARDS"
+ .PP
+ The
+Index: pam/doc/man/pam_misc_paste_env.3.xml
+===================================================================
+--- pam.orig/doc/man/pam_misc_paste_env.3.xml
++++ pam/doc/man/pam_misc_paste_env.3.xml
+@@ -44,7 +44,7 @@
+         <refentrytitle>pam_putenv</refentrytitle><manvolnum>3</manvolnum>
+       </citerefentry>,
+       <citerefentry>
+-        <refentrytitle>pam</refentrytitle><manvolnum>8</manvolnum>
++        <refentrytitle>pam</refentrytitle><manvolnum>7</manvolnum>
+       </citerefentry>
+     </para>
+   </refsect1>
+Index: pam/doc/man/pam_misc_paste_env.3
+===================================================================
+--- pam.orig/doc/man/pam_misc_paste_env.3
++++ pam/doc/man/pam_misc_paste_env.3
+@@ -47,7 +47,7 @@
+ .SH "SEE ALSO"
+ .PP
+ \fBpam_putenv\fR(3),
+-\fBpam\fR(8)
++\fBpam\fR(7)
+ .SH "STANDARDS"
+ .PP
+ The
+Index: pam/doc/man/pam_misc_setenv.3.xml
+===================================================================
+--- pam.orig/doc/man/pam_misc_setenv.3.xml
++++ pam/doc/man/pam_misc_setenv.3.xml
+@@ -51,7 +51,7 @@
+         <refentrytitle>pam_putenv</refentrytitle><manvolnum>3</manvolnum>
+       </citerefentry>,
+       <citerefentry>
+-        <refentrytitle>pam</refentrytitle><manvolnum>8</manvolnum>
++        <refentrytitle>pam</refentrytitle><manvolnum>7</manvolnum>
+       </citerefentry>
+     </para>
+   </refsect1>
+Index: pam/doc/man/pam_misc_setenv.3
+===================================================================
+--- pam.orig/doc/man/pam_misc_setenv.3
++++ pam/doc/man/pam_misc_setenv.3
+@@ -52,7 +52,7 @@
+ .SH "SEE ALSO"
+ .PP
+ \fBpam_putenv\fR(3),
+-\fBpam\fR(8)
++\fBpam\fR(7)
+ .SH "STANDARDS"
+ .PP
+ The
+Index: pam/doc/man/pam_prompt.3.xml
+===================================================================
+--- pam.orig/doc/man/pam_prompt.3.xml
++++ pam/doc/man/pam_prompt.3.xml
+@@ -95,7 +95,7 @@
+     <title>SEE ALSO</title>
+     <para>
+       <citerefentry>
+-        <refentrytitle>pam</refentrytitle><manvolnum>8</manvolnum>
++        <refentrytitle>pam</refentrytitle><manvolnum>7</manvolnum>
+       </citerefentry>,
+       <citerefentry>
+         <refentrytitle>pam_conv</refentrytitle><manvolnum>3</manvolnum>
+Index: pam/doc/man/pam_prompt.3
+===================================================================
+--- pam.orig/doc/man/pam_prompt.3
++++ pam/doc/man/pam_prompt.3
+@@ -70,7 +70,7 @@
+ .RE
+ .SH "SEE ALSO"
+ .PP
+-\fBpam\fR(8),
++\fBpam\fR(7),
+ \fBpam_conv\fR(3)
+ .SH "STANDARDS"
+ .PP
+Index: pam/doc/man/pam_putenv.3.xml
+===================================================================
+--- pam.orig/doc/man/pam_putenv.3.xml
++++ pam/doc/man/pam_putenv.3.xml
+@@ -145,7 +145,7 @@
+         <refentrytitle>pam_strerror</refentrytitle><manvolnum>3</manvolnum>
+       </citerefentry>,
+       <citerefentry>
+-        <refentrytitle>pam</refentrytitle><manvolnum>8</manvolnum>
++        <refentrytitle>pam</refentrytitle><manvolnum>7</manvolnum>
+       </citerefentry>
+     </para>
+   </refsect1>
+Index: pam/doc/man/pam_putenv.3
+===================================================================
+--- pam.orig/doc/man/pam_putenv.3
++++ pam/doc/man/pam_putenv.3
+@@ -108,4 +108,4 @@
+ \fBpam_getenv\fR(3),
+ \fBpam_getenvlist\fR(3),
+ \fBpam_strerror\fR(3),
+-\fBpam\fR(8)
++\fBpam\fR(7)
+Index: pam/doc/man/pam_strerror.3.xml
+===================================================================
+--- pam.orig/doc/man/pam_strerror.3.xml
++++ pam/doc/man/pam_strerror.3.xml
+@@ -51,7 +51,7 @@
+     <title>SEE ALSO</title>
+     <para>
+       <citerefentry>
+-        <refentrytitle>pam</refentrytitle><manvolnum>8</manvolnum>
++        <refentrytitle>pam</refentrytitle><manvolnum>7</manvolnum>
+       </citerefentry>
+     </para>
+   </refsect1>
+Index: pam/doc/man/pam_strerror.3
+===================================================================
+--- pam.orig/doc/man/pam_strerror.3
++++ pam/doc/man/pam_strerror.3
+@@ -49,4 +49,4 @@
+ This function returns always a pointer to a string\&.
+ .SH "SEE ALSO"
+ .PP
+-\fBpam\fR(8)
++\fBpam\fR(7)
+Index: pam/doc/man/pam_syslog.3.xml
+===================================================================
+--- pam.orig/doc/man/pam_syslog.3.xml
++++ pam/doc/man/pam_syslog.3.xml
+@@ -66,7 +66,7 @@
+     <title>SEE ALSO</title>
+     <para>
+       <citerefentry>
+-        <refentrytitle>pam</refentrytitle><manvolnum>8</manvolnum>
++        <refentrytitle>pam</refentrytitle><manvolnum>7</manvolnum>
+       </citerefentry>
+     </para>
+   </refsect1>
+Index: pam/doc/man/pam_syslog.3
+===================================================================
+--- pam.orig/doc/man/pam_syslog.3
++++ pam/doc/man/pam_syslog.3
+@@ -67,7 +67,7 @@
+ variable argument list macros\&.
+ .SH "SEE ALSO"
+ .PP
+-\fBpam\fR(8)
++\fBpam\fR(7)
+ .SH "STANDARDS"
+ .PP
+ The
+Index: pam/modules/pam_userdb/pam_userdb.8.xml
+===================================================================
+--- pam.orig/modules/pam_userdb/pam_userdb.8.xml
++++ pam/modules/pam_userdb/pam_userdb.8.xml
+@@ -278,7 +278,7 @@
+ 	<refentrytitle>pam.d</refentrytitle><manvolnum>5</manvolnum>
+       </citerefentry>,
+       <citerefentry>
+-	<refentrytitle>pam</refentrytitle><manvolnum>8</manvolnum>
++	<refentrytitle>pam</refentrytitle><manvolnum>7</manvolnum>
+       </citerefentry>
+     </para>
+   </refsect1>
+Index: pam/modules/pam_userdb/pam_userdb.8
+===================================================================
+--- pam.orig/modules/pam_userdb/pam_userdb.8
++++ pam/modules/pam_userdb/pam_userdb.8
+@@ -152,7 +152,7 @@
+ \fBcrypt\fR(3),
+ \fBpam.conf\fR(5),
+ \fBpam.d\fR(5),
+-\fBpam\fR(8)
++\fBpam\fR(7)
+ .SH "AUTHOR"
+ .PP
+ pam_userdb was written by Cristian Gafton >gafton@redhat\&.com<\&.
+Index: pam/modules/pam_warn/pam_warn.8.xml
+===================================================================
+--- pam.orig/modules/pam_warn/pam_warn.8.xml
++++ pam/modules/pam_warn/pam_warn.8.xml
+@@ -90,7 +90,7 @@
+ 	<refentrytitle>pam.d</refentrytitle><manvolnum>5</manvolnum>
+       </citerefentry>,
+       <citerefentry>
+-	<refentrytitle>pam</refentrytitle><manvolnum>8</manvolnum>
++	<refentrytitle>pam</refentrytitle><manvolnum>7</manvolnum>
+       </citerefentry>
+     </para>
+   </refsect1>
+Index: pam/modules/pam_warn/pam_warn.8
+===================================================================
+--- pam.orig/modules/pam_warn/pam_warn.8
++++ pam/modules/pam_warn/pam_warn.8
+@@ -83,7 +83,7 @@
+ .PP
+ \fBpam.conf\fR(5),
+ \fBpam.d\fR(5),
+-\fBpam\fR(8)
++\fBpam\fR(7)
+ .SH "AUTHOR"
+ .PP
+ pam_warn was written by Andrew G\&. Morgan <morgan@kernel\&.org>\&.
+Index: pam/modules/pam_wheel/pam_wheel.8.xml
+===================================================================
+--- pam.orig/modules/pam_wheel/pam_wheel.8.xml
++++ pam/modules/pam_wheel/pam_wheel.8.xml
+@@ -213,7 +213,7 @@
+ 	<refentrytitle>pam.d</refentrytitle><manvolnum>5</manvolnum>
+       </citerefentry>,
+       <citerefentry>
+-	<refentrytitle>pam</refentrytitle><manvolnum>8</manvolnum>
++	<refentrytitle>pam</refentrytitle><manvolnum>7</manvolnum>
+       </citerefentry>
+     </para>
+   </refsect1>
+Index: pam/modules/pam_wheel/pam_wheel.8
+===================================================================
+--- pam.orig/modules/pam_wheel/pam_wheel.8
++++ pam/modules/pam_wheel/pam_wheel.8
+@@ -136,7 +136,7 @@
+ .PP
+ \fBpam.conf\fR(5),
+ \fBpam.d\fR(5),
+-\fBpam\fR(8)
++\fBpam\fR(7)
+ .SH "AUTHOR"
+ .PP
+ pam_wheel was written by Cristian Gafton <gafton@redhat\&.com>\&.
+Index: pam/modules/pam_xauth/pam_xauth.8.xml
+===================================================================
+--- pam.orig/modules/pam_xauth/pam_xauth.8.xml
++++ pam/modules/pam_xauth/pam_xauth.8.xml
+@@ -276,7 +276,7 @@
+ 	<refentrytitle>pam.d</refentrytitle><manvolnum>5</manvolnum>
+       </citerefentry>,
+       <citerefentry>
+-	<refentrytitle>pam</refentrytitle><manvolnum>8</manvolnum>
++	<refentrytitle>pam</refentrytitle><manvolnum>7</manvolnum>
+       </citerefentry>
+     </para>
+   </refsect1>
+Index: pam/modules/pam_xauth/pam_xauth.8
+===================================================================
+--- pam.orig/modules/pam_xauth/pam_xauth.8
++++ pam/modules/pam_xauth/pam_xauth.8
+@@ -177,7 +177,7 @@
+ .PP
+ \fBpam.conf\fR(5),
+ \fBpam.d\fR(5),
+-\fBpam\fR(8)
++\fBpam\fR(7)
+ .SH "AUTHOR"
+ .PP
+ pam_xauth was written by Nalin Dahyabhai <nalin@redhat\&.com>, based on original version by Michael K\&. Johnson <johnsonm@redhat\&.com>\&.
+Index: pam/modules/pam_env/pam_env.8
+===================================================================
+--- pam.orig/modules/pam_env/pam_env.8
++++ pam/modules/pam_env/pam_env.8
+@@ -7,7 +7,7 @@
+ .\"    Source: Linux-PAM Manual
+ .\"  Language: English
+ .\"
+-.TH "PAM_ENV" "8" "05/18/2017" "Linux-PAM Manual" "Linux-PAM Manual"
++.TH "PAM_ENV" "7" "05/18/2017" "Linux-PAM Manual" "Linux-PAM Manual"
+ .\" -----------------------------------------------------------------
+ .\" * Define some portability stuff
+ .\" -----------------------------------------------------------------
+Index: pam/modules/pam_pwhistory/pam_pwhistory.8.xml
+===================================================================
+--- pam.orig/modules/pam_pwhistory/pam_pwhistory.8.xml
++++ pam/modules/pam_pwhistory/pam_pwhistory.8.xml
+@@ -229,7 +229,7 @@
+ 	<refentrytitle>pam.d</refentrytitle><manvolnum>5</manvolnum>
+       </citerefentry>,
+       <citerefentry>
+-	<refentrytitle>pam</refentrytitle><manvolnum>8</manvolnum>
++	<refentrytitle>pam</refentrytitle><manvolnum>7</manvolnum>
+       </citerefentry>
+       <citerefentry>
+ 	<refentrytitle>pam_get_authtok</refentrytitle><manvolnum>3</manvolnum>
+Index: pam/modules/pam_pwhistory/pam_pwhistory.8
+===================================================================
+--- pam.orig/modules/pam_pwhistory/pam_pwhistory.8
++++ pam/modules/pam_pwhistory/pam_pwhistory.8
+@@ -156,7 +156,8 @@
+ .PP
+ \fBpam.conf\fR(5),
+ \fBpam.d\fR(5),
+-\fBpam\fR(8)\fBpam_get_authtok\fR(3)
++\fBpam\fR(7)
++\fBpam_get_authtok\fR(3)
+ .SH "AUTHOR"
+ .PP
+ pam_pwhistory was written by Thorsten Kukuk <kukuk@thkukuk\&.de>
+Index: pam/modules/pam_sepermit/sepermit.conf.5.xml
+===================================================================
+--- pam.orig/modules/pam_sepermit/sepermit.conf.5.xml
++++ pam/modules/pam_sepermit/sepermit.conf.5.xml
+@@ -96,7 +96,7 @@
+     <para>
+       <citerefentry><refentrytitle>pam_sepermit</refentrytitle><manvolnum>8</manvolnum></citerefentry>,
+       <citerefentry><refentrytitle>pam.d</refentrytitle><manvolnum>5</manvolnum></citerefentry>,
+-      <citerefentry><refentrytitle>pam</refentrytitle><manvolnum>8</manvolnum></citerefentry>,
++      <citerefentry><refentrytitle>pam</refentrytitle><manvolnum>7</manvolnum></citerefentry>,
+       <citerefentry><refentrytitle>selinux</refentrytitle><manvolnum>8</manvolnum></citerefentry>,
+     </para>
+   </refsect1>
+Index: pam/modules/pam_sepermit/sepermit.conf.5
+===================================================================
+--- pam.orig/modules/pam_sepermit/sepermit.conf.5
++++ pam/modules/pam_sepermit/sepermit.conf.5
+@@ -110,7 +110,7 @@
+ .PP
+ \fBpam_sepermit\fR(8),
+ \fBpam.d\fR(5),
+-\fBpam\fR(8),
++\fBpam\fR(7),
+ \fBselinux\fR(8),
+ .SH "AUTHOR"
+ .PP
+Index: pam/modules/pam_tally2/pam_tally2.8.xml
+===================================================================
+--- pam.orig/modules/pam_tally2/pam_tally2.8.xml
++++ pam/modules/pam_tally2/pam_tally2.8.xml
+@@ -435,7 +435,7 @@
+ 	<refentrytitle>pam.d</refentrytitle><manvolnum>5</manvolnum>
+       </citerefentry>,
+       <citerefentry>
+-	<refentrytitle>pam</refentrytitle><manvolnum>8</manvolnum>
++	<refentrytitle>pam</refentrytitle><manvolnum>7</manvolnum>
+       </citerefentry>
+     </para>
+   </refsect1>
+Index: pam/modules/pam_tally2/pam_tally2.8
+===================================================================
+--- pam.orig/modules/pam_tally2/pam_tally2.8
++++ pam/modules/pam_tally2/pam_tally2.8
+@@ -236,7 +236,7 @@
+ .PP
+ \fBpam.conf\fR(5),
+ \fBpam.d\fR(5),
+-\fBpam\fR(8)
++\fBpam\fR(7)
+ .SH "AUTHOR"
+ .PP
+ pam_tally2 was written by Tim Baverstock and Tomas Mraz\&.
+Index: pam/modules/pam_timestamp/pam_timestamp.8.xml
+===================================================================
+--- pam.orig/modules/pam_timestamp/pam_timestamp.8.xml
++++ pam/modules/pam_timestamp/pam_timestamp.8.xml
+@@ -188,7 +188,7 @@
+ 	<refentrytitle>pam.d</refentrytitle><manvolnum>5</manvolnum>
+       </citerefentry>,
+       <citerefentry>
+-	<refentrytitle>pam</refentrytitle><manvolnum>8</manvolnum>
++	<refentrytitle>pam</refentrytitle><manvolnum>7</manvolnum>
+       </citerefentry>
+     </para>
+   </refsect1>
+Index: pam/modules/pam_timestamp/pam_timestamp.8
+===================================================================
+--- pam.orig/modules/pam_timestamp/pam_timestamp.8
++++ pam/modules/pam_timestamp/pam_timestamp.8
+@@ -124,7 +124,7 @@
+ \fBpam_timestamp_check\fR(8),
+ \fBpam.conf\fR(5),
+ \fBpam.d\fR(5),
+-\fBpam\fR(8)
++\fBpam\fR(7)
+ .SH "AUTHOR"
+ .PP
+ pam_timestamp was written by Nalin Dahyabhai\&.
+Index: pam/modules/pam_timestamp/pam_timestamp_check.8.xml
+===================================================================
+--- pam.orig/modules/pam_timestamp/pam_timestamp_check.8.xml
++++ pam/modules/pam_timestamp/pam_timestamp_check.8.xml
+@@ -192,7 +192,7 @@
+ 	<refentrytitle>pam.d</refentrytitle><manvolnum>5</manvolnum>
+       </citerefentry>,
+       <citerefentry>
+-	<refentrytitle>pam</refentrytitle><manvolnum>8</manvolnum>
++	<refentrytitle>pam</refentrytitle><manvolnum>7</manvolnum>
+       </citerefentry>
+     </para>
+   </refsect1>
+Index: pam/modules/pam_timestamp/pam_timestamp_check.8
+===================================================================
+--- pam.orig/modules/pam_timestamp/pam_timestamp_check.8
++++ pam/modules/pam_timestamp/pam_timestamp_check.8
+@@ -127,7 +127,7 @@
+ \fBpam_timestamp_check\fR(8),
+ \fBpam.conf\fR(5),
+ \fBpam.d\fR(5),
+-\fBpam\fR(8)
++\fBpam\fR(7)
+ .SH "AUTHOR"
+ .PP
+ pam_tally was written by Nalin Dahyabhai\&.
+Index: pam/modules/pam_tty_audit/pam_tty_audit.8.xml
+===================================================================
+--- pam.orig/modules/pam_tty_audit/pam_tty_audit.8.xml
++++ pam/modules/pam_tty_audit/pam_tty_audit.8.xml
+@@ -174,7 +174,7 @@
+ 	<refentrytitle>pam.d</refentrytitle><manvolnum>5</manvolnum>
+       </citerefentry>,
+       <citerefentry>
+-	<refentrytitle>pam</refentrytitle><manvolnum>8</manvolnum>
++	<refentrytitle>pam</refentrytitle><manvolnum>7</manvolnum>
+       </citerefentry>
+     </para>
+   </refsect1>
+Index: pam/modules/pam_tty_audit/pam_tty_audit.8
+===================================================================
+--- pam.orig/modules/pam_tty_audit/pam_tty_audit.8
++++ pam/modules/pam_tty_audit/pam_tty_audit.8
+@@ -125,7 +125,7 @@
+ \fBaureport\fR(8),
+ \fBpam.conf\fR(5),
+ \fBpam.d\fR(5),
+-\fBpam\fR(8)
++\fBpam\fR(7)
+ .SH "AUTHOR"
+ .PP
+ pam_tty_audit was written by Miloslav Trmač <mitr@redhat\&.com>\&. The log_passwd option was added by Richard Guy Briggs <rgb@redhat\&.com>\&.
+Index: pam/doc/man/pam_get_authtok.3.xml
+===================================================================
+--- pam.orig/doc/man/pam_get_authtok.3.xml
++++ pam/doc/man/pam_get_authtok.3.xml
+@@ -232,7 +232,7 @@
+     <title>SEE ALSO</title>
+     <para>
+       <citerefentry>
+-        <refentrytitle>pam</refentrytitle><manvolnum>8</manvolnum>
++        <refentrytitle>pam</refentrytitle><manvolnum>7</manvolnum>
+       </citerefentry>
+     </para>
+   </refsect1>
+Index: pam/doc/man/pam_get_authtok.3
+===================================================================
+--- pam.orig/doc/man/pam_get_authtok.3
++++ pam/doc/man/pam_get_authtok.3
+@@ -161,7 +161,7 @@
+ .RE
+ .SH "SEE ALSO"
+ .PP
+-\fBpam\fR(8)
++\fBpam\fR(7)
+ .SH "STANDARDS"
+ .PP
+ The

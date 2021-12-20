@@ -1,0 +1,10 @@
+debian/tmp/usr/share/man/man2/aa_change_hat.2
+debian/tmp/usr/share/man/man2/aa_change_profile.2
+debian/tmp/usr/share/man/man2/aa_find_mountpoint.2
+debian/tmp/usr/share/man/man2/aa_getcon.2
+debian/tmp/usr/share/man/man2/aa_query_label.2
+debian/tmp/usr/share/man/man2/aa_stack_profile.2
+debian/tmp/usr/share/man/man3/aa_features.3
+debian/tmp/usr/share/man/man3/aa_kernel_interface.3
+debian/tmp/usr/share/man/man3/aa_policy_cache.3
+debian/tmp/usr/share/man/man3/aa_splitcon.3

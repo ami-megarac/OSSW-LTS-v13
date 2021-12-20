@@ -1,0 +1,7 @@
+#
+#=DESCRIPTION allow change_profile
+#=EXRESULT PASS
+#
+/usr/bin/foo {
+   allow change_profile -> /bin/foo,
+}

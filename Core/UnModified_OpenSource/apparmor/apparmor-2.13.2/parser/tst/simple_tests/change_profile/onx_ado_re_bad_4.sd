@@ -1,0 +1,11 @@
+#
+#=DESCRIPTION owner not allowed in change_profile rule
+#=EXRESULT FAIL
+#
+
+@{LIBVIRT}="libvirt"
+@{LIBVIRT_RE}="libvirt*"
+
+/usr/bin/foo {
+   audit deny owner change_profile /onexec -> @{LIBVIRT}-fo*,
+}

@@ -1,0 +1,11 @@
+#!/usr/bin/make -f
+
+%:
+	dh $@ --with autoreconf --with systemd
+
+override_dh_auto_configure:
+	dh_auto_configure -- \
+		--enable-pie \
+		--with-snmp \
+		--with-xml \
+		--with-systemdsystemunitdir=/lib/systemd/system

@@ -1,0 +1,19 @@
+START
+File: file_perm_network_receive_lp1582374.in
+Event type: AA_RECORD_ALLOWED
+Audit ID: 1462045985.636:2154
+Operation: file_perm
+Mask: receive
+Denied Mask: receive
+Profile: /usr/local/apache-tomcat-8.0.33/bin/catalina.sh///usr/local/jdk1.8.0_92/bin/java
+Command: java
+PID: 12529
+Network family: inet6
+Socket type: stream
+Protocol: tcp
+Local addr: ::ffff:127.0.0.1
+Foreign addr: ::ffff:127.0.0.1
+Local port: 8080
+Foreign port: 52308
+Epoch: 1462045985
+Audit subid: 2154

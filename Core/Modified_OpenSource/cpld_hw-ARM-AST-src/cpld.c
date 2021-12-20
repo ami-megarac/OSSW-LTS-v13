@@ -68,61 +68,30 @@ static long altera_ioctl(struct file *file,unsigned int cmd, unsigned long arg)
 				    break;
   			}
         
-        if(Kernal_IO_Data.size < AST_FW_BUFFER_SIZE)
-        {
-           ret=copy_from_user (JTAG_write_buffer,Kernal_IO_Data.buf, Kernal_IO_Data.size);
-           if(ret)
-           {
-              kfree(JTAG_write_buffer);            
+            if(Kernal_IO_Data.size < AST_FW_BUFFER_SIZE)
+            {
+                ret=copy_from_user (JTAG_write_buffer,Kernal_IO_Data.buf, Kernal_IO_Data.size);
+                if(ret)
+                {
+                  kfree(JTAG_write_buffer);            
 		          dbgprintf("copy failed\n");
-							g_IsRunning=false;
+				  g_IsRunning=false;
 		          return -EFAULT;
-           }
-           set_jtag_base(Kernal_IO_Data.id);
-           ret = jbcmain((char*)"ERASE",(void*)JTAG_write_buffer,Kernal_IO_Data.size,Kernal_IO_Data.IsBackground);
-        }
-        else
-        {
-           dbgprintf("%s: Oops~ size of jbc file is too big(%d).\n", JTAG_DEV_NAME, (int)Kernal_IO_Data.size);
-           ret= -1;
-		}
+                }
+                set_jtag_base(Kernal_IO_Data.id);
+                ret = jbcmain((char*)"ERASE",(void*)JTAG_write_buffer,Kernal_IO_Data.size,Kernal_IO_Data.IsBackground);
+            }
+            else
+            {
+                dbgprintf("%s: Oops~ size of jbc file is too big(%d).\n", JTAG_DEV_NAME, (int)Kernal_IO_Data.size);
+                ret= -1;
+		    }
  
-       	kfree(JTAG_write_buffer);
-       	break;
-    }
-    case IOCTL_JTAG_VERIFY_JBC:
-    {
-			JTAG_write_buffer = kmalloc(Kernal_IO_Data.size, GFP_DMA|GFP_KERNEL);
-  			if (JTAG_write_buffer == NULL) {
-    		 		dbgprintf ("%s: Can't allocate write_buffer\n", JTAG_DEV_NAME);
-    		 		ret = -ENOMEM;
-				    break;
-  			}
-        
-        if(Kernal_IO_Data.size < AST_FW_BUFFER_SIZE)
-        {
-           ret=copy_from_user (JTAG_write_buffer,Kernal_IO_Data.buf, Kernal_IO_Data.size);
-           if(ret)
-           {
-              kfree(JTAG_write_buffer);            
-		          dbgprintf("copy failed\n");
-							g_IsRunning=false;
-		          return -EFAULT;
-           }
-           set_jtag_base(Kernal_IO_Data.id);
-           ret = jbcmain((char*)"VERIFY",(void*)JTAG_write_buffer,Kernal_IO_Data.size,Kernal_IO_Data.IsBackground);
+       	    kfree(JTAG_write_buffer);
+        	break;
         }
-        else
+        case IOCTL_JTAG_VERIFY_JBC:
         {
-           dbgprintf("%s: Oops~ size of jbc file is too big(%d).\n", JTAG_DEV_NAME, (int)Kernal_IO_Data.size);
-           ret= -1;
-		}
-
-        kfree(JTAG_write_buffer);
-        break;
-    }
-    case IOCTL_JTAG_UPDATE_JBC:
-	{	
 			JTAG_write_buffer = kmalloc(Kernal_IO_Data.size, GFP_DMA|GFP_KERNEL);
   			if (JTAG_write_buffer == NULL) {
     		 		dbgprintf ("%s: Can't allocate write_buffer\n", JTAG_DEV_NAME);
@@ -130,30 +99,61 @@ static long altera_ioctl(struct file *file,unsigned int cmd, unsigned long arg)
 				    break;
   			}
         
-       if(Kernal_IO_Data.size < AST_FW_BUFFER_SIZE)
-       {
-           ret=copy_from_user(JTAG_write_buffer,Kernal_IO_Data.buf, Kernal_IO_Data.size);
-           if(ret)
-           {
-              kfree(JTAG_write_buffer);            
-		          dbgprintf("copy failed\n");
-							g_IsRunning=false;
-		          return -EFAULT;
-           }
-           set_jtag_base(Kernal_IO_Data.id);
-           ret = jbcmain((char*)"PROGRAM",(void*)JTAG_write_buffer,Kernal_IO_Data.size,Kernal_IO_Data.IsBackground);
-      }
-      else
-      {
-      		dbgprintf("%s: Oops~ size of jbc file is too big(%d).\n", JTAG_DEV_NAME, (int)Kernal_IO_Data.size);
-           ret= -1;
-	  }
+            if(Kernal_IO_Data.size < AST_FW_BUFFER_SIZE)
+            {
+                ret=copy_from_user (JTAG_write_buffer,Kernal_IO_Data.buf, Kernal_IO_Data.size);
+                if(ret)
+                {
+                    kfree(JTAG_write_buffer);            
+		            dbgprintf("copy failed\n");
+					g_IsRunning=false;
+		            return -EFAULT;
+                }
+                set_jtag_base(Kernal_IO_Data.id);
+                ret = jbcmain((char*)"VERIFY",(void*)JTAG_write_buffer,Kernal_IO_Data.size,Kernal_IO_Data.IsBackground);
+            }
+            else
+            {
+                dbgprintf("%s: Oops~ size of jbc file is too big(%d).\n", JTAG_DEV_NAME, (int)Kernal_IO_Data.size);
+                ret= -1;
+		    }
+
+            kfree(JTAG_write_buffer);
+            break;
+        }
+        case IOCTL_JTAG_UPDATE_JBC:
+	    {	
+			JTAG_write_buffer = kmalloc(Kernal_IO_Data.size, GFP_DMA|GFP_KERNEL);
+  			if (JTAG_write_buffer == NULL) {
+    		 		dbgprintf ("%s: Can't allocate write_buffer\n", JTAG_DEV_NAME);
+    		 		ret = -ENOMEM;
+				    break;
+  			}
+        
+            if(Kernal_IO_Data.size < AST_FW_BUFFER_SIZE)
+            {
+                ret=copy_from_user(JTAG_write_buffer,Kernal_IO_Data.buf, Kernal_IO_Data.size);
+                if(ret)
+                {
+                    kfree(JTAG_write_buffer);            
+		            dbgprintf("copy failed\n");
+					g_IsRunning=false;
+		            return -EFAULT;
+                }
+                set_jtag_base(Kernal_IO_Data.id);
+                ret = jbcmain((char*)"PROGRAM",(void*)JTAG_write_buffer,Kernal_IO_Data.size,Kernal_IO_Data.IsBackground);
+            }
+            else
+            {
+      		    dbgprintf("%s: Oops~ size of jbc file is too big(%d).\n", JTAG_DEV_NAME, (int)Kernal_IO_Data.size);
+                ret= -1;
+	        }
 			
-      	kfree(JTAG_write_buffer);
-	  	break;
-	}
-	default:
-		break;
+      	    kfree(JTAG_write_buffer);
+	  	    break;
+	    }
+        default:
+		    break;
 	}
 
 

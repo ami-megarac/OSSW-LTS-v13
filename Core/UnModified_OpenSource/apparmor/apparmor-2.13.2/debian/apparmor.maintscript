@@ -1,0 +1,5 @@
+rm_conffile /etc/apparmor.d/abstractions/launchpad-integration 2.13.1-2~
+rm_conffile /etc/apparmor.d/abstractions/ubuntu-sdk-base 2.8.0-0ubuntu20~
+rm_conffile /etc/apparmor/features 2.11.1-4~
+rm_conffile /etc/apparmor/subdomain.conf 2.13.2-2~
+rm_conffile /etc/init/apparmor.conf 2.11.0-11~

@@ -1,0 +1,8 @@
+#
+#=DESCRIPTION owner not allowed after forward perm
+#=EXRESULT FAIL
+#
+/usr/bin/foo {
+  rw owner /foo,
+
+}

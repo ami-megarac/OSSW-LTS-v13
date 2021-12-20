@@ -1,0 +1,7 @@
+#
+#=DESCRIPTION allow change_profile /onexec
+#=EXRESULT PASS
+#
+/usr/bin/foo {
+   allow change_profile /onexec -> /bin/foo,
+}

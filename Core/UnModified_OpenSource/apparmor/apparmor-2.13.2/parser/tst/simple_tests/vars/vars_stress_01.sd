@@ -1,0 +1,12 @@
+#=DESCRIPTION stress test (2828 items, 676 unique)
+#=EXRESULT PASS
+
+@{FOO}=a b c d e f g h i j k l m n o p q r s t u v w x y z
+@{BAR}=a b c d e f g h i j k l m n o p q r s t u v w x y z
+@{BAZ}=a b c d e f g h i j k l m n o p q r s t u v w x y z
+
+@{FBB}=@{FOO}/@{BAR} @{BAR}/@{BAZ} @{FOO}/@{BAZ}
+
+/bin/foo {
+  /home/@{FBB} r,
+}

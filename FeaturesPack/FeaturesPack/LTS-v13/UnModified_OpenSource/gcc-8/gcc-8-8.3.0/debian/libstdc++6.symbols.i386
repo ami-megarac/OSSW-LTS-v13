@@ -1,0 +1,14 @@
+libstdc++.so.6 libstdc++6 #MINVER#
+#include "libstdc++6.symbols.32bit"
+#include "libstdc++6.symbols.excprop"
+#include "libstdc++6.symbols.money.ldbl"
+ __gxx_personality_v0@CXXABI_1.3 4.1.1
+ _ZNKSt3tr14hashIeEclEe@GLIBCXX_3.4.10 4.3
+ _ZNKSt4hashIeEclEe@GLIBCXX_3.4.10 4.3
+#(optional)_Z16__VLTRegisterSetPPvPKvjjS0_@CXXABI_1.3.8 4.9.0
+#(optional)_Z17__VLTRegisterPairPPvPKvjS2_@CXXABI_1.3.8 4.9.0
+#(optional)_Z21__VLTRegisterSetDebugPPvPKvjjS0_@CXXABI_1.3.8 4.9.0
+#(optional)_Z22__VLTRegisterPairDebugPPvPKvjS2_PKcS4_@CXXABI_1.3.8 4.9.0
+#(optional)_Z24__VLTVerifyVtablePointerPPvPKv@CXXABI_1.3.8 4.9.0
+#(optional)_Z29__VLTVerifyVtablePointerDebugPPvPKvPKcS4_@CXXABI_1.3.8 4.9.0
+#(optional)__VLTChangePermission@CXXABI_1.3.8 4.9.0

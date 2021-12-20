@@ -1,0 +1,59 @@
+From: Net-SNMP Packaging Team <pkg-net-snmp-devel@lists.alioth.debian.org>
+Date: Thu, 18 Jun 2015 06:12:05 +0900
+Subject: snmptranslate.1
+
+Author: Hideki Yamane <henrich@debian.org>
+---
+ man/snmptranslate.1.def | 22 +++++++++++-----------
+ 1 file changed, 11 insertions(+), 11 deletions(-)
+
+diff --git a/man/snmptranslate.1.def b/man/snmptranslate.1.def
+index 721af99..13da01f 100644
+--- a/man/snmptranslate.1.def
++++ b/man/snmptranslate.1.def
+@@ -166,22 +166,22 @@ will print the following tree:
+ .nf
+ +--system(1)
+    |
+-   +-- -R-- String    sysDescr(1)
++   +-- \-R-- String    sysDescr(1)
+    |        Textual Convention: DisplayString
+    |        Size: 0..255
+-   +-- -R-- ObjID     sysObjectID(2)
+-   +-- -R-- TimeTicks sysUpTime(3)
+-   +-- -RW- String    sysContact(4)
++   +-- \-R-- ObjID     sysObjectID(2)
++   +-- \-R-- TimeTicks sysUpTime(3)
++   +-- \-RW- String    sysContact(4)
+    |        Textual Convention: DisplayString
+    |        Size: 0..255
+-   +-- -RW- String    sysName(5)
++   +-- \-RW- String    sysName(5)
+    |        Textual Convention: DisplayString
+    |        Size: 0..255
+-   +-- -RW- String    sysLocation(6)
++   +-- \-RW- String    sysLocation(6)
+    |        Textual Convention: DisplayString
+    |        Size: 0..255
+-   +-- -R-- Integer   sysServices(7)
+-   +-- -R-- TimeTicks sysORLastChange(8)
++   +-- \-R-- Integer   sysServices(7)
++   +-- \-R-- TimeTicks sysORLastChange(8)
+    |        Textual Convention: TimeStamp
+    |
+    +--sysORTable(9)
+@@ -189,11 +189,11 @@ will print the following tree:
+       +--sysOREntry(1)
+          |
+          +-- ---- Integer   sysORIndex(1)
+-         +-- -R-- ObjID     sysORID(2)
+-         +-- -R-- String    sysORDescr(3)
++         +-- \-R-- ObjID     sysORID(2)
++         +-- \-R-- String    sysORDescr(3)
+          |        Textual Convention: DisplayString
+          |        Size: 0..255
+-         +-- -R-- TimeTicks sysORUpTime(4)
++         +-- \-R-- TimeTicks sysORUpTime(4)
+                   Textual Convention: TimeStamp
+ 
+ .fi

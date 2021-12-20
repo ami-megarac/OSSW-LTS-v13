@@ -1,0 +1,8 @@
+# Policy group allowing various writes to standard directories in @{HOMEDIRS}
+#include <abstractions/xdg-desktop>
+owner @{HOMEDIRS}/.cache/@{APPNAME}/ rw,
+owner @{HOMEDIRS}/.cache/@{APPNAME}/** rwkl,
+owner @{HOMEDIRS}/.config/@{APPNAME}/ rw,
+owner @{HOMEDIRS}/.config/@{APPNAME}/** rwkl,
+owner @{HOMEDIRS}/.local/share/@{APPNAME}/ rw,
+owner @{HOMEDIRS}/.local/share/@{APPNAME}/** rwkl,

@@ -1,0 +1,4 @@
+usr/lib/*/libmpfr.so
+usr/lib/*/libmpfr.a
+usr/lib/*/pkgconfig/mpfr.pc
+usr/include/*.h		usr/include/

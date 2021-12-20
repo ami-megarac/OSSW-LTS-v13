@@ -1,0 +1,25 @@
+#
+#=DESCRIPTION simple syntax test -- no actual rules.
+#=EXRESULT PASS
+#
+profile noexist /does/not/exist {
+}
+
+profile noexist2 /does/not/exist2 {
+  ^hat1 {
+  }
+
+  ^hat2 {
+  }
+}
+
+profile noexist3 /does/not/exist {
+}
+
+profile noexist4 /does/not/exist2 {
+  ^hat1 {
+  }
+
+  ^hat2 {
+  }
+}

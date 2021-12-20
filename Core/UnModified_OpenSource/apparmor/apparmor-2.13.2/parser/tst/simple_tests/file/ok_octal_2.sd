@@ -1,0 +1,8 @@
+#
+#=DESCRIPTION simple quoted octal expansion
+#=EXRESULT PASS
+#
+
+profile octal {
+  "/bin/a b \143 d e" rix,
+}

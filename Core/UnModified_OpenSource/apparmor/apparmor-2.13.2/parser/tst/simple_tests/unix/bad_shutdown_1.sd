@@ -1,0 +1,7 @@
+#
+#=DESCRIPTION simple unix shutdown w/peer test
+#=EXRESULT FAIL
+
+profile a_profile {
+  unix shutdown peer=(addr=none),
+}

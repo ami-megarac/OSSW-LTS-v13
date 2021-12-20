@@ -1,0 +1,26 @@
+#
+#=DESCRIPTION audit change_profile @{var} with just res
+#=EXRESULT PASS
+#
+
+@{var}=/test
+/usr/bin/foo {
+   audit change_profile @{var} -> *,
+}
+
+/usr/bin/foo2 {
+   audit change_profile @{var} -> **,
+}
+
+/usr/bin/foo3 {
+   audit change_profile @{var} -> ?,
+}
+
+/usr/bin/foo4 {
+   audit change_profile @{var} -> [ab],
+}
+
+/usr/bin/foo5 {
+   audit change_profile @{var} -> [^ab],
+}
+

@@ -1,0 +1,677 @@
+From beea964e85890f55d843f249f8b8251a6eac83c7 Mon Sep 17 00:00:00 2001
+From: Nobuhiro Iwamatsu <iwamatsu@debian.org>
+Date: Tue, 15 May 2018 07:47:23 +0900
+Subject: [PATCH 1/2] Show build info
+
+Signed-off-by: Nobuhiro Iwamatsu <iwamatsu@debian.org>
+---
+ Makefile                    |  46 ++++++++--------
+ contrib/djgpp/Makefile      |  60 ++++++++++-----------
+ contrib/gen_manual/Makefile |   4 +-
+ examples/Makefile           |  20 +++----
+ lib/Makefile                |  18 +++----
+ lib/dll/example/Makefile    |   4 +-
+ programs/Makefile           |  48 ++++++++---------
+ tests/Makefile              | 104 ++++++++++++++++++------------------
+ 8 files changed, 152 insertions(+), 152 deletions(-)
+
+diff --git a/Makefile b/Makefile
+index 86613fd..8ff33df 100644
+--- a/Makefile
++++ b/Makefile
+@@ -58,14 +58,14 @@ allmost: lib lz4 examples
+ .PHONY: lib lib-release liblz4.a
+ lib: liblz4.a
+ lib lib-release liblz4.a:
+-	@$(MAKE) -C $(LZ4DIR) $@
++	$(MAKE) -C $(LZ4DIR) $@
+ 
+ .PHONY: lz4 lz4-release
+ lz4 : liblz4.a
+ lz4-release : lib-release
+ lz4 lz4-release :
+-	@$(MAKE) -C $(PRGDIR) $@
+-	@cp $(PRGDIR)/lz4$(EXT) .
++	$(MAKE) -C $(PRGDIR) $@
++	cp $(PRGDIR)/lz4$(EXT) .
+ 
+ .PHONY: examples
+ examples: liblz4.a
+@@ -73,17 +73,17 @@ examples: liblz4.a
+ 
+ .PHONY: manuals
+ manuals:
+-	@$(MAKE) -C contrib/gen_manual $@
++	$(MAKE) -C contrib/gen_manual $@
+ 
+ .PHONY: clean
+ clean:
+-	@$(MAKE) -C $(LZ4DIR) $@ > $(VOID)
+-	@$(MAKE) -C $(PRGDIR) $@ > $(VOID)
+-	@$(MAKE) -C $(TESTDIR) $@ > $(VOID)
+-	@$(MAKE) -C $(EXDIR) $@ > $(VOID)
+-	@$(MAKE) -C contrib/gen_manual $@ > $(VOID)
+-	@$(RM) lz4$(EXT)
+-	@echo Cleaning completed
++	$(MAKE) -C $(LZ4DIR) $@ > $(VOID)
++	$(MAKE) -C $(PRGDIR) $@ > $(VOID)
++	$(MAKE) -C $(TESTDIR) $@ > $(VOID)
++	$(MAKE) -C $(EXDIR) $@ > $(VOID)
++	$(MAKE) -C contrib/gen_manual $@ > $(VOID)
++	$(RM) lz4$(EXT)
++	echo Cleaning completed
+ 
+ 
+ #-----------------------------------------------------------------------------
+@@ -94,14 +94,14 @@ HOST_OS = POSIX
+ 
+ .PHONY: install uninstall
+ install uninstall:
+-	@$(MAKE) -C $(LZ4DIR) $@
+-	@$(MAKE) -C $(PRGDIR) $@
++	$(MAKE) -C $(LZ4DIR) $@
++	$(MAKE) -C $(PRGDIR) $@
+ 
+ travis-install:
+ 	$(MAKE) -j1 install DESTDIR=~/install_test_dir
+ 
+ cmake:
+-	@cd contrib/cmake_unofficial; cmake $(CMAKE_PARAMS) CMakeLists.txt; $(MAKE)
++	cd contrib/cmake_unofficial; cmake $(CMAKE_PARAMS) CMakeLists.txt; $(MAKE)
+ 
+ endif
+ 
+@@ -119,7 +119,7 @@ ifneq (,$(filter $(HOST_OS),MSYS POSIX))
+ 
+ .PHONY: list
+ list:
+-	@$(MAKE) -pRrq -f $(lastword $(MAKEFILE_LIST)) : 2>/dev/null | awk -v RS= -F: '/^# File/,/^# Finished Make data base/ {if ($$1 !~ "^[#.]") {print $$1}}' | sort | egrep -v -e '^[^[:alnum:]]' -e '^$@$$' | xargs
++	$(MAKE) -pRrq -f $(lastword $(MAKEFILE_LIST)) : 2>/dev/null | awk -v RS= -F: '/^# File/,/^# Finished Make data base/ {if ($$1 !~ "^[#.]") {print $$1}}' | sort | egrep -v -e '^[^[:alnum:]]' -e '^$@$$' | xargs
+ 
+ .PHONY: check
+ check:
+@@ -132,15 +132,15 @@ test:
+ 
+ clangtest: clean
+ 	clang -v
+-	@CFLAGS="-O3 -Werror -Wconversion -Wno-sign-conversion" $(MAKE) -C $(LZ4DIR)  all CC=clang
+-	@CFLAGS="-O3 -Werror -Wconversion -Wno-sign-conversion" $(MAKE) -C $(PRGDIR)  all CC=clang
+-	@CFLAGS="-O3 -Werror -Wconversion -Wno-sign-conversion" $(MAKE) -C $(TESTDIR) all CC=clang
++	CFLAGS="-O3 -Werror -Wconversion -Wno-sign-conversion" $(MAKE) -C $(LZ4DIR)  all CC=clang
++	CFLAGS="-O3 -Werror -Wconversion -Wno-sign-conversion" $(MAKE) -C $(PRGDIR)  all CC=clang
++	CFLAGS="-O3 -Werror -Wconversion -Wno-sign-conversion" $(MAKE) -C $(TESTDIR) all CC=clang
+ 
+ clangtest-native: clean
+ 	clang -v
+-	@CFLAGS="-O3 -Werror -Wconversion -Wno-sign-conversion" $(MAKE) -C $(LZ4DIR)  all    CC=clang
+-	@CFLAGS="-O3 -Werror -Wconversion -Wno-sign-conversion" $(MAKE) -C $(PRGDIR)  native CC=clang
+-	@CFLAGS="-O3 -Werror -Wconversion -Wno-sign-conversion" $(MAKE) -C $(TESTDIR) native CC=clang
++	CFLAGS="-O3 -Werror -Wconversion -Wno-sign-conversion" $(MAKE) -C $(LZ4DIR)  all    CC=clang
++	CFLAGS="-O3 -Werror -Wconversion -Wno-sign-conversion" $(MAKE) -C $(PRGDIR)  native CC=clang
++	CFLAGS="-O3 -Werror -Wconversion -Wno-sign-conversion" $(MAKE) -C $(TESTDIR) native CC=clang
+ 
+ usan: clean
+ 	CC=clang CFLAGS="-O3 -g -fsanitize=undefined" $(MAKE) test FUZZER_TIME="-T30s" NB_LOOPS=-i1
+@@ -152,8 +152,8 @@ staticAnalyze: clean
+ 	CFLAGS=-g scan-build --status-bugs -v $(MAKE) all
+ 
+ platformTest: clean
+-	@echo "\n ---- test lz4 with $(CC) compiler ----"
+-	@$(CC) -v
++	echo "\n ---- test lz4 with $(CC) compiler ----"
++	$(CC) -v
+ 	CFLAGS="-O3 -Werror"         $(MAKE) -C $(LZ4DIR) all
+ 	CFLAGS="-O3 -Werror -static" $(MAKE) -C $(PRGDIR) all
+ 	CFLAGS="-O3 -Werror -static" $(MAKE) -C $(TESTDIR) all
+diff --git a/contrib/djgpp/Makefile b/contrib/djgpp/Makefile
+index 8cd3580..2ee4356 100644
+--- a/contrib/djgpp/Makefile
++++ b/contrib/djgpp/Makefile
+@@ -77,50 +77,50 @@ install: $(INC) $(LIB) $(EXE)
+ 	rm -f .footprint
+ 	echo $(DESTDIR)/bin/$(EXE) >> .footprint
+ 	cp -v $(EXE) $(DESTDIR)/bin/
+-	@for T in $(LIB); \
++	for T in $(LIB); \
+ 	do ( \
+ 		echo $(DESTDIR)/$$T >> .footprint; \
+ 		cp -v --parents $$T $(DESTDIR) \
+ 	); done
+-	@for T in $(INC); \
++	for T in $(INC); \
+ 	do ( \
+ 		echo $(DESTDIR)/include/`basename -a $$T` >> .footprint; \
+ 		cp -v $$T $(DESTDIR)/include/ \
+ 	); done
+ 
+ uninstall: .footprint
+-	@for T in $(shell cat .footprint); do rm -v $$T; done
++	for T in $(shell cat .footprint); do rm -v $$T; done
+ 
+ -include $(SDEPS) $(LSDEPS)
+ 
+ showconfig:
+-	@echo "PWD="$(PWD)
+-	@echo "VERSION="$(VERSION)
+-	@echo "RELEASE="$(RELEASE)
+-	@echo "LIBVER_MAJOR="$(LIBVER_MAJOR)
+-	@echo "LIBVER_MINOR="$(LIBVER_MINOR)
+-	@echo "LIBVER_PATCH="$(LIBVER_PATCH)
+-	@echo "LIBVER="$(LIBVER)
+-	@echo "CROSS="$(CROSS)
+-	@echo "CC="$(CC)
+-	@echo "AR="$(AR)
+-	@echo "LD="$(LD)
+-	@echo "DESTDIR="$(DESTDIR)
+-	@echo "CFLAGS="$(CFLAGS)
+-	@echo "LDFLAGS="$(LDFLAGS)
+-	@echo "SRC="$(SRC)
+-	@echo "OBJ="$(OBJ)
+-	@echo "IDIR="$(IDIR)
+-	@echo "INC="$(INC)
+-	@echo "EDIR="$(EDIR)
+-	@echo "EXE="$(EXE)
+-	@echo "LDIR="$(LDIR)
+-	@echo "LSRC="$(LSRC)
+-	@echo "LOBJ="$(LOBJ)
+-	@echo "LNK="$(LNK)
+-	@echo "LIB="$(LIB)
+-	@echo "SDEPS="$(SDEPS)
+-	@echo "LSDEPS="$(LSDEPS)
++	echo "PWD="$(PWD)
++	echo "VERSION="$(VERSION)
++	echo "RELEASE="$(RELEASE)
++	echo "LIBVER_MAJOR="$(LIBVER_MAJOR)
++	echo "LIBVER_MINOR="$(LIBVER_MINOR)
++	echo "LIBVER_PATCH="$(LIBVER_PATCH)
++	echo "LIBVER="$(LIBVER)
++	echo "CROSS="$(CROSS)
++	echo "CC="$(CC)
++	echo "AR="$(AR)
++	echo "LD="$(LD)
++	echo "DESTDIR="$(DESTDIR)
++	echo "CFLAGS="$(CFLAGS)
++	echo "LDFLAGS="$(LDFLAGS)
++	echo "SRC="$(SRC)
++	echo "OBJ="$(OBJ)
++	echo "IDIR="$(IDIR)
++	echo "INC="$(INC)
++	echo "EDIR="$(EDIR)
++	echo "EXE="$(EXE)
++	echo "LDIR="$(LDIR)
++	echo "LSRC="$(LSRC)
++	echo "LOBJ="$(LOBJ)
++	echo "LNK="$(LNK)
++	echo "LIB="$(LIB)
++	echo "SDEPS="$(SDEPS)
++	echo "LSDEPS="$(LSDEPS)
+ 
+ gstat:
+ 	git status
+diff --git a/contrib/gen_manual/Makefile b/contrib/gen_manual/Makefile
+index 95abe2e..4cf9d48 100644
+--- a/contrib/gen_manual/Makefile
++++ b/contrib/gen_manual/Makefile
+@@ -72,5 +72,5 @@ manuals: gen_manual $(LZ4MANUAL) $(LZ4FMANUAL)
+ 
+ .PHONY: clean
+ clean:
+-	@$(RM) gen_manual$(EXT)
+-	@echo Cleaning completed
++	$(RM) gen_manual$(EXT)
++	echo Cleaning completed
+diff --git a/examples/Makefile b/examples/Makefile
+index 103e7ec..074fe74 100644
+--- a/examples/Makefile
++++ b/examples/Makefile
+@@ -86,27 +86,27 @@ $(LZ4) :
+ 	$(MAKE) -C ../programs lz4
+ 
+ test : all $(LZ4)
+-	@echo "\n=== Print Version ==="
++	echo "\n=== Print Version ==="
+ 	./printVersion$(EXT)
+-	@echo "\n=== Simple compression example ==="
++	echo "\n=== Simple compression example ==="
+ 	./simpleBuffer$(EXT)
+-	@echo "\n=== Double-buffer ==="
++	echo "\n=== Double-buffer ==="
+ 	./doubleBuffer$(EXT) $(TESTFILE)
+-	@echo "\n=== Ring Buffer ==="
++	echo "\n=== Ring Buffer ==="
+ 	./ringBuffer$(EXT)   $(TESTFILE)
+-	@echo "\n=== Ring Buffer + LZ4 HC ==="
++	echo "\n=== Ring Buffer + LZ4 HC ==="
+ 	./ringBufferHC$(EXT) $(TESTFILE)
+-	@echo "\n=== Compress line by line ==="
++	echo "\n=== Compress line by line ==="
+ 	./lineCompress$(EXT) $(TESTFILE)
+-	@echo "\n=== Dictionary Random Access ==="
++	echo "\n=== Dictionary Random Access ==="
+ 	./dictionaryRandomAccess$(EXT) $(TESTFILE) $(TESTFILE) 1100 1400
+-	@echo "\n=== Frame compression ==="
++	echo "\n=== Frame compression ==="
+ 	./frameCompress$(EXT) $(TESTFILE)
+ 	$(LZ4) -vt $(TESTFILE).lz4
+ 
+ clean:
+-	@rm -f core *.o *.dec *-0 *-9 *-8192 *.lz4s *.lz4 \
++	rm -f core *.o *.dec *-0 *-9 *-8192 *.lz4s *.lz4 \
+ 	 printVersion$(EXT) doubleBuffer$(EXT) dictionaryRandomAccess$(EXT) \
+ 	 ringBuffer$(EXT) ringBufferHC$(EXT) lineCompress$(EXT) frameCompress$(EXT) \
+ 	 compressFunctions$(EXT) simpleBuffer$(EXT)
+-	@echo Cleaning completed
++	echo Cleaning completed
+diff --git a/lib/Makefile b/lib/Makefile
+index abb6c07..f674e0d 100644
+--- a/lib/Makefile
++++ b/lib/Makefile
+@@ -93,20 +93,20 @@ endif
+ 
+ liblz4.a: $(SRCFILES)
+ ifeq ($(BUILD_STATIC),yes)  # can be disabled on command line
+-	@echo compiling static library
++	echo compiling static library
+ 	$(Q)$(CC) $(CPPFLAGS) $(CFLAGS) -c $^
+ 	$(Q)$(AR) rcs $@ *.o
+ endif
+ 
+ $(LIBLZ4): $(SRCFILES)
+ ifeq ($(BUILD_SHARED),yes)  # can be disabled on command line
+-	@echo compiling dynamic library $(LIBVER)
++	echo compiling dynamic library $(LIBVER)
+ ifneq (,$(filter Windows%,$(OS)))
+ 	$(Q)$(CC) $(FLAGS) -DLZ4_DLL_EXPORT=1 -shared $^ -o dll\$@.dll
+ 	dlltool -D dll\liblz4.dll -d dll\liblz4.def -l dll\liblz4.lib
+ else
+ 	$(Q)$(CC) $(FLAGS) -shared $^ -fPIC -fvisibility=hidden $(SONAME_FLAGS) -o $@
+-	@echo creating versioned links
++	echo creating versioned links
+ 	$(Q)ln -sf $@ liblz4.$(SHARED_EXT_MAJOR)
+ 	$(Q)ln -sf $@ liblz4.$(SHARED_EXT)
+ endif
+@@ -117,7 +117,7 @@ liblz4: $(LIBLZ4)
+ clean:
+ 	$(Q)$(RM) core *.o liblz4.pc dll/liblz4.dll dll/liblz4.lib
+ 	$(Q)$(RM) *.a *.$(SHARED_EXT) *.$(SHARED_EXT_MAJOR) *.$(SHARED_EXT_VER)
+-	@echo Cleaning library completed
++	echo Cleaning library completed
+ 
+ 
+ #-----------------------------------------------------------------------------
+@@ -159,7 +159,7 @@ INSTALL_PROGRAM ?= $(INSTALL)
+ INSTALL_DATA    ?= $(INSTALL) -m 644
+ 
+ liblz4.pc: liblz4.pc.in Makefile
+-	@echo creating pkgconfig
++	echo creating pkgconfig
+ 	$(Q)sed -e 's|@PREFIX@|$(prefix)|' \
+          -e 's|@LIBDIR@|$(libdir)|' \
+          -e 's|@INCLUDEDIR@|$(includedir)|' \
+@@ -169,7 +169,7 @@ liblz4.pc: liblz4.pc.in Makefile
+ install: lib liblz4.pc
+ 	$(Q)$(INSTALL) -d -m 755 $(DESTDIR)$(pkgconfigdir)/ $(DESTDIR)$(includedir)/ $(DESTDIR)$(libdir)/
+ 	$(Q)$(INSTALL_DATA) liblz4.pc $(DESTDIR)$(pkgconfigdir)/
+-	@echo Installing libraries
++	echo Installing libraries
+ ifeq ($(BUILD_STATIC),yes)
+ 	$(Q)$(INSTALL_DATA) liblz4.a $(DESTDIR)$(libdir)/liblz4.a
+ 	$(Q)$(INSTALL_DATA) lz4frame_static.h $(DESTDIR)$(includedir)/lz4frame_static.h
+@@ -179,11 +179,11 @@ ifeq ($(BUILD_SHARED),yes)
+ 	$(Q)ln -sf liblz4.$(SHARED_EXT_VER) $(DESTDIR)$(libdir)/liblz4.$(SHARED_EXT_MAJOR)
+ 	$(Q)ln -sf liblz4.$(SHARED_EXT_VER) $(DESTDIR)$(libdir)/liblz4.$(SHARED_EXT)
+ endif
+-	@echo Installing headers in $(includedir)
++	echo Installing headers in $(includedir)
+ 	$(Q)$(INSTALL_DATA) lz4.h $(DESTDIR)$(includedir)/lz4.h
+ 	$(Q)$(INSTALL_DATA) lz4hc.h $(DESTDIR)$(includedir)/lz4hc.h
+ 	$(Q)$(INSTALL_DATA) lz4frame.h $(DESTDIR)$(includedir)/lz4frame.h
+-	@echo lz4 libraries installed
++	echo lz4 libraries installed
+ 
+ uninstall:
+ 	$(Q)$(RM) $(DESTDIR)$(pkgconfigdir)/liblz4.pc
+@@ -195,6 +195,6 @@ uninstall:
+ 	$(Q)$(RM) $(DESTDIR)$(includedir)/lz4hc.h
+ 	$(Q)$(RM) $(DESTDIR)$(includedir)/lz4frame.h
+ 	$(Q)$(RM) $(DESTDIR)$(includedir)/lz4frame_static.h
+-	@echo lz4 libraries successfully uninstalled
++	echo lz4 libraries successfully uninstalled
+ 
+ endif
+diff --git a/lib/dll/example/Makefile b/lib/dll/example/Makefile
+index e987956..43aaf17 100644
+--- a/lib/dll/example/Makefile
++++ b/lib/dll/example/Makefile
+@@ -59,5 +59,5 @@ fullbench-dll: fullbench.c xxhash.c
+ 	$(CC) $(FLAGS) $^ -o $@$(EXT) -DLZ4_DLL_IMPORT=1 $(DLLDIR)/liblz4.dll
+ 
+ clean:
+-	@$(RM) fullbench-dll$(EXT) fullbench-lib$(EXT) \
+-	@echo Cleaning completed
++	$(RM) fullbench-dll$(EXT) fullbench-lib$(EXT) \
++	echo Cleaning completed
+diff --git a/programs/Makefile b/programs/Makefile
+index bd33d9b..7c9e359 100644
+--- a/programs/Makefile
++++ b/programs/Makefile
+@@ -100,10 +100,10 @@ preview-man: clean-man man
+ 	man ./lz4.1
+ 
+ clean:
+-	@$(MAKE) -C $(LZ4DIR) $@ > $(VOID)
+-	@$(RM) core *.o *.test tmp* \
++	$(MAKE) -C $(LZ4DIR) $@ > $(VOID)
++	$(RM) core *.o *.test tmp* \
+            lz4$(EXT) lz4c$(EXT) lz4c32$(EXT) unlz4$(EXT) lz4cat$(EXT)
+-	@echo Cleaning completed
++	echo Cleaning completed
+ 
+ 
+ #-----------------------------------------------------------------------------
+@@ -145,28 +145,28 @@ INSTALL_DATA    ?= $(INSTALL) -m 644
+ 
+ 
+ install: lz4
+-	@echo Installing binaries
+-	@$(INSTALL) -d -m 755 $(DESTDIR)$(bindir)/ $(DESTDIR)$(man1dir)/
+-	@$(INSTALL_PROGRAM) lz4$(EXT) $(DESTDIR)$(bindir)/lz4$(EXT)
+-	@ln -sf lz4$(EXT) $(DESTDIR)$(bindir)/lz4c$(EXT)
+-	@ln -sf lz4$(EXT) $(DESTDIR)$(bindir)/lz4cat$(EXT)
+-	@ln -sf lz4$(EXT) $(DESTDIR)$(bindir)/unlz4$(EXT)
+-	@echo Installing man pages
+-	@$(INSTALL_DATA) lz4.1 $(DESTDIR)$(man1dir)/lz4.1
+-	@ln -sf lz4.1 $(DESTDIR)$(man1dir)/lz4c.1
+-	@ln -sf lz4.1 $(DESTDIR)$(man1dir)/lz4cat.1
+-	@ln -sf lz4.1 $(DESTDIR)$(man1dir)/unlz4.1
+-	@echo lz4 installation completed
++	echo Installing binaries
++	$(INSTALL) -d -m 755 $(DESTDIR)$(bindir)/ $(DESTDIR)$(man1dir)/
++	$(INSTALL_PROGRAM) lz4$(EXT) $(DESTDIR)$(bindir)/lz4$(EXT)
++	ln -sf lz4$(EXT) $(DESTDIR)$(bindir)/lz4c$(EXT)
++	ln -sf lz4$(EXT) $(DESTDIR)$(bindir)/lz4cat$(EXT)
++	ln -sf lz4$(EXT) $(DESTDIR)$(bindir)/unlz4$(EXT)
++	echo Installing man pages
++	$(INSTALL_DATA) lz4.1 $(DESTDIR)$(man1dir)/lz4.1
++	ln -sf lz4.1 $(DESTDIR)$(man1dir)/lz4c.1
++	ln -sf lz4.1 $(DESTDIR)$(man1dir)/lz4cat.1
++	ln -sf lz4.1 $(DESTDIR)$(man1dir)/unlz4.1
++	echo lz4 installation completed
+ 
+ uninstall:
+-	@$(RM) $(DESTDIR)$(bindir)/lz4cat$(EXT)
+-	@$(RM) $(DESTDIR)$(bindir)/unlz4$(EXT)
+-	@$(RM) $(DESTDIR)$(bindir)/lz4$(EXT)
+-	@$(RM) $(DESTDIR)$(bindir)/lz4c$(EXT)
+-	@$(RM) $(DESTDIR)$(man1dir)/lz4.1
+-	@$(RM) $(DESTDIR)$(man1dir)/lz4c.1
+-	@$(RM) $(DESTDIR)$(man1dir)/lz4cat.1
+-	@$(RM) $(DESTDIR)$(man1dir)/unlz4.1
+-	@echo lz4 programs successfully uninstalled
++	$(RM) $(DESTDIR)$(bindir)/lz4cat$(EXT)
++	$(RM) $(DESTDIR)$(bindir)/unlz4$(EXT)
++	$(RM) $(DESTDIR)$(bindir)/lz4$(EXT)
++	$(RM) $(DESTDIR)$(bindir)/lz4c$(EXT)
++	$(RM) $(DESTDIR)$(man1dir)/lz4.1
++	$(RM) $(DESTDIR)$(man1dir)/lz4c.1
++	$(RM) $(DESTDIR)$(man1dir)/lz4cat.1
++	$(RM) $(DESTDIR)$(man1dir)/unlz4.1
++	echo lz4 programs successfully uninstalled
+ 
+ endif
+diff --git a/tests/Makefile b/tests/Makefile
+index 3de111b..d67fb9c 100644
+--- a/tests/Makefile
++++ b/tests/Makefile
+@@ -110,17 +110,17 @@ datagen : $(PRGDIR)/datagen.c datagencli.c
+ 	$(CC) $(FLAGS) -I$(PRGDIR) $^ -o $@$(EXT)
+ 
+ clean:
+-	@$(MAKE) -C $(LZ4DIR) $@ > $(VOID)
+-	@$(MAKE) -C $(PRGDIR) $@ > $(VOID)
+-	@$(RM) core *.o *.test tmp* \
++	$(MAKE) -C $(LZ4DIR) $@ > $(VOID)
++	$(MAKE) -C $(PRGDIR) $@ > $(VOID)
++	$(RM) core *.o *.test tmp* \
+         fullbench-dll$(EXT) fullbench-lib$(EXT) \
+         fullbench$(EXT) fullbench32$(EXT) \
+         fuzzer$(EXT) fuzzer32$(EXT) \
+         frametest$(EXT) frametest32$(EXT) \
+         fasttest$(EXT) roundTripTest$(EXT) \
+         datagen$(EXT) checkTag$(EXT)
+-	@rm -fR $(TESTDIR)
+-	@echo Cleaning completed
++	rm -fR $(TESTDIR)
++	echo Cleaning completed
+ 
+ .PHONY: versionsTest
+ versionsTest:
+@@ -157,7 +157,7 @@ test-install: lz4 lib liblz4.pc
+ 	lz4_root=.. ./test_install.sh
+ 
+ test-lz4-sparse: lz4 datagen
+-	@echo "\n ---- test sparse file support ----"
++	echo "\n ---- test sparse file support ----"
+ 	./datagen -g5M  -P100 > tmplsdg5M
+ 	$(LZ4) -B4D tmplsdg5M | $(LZ4) -dv --sparse > tmplscB4
+ 	$(DIFF) -s tmplsdg5M tmplscB4
+@@ -173,12 +173,12 @@ test-lz4-sparse: lz4 datagen
+ 	./datagen -s1 -g1200007 -P100 | $(LZ4) | $(LZ4) -dv --sparse > tmplsodd   # Odd size file (to generate non-full last block)
+ 	./datagen -s1 -g1200007 -P100 | $(DIFF) -s - tmplsodd
+ 	ls -ls tmplsodd
+-	@$(RM) tmpls*
+-	@echo "\n Compatibility with Console :"
++	$(RM) tmpls*
++	echo "\n Compatibility with Console :"
+ 	echo "Hello World 1 !" | $(LZ4) | $(LZ4) -d -c
+ 	echo "Hello World 2 !" | $(LZ4) | $(LZ4) -d | cat
+ 	echo "Hello World 3 !" | $(LZ4) --no-frame-crc | $(LZ4) -d -c
+-	@echo "\n Compatibility with Append :"
++	echo "\n Compatibility with Append :"
+ 	./datagen -P100 -g1M > tmplsdg1M
+ 	cat tmplsdg1M tmplsdg1M > tmpls2M
+ 	$(LZ4) -B5 -v tmplsdg1M tmplsc
+@@ -186,44 +186,44 @@ test-lz4-sparse: lz4 datagen
+ 	$(LZ4) -d -v tmplsc >> tmplsr
+ 	ls -ls tmp*
+ 	$(DIFF) tmpls2M tmplsr
+-	@$(RM) tmpls*
++	$(RM) tmpls*
+ 
+ test-lz4-contentSize: lz4 datagen
+-	@echo "\n ---- test original size support ----"
++	echo "\n ---- test original size support ----"
+ 	./datagen -g15M > tmplc1
+ 	$(LZ4) -v tmplc1 | $(LZ4) -t
+ 	$(LZ4) -v --content-size tmplc1 | $(LZ4) -d > tmplc2
+ 	$(DIFF) -s tmplc1 tmplc2
+-	@$(RM) tmplc*
++	$(RM) tmplc*
+ 
+ test-lz4-frame-concatenation: lz4 datagen
+-	@echo "\n ---- test frame concatenation ----"
+-	@echo -n > tmp-lfc-empty
+-	@echo hi > tmp-lfc-nonempty
++	echo "\n ---- test frame concatenation ----"
++	echo -n > tmp-lfc-empty
++	echo hi > tmp-lfc-nonempty
+ 	cat tmp-lfc-nonempty tmp-lfc-empty tmp-lfc-nonempty > tmp-lfc-src
+-	@$(LZ4) -zq tmp-lfc-empty > tmp-lfc-empty.lz4
+-	@$(LZ4) -zq tmp-lfc-nonempty > tmp-lfc-nonempty.lz4
++	$(LZ4) -zq tmp-lfc-empty > tmp-lfc-empty.lz4
++	$(LZ4) -zq tmp-lfc-nonempty > tmp-lfc-nonempty.lz4
+ 	cat tmp-lfc-nonempty.lz4 tmp-lfc-empty.lz4 tmp-lfc-nonempty.lz4 > tmp-lfc-concat.lz4
+ 	$(LZ4) -d tmp-lfc-concat.lz4 > tmp-lfc-result
+ 	sdiff tmp-lfc-src tmp-lfc-result
+-	@$(RM) tmp-lfc-*
+-	@echo frame concatenation test completed
++	$(RM) tmp-lfc-*
++	echo frame concatenation test completed
+ 
+ test-lz4-multiple: lz4 datagen
+-	@echo "\n ---- test multiple files ----"
+-	@./datagen -s1        > tmp-tlm1 2> $(VOID)
+-	@./datagen -s2 -g100K > tmp-tlm2 2> $(VOID)
+-	@./datagen -s3 -g1M   > tmp-tlm3 2> $(VOID)
++	echo "\n ---- test multiple files ----"
++	./datagen -s1        > tmp-tlm1 2> $(VOID)
++	./datagen -s2 -g100K > tmp-tlm2 2> $(VOID)
++	./datagen -s3 -g1M   > tmp-tlm3 2> $(VOID)
+ 	$(LZ4) -f -m tmp-tlm*
+ 	ls -ls tmp-tlm*
+-	@$(RM) tmp-tlm1 tmp-tlm2 tmp-tlm3
++	$(RM) tmp-tlm1 tmp-tlm2 tmp-tlm3
+ 	$(LZ4) -df -m tmp-tlm*.lz4
+ 	ls -ls tmp-tlm*
+ 	$(LZ4) -f -m tmp-tlm1 notHere tmp-tlm2; echo $$?
+-	@$(RM) tmp-tlm*
++	$(RM) tmp-tlm*
+ 
+ test-lz4-basic: lz4 datagen unlz4 lz4cat
+-	@echo "\n ---- test lz4 basic compression/decompression ----"
++	echo "\n ---- test lz4 basic compression/decompression ----"
+ 	./datagen -g0       | $(LZ4) -v     | $(LZ4) -t
+ 	./datagen -g16KB    | $(LZ4) -9     | $(LZ4) -t
+ 	./datagen -g20KB > tmp-tlb-dg20k
+@@ -236,7 +236,7 @@ test-lz4-basic: lz4 datagen unlz4 lz4cat
+ 	./datagen -g17M     | $(LZ4) -9v    | $(LZ4) -qt
+ 	./datagen -g33M     | $(LZ4) --no-frame-crc | $(LZ4) -t
+ 	./datagen -g256MB   | $(LZ4) -vqB4D | $(LZ4) -t
+-	@echo "hello world" > tmp-tlb-hw
++	echo "hello world" > tmp-tlb-hw
+ 	$(LZ4) --rm -f tmp-tlb-hw tmp-tlb-hw.lz4
+ 	test ! -f tmp-tlb-hw                      # must fail (--rm)
+ 	test   -f tmp-tlb-hw.lz4
+@@ -273,12 +273,12 @@ test-lz4-basic: lz4 datagen unlz4 lz4cat
+ 	test "$(shell ./datagen -g20KB | $(LZ4) -c --fast=1 | wc -c)" -eq "$(shell ./datagen -g20KB| $(LZ4) -c --fast| wc -c)" # checks default fast compression is -1
+ 	! $(LZ4) -c --fast=0 tmp-tlb-dg20K # lz4 should fail when fast=0
+ 	! $(LZ4) -c --fast=-1 tmp-tlb-dg20K # lz4 should fail when fast=-1
+-	@$(RM) tmp-tlb*
++	$(RM) tmp-tlb*
+ 
+ 
+ 
+ test-lz4-dict: lz4 datagen
+-	@echo "\n ---- test lz4 compression/decompression with dictionary ----"
++	echo "\n ---- test lz4 compression/decompression with dictionary ----"
+ 	./datagen -g16KB > tmp-dict
+ 	./datagen -g32KB > tmp-dict-sample-32k
+ 	< tmp-dict-sample-32k $(LZ4) -D tmp-dict | $(LZ4) -dD tmp-dict | diff - tmp-dict-sample-32k
+@@ -290,7 +290,7 @@ test-lz4-dict: lz4 datagen
+ 	< tmp-dict-sample-32k $(LZ4) -D tmp-dict-sample-0 | $(LZ4) -dD tmp-dict-sample-0 | diff - tmp-dict-sample-32k
+ 	< tmp-dict-sample-0 $(LZ4) -D tmp-dict-sample-0 | $(LZ4) -dD tmp-dict-sample-0 | diff - tmp-dict-sample-0
+ 
+-	@echo "\n ---- test lz4 dictionary loading ----"
++	echo "\n ---- test lz4 dictionary loading ----"
+ 	./datagen -g128KB > tmp-dict-data-128KB
+ 	set -e; \
+ 	for l in 0 1 4 128 32767 32768 32769 65535 65536 65537 98303 98304 98305 131071 131072 131073; do \
+@@ -300,41 +300,41 @@ test-lz4-dict: lz4 datagen
+ 		< tmp-dict-$$l-tail $(LZ4) -D stdin tmp-dict-data-128KB | $(LZ4) -dD tmp-dict-$$l      | $(DIFF) - tmp-dict-data-128KB; \
+ 	done
+ 
+-	@$(RM) tmp-dict*
++	$(RM) tmp-dict*
+ 
+ test-lz4-hugefile: lz4 datagen
+-	@echo "\n ---- test huge files compression/decompression ----"
++	echo "\n ---- test huge files compression/decompression ----"
+ 	./datagen -g6GB   | $(LZ4) -vB5D  | $(LZ4) -qt
+ 	./datagen -g6GB   | $(LZ4) -v5BD  | $(LZ4) -qt
+ 	# test large file size [2-4] GB
+-	@./datagen -g3G -P100 | $(LZ4) -vv | $(LZ4) --decompress --force --sparse - tmphf1
+-	@ls -ls tmphf1
+-	@./datagen -g3G -P100 | $(LZ4) --quiet --content-size | $(LZ4) --verbose --decompress --force --sparse - tmphf2
+-	@ls -ls tmphf2
++	./datagen -g3G -P100 | $(LZ4) -vv | $(LZ4) --decompress --force --sparse - tmphf1
++	ls -ls tmphf1
++	./datagen -g3G -P100 | $(LZ4) --quiet --content-size | $(LZ4) --verbose --decompress --force --sparse - tmphf2
++	ls -ls tmphf2
+ 	$(DIFF) -s tmphf1 tmphf2
+-	@$(RM) tmphf*
++	$(RM) tmphf*
+ 
+ test-lz4-testmode: lz4 datagen
+-	@echo "\n ---- bench mode ----"
++	echo "\n ---- bench mode ----"
+ 	$(LZ4) -bi1
+-	@echo "\n ---- test mode ----"
++	echo "\n ---- test mode ----"
+ 	! ./datagen | $(LZ4) -t
+ 	! ./datagen | $(LZ4) -tf
+-	@echo "\n ---- pass-through mode ----"
++	echo "\n ---- pass-through mode ----"
+ 	! ./datagen | $(LZ4) -d  > $(VOID)
+ 	./datagen | $(LZ4) -df > $(VOID)
+-	@echo "Hello World !" > tmp-tlt1
++	echo "Hello World !" > tmp-tlt1
+ 	$(LZ4) -dcf tmp-tlt1
+-	@echo "from underground..." > tmp-tlt2
++	echo "from underground..." > tmp-tlt2
+ 	$(LZ4) -dcfm tmp-tlt1 tmp-tlt2
+-	@echo "\n ---- non-existing source ----"
++	echo "\n ---- non-existing source ----"
+ 	! $(LZ4)     file-does-not-exist
+ 	! $(LZ4) -f  file-does-not-exist
+ 	! $(LZ4) -fm file1-dne file2-dne
+-	@$(RM) tmp-tlt
++	$(RM) tmp-tlt
+ 
+ test-lz4-opt-parser: lz4 datagen
+-	@echo "\n ---- test opt-parser ----"
++	echo "\n ---- test opt-parser ----"
+ 	./datagen -g16KB      | $(LZ4) -12      | $(LZ4) -t
+ 	./datagen -P10        | $(LZ4) -12B4    | $(LZ4) -t
+ 	./datagen -g256K      | $(LZ4) -12B4D   | $(LZ4) -t
+@@ -349,21 +349,21 @@ test-lz4-opt-parser: lz4 datagen
+ test-lz4-essentials : lz4 datagen test-lz4-basic test-lz4-multiple \
+                       test-lz4-frame-concatenation test-lz4-testmode \
+                       test-lz4-contentSize test-lz4-dict
+-	@$(RM) tmp*
++	$(RM) tmp*
+ 
+ test-lz4: lz4 datagen test-lz4-essentials test-lz4-opt-parser \
+           test-lz4-sparse test-lz4-hugefile test-lz4-dict
+-	@$(RM) tmp*
++	$(RM) tmp*
+ 
+ test-lz4c: lz4c datagen
+-	@echo "\n ---- test lz4c variant ----"
++	echo "\n ---- test lz4c variant ----"
+ 	./datagen -g256MB | $(LZ4)c -l -v    | $(LZ4)c   -t
+ 
+ test-lz4c32: CFLAGS+=-m32
+ test-lz4c32: test-lz4
+ 
+ test-interop-32-64: lz4 lz4c32 datagen
+-	@echo "\n ---- test interoperability 32-bits -vs- 64 bits ----"
++	echo "\n ---- test interoperability 32-bits -vs- 64 bits ----"
+ 	./datagen -g16KB  | $(LZ4)c32 -9     | $(LZ4)    -t
+ 	./datagen -P10    | $(LZ4)    -9B4   | $(LZ4)c32 -t
+ 	./datagen         | $(LZ4)c32        | $(LZ4)    -t
+@@ -373,14 +373,14 @@ test-interop-32-64: lz4 lz4c32 datagen
+ 	./datagen -g6GB   | $(LZ4)c32 -vq9BD | $(LZ4)    -qt
+ 
+ test-lz4c32-basic: lz4c32 datagen
+-	@echo "\n ---- test lz4c32 32-bits version ----"
++	echo "\n ---- test lz4c32 32-bits version ----"
+ 	./datagen -g16KB  | $(LZ4)c32 -9     | $(LZ4)c32 -t
+ 	./datagen         | $(LZ4)c32        | $(LZ4)c32 -t
+ 	./datagen -g256MB | $(LZ4)c32 -vqB4D | $(LZ4)c32 -qt
+ 	./datagen -g6GB   | $(LZ4)c32 -vqB5D | $(LZ4)c32 -qt
+ 
+ test-platform:
+-	@echo "\n ---- test lz4 $(QEMU_SYS) platform ----"
++	echo "\n ---- test lz4 $(QEMU_SYS) platform ----"
+ 	$(QEMU_SYS) ./datagen -g16KB  | $(QEMU_SYS) $(LZ4) -9     | $(QEMU_SYS) $(LZ4) -t
+ 	$(QEMU_SYS) ./datagen         | $(QEMU_SYS) $(LZ4)        | $(QEMU_SYS) $(LZ4) -t
+ 	$(QEMU_SYS) ./datagen -g256MB | $(QEMU_SYS) $(LZ4) -vqB4D | $(QEMU_SYS) $(LZ4) -qt
+@@ -407,7 +407,7 @@ test-frametest32: CFLAGS += -m32
+ test-frametest32: test-frametest
+ 
+ test-mem: lz4 datagen fuzzer frametest fullbench
+-	@echo "\n ---- valgrind tests : memory analyzer ----"
++	echo "\n ---- valgrind tests : memory analyzer ----"
+ 	valgrind --leak-check=yes --error-exitcode=1 ./datagen -g50M > $(VOID)
+ 	./datagen -g16KB > ftmdg16K
+ 	valgrind --leak-check=yes --error-exitcode=1 $(LZ4) -9 -BD -f ftmdg16K $(VOID)

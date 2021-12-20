@@ -1,0 +1,7 @@
+#
+#=Description basic inherit uppercase exec permission (should emit warning)
+#=EXRESULT PASS
+#
+/usr/bin/foo {
+  /usr/bin/foo iX,
+}

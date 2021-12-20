@@ -1,0 +1,25 @@
+From 1d8d4b083bca049a33673959059127fa3705816e Mon Sep 17 00:00:00 2001
+From: Dominic Hargreaves <dom@earth.li>
+Date: Sat, 30 Apr 2016 22:50:52 +0100
+Subject: Math::Trig: clarify definition of great_circle_midpoint
+
+Bug: https://rt.cpan.org/Ticket/Display.html?id=114104
+Bug-Debian: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=697567
+Patch-Name: fixes/math_complex_doc_great_circle.diff
+---
+ cpan/Math-Complex/lib/Math/Trig.pm | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/cpan/Math-Complex/lib/Math/Trig.pm b/cpan/Math-Complex/lib/Math/Trig.pm
+index 1d9612a41c..efc2ff80ac 100644
+--- a/cpan/Math-Complex/lib/Math/Trig.pm
++++ b/cpan/Math-Complex/lib/Math/Trig.pm
+@@ -608,7 +608,7 @@ or the midpoint if you know the end points:
+   ($thetam, $phim) =
+     great_circle_midpoint($theta0, $phi0, $theta1, $phi1);
+ 
+-The great_circle_midpoint() is just a special case of
++The great_circle_midpoint() is just a special case (with $way = 0.5) of
+ 
+ =head2 great_circle_waypoint
+ 

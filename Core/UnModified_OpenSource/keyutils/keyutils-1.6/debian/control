@@ -1,0 +1,56 @@
+Source: keyutils
+Section: admin
+Priority: optional
+Maintainer: Christian Kastner <ckk@debian.org>
+Build-Depends:
+    debhelper-compat (= 12),
+    lsb-release,
+Rules-Requires-Root: no
+Standards-Version: 4.3.0
+Homepage: https://people.redhat.com/~dhowells/keyutils/
+Vcs-Git: https://salsa.debian.org/debian/keyutils.git
+Vcs-Browser: https://salsa.debian.org/debian/keyutils
+
+Package: keyutils
+Architecture: linux-any
+Multi-Arch: foreign
+Depends:
+    ${misc:Depends},
+    ${shlibs:Depends},
+Description: Linux Key Management Utilities
+ Keyutils is a set of utilities for managing the key retention facility in the
+ kernel, which can be used by filesystems, block devices and more to gain and
+ retain the authorization and encryption keys required to perform secure
+ operations.
+
+Package: libkeyutils1
+Section: libs
+Architecture: linux-any
+Multi-Arch: same
+Depends:
+    ${misc:Depends},
+    ${shlibs:Depends},
+Pre-Depends: ${misc:Pre-Depends}
+Description: Linux Key Management Utilities (library)
+ Keyutils is a set of utilities for managing the key retention facility in the
+ kernel, which can be used by filesystems, block devices and more to gain and
+ retain the authorization and encryption keys required to perform secure
+ operations.
+ .
+ This package provides a wrapper library for the key management facility system
+ calls.
+
+Package: libkeyutils-dev
+Section: libdevel
+Architecture: linux-any
+Multi-Arch: same
+Depends:
+    ${misc:Depends},
+    libkeyutils1 (= ${binary:Version}),
+Description: Linux Key Management Utilities (development)
+ Keyutils is a set of utilities for managing the key retention facility in the
+ kernel, which can be used by filesystems, block devices and more to gain and
+ retain the authorization and encryption keys required to perform secure
+ operations.
+ .
+ This package contains the development files.

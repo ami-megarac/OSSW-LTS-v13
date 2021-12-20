@@ -1,0 +1,8 @@
+#
+#=Description basic ptrace bad multi-peer perms rule
+#=EXRESULT FAIL
+#
+/usr/bin/foo {
+  ptrace peer=/bin/true peer=/sbin/init peer=MY_PROFILE,
+
+  }

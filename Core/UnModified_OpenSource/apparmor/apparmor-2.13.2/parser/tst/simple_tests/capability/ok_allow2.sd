@@ -1,0 +1,101 @@
+#
+#=DESCRIPTION validate uses of allow/capabilities in hats
+#=EXRESULT PASS
+# vim:syntax=apparmor
+# Last Modified: Sun Apr 17 19:44:44 2005
+#
+/does/not/exist2 {
+  ^chown {
+    allow capability chown,
+  }
+  ^dac_override {
+    allow capability dac_override,
+  }
+  ^dac_read_search {
+    allow capability dac_read_search,
+  }
+  ^fowner {
+    allow capability fowner,
+  }
+  ^fsetid {
+    allow capability fsetid,
+  }
+  ^kill {
+    allow capability kill,
+  }
+  ^setgid {
+    allow capability setgid,
+  }
+  ^setuid {
+    allow capability setuid,
+  }
+  ^setpcap {
+    allow capability setpcap,
+  }
+  ^linux_immutable {
+    allow capability linux_immutable,
+  }
+  ^net_bind_service {
+    allow capability net_bind_service,
+  }
+  ^net_broadcast {
+    allow capability net_broadcast,
+  }
+  ^net_admin {
+    allow capability net_admin,
+  }
+  ^net_raw {
+    allow capability net_raw,
+  }
+  ^ipc_lock {
+    allow capability ipc_lock,
+  }
+  ^ipc_owner {
+    allow capability ipc_owner,
+  }
+  ^sys_module {
+    allow capability sys_module,
+  }
+  ^sys_rawio {
+    allow capability sys_rawio,
+  }
+  ^sys_chroot {
+    allow capability sys_chroot,
+  }
+  ^sys_ptrace {
+    allow capability sys_ptrace,
+  }
+  ^sys_pacct {
+    allow capability sys_pacct,
+  }
+  ^sys_admin {
+    allow capability sys_admin,
+  }
+  ^sys_boot {
+    allow capability sys_boot,
+  }
+  ^sys_nice {
+    allow capability sys_nice,
+  }
+  ^sys_resource {
+    allow capability sys_resource,
+  }
+  ^sys_time {
+    allow capability sys_time,
+  }
+  ^sys_tty_config {
+    allow capability sys_tty_config,
+  }
+  ^mknod {
+    allow capability mknod,
+  }
+  ^lease {
+    allow capability lease,
+  }
+  ^audit_write {
+    allow capability audit_write,
+  }
+  ^audit_control {
+    allow capability audit_control,
+  }
+}

@@ -1,0 +1,20 @@
+#
+#=DESCRIPTION test cx
+#=EXRESULT PASS
+#
+/usr/bin/foo {
+  /bin/cat cx,
+  /bin/foo Cx,
+
+  unsafe cx /bin/bar,
+  cx /bin/a,
+
+  profile /bin/cat {
+    /bin/cat mr,
+  }
+
+  profile /bin/a {
+    /bin/a mr,
+    /tmp/slurp* rw,
+  }
+}

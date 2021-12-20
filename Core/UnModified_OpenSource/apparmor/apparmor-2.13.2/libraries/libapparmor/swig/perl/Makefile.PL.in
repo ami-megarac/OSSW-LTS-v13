@@ -1,0 +1,18 @@
+#!/usr/bin/perl -w
+
+use ExtUtils::MakeMaker;
+
+use vars qw($CFLAGS $OBJECT $VERSION $OPTIMIZE);
+
+WriteMakefile(
+	'NAME' => 'LibAppArmor',
+	'MAKEFILE' => 'Makefile.perl',
+	'FIRST_MAKEFILE' => 'Makefile.perl',
+	'ABSTRACT' => q[Perl interface to AppArmor] ,
+	'VERSION' => q[@VERSION@],
+	'INC' => q[@CPPFLAGS@ -I@top_srcdir@/include @CFLAGS@],
+	'LIBS' => q[-L@top_builddir@/src/.libs/ -lapparmor @LIBS@],
+	'OBJECT' => 'libapparmor_wrap.o', # $(OBJ_EXT)
+	'dynamic_lib' => { 'OTHERLDFLAGS' => q[@LDFLAGS@], },
+) ;
+

@@ -1,0 +1,7 @@
+#
+#=DESCRIPTION simple unix getattr w/peer modifier
+#=EXRESULT FAIL
+
+profile a_profile {
+  unix getattr peer=(addr=none),
+}

@@ -1,0 +1,5 @@
+usr/include/uuid
+usr/lib/*/libuuid.a
+usr/lib/*/libuuid.so
+usr/lib/*/pkgconfig/uuid.pc
+usr/share/man/man3/uuid*

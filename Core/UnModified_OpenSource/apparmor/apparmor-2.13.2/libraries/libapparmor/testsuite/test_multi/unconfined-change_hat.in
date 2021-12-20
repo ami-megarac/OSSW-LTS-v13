@@ -1,0 +1,1 @@
+Feb 21 23:22:01 mail-20170118 kernel: [1222198.459750] audit: type=1400 audit(1487719321.954:218): apparmor="ALLOWED" operation="change_hat" info="unconfined can not change_hat" error=-1 profile="unconfined" pid=19941 comm="apache2"

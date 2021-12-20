@@ -1350,6 +1350,15 @@ local function object_or_array(self, T, etc)
    return string_keys, nil, map
 end
 
+--defining custom unsupportedTypeEncoder function  to handle the usedata returned form int64 library as per the example documented.
+function OBJDEF:unsupportedTypeEncoder(value, parents, etc, options, indent, for_key)
+	if type(value) == "userdata" then
+		return value
+	else
+		return nil
+	end
+end
+
 --
 -- Encode
 --
@@ -1420,7 +1429,9 @@ local function encode_value(self, value, parents, etc, options, indent, for_key)
          local user_value, user_error = self:unsupportedTypeEncoder(value, parents, etc, options, indent, for_key)
          -- If the user's handler returns a string, use that. If it returns nil plus an error message, bail with that.
          -- If only nil returned, fall through to the default error handler.
-         if type(user_value) == 'string' then
+         if type(user_value) == 'userdata' then
+            return user_value
+         elseif type(user_value) == 'string' then
             return user_value
          elseif user_value ~= nil then
             self:onEncodeError("unsupportedTypeEncoder method returned a " .. type(user_value), etc)

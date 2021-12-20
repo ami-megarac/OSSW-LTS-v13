@@ -1,0 +1,29 @@
+From 35f89b597a40c870f93a068bc92a7ef4f9b16a66 Mon Sep 17 00:00:00 2001
+From: John Johansen <john.johansen@canonical.com>
+Date: Sat, 16 Apr 2016 13:59:02 -0700
+Subject: [PATCH 08/25] apparmor: fix put() parent ref after updating the
+ active ref
+
+Signed-off-by: John Johansen <john.johansen@canonical.com>
+Acked-by: Seth Arnold <seth.arnold@canonical.com>
+---
+ security/apparmor/policy.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/security/apparmor/policy.c b/security/apparmor/policy.c
+index c92a9f6..455c9f8 100644
+--- a/security/apparmor/policy.c
++++ b/security/apparmor/policy.c
+@@ -1187,8 +1187,8 @@ ssize_t aa_replace_profiles(void *udata, size_t size, bool noreplace)
+ 			/* parent replaced in this atomic set? */
+ 			if (newest != parent) {
+ 				aa_get_profile(newest);
+-				aa_put_profile(parent);
+ 				rcu_assign_pointer(ent->new->parent, newest);
++				aa_put_profile(parent);
+ 			}
+ 			/* aafs interface uses replacedby */
+ 			rcu_assign_pointer(ent->new->replacedby->profile,
+-- 
+2.7.4
+

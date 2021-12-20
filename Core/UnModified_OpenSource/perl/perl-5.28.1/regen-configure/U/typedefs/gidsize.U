@@ -1,0 +1,56 @@
+?RCS:
+?RCS: Copyright (c) 1999, Jarkko Hietaniemi
+?RCS:
+?RCS: You may redistribute only under the terms of the Artistic License,
+?RCS: as specified in the README file that comes with the distribution.
+?RCS: You may reuse parts of this distribution only within the terms of
+?RCS: that same Artistic License; a copy of which may be found at the root
+?RCS: of the source tree for dist 3.0.
+?RCS:
+?MAKE:gidsize: Myread Typedef gidtype Compile run i_stdlib
+?MAKE:	-pick add $@ %<
+?S:gidsize:
+?S:	This variable contains the size of a gidtype in bytes.
+?S:.
+?C:Gid_t_size:
+?C:	This symbol holds the size of a Gid_t in bytes.
+?C:.
+?H:#define Gid_t_size $gidsize		/* GID size */
+?H:.
+?T:yyy zzz
+?F:!try
+: Check the size of GID
+echo " "
+case "$gidtype" in
+*_t) zzz="$gidtype"	;;
+*)   zzz="gid"		;;
+esac
+echo "Checking the size of $zzz..." >&4
+cat > try.c <<EOCP
+#include <sys/types.h>
+#include <stdio.h>
+#$i_stdlib I_STDLIB
+#ifdef I_STDLIB
+#include <stdlib.h>
+#endif
+int main() {
+    printf("%d\n", (int)sizeof($gidtype));
+    exit(0);
+}
+EOCP
+set try
+if eval $compile_ok; then
+	yyy=`$run ./try`
+	case "$yyy" in
+	'')	gidsize=4
+		echo "(I can't execute the test program--guessing $gidsize.)" >&4
+		;;
+	*)	gidsize=$yyy
+		echo "Your $zzz is $gidsize bytes long."
+		;;
+	esac
+else
+	gidsize=4
+	echo "(I can't compile the test program--guessing $gidsize.)" >&4
+fi
+

@@ -1,0 +1,49 @@
+Author: Sven Joachim <svenjoac@gmx.de>
+Description: Omit -L part from ncurses6{w,}-config output
+ "ncurses6-config --libs" includes a "-L" part which is not needed
+ since the library is installed in a directory in the default linker
+ search path.
+ .
+ Upstream only omits the -L part if $libdir is /usr/lib.  Until there
+ is a way to obtain the multiarch path without running
+ dpkg-architecture our patch is not upstreamable.
+Bug-Debian: https://bugs.debian.org/638281
+Bug-Debian: https://bugs.debian.org/745479
+Forwarded: not-needed
+Last-Update: 2018-06-03
+
+---
+ misc/ncurses-config.in |    7 -------
+ 1 file changed, 7 deletions(-)
+
+--- a/misc/ncurses-config.in
++++ b/misc/ncurses-config.in
+@@ -40,7 +40,6 @@ exec_prefix="@exec_prefix@"
+ 
+ bindir="@bindir@"
+ includedir="@includedir@"
+-libdir="@libdir@"
+ datarootdir="@datarootdir@"
+ datadir="@datadir@"
+ mandir="@mandir@"
+@@ -111,12 +110,7 @@ while test $# -gt 0; do
+ ENDECHO
+ 		;;
+ 	--libs)
+-		if test "$libdir" = /usr/lib
+-		then
+ 			LIBDIR=
+-		else
+-			LIBDIR=-L$libdir
+-		fi
+ 		LIBS="@LIBS@ @PRIVATE_LIBS@"
+ 		if test @TINFO_NAME@ = @LIB_NAME@ ; then
+ 		sed -e 's,^[ ]*,,' -e 's, [ ]*, ,g' -e 's,[ ]*$,,' <<-ENDECHO
+@@ -155,7 +149,6 @@ ENDECHO
+ 		echo $INCS
+ 		;;
+ 	--libdir)
+-		echo "${libdir}"
+ 		;;
+ 	--mandir)
+ 		echo "${mandir}"

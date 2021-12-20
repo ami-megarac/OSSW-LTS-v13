@@ -1,0 +1,8 @@
+#
+#=DESCRIPTION unix rule with a bad addr regex expansion
+#=EXRESULT FAIL
+#
+
+profile foo {
+  unix send addr=@foo{one,two peer=(label=splat),
+}

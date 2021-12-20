@@ -1,0 +1,10 @@
+#!/usr/bin/make -f
+
+CFLAGS=$(shell pkg-config --cflags icu-io)
+LIBS=$(shell pkg-config --libs icu-io)
+
+a.out: debian/tests/ustring.cpp
+	g++ $(CFLAGS) $< $(LIBS)
+	@echo "Build test of $< succeeded"
+	./a.out
+	@rm -f a.out

@@ -1,0 +1,1 @@
+type=AVC msg=audit(1463403689.381:267599): apparmor="ALLOWED" operation="file_perm" profile="/usr/sbin/apache2//www.xxxxxxxxxx.co.uk" pid=13215 comm="apache2" laddr=::ffff:192.168.1.100 lport=80 faddr=::ffff:192.168.1.100 fport=45658 family="inet6" sock_type="stream" protocol=6 requested_mask="send" denied_mask="send"

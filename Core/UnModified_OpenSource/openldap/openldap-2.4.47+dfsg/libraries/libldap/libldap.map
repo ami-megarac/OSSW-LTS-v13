@@ -1,0 +1,7 @@
+OPENLDAP_2.4_2 {
+  global:
+    ldap_*;
+    ldif_*;
+  local:
+    *;
+};

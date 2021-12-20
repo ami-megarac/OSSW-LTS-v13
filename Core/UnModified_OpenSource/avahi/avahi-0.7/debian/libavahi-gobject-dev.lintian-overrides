@@ -1,0 +1,2 @@
+# AvahiCore-0.6.gir is provided by gir1.2-avahi-0.6
+libavahi-gobject-dev: gir-missing-typelib-dependency usr/share/gir-1.0/AvahiCore-0.6.gir gir1.2-avahicore-0.6

@@ -1,0 +1,11 @@
+#
+#=Description ptrace peer w/multiple var names rule
+#=EXRESULT PASS
+#
+
+@{SHELLS}=/bin/bash /bin/dash /bin/tcsh
+
+/usr/bin/foo {
+  ptrace peer=@{SHELLS},
+
+  }

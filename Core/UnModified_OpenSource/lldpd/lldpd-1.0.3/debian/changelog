@@ -1,0 +1,401 @@
+lldpd (1.0.3-1) unstable; urgency=medium
+
+  * New upstream release.
+
+ -- Vincent Bernat <bernat@debian.org>  Mon, 10 Dec 2018 16:16:57 +0100
+
+lldpd (1.0.2-1) unstable; urgency=medium
+
+  * New upstream release.
+  * d/control: build-depends on libcap-dev.
+
+ -- Vincent Bernat <bernat@debian.org>  Sat, 01 Dec 2018 16:06:04 +0100
+
+lldpd (1.0.1-1) unstable; urgency=medium
+
+  * New upstream release.
+     + Fix systemd service file. Closes: #895276.
+  * d/control: update Vcs-* to salsa.debian.org.
+
+ -- Vincent Bernat <bernat@debian.org>  Mon, 09 Apr 2018 22:10:28 +0200
+
+lldpd (0.9.9-1) unstable; urgency=medium
+
+  * New upstream release.
+  * d/control: bump Standards-Version.
+  * d/control: build-depends on recent debhelper instead of dh-systemd.
+  * d/watch: use HTTPS.
+
+ -- Vincent Bernat <bernat@debian.org>  Wed, 22 Nov 2017 19:31:28 +0100
+
+lldpd (0.9.8-1) unstable; urgency=medium
+
+  * New upstream release.
+  * Move back ZSH completions in vendor-completions directory.
+  * Remove upstart configuration file.
+  * Remove upstream signature check.
+
+ -- Vincent Bernat <bernat@debian.org>  Mon, 21 Aug 2017 09:07:16 +0200
+
+lldpd (0.9.7-1) unstable; urgency=medium
+
+  * New upstream release.
+  * d/copyright: updates.
+  * d/control: remove dependency on libjansson-dev.
+  * d/control: bump Standards-Version.
+
+ -- Vincent Bernat <bernat@debian.org>  Thu, 13 Jul 2017 08:35:39 +0200
+
+lldpd (0.9.6-1) unstable; urgency=medium
+
+  * New upstream release.
+
+ -- Vincent Bernat <bernat@debian.org>  Sat, 21 Jan 2017 13:34:38 +0100
+
+lldpd (0.9.5-1) unstable; urgency=medium
+
+  * New upstream release.
+
+ -- Vincent Bernat <bernat@debian.org>  Sat, 22 Oct 2016 14:51:30 +0200
+
+lldpd (0.9.4-1) unstable; urgency=medium
+
+  * New upstream version.
+  * d/copyright: misc updates.
+
+ -- Vincent Bernat <bernat@debian.org>  Sat, 18 Jun 2016 20:33:31 +0200
+
+lldpd (0.9.3-1) unstable; urgency=medium
+
+  * New upstream version.
+  * d/control: bump Standards-Version.
+
+ -- Vincent Bernat <bernat@debian.org>  Sun, 22 May 2016 08:44:57 +0200
+
+lldpd (0.9.2-2) unstable; urgency=medium
+
+  * d/rules: enable dh_systemd use.
+
+ -- Vincent Bernat <bernat@debian.org>  Sun, 17 Apr 2016 11:51:41 +0200
+
+lldpd (0.9.2-1) unstable; urgency=medium
+
+  * New upstream version.
+  * d/control: bump Standards-Version.
+  * d/control: update Vcs-* URL.
+  * d/rules: switch to dh.
+  * d/rules: enable PIE (previously autodetected).
+
+ -- Vincent Bernat <bernat@debian.org>  Sat, 19 Mar 2016 19:08:57 +0100
+
+lldpd (0.7.19-1) unstable; urgency=medium
+
+  * New upstream release.
+     + Fix a buffer overflow when parsing management addresses. Not
+       exploitable, but can crash the process.
+
+ -- Vincent Bernat <bernat@debian.org>  Sat, 17 Oct 2015 19:43:41 +0200
+
+lldpd (0.7.17-1) unstable; urgency=medium
+
+  * New upstream release.
+  * Add upstream GPG signature verification.
+
+ -- Vincent Bernat <bernat@debian.org>  Thu, 10 Sep 2015 15:04:53 +0200
+
+lldpd (0.7.16-1) unstable; urgency=medium
+
+  * New upstream release.
+  * Update debian/lldpd.symbols to account for new versioning scheme.
+
+ -- Vincent Bernat <bernat@debian.org>  Sat, 08 Aug 2015 18:27:23 +0200
+
+lldpd (0.7.15-1) unstable; urgency=medium
+
+  * New upstream release.
+  * Enable JSON output.
+  * Move bash completions to /usr/share/bash-completion/completions.
+
+ -- Vincent Bernat <bernat@debian.org>  Thu, 21 May 2015 21:34:42 +0200
+
+lldpd (0.7.14-2) unstable; urgency=medium
+
+  * Run unittests.
+
+ -- Vincent Bernat <bernat@debian.org>  Thu, 14 May 2015 20:47:38 +0200
+
+lldpd (0.7.14-1) unstable; urgency=medium
+
+  * New upstream release.
+     + All previous patches are unneeded. Drop them.
+
+ -- Vincent Bernat <bernat@debian.org>  Sun, 26 Apr 2015 17:26:56 +0200
+
+lldpd (0.7.11-2) unstable; urgency=medium
+
+  * Cherry-pick 0001-lib-fix-pkgconfig-file-substitutions.patch to fix
+    substitutions in .pc file in liblldpctl-dev package.
+
+ -- Vincent Bernat <bernat@debian.org>  Mon, 24 Nov 2014 08:51:28 +0100
+
+lldpd (0.7.11-1) unstable; urgency=medium
+
+  * New upstream version.
+  * Bump Standards-Version to 3.9.6.
+  * Cherry-pick 0001-systemd-fix-systemd-unit-file.patch to fix systemd
+    unit file.
+
+ -- Vincent Bernat <bernat@debian.org>  Sun, 26 Oct 2014 18:30:51 +0100
+
+lldpd (0.7.10-1) unstable; urgency=medium
+
+  * New upstream version.
+     + Update symbols.
+
+ -- Vincent Bernat <bernat@debian.org>  Sat, 26 Jul 2014 10:19:24 +0200
+
+lldpd (0.7.9-2) unstable; urgency=medium
+
+  * Depends again on libpci-dev as libsnmp-dev is not up-to-date in
+    kfreebsd.
+
+ -- Vincent Bernat <bernat@debian.org>  Sat, 05 Jul 2014 10:37:07 +0200
+
+lldpd (0.7.9-1) unstable; urgency=medium
+
+  * New upstream version.
+  * Drop dependency on libsensors4-dev and libpci-dev. libsnmp-dev now
+    depends on those.
+
+ -- Vincent Bernat <bernat@debian.org>  Sat, 31 May 2014 19:33:30 +0200
+
+lldpd (0.7.8-1) unstable; urgency=medium
+
+  * New upstream version.
+  * Depends on libpci-dev to workaround bug #744023. Closes: #746060.
+  * Bump Standards-Version to 3.9.5.
+
+ -- Vincent Bernat <bernat@debian.org>  Wed, 07 May 2014 13:37:16 +0200
+
+lldpd (0.7.7-1) unstable; urgency=low
+
+  * New upstream version.
+     + lldpd now builds its chroot itself. This removes the need to use
+       mkdir/cp in lldpd.service and closes: #725098.
+     + lldpd ships its own lldpd.service. Use it.
+
+ -- Vincent Bernat <bernat@debian.org>  Sun, 17 Nov 2013 09:48:00 +0100
+
+lldpd (0.7.6-2) unstable; urgency=low
+
+  * Build-Depends on dh-systemd to correctly register service files.
+
+ -- Vincent Bernat <bernat@debian.org>  Mon, 12 Aug 2013 17:52:07 +0200
+
+lldpd (0.7.6-1) unstable; urgency=low
+
+  * New upstream version.
+
+ -- Vincent Bernat <bernat@debian.org>  Mon, 22 Jul 2013 08:18:53 +0200
+
+lldpd (0.7.5-2) unstable; urgency=low
+
+  * control: use canonical URL for Vcs-* fields.
+  * init: do not source /lib/init/vars.sh in init script.
+  * lintian: update override about liblldpctl.
+  * symbols: update liblldpctl version.
+  * postinst/postrm: use `set -e` in case they are invoked with `sh`.
+
+ -- Vincent Bernat <bernat@debian.org>  Sun, 23 Jun 2013 19:23:41 +0200
+
+lldpd (0.7.5-1) unstable; urgency=low
+
+  * New upstream version.
+     + Fix FTBFS due to embedded libevent during autoreconf step by
+       shipping a more recent version of libevent compatible with automake
+       1.14. Closes: #713773.
+  * Add back libsensors4-dev as a Build-Depends since it is missing from
+    libsnmp-dev for kfreebsd-*.
+
+ -- Vincent Bernat <bernat@debian.org>  Sat, 22 Jun 2013 13:19:43 +0200
+
+lldpd (0.7.3-4) unstable; urgency=low
+
+  * debian/control:
+     + switch architecture to "linux-any kfreebsd-any"
+
+ -- Vincent Bernat <bernat@debian.org>  Sun, 26 May 2013 10:43:07 +0200
+
+lldpd (0.7.3-3) unstable; urgency=low
+
+  * Fix call to dpkg-statoverride in postrm. Closes: #709128.
+
+ -- Vincent Bernat <bernat@debian.org>  Tue, 21 May 2013 09:22:30 +0200
+
+lldpd (0.7.3-2) unstable; urgency=low
+
+  * Don't Build-Depends on libsensors*-dev or on libperl-dev. They were
+    needed in the past to link against libsnmp-dev but this is not the
+    case anymore. Closes: #708990.
+
+ -- Vincent Bernat <bernat@debian.org>  Mon, 20 May 2013 08:06:50 +0200
+
+lldpd (0.7.3-1) unstable; urgency=low
+
+  * New upstream version.
+     + lldpd now watches for link down events. Closes: #551606.
+     + lldpd should now build on Debian kFreeBSD as well.
+  * debian/control:
+     + build-depends on libevent-dev, pkg-config for lldpd
+     + build-depends on libreadline-dev for lldpcli
+     + build-depends on dh-autoreconf
+     + update homepage
+     + bump Standards-Version to 3.9.4
+  * Add support for upstart and systemd.
+  * Ship a liblldpctl-dev package. There is no liblldpctlX package because
+    the library is contained in lldpd package: while the library provide
+    API and ABI stability, the internals are dependent on the exact
+    version of lldpd (the communication is done through a binary RPC
+    protocol). Add a lintian override for this.
+  * Introduce a symbol files for liblldpctl.so.
+  * Update debian/copyright for libevent, various M4 macros and shipped
+    include files.
+
+ -- Vincent Bernat <bernat@debian.org>  Sun, 12 May 2013 12:12:01 +0200
+
+lldpd (0.5.7-2) unstable; urgency=low
+
+  * Update debian/watch.
+  * Add a "status" command to init.d script.
+
+ -- Vincent Bernat <bernat@debian.org>  Sun, 24 Jun 2012 01:56:37 +0200
+
+lldpd (0.5.7-1) unstable; urgency=low
+
+  * New upstream version.
+     + Fix a possible infinite loop in the receiving part which may
+       prevent lldpd to send frames.
+  * Bump Standards-Version to 3.9.3.
+
+ -- Vincent Bernat <bernat@debian.org>  Thu, 01 Mar 2012 00:06:43 +0100
+
+lldpd (0.5.5-1) unstable; urgency=low
+
+  * New upstream release.
+  * Don't ship changelog twice.
+
+ -- Vincent Bernat <bernat@debian.org>  Wed, 16 Nov 2011 22:16:48 +0100
+
+lldpd (0.5.4-1) unstable; urgency=low
+
+  * New upstream release.
+     + flag to specify which interfaces lldpd listen to (Closes: #584806).
+  * Correct debian/watch to download from GitHub.
+  * Correct homepage location (now on Github).
+  * Bump Standards-Version to 3.9.2. No changes required.
+
+ -- Vincent Bernat <bernat@debian.org>  Sat, 02 Jul 2011 20:17:32 +0200
+
+lldpd (0.5.2-1) unstable; urgency=low
+
+  * New upstream release.
+  * Enable XML output for lldpctl.
+  * Bump Standards-Version to 3.9.1. No changes required.
+
+ -- Vincent Bernat <bernat@debian.org>  Mon, 21 Feb 2011 21:36:04 +0100
+
+lldpd (0.5.1-1) unstable; urgency=low
+
+  * New upstream release.
+     + Do not report MTU as MFS anymore. Closes: #559314.
+     + lldpctl reports information ages. Closes: #551607.
+     + lldpctl now supports a key/value output. Closes: #551608.
+
+ -- Vincent Bernat <bernat@debian.org>  Fri, 18 Jun 2010 19:53:33 +0200
+
+lldpd (0.4.2-1) unstable; urgency=low
+
+  * New upstream release.
+  * Bump Standards-Version to 3.8.4. No changes required.
+  * Put /etc/localtime into chroot to ensure correct timestamps for
+    syslog.
+
+ -- Vincent Bernat <bernat@debian.org>  Thu, 11 Mar 2010 19:35:55 +0100
+
+lldpd (0.4.1-1) unstable; urgency=low
+
+  * New upstream release: drop all patchs, they have been applied on 0.4.1.
+  * Switch to dpkg-source 3.0 (quilt) format.
+
+ -- Vincent Bernat <bernat@debian.org>  Thu, 14 Jan 2010 07:48:04 +0100
+
+lldpd (0.4.0-2) unstable; urgency=low
+
+  * Fix init.d script with respect with the incorrect LSB header, thanks
+    to Peter Reinholdtsen. Closes: #542161.
+  * Add some patches from git:
+     + fix EDP vlan handling when there is no VLAN [c3f02fe]
+     + fix a bug in CDP packet generation [62d75ae]
+     + add missing argument in some call to LLOG_INFO [1ac88e1]
+  * Bump Standards-Version to 3.8.3. No changes required.
+
+ -- Vincent Bernat <bernat@debian.org>  Tue, 18 Aug 2009 14:08:54 +0200
+
+lldpd (0.4.0-1) unstable; urgency=low
+
+  * New upstream version. Should work on ARM.
+
+ -- Vincent Bernat <bernat@debian.org>  Wed, 20 May 2009 19:15:19 +0200
+
+lldpd (0.3.3-2) unstable; urgency=low
+
+  * Create /var/run/lldpd in init.d. /var/run can be in a ramfs.
+    LP: #316335.
+  * Bump Standards-Version to 3.8.1.
+
+ -- Vincent Bernat <bernat@debian.org>  Sun, 05 Apr 2009 12:59:09 +0200
+
+lldpd (0.3.3-1) unstable; urgency=low
+
+  * New upstream version
+
+ -- Vincent Bernat <bernat@debian.org>  Sat, 14 Mar 2009 21:57:35 +0100
+
+lldpd (0.3.2-1) unstable; urgency=low
+
+  * New upstream version
+
+ -- Vincent Bernat <bernat@debian.org>  Mon, 02 Mar 2009 17:14:17 +0100
+
+lldpd (0.3-1) unstable; urgency=low
+
+  * New upstream version
+     + LLDP-MED support
+
+ -- Vincent Bernat <bernat@debian.org>  Sun, 14 Dec 2008 12:02:23 +0100
+
+lldpd (0.2.1-1) unstable; urgency=low
+
+  * New upstream version
+     + Fix a lintian warning about a syntax error in manual page
+  * Ship upstream changelog
+
+ -- Vincent Bernat <bernat@debian.org>  Wed, 19 Nov 2008 20:12:13 +0100
+
+lldpd (0.2-1) unstable; urgency=low
+
+  * New upstream version
+     + FDP support
+     + privilege separation
+  * Provide debian/postinst and debian/postrm to create _lldpd user and group.
+  * /usr/sbin/lldpctl is now installed with setuid _lldpd, owned by adm
+    group and can be executed only by adm group. Any user in adm group can
+    run lldpctl.
+
+ -- Vincent Bernat <bernat@debian.org>  Mon, 17 Nov 2008 20:22:17 +0100
+
+lldpd (0.1-1) unstable; urgency=low
+
+  * Initial release (Closes: #502301)
+
+ -- Vincent Bernat <bernat@debian.org>  Wed, 15 Oct 2008 21:41:21 +0200

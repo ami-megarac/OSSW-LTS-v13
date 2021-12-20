@@ -1,0 +1,5 @@
+# taken from cond8.sd
+#=DESCRIPTION initial part of word matches 'true', with spaces
+#=EXRESULT FAIL
+
+$FOO = truely

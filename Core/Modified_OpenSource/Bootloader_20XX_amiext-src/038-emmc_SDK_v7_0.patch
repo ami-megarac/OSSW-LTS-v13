@@ -1,0 +1,112 @@
+--- uboot/drivers/clk/aspeed/clk_ast2600.c	2021-08-19 16:32:06.252393661 -0400
++++ uboot.new/drivers/clk/aspeed/clk_ast2600.c	2021-08-19 19:00:55.970200952 -0400
+@@ -440,12 +440,21 @@
+ 
+ static u32 ast2600_get_emmc_clk_rate(struct ast2600_scu *scu)
+ {
+-	u32 clkin = ast2600_get_pll_rate(scu, ASPEED_CLK_HPLL);
++//	u32 clkin = ast2600_get_pll_rate(scu, ASPEED_CLK_HPLL);
++	u32 mmc_clk_src = readl(&scu->clk_sel1);
++	u32 clkin;
+ 	u32 clk_sel = readl(&scu->clk_sel1);
+ 	u32 div = (clk_sel >> 12) & 0x7;
+ 
+-	div = (div + 1) << 2;
+-
++//	div = (div + 1) << 2;
++	if (mmc_clk_src & BIT(11)) {
++		/* emmc clock comes from MPLL */
++		clkin = ast2600_get_pll_rate(scu, ASPEED_CLK_MPLL);
++		div = (div + 1) * 2;
++	} else {
++		clkin = ast2600_get_pll_rate(scu, ASPEED_CLK_HPLL);
++		div = (div + 1) << 2;
++	}
+ 	return (clkin / div);
+ }
+ 
+--- uboot/drivers/mmc/aspeed_sdhci.c	2020-11-20 04:00:27.000000000 -0500
++++ uboot.new/drivers/mmc/aspeed_sdhci.c	2021-08-19 19:00:56.146204788 -0400
+@@ -35,6 +35,7 @@
+ 	struct aspeed_sdhci_priv *prv = dev_get_priv(dev);
+ 	struct sdhci_host *host = prv->host;
+ 	unsigned long clock;
++	unsigned long f_max;
+ 	struct clk clk;
+ 	int ret;
+ #ifndef CONFIG_SPL_BUILD
+@@ -82,13 +83,14 @@
+ #endif
+ //	host->quirks = SDHCI_QUIRK_WAIT_SEND_CMD;
+ 	host->max_clk = clock;
+-
++	f_max = dev_read_u32_default(dev, "max-frequency", clock);
+ 	host->bus_width = dev_read_u32_default(dev, "bus-width", 4);
+ 
+ 	if (host->bus_width == 8)
+ 		host->host_caps |= MMC_MODE_8BIT;
+ 
+-	ret = sdhci_setup_cfg(&plat->cfg, host, host->max_clk, EMMC_MIN_FREQ);
++//	ret = sdhci_setup_cfg(&plat->cfg, host, host->max_clk, EMMC_MIN_FREQ);
++	ret = sdhci_setup_cfg(&plat->cfg, host, f_max, EMMC_MIN_FREQ);
+ 
+ 	host->mmc = &plat->mmc;
+ 	if (ret)
+--- uboot/drivers/mmc/aspeed_sdhci_ic.c	2020-11-20 04:00:27.000000000 -0500
++++ uboot.new/drivers/mmc/aspeed_sdhci_ic.c	2021-08-19 19:00:56.146204788 -0400
+@@ -14,6 +14,11 @@
+ 
+ #define TIMING_PHASE_OFFSET 0xf4
+ 
++#define SDHCI140_SLOT_0_MIRROR_OFFSET 0x10
++#define SDHCI240_SLOT_0_MIRROR_OFFSET 0x20
++#define SDHCI140_SLOT_0_CAP_REG_1_OFFSET 0x140
++#define SDHCI240_SLOT_0_CAP_REG_1_OFFSET 0x240
++
+ struct aspeed_sdhci_general_reg {
+ 	u32 genreal_info;
+ 	u32 debounce_setting;
+@@ -39,6 +44,7 @@
+ 	struct resource regs;
+ 	void __iomem  *sdhci_ctrl_base;
+ 	u32 timing_phase;
++	u32 reg_val;
+ 
+ 	debug("%s(dev=%p) \n", __func__, dev);
+ 
+@@ -56,6 +62,17 @@
+ 
+ 	timing_phase = dev_read_u32_default(dev, "timing-phase", 0);
+ 	writel(timing_phase, sdhci_ctrl_base + TIMING_PHASE_OFFSET);
++	
++	if (dev_read_bool(dev, "sdhci_hs200")) {
++		reg_val = readl(sdhci_ctrl_base + SDHCI140_SLOT_0_CAP_REG_1_OFFSET);
++		/* support 1.8V */
++		reg_val |= BIT(26);
++		writel(reg_val, sdhci_ctrl_base + SDHCI140_SLOT_0_MIRROR_OFFSET);
++		reg_val = readl(sdhci_ctrl_base + SDHCI240_SLOT_0_CAP_REG_1_OFFSET);
++		/* support 1.8V */
++		reg_val |= BIT(26);
++		writel(reg_val, sdhci_ctrl_base + SDHCI240_SLOT_0_MIRROR_OFFSET);
++	}
+ 
+ 	return 0;
+ }
+--- uboot/configs/evb-ast2600-emmc-cot_defconfig	2020-11-20 04:00:27.000000000 -0500
++++ uboot.new/configs/evb-ast2600-emmc-cot_defconfig	2021-08-19 19:00:57.466233551 -0400
+@@ -1,5 +1,5 @@
+ CONFIG_ARM=y
+-CONFIG_SYS_CONFIG_NAME="evb_ast2600a1_spl"
++CONFIG_SYS_CONFIG_NAME="evb_ast2600_spl"
+ CONFIG_SYS_DCACHE_OFF=y
+ CONFIG_SPL_LDSCRIPT="arch/$(ARCH)/mach-aspeed/ast2600/u-boot-spl.lds"
+ CONFIG_ARCH_ASPEED=y
+--- uboot/configs/evb-ast2600-emmc_defconfig	2020-11-20 04:00:27.000000000 -0500
++++ uboot.new/configs/evb-ast2600-emmc_defconfig	2021-08-19 19:00:57.466233551 -0400
+@@ -1,5 +1,5 @@
+ CONFIG_ARM=y
+-CONFIG_SYS_CONFIG_NAME="evb_ast2600a1_spl"
++CONFIG_SYS_CONFIG_NAME="evb_ast2600_spl"
+ CONFIG_SYS_DCACHE_OFF=y
+ CONFIG_POSITION_INDEPENDENT=y
+ CONFIG_ENABLE_ARM_SOC_BOOT0_HOOK=y

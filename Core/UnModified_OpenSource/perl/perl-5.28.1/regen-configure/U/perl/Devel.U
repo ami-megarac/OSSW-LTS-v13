@@ -1,0 +1,80 @@
+?RCS: $Id$
+?RCS:
+?RCS: Copyright (c) 2000, Jarkko Hietaniemi
+?RCS:
+?RCS: You may redistribute only under the terms of the Artistic License,
+?RCS: as specified in the README file that comes with the distribution.
+?RCS: You may reuse parts of this distribution only within the terms of
+?RCS: that same Artistic License; a copy of which may be found at the root
+?RCS: of the source tree for dist 3.0.
+?RCS:
+?MAKE:Devel usedevel: Myread rsrc package
+?MAKE:	-pick wipe $@ %<
+?T:xversion
+?X: waiver of rights
+?S:usedevel:
+?S:	This variable indicates that Perl was configured with development
+?S:	features enabled.  This should not be done for production builds.
+?S:.
+?C:PERL_USE_DEVEL:
+?C:	This symbol, if defined, indicates that Perl was configured with
+?C:	-Dusedevel, to enable development features.  This should not be
+?C:	done for production builds.
+?C:.
+?H:#$usedevel	PERL_USE_DEVEL		/**/
+?H:.
+?LINT:extern versiononly
+?LINT:extern installusrbinperl
+?LINT:change versiononly
+?LINT:change installusrbinperl
+: See if we are using a devel version and want that
+xversion=`awk '/define[ 	]+PERL_VERSION/ {print $3}' $rsrc/patchlevel.h`
+case "$usedevel" in
+$define|true|[yY]*)
+    usedevel="$define" ;;
+*) case "$xversion" in
+   *[13579])
+	cat >&4 <<EOH
+*** WHOA THERE!!! ***
+
+    This is an UNSTABLE DEVELOPMENT release.
+    The version of this $package distribution is $xversion, that is, odd,
+    (as opposed to even) and that signifies a development release.
+    If you want a maintenance release, you want an even-numbered version.
+
+    Do ***NOT*** install this into production use.
+    Data corruption and crashes are possible.
+
+    It is most seriously suggested that you do not continue any further
+    unless you want to help in developing and debugging Perl.
+
+    If you *still* want to build perl, you can answer 'y' now,
+    or pass -Dusedevel to Configure.
+
+EOH
+	rp='Do you really want to continue?'
+	dflt='n'
+	. ./myread
+	case "$ans" in
+	[yY]) echo >&4 "Okay, continuing."
+	      usedevel="$define" ;;
+	*) echo >&4 "Okay, bye."
+	   exit 1
+	   ;;
+	esac
+	;;
+    esac
+    usedevel="$undef"
+    ;;
+esac
+case "$usedevel" in
+$define|true|[yY]*)
+	case "$versiononly" in
+	'') versiononly="$define" ;;
+	esac
+	case "$installusrbinperl" in
+	'') installusrbinperl="$undef" ;;
+	esac
+	;;
+esac
+

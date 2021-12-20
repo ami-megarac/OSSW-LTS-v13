@@ -1,0 +1,28 @@
+From b6adce77ceda447969a0e240e40b183063fe349d Mon Sep 17 00:00:00 2001
+From: Niko Tyni <ntyni@debian.org>
+Date: Sat, 19 Nov 2016 21:30:46 +0200
+Subject: Generate man pages with UTF-8 characters
+
+This fixes totally incorrectly rendered manual pages like
+perlunicook and perltw.
+
+TODO: should probably be a Configure option for proper upstreaming.
+
+Bug-Debian: https://bugs.debian.org/840211
+Patch-Name: debian/installman-utf8.diff
+---
+ installman | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/installman b/installman
+index 0154be4d68..fff0ff04a7 100755
+--- a/installman
++++ b/installman
+@@ -161,6 +161,7 @@ sub pod2man {
+ 	$manpage = "${mandir}/${manpage}.${manext}";
+ 
+         my $parser = Pod::Man->new( section => $manext,
++                                    utf8    => 1,
+                                     official=> 1,
+                                     center  => 'Perl Programmers Reference Guide'
+                                   );

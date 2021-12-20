@@ -1,0 +1,2 @@
+debian/tmp/usr/bin/h2load /usr/bin
+debian/tmp/usr/bin/nghttp usr/bin

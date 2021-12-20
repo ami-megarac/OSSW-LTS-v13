@@ -1,0 +1,8 @@
+#
+#=DESCRIPTION 'safe' and unspecified exec condition shouldn't conflict because 'safe' is the default
+#=EXRESULT PASS
+#
+/usr/bin/foo {
+   change_profile safe /onexec -> /bin/foo,
+   change_profile /onexec -> /bin/foo,
+}

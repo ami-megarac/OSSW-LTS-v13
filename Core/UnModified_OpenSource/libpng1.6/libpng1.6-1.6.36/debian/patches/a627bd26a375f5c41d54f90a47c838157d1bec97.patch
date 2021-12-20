@@ -1,0 +1,74 @@
+From a627bd26a375f5c41d54f90a47c838157d1bec97 Mon Sep 17 00:00:00 2001
+From: Cosmin Truta <ctruta@gmail.com>
+Date: Sun, 7 Apr 2019 19:50:12 -0400
+Subject: [PATCH] arm: Partially revert "Fix a memory leak in the riffled
+ palette [...]"
+
+The memory leak remains fixed, but the associated refactoring is
+being reverted. Moving the initialization of the riffled palette
+from png_do_read_transformations to png_init_palette_transformations
+has caused a regression in some of the test programs.
+
+Although png_init_palette_transformations is the proper place to
+perform this initialization, and the test programs are technically
+incorrect to fail, we are still undoing that refactoring for the
+time being.
+---
+ pngrtran.c | 30 ++++++++++++++----------------
+ 1 file changed, 14 insertions(+), 16 deletions(-)
+
+diff --git a/pngrtran.c b/pngrtran.c
+index d2bb82eeb..9a8fad9f4 100644
+--- a/pngrtran.c
++++ b/pngrtran.c
+@@ -1161,20 +1161,7 @@ png_init_palette_transformations(png_structrp png_ptr)
+          png_ptr->transformations &= ~(PNG_COMPOSE | PNG_BACKGROUND_EXPAND);
+    }
+ 
+-#ifdef PNG_READ_EXPAND_SUPPORTED
+-#ifdef PNG_ARM_NEON_INTRINSICS_AVAILABLE
+-   /* Initialize the accelerated palette expansion, if applicable. */
+-   if ((png_ptr->transformations & PNG_EXPAND) != 0)
+-   {
+-      if ((png_ptr->num_trans > 0) && (png_ptr->bit_depth == 8))
+-      {
+-         png_ptr->riffled_palette = (png_bytep)png_malloc(png_ptr, 256 * 4);
+-         png_riffle_palette_neon(png_ptr);
+-      }
+-   }
+-#endif /* PNG_ARM_NEON_INTRINSICS_AVAILABLE */
+-
+-#ifdef PNG_READ_BACKGROUND_SUPPORTED
++#if defined(PNG_READ_EXPAND_SUPPORTED) && defined(PNG_READ_BACKGROUND_SUPPORTED)
+    /* png_set_background handling - deals with the complexity of whether the
+     * background color is in the file format or the screen format in the case
+     * where an 'expand' will happen.
+@@ -1212,8 +1199,7 @@ png_init_palette_transformations(png_structrp png_ptr)
+ #endif /* READ_INVERT_ALPHA */
+       }
+    } /* background expand and (therefore) no alpha association. */
+-#endif /* READ_BACKGROUND */
+-#endif /* READ_EXPAND */
++#endif /* READ_EXPAND && READ_BACKGROUND */
+ }
+ 
+ static void /* PRIVATE */
+@@ -4785,6 +4771,18 @@ png_do_read_transformations(png_structrp png_ptr, png_row_infop row_info)
+    {
+       if (row_info->color_type == PNG_COLOR_TYPE_PALETTE)
+       {
++#ifdef PNG_ARM_NEON_INTRINSICS_AVAILABLE
++         if ((png_ptr->num_trans > 0) && (png_ptr->bit_depth == 8))
++         {
++            if (png_ptr->riffled_palette == NULL)
++            {
++               /* Initialize the accelerated palette expansion. */
++               png_ptr->riffled_palette =
++                   (png_bytep)png_malloc(png_ptr, 256 * 4);
++               png_riffle_palette_neon(png_ptr);
++            }
++         }
++#endif
+          png_do_expand_palette(png_ptr, row_info, png_ptr->row_buf + 1,
+              png_ptr->palette, png_ptr->trans_alpha, png_ptr->num_trans);
+       }

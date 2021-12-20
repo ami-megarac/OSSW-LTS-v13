@@ -1,0 +1,32 @@
+#!/bin/sh
+set -e
+
+ARCH=$(dpkg --print-architecture)
+DB=$(mktemp).gdbm
+DATA=debian/tests/data
+
+[ -d $DATA/$ARCH ] || exit 77
+
+echo "testing GDBM reading..."
+
+msg="GDBM file read OK"
+
+printf 'open %s\nstore %s "%s"\n' $DB foo "$msg" | gdbmtool -f -
+
+for db in $DB $DATA/$ARCH/*.gdbm; do
+    perl -MGDBM_File -le 'tie %h,  q(GDBM_File), shift, &GDBM_READER, 0640 or die "opening GDBM file failed: $!"; die "contents of GDBM file not found?" if !exists $h{foo}; print $h{foo}' $db | grep OK
+done
+
+rm $DB
+
+echo "testing GDBM writing..."
+
+msg="GDBM file written OK"
+
+DB=$(mktemp).db
+
+perl -MGDBM_File -e 'tie %h,  q(GDBM_File), shift, &GDBM_WRCREAT, 0640 or die "opening GDBM file failed: $!"; $h{foo} = shift; untie %h' $DB "$msg"
+
+printf 'open %s\nfetch %s\n' $DB foo | gdbmtool -f - | grep "$msg"
+
+rm $DB

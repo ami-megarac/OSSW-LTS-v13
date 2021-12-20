@@ -1,0 +1,8 @@
+#
+#=DESCRIPTION dbus rule with a bad path regex expansion
+#=EXRESULT FAIL
+#
+
+profile foo {
+  dbus send path=/some/random/{path peer=(label=splat),
+}

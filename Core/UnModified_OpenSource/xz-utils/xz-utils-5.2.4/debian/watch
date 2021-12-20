@@ -1,0 +1,3 @@
+version=3
+opts=dversionmangle=s/\+\d{8}$//,pgpsigurlmangle=s/$/.sig/ \
+https://tukaani.org/xz/xz-([\d.]*(?:beta)?)\.tar\.xz

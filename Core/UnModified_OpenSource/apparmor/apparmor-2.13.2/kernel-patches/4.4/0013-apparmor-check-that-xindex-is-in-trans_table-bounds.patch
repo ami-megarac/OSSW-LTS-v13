@@ -1,0 +1,27 @@
+From 706473f3ead5cdffe5ad159adfbc090e0fda81d6 Mon Sep 17 00:00:00 2001
+From: John Johansen <john.johansen@canonical.com>
+Date: Thu, 17 Mar 2016 12:02:54 -0700
+Subject: [PATCH 13/27] apparmor: check that xindex is in trans_table bounds
+
+Signed-off-by: John Johansen <john.johansen@canonical.com>
+Acked-by: Seth Arnold <seth.arnold@canonical.com>
+---
+ security/apparmor/policy_unpack.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/security/apparmor/policy_unpack.c b/security/apparmor/policy_unpack.c
+index a689f10..c841b12 100644
+--- a/security/apparmor/policy_unpack.c
++++ b/security/apparmor/policy_unpack.c
+@@ -676,7 +676,7 @@ static bool verify_xindex(int xindex, int table_size)
+ 	int index, xtype;
+ 	xtype = xindex & AA_X_TYPE_MASK;
+ 	index = xindex & AA_X_INDEX_MASK;
+-	if (xtype == AA_X_TABLE && index > table_size)
++	if (xtype == AA_X_TABLE && index >= table_size)
+ 		return 0;
+ 	return 1;
+ }
+-- 
+2.7.4
+

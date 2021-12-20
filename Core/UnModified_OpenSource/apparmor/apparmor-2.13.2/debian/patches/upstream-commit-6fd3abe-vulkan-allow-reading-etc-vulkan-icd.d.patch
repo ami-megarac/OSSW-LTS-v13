@@ -1,0 +1,27 @@
+From: Christian Boltz <gitlab2@cboltz.de>
+Date: Sun, 10 Feb 2019 13:40:53 +0000
+Subject: vulkan: allow reading /etc/vulkan/icd.d/
+
+See merge request apparmor/apparmor!329
+
+Acked-by: Christian Boltz <apparmor@cboltz.de> for 2.12..master
+
+(cherry picked from commit f2c0a1132707256aa3370e6f051965fdef80d7eb)
+
+e322c02c vulkan: allow reading /etc/vulkan/icd.d/
+---
+ profiles/apparmor.d/abstractions/vulkan | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/profiles/apparmor.d/abstractions/vulkan b/profiles/apparmor.d/abstractions/vulkan
+index 39b5d5f..7f0d8cb 100644
+--- a/profiles/apparmor.d/abstractions/vulkan
++++ b/profiles/apparmor.d/abstractions/vulkan
+@@ -3,6 +3,7 @@
+ 
+   # System files
+   /dev/dri/ r, # libvulkan_radeon.so, libvulkan_intel.so (Mesa)
++  /etc/vulkan/icd.d/{,*.json} r,
+   /etc/vulkan/{explicit,implicit}_layer.d/{,*.json} r,
+   # for drmGetMinorNameForFD() from libvulkan_intel.so (Mesa)
+   @{sys}/devices/pci[0-9]*/*/drm/ r,

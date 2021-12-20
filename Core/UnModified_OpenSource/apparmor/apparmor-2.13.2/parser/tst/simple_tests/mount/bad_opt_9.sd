@@ -1,0 +1,6 @@
+#
+#=Description basic rule to test the valid "unbindable" mount opt and an invalid src
+#=EXRESULT FAIL
+/usr/bin/foo {
+  mount options=(unbindable) /a -> /1,
+  }

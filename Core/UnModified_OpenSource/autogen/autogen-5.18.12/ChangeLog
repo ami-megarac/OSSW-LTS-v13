@@ -1,0 +1,119 @@
+2016-08-29  Bruce Korb  <bkorb@gnu.org>
+
+	update news
+
+	use "which" to locate local tools
+
+	cross platform support
+	* config/misc.def (PKG_CONFIG): use an environment parameter
+	  to select the correct pkg-config program for cross platform build
+	* configure.ac.pre (XXexe): in a cross platform environment, do not
+	  select build products for any build rules
+
+2016-07-31  Bruce Korb  <bkorb@gnu.org>
+
+	fix bootstrap
+	finish the scan_data_buf inline function.
+
+	* add-on/char-mapper/char-mapper.c (scan_data_buf): include
+	  all the arguments needed to work correctly.
+
+	* autoopts/nested.c (optionLoadNested): warning patrol
+
+	* config/libopts.def: accept POSIX_SHELL from the environment
+	  during the configure step
+
+2016-05-27  Bruce Korb  <bkorb@gnu.org>
+
+	update news
+
+2016-05-27  Bruce Korb  <bkorb@gnu.org>
+
+	miscelleaneous cleanups
+	* agen5/ag-text.def (MK_GPERF_SCRIPT): augment CFLAGS with "-g"
+	  LDFLAGS might depend upon CFLAGS content.
+
+	* configure.ac.pre (GUILE_VERSION): that is an output C define,
+	  not a script variable.  Use $ag_gv instead.
+
+	* agen5/autogen.c : fix warnings
+	* agen5/expOutput.c : fix warnings
+	* autoopts/putshell.c : fix warnings
+	* autoopts/save.c : fix warnings
+	* autoopts/time.c : fix warnings
+	* config/misc.def : fix warnings
+
+2016-05-26  Bruce Korb  <bkorb@gnu.org>
+
+	more error.test fixes
+
+2016-05-24  Bruce Korb  <bkorb@gnu.org>
+
+	another adjustment for abort() call
+
+	another adjustment for abort() call
+
+	adjust for abort() call
+
+2016-05-24  Bruce Korb  <bkorb@gnu.org>
+
+	NUL terminate CGI def text
+	Usually (99.44% of the time), CGI text gets NUL teriminated.
+	However, sometimes not.  Fix it.
+
+	* agen5/autogen.c (ag_abend_at): call abort()
+	* agen5/agCgi.c (ENV_TABLE) reorder to make easier to debug
+	* agen5/cgi-fsm.c (cgi_run_fsm): add NUL byte on separation transition.
+
+2016-05-24  Bruce Korb  <bkorb@gnu.org>
+
+	NUL terminate CGI def text
+	Usually (99.44% of the time), CGI text gets NUL teriminated.
+	However, sometimes not.  Fix it.
+
+	* agen5/autogen.c (ag_abend_at): call abort()
+	* agen5/agCgi.c (ENV_TABLE) reorder to make easier to debug
+	* agen5/cgi-fsm.c (cgi_run_fsm): add NUL byte on separation transition.
+
+2016-05-23  Bruce Korb  <bkorb@gnu.org>
+
+	add a couple of static procs to fwd decs
+
+	remove some Guile wrappers
+	Some parts of the Guile interface have stabilized in the currently
+	supported versions of Guile (1.8 and later).  Remove several
+	wrappers for these functions.
+
+	TODO: add manywarnings gnulib module
+
+2016-05-09  Bruce Korb  <bkorb@gnu.org>
+
+	remove quotes for disabled options in man pages
+
+2016-04-20  Bruce Korb  <bkorb@gnu.org>
+
+	Fix mal-formed usage text
+	Option "values" beyond the range of single letters were supposed to
+	indicate that there was no flag character for the option.  The
+	"IS_GRAPHIC_CHAR()" macro did not properly test for this.
+
+	* agen5/agUtils.c (span_quote): remove unneeded braces
+	* autoopts/cook.c (nl_count): new function to clarify code
+	  (contiguous_quote): clarify with new function
+	* autoopts/usage.c (GRAPH_CH): new macro for testing for graphic chars.
+	  Will not stumble on values beyond 0xFF.
+
+2016-03-08  Bruce Korb  <bruce.korb@hgst.com>
+
+	update the NEWS
+
+	update the NEWS
+
+	Ensure testing vars are unset
+	The CGI variables CONTENT_LENGTH REQUEST_METHOD and QUERY_STRING
+	need to be unset before starting a test suite.
+
+	happy new year & de-uglifications
+
+	formatting changes
+

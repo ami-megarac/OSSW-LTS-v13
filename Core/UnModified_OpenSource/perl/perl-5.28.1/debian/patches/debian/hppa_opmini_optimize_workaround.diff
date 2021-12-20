@@ -1,0 +1,28 @@
+From fade13c1c4234e9941cad18641cf82fa282e460f Mon Sep 17 00:00:00 2001
+From: Niko Tyni <ntyni@debian.org>
+Date: Sat, 29 Jul 2017 23:30:20 +0300
+Subject: Lower the optimization level of opmini.c on hppa
+
+This further amends debian/hppa_op_optimize_workaround.diff to affect
+miniperl too.
+
+Bug: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=81538
+Bug-Debian: https://bugs.debian.org/869122
+Patch-Name: debian/hppa_opmini_optimize_workaround.diff
+---
+ cflags.SH | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/cflags.SH b/cflags.SH
+index 3e4526ff8f..c8231e64e8 100755
+--- a/cflags.SH
++++ b/cflags.SH
+@@ -497,7 +497,7 @@ for file do
+     # or customize here
+ 
+     case "$file" in
+-    op) : work around http://bugs.debian.org/838613
++    op|opmini) : work around http://bugs.debian.org/838613 and 869122
+         case $archname in
+         hppa-*)
+             optimize="$optimize -O0";;

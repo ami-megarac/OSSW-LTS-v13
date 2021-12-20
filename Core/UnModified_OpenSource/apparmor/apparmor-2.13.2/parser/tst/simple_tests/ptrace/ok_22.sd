@@ -1,0 +1,15 @@
+#
+#=Description ptrace peer w/perms and misc modifiers rule
+#=EXRESULT PASS
+#
+
+/usr/bin/foo {
+  deny ptrace read peer=/bin/sh,
+  allow ptrace write peer=/bin/true,
+  audit ptrace trace peer=/bin/false,
+  audit deny ptrace readby peer=/sbin/init,
+  audit allow ptrace tracedby peer=/usr/bin/gdb,
+  ptrace rw peer=/usr/bin/top,
+  deny ptrace (readby, tracedby) peer=/usr/bin/valgrind,
+
+  }

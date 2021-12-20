@@ -1,0 +1,8 @@
+#
+#=DESCRIPTION k to be lower case
+#=EXRESULT FAIL
+#
+/usr/bin/foo {
+  file /bin/ls K,
+}
+

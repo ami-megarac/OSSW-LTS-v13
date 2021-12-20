@@ -1,0 +1,22 @@
+From: Christian Boltz <apparmor@cboltz.de>
+Date: Mon, 12 Nov 2018 15:51:15 +0100
+Subject: Drop APPARMOR_ENABLE_AAEVENTD
+
+This is another trace of aa-eventd which is deprecated since years.
+---
+ parser/rc.apparmor.functions | 2 --
+ 1 file changed, 2 deletions(-)
+
+diff --git a/parser/rc.apparmor.functions b/parser/rc.apparmor.functions
+index 77fda76..5655d04 100644
+--- a/parser/rc.apparmor.functions
++++ b/parser/rc.apparmor.functions
+@@ -39,8 +39,6 @@ else
+ 	aa_log_warning_msg "Unable to find config file in ${CONFIG_DIR}, installation problem?"
+ fi
+ 
+-APPARMOR_ENABLE_AAEVENTD="no"
+-
+ if [ -f "${APPARMOR_CONF}" ] ; then
+ 	#parse the conf file to see what we should do
+ 	. "${APPARMOR_CONF}"

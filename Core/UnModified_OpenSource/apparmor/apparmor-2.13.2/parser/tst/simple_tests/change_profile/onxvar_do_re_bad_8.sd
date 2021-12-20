@@ -1,0 +1,8 @@
+#
+#=DESCRIPTION owner not allowed in change_profile rule
+#=EXRESULT FAIL
+#
+
+/usr/bin/foo5 {
+   deny owner change_profile @{var} -> "/bin/*",
+}

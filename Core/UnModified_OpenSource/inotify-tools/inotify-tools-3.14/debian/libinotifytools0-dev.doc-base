@@ -1,0 +1,9 @@
+Document: libinotifytools
+Title: libinotifytools library documentation
+Author: Rohan McGovern <rohan@mcgovern.id.au>
+Abstract: Doxygen-generated documentation
+Section: Programming
+
+Format: HTML
+Index: /usr/share/doc/libinotifytools0-dev/index.html
+Files: /usr/share/doc/libinotifytools0-dev/*.html

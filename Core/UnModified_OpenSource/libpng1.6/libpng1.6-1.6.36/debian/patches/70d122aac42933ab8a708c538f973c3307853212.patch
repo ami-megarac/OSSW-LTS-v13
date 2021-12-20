@@ -1,0 +1,350 @@
+From 70d122aac42933ab8a708c538f973c3307853212 Mon Sep 17 00:00:00 2001
+From: Cosmin Truta <ctruta@gmail.com>
+Date: Sun, 3 Feb 2019 19:51:18 -0500
+Subject: [PATCH] Fix a memory leak in the riffled palette optimization on ARM;
+ refactor
+
+Move deallocation of riffled_palette from png_write_destroy to
+png_read_destroy. The reader (not the writer) is the owner of
+riffled_palette.
+
+Move allocation and initialization of riffled_palette from
+png_do_read_transformations to png_init_palette_transformations.
+
+Allow riffled_palette inside png_struct only if the ARM Neon
+optimizations are enabled.
+
+Rename png_riffle_palette_rgba to png_riffle_palette_rgba8, etc.,
+to better indicate the strict applicability of these routines.
+
+Fix an unused parameter warning in the build configurations where
+riffled palette optimization is not enabled.
+
+Fix indentation.
+---
+ arm/palette_neon_intrinsics.c | 26 +++++--------
+ pngpriv.h                     | 10 ++---
+ pngread.c                     |  8 +++-
+ pngrtran.c                    | 72 ++++++++++++++++++-----------------
+ pngstruct.h                   | 12 +++---
+ pngwrite.c                    |  6 +--
+ 6 files changed, 68 insertions(+), 66 deletions(-)
+
+Index: libpng1.6/arm/palette_neon_intrinsics.c
+===================================================================
+--- libpng1.6.orig/arm/palette_neon_intrinsics.c
++++ libpng1.6/arm/palette_neon_intrinsics.c
+@@ -1,7 +1,7 @@
+ 
+ /* palette_neon_intrinsics.c - NEON optimised palette expansion functions
+  *
+- * Copyright (c) 2018 Cosmin Truta
++ * Copyright (c) 2018-2019 Cosmin Truta
+  * Copyright (c) 2017-2018 Arm Holdings. All rights reserved.
+  * Written by Richard Townsend <Richard.Townsend@arm.com>, February 2017.
+  *
+@@ -20,9 +20,9 @@
+ #  include <arm_neon.h>
+ #endif
+ 
+-/* Build an RGBA palette from the RGB and separate alpha palettes. */
++/* Build an RGBA8 palette from the separate RGB and alpha palettes. */
+ void
+-png_riffle_palette_rgba(png_structrp png_ptr, png_row_infop row_info)
++png_riffle_palette_rgba8(png_structrp png_ptr)
+ {
+    png_const_colorp palette = png_ptr->palette;
+    png_bytep riffled_palette = png_ptr->riffled_palette;
+@@ -38,16 +38,10 @@
+       vdupq_n_u8(0xff),
+    }};
+ 
+-   if (row_info->bit_depth != 8)
+-   {
+-      png_error(png_ptr, "bit_depth must be 8 for png_riffle_palette_rgba");
+-      return;
+-   }
+-
+-   /* First, riffle the RGB colours into a RGBA palette, the A value is
+-    * set to opaque for now.
++   /* First, riffle the RGB colours into an RGBA8 palette.
++    * The alpha component is set to opaque for now.
+     */
+-   for (i = 0; i < (1 << row_info->bit_depth); i += 16)
++   for (i = 0; i < 256; i += 16)
+    {
+       uint8x16x3_t v = vld3q_u8((png_const_bytep)(palette + i));
+       w.val[0] = v.val[0];
+@@ -61,9 +55,9 @@
+       riffled_palette[(i << 2) + 3] = trans_alpha[i];
+ }
+ 
+-/* Expands a palettized row into RGBA. */
++/* Expands a palettized row into RGBA8. */
+ int
+-png_do_expand_palette_neon_rgba(png_structrp png_ptr, png_row_infop row_info,
++png_do_expand_palette_neon_rgba8(png_structrp png_ptr, png_row_infop row_info,
+     png_const_bytep row, png_bytepp ssp, png_bytepp ddp)
+ {
+    png_uint_32 row_width = row_info->width;
+@@ -103,9 +97,9 @@
+    return i;
+ }
+ 
+-/* Expands a palettized row into RGB format. */
++/* Expands a palettized row into RGB8. */
+ int
+-png_do_expand_palette_neon_rgb(png_structrp png_ptr, png_row_infop row_info,
++png_do_expand_palette_neon_rgb8(png_structrp png_ptr, png_row_infop row_info,
+     png_const_bytep row, png_bytepp ssp, png_bytepp ddp)
+ {
+    png_uint_32 row_width = row_info->width;
+Index: libpng1.6/pngpriv.h
+===================================================================
+--- libpng1.6.orig/pngpriv.h
++++ libpng1.6/pngpriv.h
+@@ -1,7 +1,7 @@
+ 
+ /* pngpriv.h - private declarations for use inside libpng
+  *
+- * Copyright (c) 2018 Cosmin Truta
++ * Copyright (c) 2018-2019 Cosmin Truta
+  * Copyright (c) 1998-2002,2004,2006-2018 Glenn Randers-Pehrson
+  * Copyright (c) 1996-1997 Andreas Dilger
+  * Copyright (c) 1995-1996 Guy Eric Schalnat, Group 42, Inc.
+@@ -2174,11 +2174,11 @@
+ 
+ #if PNG_ARM_NEON_IMPLEMENTATION == 1
+ PNG_INTERNAL_FUNCTION(void,
+-                      png_riffle_palette_rgba,
+-                      (png_structrp, png_row_infop),
++                      png_riffle_palette_rgba8,
++                      (png_structrp),
+                       PNG_EMPTY);
+ PNG_INTERNAL_FUNCTION(int,
+-                      png_do_expand_palette_neon_rgba,
++                      png_do_expand_palette_neon_rgba8,
+                       (png_structrp,
+                        png_row_infop,
+                        png_const_bytep,
+@@ -2186,7 +2186,7 @@
+                        const png_bytepp),
+                       PNG_EMPTY);
+ PNG_INTERNAL_FUNCTION(int,
+-                      png_do_expand_palette_neon_rgb,
++                      png_do_expand_palette_neon_rgb8,
+                       (png_structrp,
+                        png_row_infop,
+                        png_const_bytep,
+Index: libpng1.6/pngread.c
+===================================================================
+--- libpng1.6.orig/pngread.c
++++ libpng1.6/pngread.c
+@@ -1,7 +1,7 @@
+ 
+ /* pngread.c - read a PNG file
+  *
+- * Copyright (c) 2018 Cosmin Truta
++ * Copyright (c) 2018-2019 Cosmin Truta
+  * Copyright (c) 1998-2002,2004,2006-2018 Glenn Randers-Pehrson
+  * Copyright (c) 1996-1997 Andreas Dilger
+  * Copyright (c) 1995-1996 Guy Eric Schalnat, Group 42, Inc.
+@@ -1075,6 +1075,12 @@
+    png_ptr->chunk_list = NULL;
+ #endif
+ 
++#if defined(PNG_READ_EXPAND_SUPPORTED) && \
++    defined(PNG_ARM_NEON_IMPLEMENTATION)
++   png_free(png_ptr, png_ptr->riffled_palette);
++   png_ptr->riffled_palette = NULL;
++#endif
++
+    /* NOTE: the 'setjmp' buffer may still be allocated and the memory and error
+     * callbacks are still set at this point.  They are required to complete the
+     * destruction of the png_struct itself.
+diff --git a/pngrtran.c b/pngrtran.c
+index ccc58ce6f..329434091 100644
+--- a/pngrtran.c
++++ b/pngrtran.c
+@@ -1,7 +1,7 @@
+ 
+ /* pngrtran.c - transforms the data in a row for PNG readers
+  *
+- * Copyright (c) 2018 Cosmin Truta
++ * Copyright (c) 2018-2019 Cosmin Truta
+  * Copyright (c) 1998-2002,2004,2006-2018 Glenn Randers-Pehrson
+  * Copyright (c) 1996-1997 Andreas Dilger
+  * Copyright (c) 1995-1996 Guy Eric Schalnat, Group 42, Inc.
+@@ -1161,7 +1161,20 @@
+          png_ptr->transformations &= ~(PNG_COMPOSE | PNG_BACKGROUND_EXPAND);
+    }
+ 
+-#if defined(PNG_READ_EXPAND_SUPPORTED) && defined(PNG_READ_BACKGROUND_SUPPORTED)
++#ifdef PNG_READ_EXPAND_SUPPORTED
++#ifdef PNG_ARM_NEON_INTRINSICS_AVAILABLE
++   /* Initialize the accelerated palette expansion, if applicable. */
++   if ((png_ptr->transformations & PNG_EXPAND) != 0)
++   {
++      if ((png_ptr->num_trans > 0) && (png_ptr->bit_depth == 8))
++      {
++         png_ptr->riffled_palette = (png_bytep)png_malloc(png_ptr, 256 * 4);
++         png_riffle_palette_rgba8(png_ptr);
++      }
++   }
++#endif /* PNG_ARM_NEON_INTRINSICS_AVAILABLE */
++
++#ifdef PNG_READ_BACKGROUND_SUPPORTED
+    /* png_set_background handling - deals with the complexity of whether the
+     * background color is in the file format or the screen format in the case
+     * where an 'expand' will happen.
+@@ -1182,24 +1195,25 @@
+              png_ptr->palette[png_ptr->background.index].blue;
+ 
+ #ifdef PNG_READ_INVERT_ALPHA_SUPPORTED
+-        if ((png_ptr->transformations & PNG_INVERT_ALPHA) != 0)
+-        {
+-           if ((png_ptr->transformations & PNG_EXPAND_tRNS) == 0)
+-           {
+-              /* Invert the alpha channel (in tRNS) unless the pixels are
+-               * going to be expanded, in which case leave it for later
+-               */
+-              int i, istop = png_ptr->num_trans;
+-
+-              for (i=0; i<istop; i++)
+-                 png_ptr->trans_alpha[i] = (png_byte)(255 -
+-                    png_ptr->trans_alpha[i]);
+-           }
+-        }
++         if ((png_ptr->transformations & PNG_INVERT_ALPHA) != 0)
++         {
++            if ((png_ptr->transformations & PNG_EXPAND_tRNS) == 0)
++            {
++               /* Invert the alpha channel (in tRNS) unless the pixels are
++                * going to be expanded, in which case leave it for later
++                */
++               int i, istop = png_ptr->num_trans;
++
++               for (i = 0; i < istop; i++)
++                  png_ptr->trans_alpha[i] =
++                      (png_byte)(255 - png_ptr->trans_alpha[i]);
++            }
++         }
+ #endif /* READ_INVERT_ALPHA */
+       }
+    } /* background expand and (therefore) no alpha association. */
+-#endif /* READ_EXPAND && READ_BACKGROUND */
++#endif /* READ_BACKGROUND */
++#endif /* READ_EXPAND */
+ }
+ 
+ static void /* PRIVATE */
+@@ -4320,9 +4334,11 @@
+                    * but sometimes row_info->bit_depth has been changed to 8.
+                    * In these cases, the palette hasn't been riffled.
+                    */
+-                  i = png_do_expand_palette_neon_rgba(png_ptr, row_info, row,
++                  i = png_do_expand_palette_neon_rgba8(png_ptr, row_info, row,
+                       &sp, &dp);
+                }
++#else
++               PNG_UNUSED(png_ptr)
+ #endif
+ 
+                for (; i < row_width; i++)
+@@ -4349,8 +4365,10 @@
+                dp = row + (size_t)(row_width * 3) - 1;
+                i = 0;
+ #ifdef PNG_ARM_NEON_INTRINSICS_AVAILABLE
+-               i = png_do_expand_palette_neon_rgb(png_ptr, row_info, row,
++               i = png_do_expand_palette_neon_rgb8(png_ptr, row_info, row,
+                    &sp, &dp);
++#else
++               PNG_UNUSED(png_ptr)
+ #endif
+ 
+                for (; i < row_width; i++)
+@@ -4767,22 +4785,8 @@
+    {
+       if (row_info->color_type == PNG_COLOR_TYPE_PALETTE)
+       {
+-#ifdef PNG_ARM_NEON_INTRINSICS_AVAILABLE
+-         if ((png_ptr->num_trans > 0) && (png_ptr->bit_depth == 8))
+-         {
+-            /* Allocate space for the decompressed full palette. */
+-            if (png_ptr->riffled_palette == NULL)
+-            {
+-               png_ptr->riffled_palette = png_malloc(png_ptr, 256*4);
+-               if (png_ptr->riffled_palette == NULL)
+-                  png_error(png_ptr, "NULL row buffer");
+-               /* Build the RGBA palette. */
+-               png_riffle_palette_rgba(png_ptr, row_info);
+-            }
+-         }
+-#endif
+          png_do_expand_palette(png_ptr, row_info, png_ptr->row_buf + 1,
+-            png_ptr->palette, png_ptr->trans_alpha, png_ptr->num_trans);
++             png_ptr->palette, png_ptr->trans_alpha, png_ptr->num_trans);
+       }
+ 
+       else
+Index: libpng1.6/pngstruct.h
+===================================================================
+--- libpng1.6.orig/pngstruct.h
++++ libpng1.6/pngstruct.h
+@@ -1,7 +1,7 @@
+ 
+ /* pngstruct.h - header file for PNG reference library
+  *
+- * Copyright (c) 2018 Cosmin Truta
++ * Copyright (c) 2018-2019 Cosmin Truta
+  * Copyright (c) 1998-2002,2004,2006-2018 Glenn Randers-Pehrson
+  * Copyright (c) 1996-1997 Andreas Dilger
+  * Copyright (c) 1995-1996 Guy Eric Schalnat, Group 42, Inc.
+@@ -228,10 +228,6 @@
+                                * big_row_buf; while writing it is separately
+                                * allocated.
+                                */
+-#ifdef PNG_READ_EXPAND_SUPPORTED
+-   /* Buffer to accelerate palette transformations. */
+-   png_bytep riffled_palette;
+-#endif
+ #ifdef PNG_WRITE_FILTER_SUPPORTED
+    png_bytep try_row;    /* buffer to save trial row when filtering */
+    png_bytep tst_row;    /* buffer to save best trial row when filtering */
+@@ -396,6 +392,12 @@
+    /* deleted in 1.5.5: rgb_to_gray_blue_coeff; */
+ #endif
+ 
++/* New member added in libpng-1.6.36 */
++#if defined(PNG_READ_EXPAND_SUPPORTED) && \
++    defined(PNG_ARM_NEON_IMPLEMENTATION)
++   png_bytep riffled_palette; /* buffer for accelerated palette expansion */
++#endif
++
+ /* New member added in libpng-1.0.4 (renamed in 1.0.9) */
+ #if defined(PNG_MNG_FEATURES_SUPPORTED)
+ /* Changed from png_byte to png_uint_32 at version 1.2.0 */
+Index: libpng1.6/pngwrite.c
+===================================================================
+--- libpng1.6.orig/pngwrite.c
++++ libpng1.6/pngwrite.c
+@@ -1,7 +1,7 @@
+ 
+ /* pngwrite.c - general routines to write a PNG file
+  *
+- * Copyright (c) 2018 Cosmin Truta
++ * Copyright (c) 2018-2019 Cosmin Truta
+  * Copyright (c) 1998-2002,2004,2006-2018 Glenn Randers-Pehrson
+  * Copyright (c) 1996-1997 Andreas Dilger
+  * Copyright (c) 1995-1996 Guy Eric Schalnat, Group 42, Inc.
+@@ -957,10 +957,6 @@
+    png_free_buffer_list(png_ptr, &png_ptr->zbuffer_list);
+    png_free(png_ptr, png_ptr->row_buf);
+    png_ptr->row_buf = NULL;
+-#ifdef PNG_READ_EXPANDED_SUPPORTED
+-   png_free(png_ptr, png_ptr->riffled_palette);
+-   png_ptr->riffled_palette = NULL;
+-#endif
+ #ifdef PNG_WRITE_FILTER_SUPPORTED
+    png_free(png_ptr, png_ptr->prev_row);
+    png_free(png_ptr, png_ptr->try_row);

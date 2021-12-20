@@ -1,0 +1,7 @@
+#
+#=DESCRIPTION simple unix accept acceptance test
+#=EXRESULT PASS
+
+profile a_profile {
+  unix accept,
+}

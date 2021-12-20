@@ -1,0 +1,9 @@
+30_nogetauxvalonbsd.diff
+35_hurd_enable_secure.diff
+41_kfreebsd_LOCAL_PEERCRED.diff
+45_01-extract-jks-Prefer-_p11_extract_jks_timestamp-to-SOU.patch
+enable_locale.diff
+Fix-bounds-check-in-p11_rpc_buffer_get_byte_array.patch
+Check-attribute-length-against-buffer-size.patch
+Check-for-arithmetic-overflows-before-allocating.patch
+Follow-up-to-arithmetic-overflow-fix.patch

@@ -1,0 +1,21 @@
+From: Debian MySQL Maintainers <pkg-mysql-maint@lists.alioth.debian.org>
+Date: Thu, 10 Aug 2017 20:40:29 +0200
+Subject: kFreeBSD-gettid
+
+---
+ storage/tokudb/PerconaFT/portability/portability.cc | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+--- a/storage/tokudb/PerconaFT/portability/portability.cc
++++ b/storage/tokudb/PerconaFT/portability/portability.cc
+@@ -120,6 +120,10 @@ toku_os_gettid(void) {
+     return syscall(SYS_gettid);
+ #elif defined(HAVE_PTHREAD_GETTHREADID_NP)
+     return pthread_getthreadid_np();
++#elif defined(__FreeBSD__) || defined(__FreeBSD_kernel__)
++    long lwpid;
++    thr_self( &lwpid );
++    return lwpid;
+ #else
+ # error "no implementation of gettid available"
+ #endif

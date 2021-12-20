@@ -1,0 +1,224 @@
+lzo2 (2.10-0.1) unstable; urgency=medium
+
+  * Non-maintainer upload.
+  * New upstream release, with pkg-config support.
+  * Don’t depend on libc6-dev, it’s pulled in by build-essential anyway
+    (closes: #782099).
+
+ -- Stephen Kitt <skitt@debian.org>  Tue, 01 May 2018 19:14:56 +0200
+
+lzo2 (2.08-1.2) unstable; urgency=low
+
+  * Non-maintainer upload.
+  * Adjust patch from previous upload so the "modern C" code path still
+    defines some typedefs: lzo_memops_TU1p is a pointer to unsigned byte
+    (used by the byteswapping implementation on non-powerpc big-endian
+    architectures), and lzo_memops_TU2p and lzo_memops_TU4p
+    are pointers to unsigned 2- and 4-byte quantities (needed by the
+    powerpc assembler implementation). Together, these fix FTBFS on
+    big-endian platforms. (Closes: #773580)
+
+ -- Simon McVittie <smcv@debian.org>  Sat, 20 Dec 2014 17:50:38 +0000
+
+lzo2 (2.08-1.1) unstable; urgency=low
+
+  * Non-maintainer upload.
+  * Replace liblzo's reinvention of memcpy() with calls to memcpy().
+    gcc already knows how to inline memcpy calls with constant n,
+    and also gets the alignment constraints right, avoiding incorrect
+    unaligned accesses on armel (Closes: #757037)
+
+ -- Simon McVittie <smcv@debian.org>  Tue, 16 Dec 2014 23:35:36 +0000
+
+lzo2 (2.08-1) unstable; urgency=low
+
+  * New upstream release (closes: #752861) (CVE-2014-4607)
+  * Update standards version
+  * Add autotools-dev to build dependencies (closes: #750622)
+
+ -- Peter Eisentraut <petere@debian.org>  Mon, 14 Jul 2014 21:03:12 -0400
+
+lzo2 (2.06-1.2) unstable; urgency=low
+
+  * Non-maintainer upload.
+  * Correct /usr/lib/liblzo2.so symlink (Closes: #720749)
+
+ -- Dmitrijs Ledkovs <dmitrij.ledkov@ubuntu.com>  Mon, 26 Aug 2013 20:25:00 +0100
+
+lzo2 (2.06-1.1) unstable; urgency=low
+
+  * Non-maintainer upload to unbreak btrfs/installer.
+  * Install libzo2 library into /lib, because btrfs user space now depends
+    on this library and thus is needed before /usr might be
+    mounted. (Closes: #709422)
+  * Create libzo2-2-udeb, for the debian-installer to use btrfs at install
+    time.
+  * Piggy-back release-goal, mark dev package Multi-Arch (Closes: #681840)
+
+ -- Dmitrijs Ledkovs <xnox@debian.org>  Fri, 16 Aug 2013 09:53:32 +0100
+
+lzo2 (2.06-1) unstable; urgency=low
+
+  * New upstream release
+  * Fixed lintian warning brace-expansion-in-debhelper-config-file
+
+ -- Peter Eisentraut <petere@debian.org>  Thu, 10 Nov 2011 07:11:13 +0200
+
+lzo2 (2.05-2) unstable; urgency=low
+
+  * Converted to multiarch
+  * Changed priority to optional to match override
+
+ -- Peter Eisentraut <petere@debian.org>  Mon, 01 Aug 2011 14:48:33 +0300
+
+lzo2 (2.05-1) unstable; urgency=low
+
+  * New upstream release
+  * Updated standards version
+  * Removed *.la file (closes: #622467)
+
+ -- Peter Eisentraut <petere@debian.org>  Mon, 04 Jul 2011 20:09:22 +0300
+
+lzo2 (2.04-1) unstable; urgency=low
+
+  * New upstream release (closes: #610732)
+  * Updated standards version
+  * Changed to debhelper level 8
+
+ -- Peter Eisentraut <petere@debian.org>  Sat, 19 Feb 2011 08:36:13 +0200
+
+lzo2 (2.03-2) unstable; urgency=low
+
+  * Changed source format to 3.0 (quilt)
+  * Added ${misc:Depends} to all packages
+  * Set a version on the dependency of liblzo2-dev to liblzo2-2
+  * Removed redundant section and priority fields
+  * Pointed copyright to non-symlinked version of GPL file
+  * Updated standards version
+  * Really changed to debhelper level 6
+
+ -- Peter Eisentraut <petere@debian.org>  Fri, 06 Nov 2009 09:39:24 +0200
+
+lzo2 (2.03-1) unstable; urgency=low
+
+  * New upstream release
+    - Obsoletes patches to avoid requiring an executable stack
+  * Updated standards version
+  * Added Homepage control field
+  * Updated copyright; license is now GPLv2+
+  * Changed to debhelper level 6
+
+ -- Peter Eisentraut <petere@debian.org>  Wed, 30 Apr 2008 17:40:08 +0200
+
+lzo2 (2.02-3) unstable; urgency=low
+
+  * Added *.h files to examples (closes: #410054)
+  * Updated standards version
+  * Patched assembly to avoid requiring an executable stack (closes: #420753)
+
+ -- Peter Eisentraut <petere@debian.org>  Fri, 15 Jun 2007 23:24:41 +0200
+
+lzo2 (2.02-2) unstable; urgency=low
+
+  * Fixed dependencies of liblzo2-dev
+
+ -- Peter Eisentraut <petere@debian.org>  Fri, 27 Jan 2006 17:04:00 +0100
+
+lzo2 (2.02-1) unstable; urgency=low
+
+  * New upstream version in new package because of interface
+    incompatibilities (closes: #342715)
+  * Removed patches and quilt usage
+
+ -- Peter Eisentraut <petere@debian.org>  Sat, 14 Jan 2006 11:42:59 +0100
+
+lzo (1.08-3) unstable; urgency=low
+
+  * Changed maintainer address
+  * Updated standards version
+  * Changed build system to CDBS and quilt
+  * Added "old version" to description in light of upcoming lzo2 package
+  * Altered watch file to cover only version 1 series
+  * Added test suite to build process
+  * Changed to debhelper level 5
+
+ -- Peter Eisentraut <petere@debian.org>  Wed, 11 Jan 2006 20:09:20 +0100
+
+lzo (1.08-2) unstable; urgency=low
+
+  * New maintainer (closes: #265726)
+  * Previous two NMUs acknowledged (closes: #261872, #268052, #263513)
+  * Revised descriptions
+  * Changed section and priority to match overrides
+  * Completed copyright information
+  * Removed content-free README.debian
+  * Updated rules to debhelper 4 conventions
+  * Removed now useless liblzo1.postinst
+  * Moved documentation files around
+  * Use --disable-dependency-tracking and --disable-libtool-lock to
+    speed up builds
+  * Added watch file
+  * Converted to dpatch
+  * Updated libtool (closes: #261313)
+  * Added minilzo to installation
+
+ -- Peter Eisentraut <peter_e@gmx.net>  Thu, 11 Nov 2004 12:33:51 +0100
+
+lzo (1.08-1.2) unstable; urgency=high
+
+  * NMU with high urgency for RC fix.
+  * configure.in: add proper \ at the end of lines inside multi-line strings
+    to fix ASM tests with gcc-3.3 (closes: #268052).
+  * Re-run autoconf.
+  * Standards-version is 3.6.1.1.
+
+ -- Josselin Mouette <joss@debian.org>  Tue, 31 Aug 2004 11:58:13 +0200
+
+lzo (1.08-1.1) unstable; urgency=low
+
+  * NMU
+  * [debian/rules] Added SHELL=/bin/bash as brace expansion is not POSIX.
+  * [debian/rules] Put the .la file in the -dev package, not the runtime
+    package. (Closes: #261872)
+  * [debian/control] Added a Replaces for the .la move.
+
+ -- J.H.M. Dassen (Ray) <jdassen@debian.org>  Wed,  4 Aug 2004 22:25:19 +0200
+
+lzo (1.08-1) unstable; urgency=low
+
+  * New upstream version.
+  * Include examples (closes: bug#156918).
+
+ -- Paolo Molaro <lupus@debian.org>  Sun,  8 Jun 2003 14:38:18 +0200
+
+lzo (1.07-1) unstable; urgency=low
+
+  * New upstream release.
+  * Updated to new policy.
+  * Updated config.{sub,guess} (Closes: bug#95329).
+
+ -- Paolo Molaro <lupus@debian.org>  Sat, 30 Jun 2001 16:31:04 +0200
+
+lzo (1.06-1) unstable; urgency=low
+
+  * New upstream release (Closes: bug#53970).
+
+ -- Paolo Molaro <lupus@lettere.unipd.it>  Wed,  5 Apr 2000 18:46:31 +0200
+
+lzo (1.04-2) unstable; urgency=low
+
+  * Fix overlapping of liblzo.la (Bug#28533).
+
+ -- Paolo Molaro <lupus@lettere.unipd.it>  Thu, 29 Oct 1998 11:17:54 +0100
+
+lzo (1.04-1) unstable; urgency=low
+
+  * New Upstream release.
+
+ -- Paolo Molaro <lupus@lettere.unipd.it>  Fri, 16 Oct 1998 13:45:07 +0200
+
+lzo (1.03-1) unstable; urgency=low
+
+  * Initial Release.
+
+ -- Paolo Molaro <lupus@lettere.unipd.it>  Fri, 13 Feb 1998 13:41:33 +0100

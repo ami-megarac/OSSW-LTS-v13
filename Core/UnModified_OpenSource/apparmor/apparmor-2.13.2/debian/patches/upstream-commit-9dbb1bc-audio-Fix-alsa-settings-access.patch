@@ -1,0 +1,20 @@
+From: Christian Boltz <gitlab2@cboltz.de>
+Date: Sun, 13 Jan 2019 16:11:41 +0000
+Subject: audio: Fix alsa settings access
+
+---
+ profiles/apparmor.d/abstractions/audio | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/profiles/apparmor.d/abstractions/audio b/profiles/apparmor.d/abstractions/audio
+index 960083a..6964a66 100644
+--- a/profiles/apparmor.d/abstractions/audio
++++ b/profiles/apparmor.d/abstractions/audio
+@@ -68,6 +68,7 @@ owner /tmp/pulse-*/* rw,
+ /etc/sound/** r,
+ 
+ # openal
++/etc/alsa/conf.d/{,*} r,
+ /etc/openal/alsoft.conf r,
+ owner @{HOME}/.alsoftrc r,
+ /usr/{,local/}share/openal/hrtf/{,**} r,

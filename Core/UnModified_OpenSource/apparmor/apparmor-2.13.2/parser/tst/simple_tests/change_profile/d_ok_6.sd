@@ -1,0 +1,11 @@
+#
+#=DESCRIPTION deny change_profile with quotes
+#=EXRESULT PASS
+#
+/usr/bin/foo {
+   deny change_profile -> "/bin/foo",
+}
+
+/usr/bin/foo2 {
+   deny change_profile -> "/bin/ foo",
+}

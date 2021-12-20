@@ -1,0 +1,18 @@
+#!/bin/sh
+# copy Config.pm from the first argument to a temporary directory
+# then run the rest with that prepended to @INC
+
+# better ideas welcome...
+
+set -e
+
+T=$(mktemp -d)
+d="$1"
+shift
+cp "$d/Config.pm" "$d/Config_heavy.pl" "$T"
+p="$1"
+shift
+status=0
+"$p" "-I$T" "$@" || status=$?
+rm -rf "$T"
+exit $status

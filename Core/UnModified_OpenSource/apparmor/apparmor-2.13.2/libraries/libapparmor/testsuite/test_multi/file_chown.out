@@ -1,0 +1,15 @@
+START
+File: file_chown.in
+Event type: AA_RECORD_DENIED
+Audit ID: 1465133533.431:728
+Operation: chown
+Mask: w
+Denied Mask: w
+fsuid: 0
+ouid: 4
+Profile: /usr/sbin/cupsd
+Name: /run/cups/certs/
+Command: cupsd
+PID: 8515
+Epoch: 1465133533
+Audit subid: 728

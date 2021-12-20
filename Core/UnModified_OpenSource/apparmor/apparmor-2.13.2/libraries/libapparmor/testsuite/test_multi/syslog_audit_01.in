@@ -1,0 +1,1 @@
+Sep  2 11:53:23 utopic-amd64 kernel: [182243.243324] audit: type=1400 audit(1409684003.960:273342): apparmor="DENIED" operation="mkdir" profile="/home/ubuntu/bzr/apparmor/tests/regression/apparmor/mkdir" name="/tmp/sdtest.7283-14445-r31VAP/tmpdir/" pid=7314 comm="mkdir" requested_mask="c" denied_mask="c" fsuid=0 ouid=0

@@ -1,0 +1,4 @@
+version=4
+opts="dversionmangle=s/\+dfsg\d*$//, \
+  pgpsigurlmangle=s%$%.asc%" \
+  https://sf.net/net-snmp/net-snmp-([\d+\.]+|\d+)\.tar\.gz debian uupdate

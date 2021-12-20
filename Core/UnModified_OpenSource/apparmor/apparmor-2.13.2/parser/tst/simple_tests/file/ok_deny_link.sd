@@ -1,0 +1,9 @@
+#
+#=DESCRIPTION simple link access test
+#=EXRESULT PASS
+#
+
+profile test {
+  deny link /alpha/beta -> /tmp/**,
+}
+

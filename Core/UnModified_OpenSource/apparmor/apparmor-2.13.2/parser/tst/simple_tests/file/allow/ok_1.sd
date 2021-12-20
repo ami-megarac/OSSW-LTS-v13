@@ -1,0 +1,8 @@
+#
+#=Description basic file rule
+#=EXRESULT PASS
+# vim:syntax=apparmor
+#
+/usr/bin/foo {
+  allow /usr/bin/foo r,
+}

@@ -1,0 +1,2 @@
+usr/lib/*/libip4tc.so
+usr/lib/*/pkgconfig/libip4tc.pc

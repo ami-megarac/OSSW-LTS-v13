@@ -1,0 +1,8 @@
+#
+#=DESCRIPTION alternation braces '{}' with only one entry should be an error
+#=EXRESULT FAIL
+#
+
+profile failure {
+  /usr/bin/one{en}try rw,
+}

@@ -1,0 +1,7 @@
+#
+#=DESCRIPTION simple unix setattr w/addr acceptance test
+#=EXRESULT PASS
+
+profile a_profile {
+  unix setattr addr=none,
+}

@@ -1,0 +1,12 @@
+#!/bin/sh
+
+set -e
+
+if [ "$1" = "purge" ]; then
+    APP_PROFILE="usr.sbin.apache2"
+    rm -f /etc/apparmor.d/disable/$APP_PROFILE >/dev/null 2>&1 || true
+    rmdir /etc/apparmor.d/disable 2>/dev/null || true
+    rmdir /etc/apparmor.d         2>/dev/null || true
+fi
+
+#DEBHELPER#

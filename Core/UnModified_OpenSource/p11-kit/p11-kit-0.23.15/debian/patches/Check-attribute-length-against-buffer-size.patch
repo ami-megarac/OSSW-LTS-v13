@@ -1,0 +1,46 @@
+From: David Cook <divergentdave@gmail.com>
+Date: Sat, 7 Nov 2020 00:06:01 -0600
+Subject: Check attribute length against buffer size
+Origin: https://github.com/p11-glue/p11-kit/commit/commit/2617f3ef888e103324a28811886b99ed0a56346d
+Bug: https://github.com/p11-glue/p11-kit/security/advisories/GHSA-5j67-fw89-fp6x
+Bug-Debian-Security: https://security-tracker.debian.org/tracker/CVE-2020-29363
+
+If an attribute's length does not match the length of the byte array
+inside it, one length was used for allocation, and the other was used
+for memcpy. This additional check will instead return an error on
+malformed messages.
+---
+ p11-kit/rpc-message.c | 9 +++++++--
+ 1 file changed, 7 insertions(+), 2 deletions(-)
+
+diff --git a/p11-kit/rpc-message.c b/p11-kit/rpc-message.c
+index b26b036bdada..21283588cec4 100644
+--- a/p11-kit/rpc-message.c
++++ b/p11-kit/rpc-message.c
+@@ -1213,7 +1213,7 @@ p11_rpc_buffer_get_attribute (p11_buffer *buffer,
+ 			      size_t *offset,
+ 			      CK_ATTRIBUTE *attr)
+ {
+-	uint32_t type, length;
++	uint32_t type, length, decode_length;
+ 	unsigned char validity;
+ 	p11_rpc_attribute_serializer *serializer;
+ 	p11_rpc_value_type value_type;
+@@ -1243,8 +1243,13 @@ p11_rpc_buffer_get_attribute (p11_buffer *buffer,
+ 	assert (serializer != NULL);
+ 	if (!serializer->decode (buffer, offset, attr->pValue, &attr->ulValueLen))
+ 		return false;
+-	if (!attr->pValue)
++	if (!attr->pValue) {
++		decode_length = attr->ulValueLen;
+ 		attr->ulValueLen = length;
++		if (decode_length > length) {
++			return false;
++		}
++	}
+ 	attr->type = type;
+ 	return true;
+ }
+-- 
+2.30.0.rc2
+

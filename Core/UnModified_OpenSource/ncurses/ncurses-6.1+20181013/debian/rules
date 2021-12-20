@@ -1,0 +1,583 @@
+#!/usr/bin/make -f
+# This file has gone through many maintainers.  Mostly rewritten
+# by Daniel Jacobowitz.
+
+ifneq (,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
+    NUMJOBS = $(patsubst parallel=%,%,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
+    MAKEFLAGS += -j$(NUMJOBS) -Otarget
+endif
+
+export CFLAGS := $(shell DEB_BUILD_MAINT_OPTIONS=hardening=+bindnow dpkg-buildflags --get CFLAGS)
+export CPPFLAGS := $(shell DEB_BUILD_MAINT_OPTIONS=hardening=+bindnow dpkg-buildflags --get CPPFLAGS)
+export CXXFLAGS := $(shell DEB_BUILD_MAINT_OPTIONS=hardening=+bindnow dpkg-buildflags --get CXXFLAGS)
+export LDFLAGS := $(shell DEB_BUILD_MAINT_OPTIONS=hardening=+bindnow dpkg-buildflags --get LDFLAGS)
+
+ifneq ($(DEB_BUILD_GNU_TYPE),$(DEB_HOST_GNU_TYPE))
+HOST_CC ?= $(DEB_HOST_GNU_TYPE)-gcc
+HOST_CXX ?= $(DEB_HOST_GNU_TYPE)-g++
+else
+HOST_CC ?= gcc
+HOST_CXX ?= g++
+endif
+
+# These are important since this is a library package
+soname=6
+sodepver = (>= 6.1)
+
+# Name our packages
+package-base=ncurses-base
+package-bin=ncurses-bin
+package-lib=libncurses$(soname)
+package-lib-32=lib32ncurses$(soname)
+package-lib-64=lib64ncurses$(soname)
+package-ti=libtinfo$(soname)
+package-ti-32=lib32tinfo$(soname)
+package-ti-64=lib64tinfo$(soname)
+package-libw=libncursesw$(soname)
+package-libw-32=lib32ncursesw$(soname)
+package-libw-64=lib64ncursesw$(soname)
+package-dev=libncurses5-dev
+package-dev-32=lib32ncurses-dev
+package-dev-64=lib64ncurses-dev
+package-devti=libtinfo-dev
+package-devw=libncursesw5-dev
+package-dbg=libncurses$(soname)-dbg
+package-dbgw=libncursesw$(soname)-dbg
+package-dbgti=libtinfo$(soname)-dbg
+package-term=ncurses-term
+package-examples=ncurses-examples
+package-lib-legacy=libncurses5
+package-ti-legacy=libtinfo5
+package-libw-legacy=libncursesw5
+
+workdir=$(shell pwd)
+tempdir=debian/tmp
+fulltempdir=$(workdir)/$(tempdir)
+
+srcdir=$(shell pwd)
+relsrcdir=..
+objdir=$(srcdir)/obj
+objdir-static=$(srcdir)/obj-static
+objdir-32=$(srcdir)/obj-32
+objdir-64=$(srcdir)/obj-64
+wobjdir=$(srcdir)/obj-wide
+wobjdir-static=$(srcdir)/obj-wide-static
+wobjdir-32=$(srcdir)/obj-wide-32
+wobjdir-64=$(srcdir)/obj-wide-64
+objdir-debug=$(srcdir)/obj-debug
+wobjdir-debug=$(srcdir)/obj-wide-debug
+objdir-test=$(srcdir)/obj-test
+objdir-legacy=$(srcdir)/obj-legacy
+wobjdir-legacy=$(srcdir)/obj-wide-legacy
+
+DEB_BUILD_GNU_TYPE ?= $(shell dpkg-architecture -qDEB_BUILD_GNU_TYPE)
+DEB_HOST_GNU_TYPE ?= $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
+DEB_HOST_GNU_SYSTEM ?= $(shell dpkg-architecture -qDEB_HOST_GNU_SYSTEM)
+DEB_HOST_ARCH ?= $(shell dpkg-architecture -qDEB_HOST_ARCH)
+DEB_HOST_ARCH_OS ?= $(shell dpkg-architecture -qDEB_HOST_ARCH_OS)
+DEB_HOST_MULTIARCH ?= $(shell dpkg-architecture -qDEB_HOST_MULTIARCH)
+
+autogen-files := debian/libncurses-dev.links debian/libncurses-dev.install \
+		 debian/libncurses6.install debian/libncursesw6.install \
+		 debian/libtinfo6.install debian/libtinfo5.install \
+		 debian/libncurses5.install debian/libncursesw5.install \
+		 debian/libtermcap.so
+
+ifeq ($(DEB_HOST_ARCH),i386)
+build_64_target = x86_64-$(DEB_HOST_GNU_SYSTEM)
+build_64 = build-64 build-wide-64
+endif
+
+ifeq ($(DEB_HOST_ARCH),powerpc)
+build_64_target = powerpc64-$(DEB_HOST_GNU_SYSTEM)
+build_64 = build-64 build-wide-64
+endif
+
+ifeq ($(DEB_HOST_ARCH),s390)
+build_64_target = s390x-$(DEB_HOST_GNU_SYSTEM)
+build_64 = build-64 build-wide-64
+endif
+
+ifeq ($(DEB_HOST_ARCH),sparc)
+build_64_target = sparc64-$(DEB_HOST_GNU_SYSTEM)
+build_64 = build-64 build-wide-64
+endif
+
+ifeq ($(DEB_HOST_ARCH),amd64)
+build_32_target = i486-$(DEB_HOST_GNU_SYSTEM)
+build_32 = build-32 build-wide-32
+endif
+
+ifeq ($(DEB_HOST_ARCH),ppc64)
+build_32_target = powerpc-$(DEB_HOST_GNU_SYSTEM)
+build_32 = build-32 build-wide-32
+endif
+
+ifneq (,$(filter nobiarch,$(DEB_BUILD_PROFILES)))
+override build_32=
+override build_64=
+endif
+
+ifeq ($(DEB_HOST_ARCH_OS),linux)
+with_mouse = --with-gpm
+else
+ifeq ($(DEB_HOST_ARCH_OS),kfreebsd)
+with_mouse = --without-sysmouse
+endif
+endif
+
+CONFARGS =	--prefix=/usr \
+		--build=$(DEB_BUILD_GNU_TYPE) \
+		--with-shared \
+		--mandir=/usr/share/man \
+		--with-manpage-format=normal \
+		--without-profile --without-debug \
+		--disable-rpath --enable-echo \
+		--disable-stripping \
+		--enable-const \
+		--enable-pc-files \
+		--with-pkg-config-libdir=/usr/lib/$(DEB_HOST_MULTIARCH)/pkgconfig \
+		--libdir=/usr/lib/$(DEB_HOST_MULTIARCH) \
+		--with-install-prefix=$(fulltempdir) \
+		--without-ada \
+		--without-tests \
+		--without-progs \
+		$(with_mouse) \
+		--enable-symlinks \
+		--disable-termcap \
+		--with-default-terminfo-dir=/etc/terminfo \
+		--with-terminfo-dirs="/etc/terminfo:/lib/terminfo:/usr/share/terminfo" \
+		--with-ticlib=tic \
+		--with-termlib=tinfo \
+		--with-versioned-syms \
+		--disable-wattr-macros \
+		--disable-relink \
+		--enable-overwrite \
+		--with-xterm-kbs=del
+
+CONFARGS-LEGACY =	$(CONFARGS) \
+			--with-abi-version=5 \
+			--disable-lp64 \
+			--with-chtype='long' \
+			--with-mmask-t='long' \
+			--disable-overwrite \
+			--without-cxx-binding \
+			--without-normal
+
+CONFARGS-TEST =	--prefix=/usr \
+		--build=$(DEB_BUILD_GNU_TYPE) \
+		--bindir=/usr/lib/ncurses/examples \
+		--datadir=/usr/share/ncurses-examples \
+		--disable-stripping \
+		--with-x11-rgb=/etc/X11/rgb.txt \
+		--with-ncursesw \
+		--with-curses-dir=$(wobjdir)
+
+ifneq ($(DEB_BUILD_GNU_TYPE),$(DEB_HOST_GNU_TYPE))
+CONFARGS += --with-build-cc=gcc --host=$(DEB_HOST_GNU_TYPE)
+CONFARGS-LEGACY += --with-build-cc=gcc --host=$(DEB_HOST_GNU_TYPE)
+CONFARGS-TEST += --host=$(DEB_HOST_GNU_TYPE)
+endif
+
+# Files for /lib/terminfo.
+libterminfofiles=a/ansi c/cons25 c/cons25-debian c/cygwin d/dumb h/hurd l/linux \
+	m/mach m/mach-bold m/mach-color m/mach-gnu m/mach-gnu-color p/pcansi \
+	r/rxvt r/rxvt-m r/rxvt-basic r/rxvt-unicode r/rxvt-unicode-256color \
+	s/screen s/screen-bce s/screen-s s/screen-w s/sun v/vt100 v/vt102 \
+	v/vt220 v/vt52 x/xterm x/xterm-debian x/xterm-xfree86 x/xterm-color \
+	x/xterm-mono x/xterm-r5 x/xterm-r6 x/xterm-vt220 \
+	x/xterm-256color s/screen-256color s/screen-256color-bce \
+	s/screen.xterm-256color w/wsvt25 w/wsvt25m E/Eterm E/Eterm-color
+
+# Blacklist terminfo entries shipped by other Debian packages so that we do
+# not begin shipping them by accident.
+badterminfo = 5/5250 f/fbterm i/iterm i/iterm-am i/iterm-color \
+	j/jfbterm k/kon k/kon2 l/linux-5250 s/stterm s/stterm-256color
+
+ifneq ($(DEB_BUILD_GNU_TYPE),$(DEB_HOST_GNU_TYPE))
+# Force necessary configure checks which do not work when
+# cross compiling; all Debian platforms return unsigned char
+# and working poll for these configure checks.
+export cf_cv_type_of_bool=unsigned char
+export cf_cv_working_poll=yes
+export cf_cv_gpm_soname=libgpm.so.2
+endif
+
+config.guess-stamp:
+	dh_update_autotools_config
+	dh_autoreconf autoreconf-dickey -- -f -i
+	touch $@
+
+$(objdir)/config.status: config.guess-stamp
+	test -d $(objdir) || mkdir $(objdir)
+	cd $(objdir) && $(relsrcdir)/configure \
+		$(CONFARGS)
+
+$(objdir-static)/config.status: config.guess-stamp
+	test -d $(objdir-static) || mkdir $(objdir-static)
+	cd $(objdir-static) && $(relsrcdir)/configure \
+		$(CONFARGS) \
+		--without-shared \
+		--without-gpm
+
+$(objdir-32)/config.status: config.guess-stamp
+	test -d $(objdir-32) || mkdir $(objdir-32)
+
+	cf_cv_type_of_bool='unsigned char'; export cf_cv_type_of_bool; \
+	cf_cv_working_poll=yes; export cf_cv_working_poll; \
+	cd $(objdir-32) && CC="$(HOST_CC) -m32" \
+		BUILD_CC="gcc" CXX="$(HOST_CXX) -m32" \
+		$(relsrcdir)/configure \
+		$(CONFARGS) \
+		--host=$(build_32_target) \
+		--without-gpm \
+		--libdir=/usr/lib32
+
+$(objdir-64)/config.status: config.guess-stamp
+	test -d $(objdir-64) || mkdir $(objdir-64)
+
+	cf_cv_type_of_bool='unsigned char'; export cf_cv_type_of_bool; \
+	cf_cv_working_poll=yes; export cf_cv_working_poll; \
+	cd $(objdir-64) && CC="$(HOST_CC) -m64" \
+		BUILD_CC="gcc" CXX="$(HOST_CXX) -m64" \
+		$(relsrcdir)/configure \
+		$(CONFARGS) \
+		--host=$(build_64_target) \
+		--without-gpm \
+		--libdir=/usr/lib64
+
+$(objdir-debug)/config.status: config.guess-stamp
+	test -d $(objdir-debug) || mkdir $(objdir-debug)
+	cd $(objdir-debug) && \
+		CFLAGS="$(CFLAGS) -DTRACE" $(relsrcdir)/configure \
+		$(CONFARGS) \
+		--without-cxx-binding \
+		--without-normal
+
+$(wobjdir)/config.status: config.guess-stamp
+	test -d $(wobjdir) || mkdir $(wobjdir)
+	cd $(wobjdir) && $(relsrcdir)/configure \
+		$(CONFARGS) \
+		--with-progs \
+		--enable-widec
+
+$(wobjdir-static)/config.status: config.guess-stamp
+	test -d $(wobjdir-static) || mkdir $(wobjdir-static)
+	cd $(wobjdir-static) && $(relsrcdir)/configure \
+		$(CONFARGS) \
+		--without-shared \
+		--without-gpm \
+		--enable-widec
+
+$(wobjdir-debug)/config.status: config.guess-stamp
+	test -d $(wobjdir-debug) || mkdir $(wobjdir-debug)
+	cd $(wobjdir-debug) && \
+		CFLAGS="$(CFLAGS) -DTRACE" $(relsrcdir)/configure \
+		$(CONFARGS) \
+		--without-cxx-binding \
+		--without-normal \
+		--enable-widec
+
+$(wobjdir-32)/config.status: config.guess-stamp
+	test -d $(wobjdir-32) || mkdir $(wobjdir-32)
+
+	cf_cv_type_of_bool='unsigned char'; export cf_cv_type_of_bool; \
+	cf_cv_working_poll=yes; export cf_cv_working_poll; \
+	cd $(wobjdir-32) && CC="$(HOST_CC) -m32" \
+		BUILD_CC="gcc" CXX="$(HOST_CXX) -m32" \
+		$(relsrcdir)/configure \
+		$(CONFARGS) \
+		--host=$(build_32_target) \
+		--without-gpm \
+		--enable-widec \
+		--libdir=/usr/lib32
+
+$(wobjdir-64)/config.status: config.guess-stamp
+	test -d $(wobjdir-64) || mkdir $(wobjdir-64)
+
+	cf_cv_type_of_bool='unsigned char'; export cf_cv_type_of_bool; \
+	cf_cv_working_poll=yes; export cf_cv_working_poll; \
+	cd $(wobjdir-64) && CC="$(HOST_CC) -m64" \
+		BUILD_CC="gcc" CXX="$(HOST_CXX) -m64" \
+		$(relsrcdir)/configure \
+		$(CONFARGS) \
+		--host=$(build_64_target) \
+		--without-gpm \
+		--enable-widec \
+		--libdir=/usr/lib64
+
+$(objdir-legacy)/config.status: config.guess-stamp
+	test -d $(objdir-legacy) || mkdir $(objdir-legacy)
+	cd $(objdir-legacy) && $(relsrcdir)/configure \
+		$(CONFARGS-LEGACY)
+
+$(wobjdir-legacy)/config.status: config.guess-stamp
+	test -d $(wobjdir-legacy) || mkdir $(wobjdir-legacy)
+	cd $(wobjdir-legacy) && $(relsrcdir)/configure \
+		$(CONFARGS-LEGACY) \
+		--enable-widec
+
+$(objdir-test)/config.status: build-wide config.guess-stamp
+	test -d $(objdir-test) || mkdir $(objdir-test)
+	export LD_LIBRARY_PATH=$${LD_LIBRARY_PATH}:$(wobjdir)/lib && \
+	cd $(objdir-test) && \
+		PKG_CONFIG_LIBDIR=$(wobjdir)/usr/lib/$(DEB_HOST_MULTIARCH)/pkgconfig \
+		$(relsrcdir)/test/configure $(CONFARGS-TEST)
+
+build-indep: build-normal build-wide
+	touch $@
+
+build-arch build: build-indep build-static build-wide-static build-test \
+	          build-legacy build-wide-legacy $(build_64) $(build_32)
+	touch build-arch build
+
+build-normal: $(objdir)/config.status
+	cd $(objdir) && $(MAKE)
+	touch $@
+
+build-static: $(objdir-static)/config.status
+	cd $(objdir-static) && $(MAKE)
+	touch $@
+
+build-32: $(objdir-32)/config.status
+	cd $(objdir-32) && $(MAKE) CC="$(HOST_CC) -m32" CXX="$(HOST_CXX) -m32"
+	touch $@
+
+build-64: $(objdir-64)/config.status
+	cd $(objdir-64) && $(MAKE) CC="$(HOST_CC) -m64" CXX="$(HOST_CXX) -m64"
+	touch $@
+
+build-debug: $(objdir-debug)/config.status
+	cd $(objdir-debug) && $(MAKE)
+	touch $@
+
+build-wide: $(wobjdir)/config.status
+	cd $(wobjdir) && $(MAKE)
+	# needed for building the examples
+	$(MAKE) -C $(wobjdir) DESTDIR=$(wobjdir) install.libs
+	touch $@
+
+build-wide-static: $(wobjdir-static)/config.status
+	cd $(wobjdir-static) && $(MAKE)
+	touch $@
+
+build-wide-32: $(wobjdir-32)/config.status
+	cd $(wobjdir-32) && $(MAKE) CC="$(HOST_CC) -m32" CXX="$(HOST_CXX) -m32"
+	touch $@
+
+build-wide-64: $(wobjdir-64)/config.status
+	cd $(wobjdir-64) && $(MAKE) CC="$(HOST_CC) -m64" CXX="$(HOST_CXX) -m64"
+	touch $@
+
+build-wide-debug: $(wobjdir-debug)/config.status
+	cd $(wobjdir-debug) && $(MAKE)
+	touch $@
+
+build-legacy: $(objdir-legacy)/config.status
+	cd $(objdir-legacy) && $(MAKE)
+	touch $@
+
+build-wide-legacy: $(wobjdir-legacy)/config.status
+	cd $(wobjdir-legacy) && $(MAKE)
+	touch $@
+
+build-test: $(objdir-test)/config.status
+	cd $(objdir-test) && $(MAKE)
+	touch $@
+
+clean:
+	dh_testdir
+	rm -f build build-arch build-indep
+	rm -f build-normal build-static build-wide build-debug build-wide-debug \
+		build-wide-static build-legacy build-wide-legacy build-test $(build_32) $(build_64)
+	rm -rf $(objdir)
+	rm -rf $(objdir-static)
+	rm -rf $(objdir-32)
+	rm -rf $(objdir-64)
+	rm -rf $(wobjdir)
+	rm -rf $(wobjdir-static)
+	rm -rf $(wobjdir-32)
+	rm -rf $(wobjdir-64)
+	rm -rf $(objdir-debug)
+	rm -rf $(wobjdir-debug)
+	rm -rf $(objdir-legacy)
+	rm -rf $(wobjdir-legacy)
+	rm -rf $(objdir-test)
+	rm -f $(autogen-files)
+	dh_autoreconf_clean
+	dh_clean
+
+install-indep: build-indep
+	# Generate proper debhelper files for so-named packages
+	dh_testdir
+	dh_testroot
+	dh_prep
+
+	# Install non -DTRACE versions.
+	$(MAKE) -C $(objdir) install.libs
+	rm -f $(tempdir)/usr/lib/$(DEB_HOST_MULTIARCH)/libtinfo.so*
+	rm -f $(tempdir)/usr/lib/$(DEB_HOST_MULTIARCH)/libtic.so*
+	$(MAKE) -C $(wobjdir) install
+
+	# Move terminfo files to the right place.
+	mv $(tempdir)/etc/terminfo $(tempdir)/usr/share/terminfo
+
+	# Remove blacklisted terminal types and other stuff we don't install
+	cd $(tempdir)/usr/share/terminfo && rm -f $(badterminfo)
+	rm -f $(tempdir)/usr/lib/terminfo \
+	      $(tempdir)/usr/lib/$(DEB_HOST_MULTIARCH)/libcurses.so \
+	      $(tempdir)/usr/lib/$(DEB_HOST_MULTIARCH)/libtinfo.so
+
+	# Provide header file symlinks under usr/include/ncursesw
+	install -d $(fulltempdir)/usr/include/ncursesw
+	set -e; \
+	for file in $(tempdir)/usr/include/*.h; do \
+		ln -s ../$${file##*/} $(tempdir)/usr/include/ncursesw; \
+	done
+
+	# Compile Debian-specific terminfo entries before copying files
+	# into their packages.  Hurd uses gsbom/grbom, so pass -x to tic.
+ifeq ($(DEB_BUILD_GNU_TYPE),$(DEB_HOST_GNU_TYPE))
+	set -e; \
+	for ti in xterm hurd rxvt rxvt-unicode; do \
+	  LD_LIBRARY_PATH=$${LD_LIBRARY_PATH}:$(fulltempdir)/usr/lib/$(DEB_HOST_MULTIARCH):$(fulltempdir)/lib/$(DEB_HOST_MULTIARCH) \
+		TERMINFO=$(fulltempdir)/usr/share/terminfo \
+		$(tempdir)/usr/bin/tic -x debian/$$ti.ti; \
+	done
+else
+	set -e; \
+	for ti in xterm hurd rxvt rxvt-unicode; do \
+		TERMINFO=$(fulltempdir)/usr/share/terminfo \
+		tic -x debian/$$ti.ti; \
+	done
+
+endif
+
+	# Move ncurses-base terminfo entries to /lib/terminfo.
+	set -e; \
+	for f in $(libterminfofiles); do \
+		dir=$(tempdir)/lib/terminfo/$$(dirname $$f); \
+		mkdir -p $$dir; \
+		mv $(tempdir)/usr/share/terminfo/$$f $$dir; \
+	done
+
+	# Create an empty /etc/terminfo for the sysadmin.
+	mkdir -p $(tempdir)/etc/terminfo
+	install --mode 644 debian/README.etc $(tempdir)/etc/terminfo/README
+
+install-arch: build-arch install-indep
+	install -m 644 -t $(fulltempdir)/usr/lib/$(DEB_HOST_MULTIARCH) $(objdir-static)/lib/*.a
+	install -m 644 -t $(fulltempdir)/usr/lib/$(DEB_HOST_MULTIARCH) $(wobjdir-static)/lib/*.a
+
+	# Always add -ltinfo when linking with -lncurses or -lnursesw
+	rm -f $(tempdir)/usr/lib/$(DEB_HOST_MULTIARCH)/libncurses.so
+	echo "INPUT(libncurses.so.6 -ltinfo)" > $(tempdir)/usr/lib/$(DEB_HOST_MULTIARCH)/libncurses.so
+	rm -f $(tempdir)/usr/lib/$(DEB_HOST_MULTIARCH)/libncursesw.so
+	echo "INPUT(libncursesw.so.6 -ltinfo)" > $(tempdir)/usr/lib/$(DEB_HOST_MULTIARCH)/libncursesw.so
+ifneq (,$(build_32))
+	mkdir -p $(tempdir)/usr/lib32
+	rm -f $(tempdir)/usr/lib32/libncurses.so
+	echo "INPUT(libncurses.so.6 -ltinfo)" > $(tempdir)/usr/lib32/libncurses.so
+	rm -f $(tempdir)/usr/lib32/libncursesw.so
+	echo "INPUT(libncursesw.so.6 -ltinfo)" > $(tempdir)/usr/lib32/libncursesw.so
+endif
+ifneq (,$(build_64))
+	mkdir -p $(tempdir)/usr/lib64
+	rm -f $(tempdir)/usr/lib64/libncurses.so
+	echo "INPUT(libncurses.so.6 -ltinfo)" > $(tempdir)/usr/lib64/libncurses.so
+	rm -f $(tempdir)/usr/lib64/libncursesw.so
+	echo "INPUT(libncursesw.so.6 -ltinfo)" > $(tempdir)/usr/lib64/libncursesw.so
+endif
+
+	# Install the test programs, sparing the detour to debian/tmp.
+	$(MAKE) -C $(objdir-test) DESTDIR=$(workdir)/debian/$(package-examples) install
+	sed -i -e 's%^#!/usr/bin/env perl%#!/usr/bin/perl%' \
+		$(workdir)/debian/$(package-examples)/usr/lib/ncurses/examples/tracemunch
+
+debian/%: debian/%.in
+	sed -e 's/$${DEB_HOST_MULTIARCH}/$(DEB_HOST_MULTIARCH)/g' $< > $@
+
+binary:	binary-arch binary-indep
+
+binary-arch: build-arch install-arch $(autogen-files)
+	dh_testdir
+	dh_testroot
+	dh_install -p$(package-bin) -Xncurses6-config -Xncursesw6-config
+	dh_install -a -N$(package-bin)
+	dh_installman -a
+	dh_installdocs -p$(package-ti) -p$(package-bin) -p$(package-examples) debian/FAQ
+	dh_installdocs -a -N$(package-bin) -N$(package-ti) -N$(package-examples) \
+		       -N$(package-ti-legacy) -N$(package-lib-legacy) -N$(package-libw-legacy) \
+		       -N$(package-lib-32) -N$(package-libw-32) -N$(package-dev-32) -N$(package-ti-32) \
+		       -N$(package-lib-64) -N$(package-libw-64) -N$(package-dev-64) -N$(package-ti-64) \
+		       --link-doc=$(package-ti)
+	dh_installdocs -p$(package-ti-legacy)
+	dh_installdocs -p$(package-lib-legacy) -p$(package-libw-legacy) \
+		       --link-doc=$(package-ti-legacy)
+ifneq ($(build_32),)
+	dh_installdocs -p$(package-ti-32)
+	dh_installdocs -p$(package-lib-32) -p$(package-libw-32) -p$(package-dev-32) \
+		       --link-doc=$(package-ti-32)
+endif
+ifneq ($(build_64),)
+	dh_installdocs -p$(package-ti-64)
+	dh_installdocs -p$(package-lib-64) -p$(package-libw-64) -p$(package-dev-64) \
+		       --link-doc=$(package-ti-64)
+endif
+	dh_installchangelogs -a NEWS
+	dh_installdirs -a
+
+	# Strip the packages, shipping detached debugging symbols.
+	dh_strip -a -N$(package-lib) -N$(package-libw) -N$(package-ti)
+	dh_strip -p$(package-lib) --dbg-package=$(package-dbg)
+	dh_strip -p$(package-libw) --dbg-package=$(package-dbgw)
+	dh_strip -p$(package-ti) --dbg-package=$(package-dbgti)
+	dh_lintian -a
+	dh_link -a
+	dh_compress -p$(package-examples) usr/lib/ncurses/examples/README
+	dh_compress -a -N$(package-examples)
+	dh_fixperms -a
+	dh_missing -a --fail-missing
+	dh_makeshlibs -p$(package-ti) -V "$(package-ti) $(sodepver)" --add-udeb=$(package-ti)-udeb -- -c4
+	dh_makeshlibs -p$(package-lib) -V "$(package-lib) $(sodepver)" -- -c4
+	dh_makeshlibs -p$(package-libw) -V "$(package-libw) $(sodepver)" -- -c4
+	dh_makeshlibs -p$(package-ti-legacy) -V "$(package-ti-legacy) $(sodepver)" -- -c4
+	dh_makeshlibs -p$(package-lib-legacy) -V "$(package-lib-legacy) $(sodepver)" -- -c4
+	dh_makeshlibs -p$(package-libw-legacy) -V "$(package-libw-legacy) $(sodepver)" -- -c4
+ifneq ($(build_32),)
+	dh_makeshlibs -p$(package-ti-32) -V "$(package-ti-32) $(sodepver)" -- -c4
+	dh_makeshlibs -p$(package-lib-32) -V "$(package-lib-32) $(sodepver)" -- -c4
+	dh_makeshlibs -p$(package-libw-32) -V "$(package-libw-32) $(sodepver)" -- -c4
+endif
+ifneq ($(build_64),)
+	dh_makeshlibs -p$(package-ti-64) -V "$(package-ti-64) $(sodepver)" -- -c4
+	dh_makeshlibs -p$(package-lib-64) -V "$(package-lib-64) $(sodepver)" -- -c4
+	dh_makeshlibs -p$(package-libw-64) -V "$(package-libw-64) $(sodepver)" -- -c4
+endif
+	dh_shlibdeps -a
+	dh_gencontrol -a
+	dh_installdeb -a
+	# We don't install the tic library in the libtinfo6 udeb, adjust the shlibs file
+	sed -i '/^udeb: libtic /d' debian/$(package-ti)/DEBIAN/shlibs
+	dh_md5sums -a
+	dh_builddeb -a
+
+binary-indep: build-indep install-indep $(autogen-files)
+	dh_testdir
+	dh_testroot
+
+	dh_installdocs -i -Xhtml/Ada95.html -Xhtml/ada/
+	dh_installchangelogs -i NEWS
+	dh_install -i
+	dh_installdirs -i
+	dh_lintian -i
+	dh_link -i
+	dh_compress -i
+	dh_fixperms -i
+	dh_missing -i --fail-missing
+	dh_gencontrol -i
+	dh_installdeb -i
+	dh_md5sums -i
+	dh_builddeb -i
+
+.PHONY: binary binary-arch binary-indep clean install-indep install-arch

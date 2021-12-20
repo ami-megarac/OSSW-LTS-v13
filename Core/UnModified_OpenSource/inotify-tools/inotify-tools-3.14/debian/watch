@@ -1,0 +1,3 @@
+version=3
+
+https://github.com/rvoicilas/inotify-tools/downloads .*/inotify-tools-(.+)\.tar\.gz

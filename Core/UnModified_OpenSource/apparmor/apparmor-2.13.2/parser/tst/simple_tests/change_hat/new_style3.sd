@@ -1,0 +1,40 @@
+#
+#=DESCRIPTION Simple test of new-style hats with spaces
+#=EXRESULT PASS
+# vim:syntax=subdomain
+# Last Modified: Sun Apr 17 19:44:44 2005
+#
+/does/not/exist {
+  #include <includes/base>
+
+
+# hat 1
+  ^HAT1                           {
+    /var/log/HAT1 rwl,
+  }
+
+# hat 2
+  ^HAT2
+
+
+
+  { /var/log/HAT2 rwl, }
+
+# hat 3
+  ^HAT3								 {
+
+
+
+
+    /var/log/HAT3 rwl,
+
+
+
+
+
+  }
+
+  /usr/X11R6/lib/lib*so* r,
+  /usr/bin/emacs r,
+}
+

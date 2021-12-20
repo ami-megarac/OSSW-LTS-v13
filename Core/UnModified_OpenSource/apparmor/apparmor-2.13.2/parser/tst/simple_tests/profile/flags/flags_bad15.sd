@@ -1,0 +1,10 @@
+#
+#=DESCRIPTION Ensure namespace_relative and chroot_relative conflict
+#=EXRESULT FAIL
+# vim:syntax=apparmor
+#
+/does/not/exist flags=(namespace_relative, chroot_relative) {
+
+  /usr/X11R6/lib/lib*so* r,
+  /does/not/exist r,
+}

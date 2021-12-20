@@ -1,0 +1,40 @@
+Source: lua-cjson
+Maintainer: The Debian Lua Team <pkg-lua-devel@lists.alioth.debian.org>
+Uploaders: Dmitry E. Oboukhov <unera@debian.org>
+Build-Depends: debhelper (>= 9), dh-lua
+Standards-Version: 3.9.3
+Section: interpreters
+Priority: optional
+Homepage: http://www.kyne.com.au/~mark/software/lua-cjson.php
+VCS-Git: git://anonscm.debian.org/collab-maint/liblua-cjson.git
+VCS-Browser: http://anonscm.debian.org/gitweb/?p=collab-maint/liblua-cjson.git;a=summary
+
+Package: lua-cjson
+Architecture: any
+Multi-Arch: same
+Pre-Depends: ${misc:Pre-Depends}
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Provides: ${lua:Provides}
+XB-Lua-Versions: ${lua:Versions}
+Description: JSON parser/encoder for Lua
+ This library allows you to easily convert Lua values to JSON strings and back.
+ Features:
+  * Fast, standards compliant encoding/parsing routines
+  * Full support for JSON with UTF-8, including decoding surrogate pairs
+  * Optional run-time support for common exceptions to the JSON
+    specification (infinity, NaN,..)
+  * No dependencies on other libraries
+
+Package: lua-cjson-dev
+Section: libdevel
+Architecture: any
+Multi-Arch: same
+Pre-Depends: ${misc:Pre-Depends}
+Depends: ${misc:Depends}, ${shlibs:Depends}, lua-cjson (= ${binary:Version})
+Provides: ${lua:Provides}
+XB-Lua-Versions: ${lua:Versions}
+Description: JSON parser/encoder for Lua, development files
+ This package contains the development files of the lua-cjson library,
+ useful to create a statically linked binary (like a C application or a
+ standalone Lua interpreter).
+ Documentation is also shipped within this package.

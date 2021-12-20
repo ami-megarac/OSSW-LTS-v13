@@ -1,0 +1,7 @@
+#
+#=DESCRIPTION simple unix getopt w/addr acceptance test
+#=EXRESULT PASS
+
+profile a_profile {
+  unix getopt addr=@private/defer,
+}

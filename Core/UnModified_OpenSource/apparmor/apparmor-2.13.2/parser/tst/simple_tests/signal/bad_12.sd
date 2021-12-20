@@ -1,0 +1,9 @@
+#
+#=Description basic bad signal 'lost'
+#=EXRESULT FAIL
+#
+/usr/bin/signal-test {
+  signal send set=lost,
+
+}
+

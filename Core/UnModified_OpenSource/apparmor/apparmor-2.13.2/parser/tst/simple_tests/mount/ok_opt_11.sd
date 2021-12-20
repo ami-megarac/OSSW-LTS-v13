@@ -1,0 +1,10 @@
+#
+#=Description basic rules to test the "exec" mount option
+#=EXRESULT PASS
+/usr/bin/foo {
+  mount options=exec /a -> /1,
+  mount options=(exec) /b -> /2,
+  mount options=(rw,exec) /c -> /3,
+  mount options in (exec) /d -> /4,
+  mount options in (ro,exec) /e -> /5,
+}

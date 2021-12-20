@@ -1,0 +1,93 @@
+/dts-v1/;
+
+/ {
+        description = "U-Boot fitImage for LTS13 SPX/5.4.85-ami/ast2600";
+        #address-cells = <1>;
+
+        images {
+                kernel@1 {
+                        description = "Linux kernel";
+                        data = /incbin/("arch/arm/boot/zImage");
+                        type = "kernel";
+                        arch = "arm";
+                        os = "linux";
+                        compression = "none";
+                        load = <0x80001000>;
+                        entry = <0x80001000>;
+                        hash@1 {
+                                algo = "sha256";
+                        };
+                };
+                fdt@ast2600evb_a1.dtb {
+                        description = "Flattened Device Tree blob";
+                        data = /incbin/("arch/arm/boot/dts/ast2600evb_a1.dtb");
+                        type = "flat_dt";
+                        arch = "arm";
+                        compression = "none";
+                        
+                        hash@1 {
+                                algo = "sha256";
+                        };
+                };
+                fdt@ast2600evb_a1_1.dtb {
+                        description = "Flattened Device Tree blob";
+                        data = /incbin/("arch/arm/boot/dts/ast2600evb_a1_1.dtb");
+                        type = "flat_dt";
+                        arch = "arm";
+                        compression = "none";
+                        
+                        hash@1 {
+                                algo = "sha256";
+                        };
+                };
+				fdt@ast2600evb_dualspi.dtb {
+                        description = "Flattened Device Tree blob";
+                        data = /incbin/("arch/arm/boot/dts/ast2600evb_dualspi.dtb");
+                        type = "flat_dt";
+                        arch = "arm";
+                        compression = "none";
+                        
+                        hash@1 {
+                                algo = "sha256";
+                        };
+                };
+				
+	};
+
+        configurations {
+                default = "conf@ast2600evb_a1.dtb";
+                conf@ast2600evb_a1.dtb {
+			description = "1 Linux kernel, FDT blob";
+			kernel = "kernel@1";
+			fdt = "fdt@ast2600evb_a1.dtb";
+			
+			
+                        hash@1 {
+                                algo = "sha256";
+                        };
+                };
+                
+				 conf@ast2600evb_a1_1.dtb {
+			description = "0 Linux kernel, FDT blob";
+			kernel = "kernel@1";
+			fdt = "fdt@ast2600evb_a1_1.dtb";
+			
+			
+                        hash@1 {
+                                algo = "sha256";
+                        };
+                };
+			
+				conf@ast2600evb_dualspi.dtb {
+			description = "0 Linux kernel, FDT blob";
+			kernel = "kernel@1";
+			fdt = "fdt@ast2600evb_dualspi.dtb";
+			
+			
+                        hash@1 {
+                                algo = "sha256";
+                        };
+                };
+				
+	};
+};

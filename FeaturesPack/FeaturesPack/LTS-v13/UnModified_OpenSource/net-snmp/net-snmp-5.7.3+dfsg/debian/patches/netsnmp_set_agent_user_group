@@ -1,0 +1,123 @@
+Description: snmpd, snmptrapd: Introduce the netsnmp_set_agent_{user,group}_id() functions
+ This patch does not change any functionality.
+Author: Bart Van Assche <bvanassche@acm.org>
+Origin: upstream
+Applied-Upstream: https://github.com/net-snmp/net-snmp/commit/53922d2d8873c460d526b8bba9a285c5b98c9e1f
+Reviewed-by: Craig Small <csmall@debian.org>
+Last-Update: 2020-07-23
+--- a/agent/agent_read_config.c
++++ b/agent/agent_read_config.c
+@@ -111,6 +111,17 @@
+ 
+ netsnmp_feature_child_of(snmpd_unregister_config_handler, agent_read_config_all)
+ 
++void netsnmp_set_agent_user_id(int uid)
++{
++    netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_USERID, uid);
++}
++
++void netsnmp_set_agent_group_id(int gid)
++{
++    netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_GROUPID,
++                       gid);
++}
++
+ #ifdef HAVE_UNISTD_H
+ void
+ snmpd_set_agent_user(const char *token, char *cptr)
+@@ -123,8 +134,7 @@
+         if (*ecp != 0) {
+             config_perror("Bad number");
+ 	} else {
+-	    netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID, 
+-			       NETSNMP_DS_AGENT_USERID, uid);
++            netsnmp_set_agent_user_id(uid);
+ 	}
+ #if defined(HAVE_GETPWNAM) && defined(HAVE_PWD_H)
+     } else {
+@@ -132,8 +142,7 @@
+ 
+         info = getpwnam(cptr);
+         if (info)
+-            netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID, 
+-                               NETSNMP_DS_AGENT_USERID, info->pw_uid);
++            netsnmp_set_agent_user_id(info->pw_uid);
+         else
+             config_perror("User not found in passwd database");
+         endpwent();
+@@ -151,8 +160,7 @@
+         if (*ecp != 0) {
+             config_perror("Bad number");
+ 	} else {
+-            netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID, 
+-			       NETSNMP_DS_AGENT_GROUPID, gid);
++            netsnmp_set_agent_group_id(gid);
+ 	}
+ #if defined(HAVE_GETGRNAM) && defined(HAVE_GRP_H)
+     } else {
+@@ -160,8 +168,7 @@
+ 
+         info = getgrnam(cptr);
+         if (info)
+-            netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID, 
+-                               NETSNMP_DS_AGENT_GROUPID, info->gr_gid);
++            netsnmp_set_agent_group_id(info->gr_gid);
+         else
+             config_perror("Group not found in group database");
+         endgrent();
+--- a/apps/snmptrapd.c
++++ b/apps/snmptrapd.c
+@@ -814,8 +814,8 @@
+ #if HAVE_UNISTD_H
+         case 'g':
+             if (optarg != NULL) {
+-                netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID, 
+-				   NETSNMP_DS_AGENT_GROUPID, gid = atoi(optarg));
++                gid = atoi(optarg);
++                netsnmp_set_agent_group_id(gid);
+             } else {
+                 usage();
+                 exit(1);
+@@ -946,8 +946,7 @@
+                     fprintf(stderr, "Bad user id: %s\n", optarg);
+                     exit(1);
+                 }
+-                netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID, 
+-				   NETSNMP_DS_AGENT_USERID, uid);
++                netsnmp_set_agent_user_id(uid);
+             } else {
+                 usage();
+                 exit(1);
+--- a/include/net-snmp/agent/agent_read_config.h
++++ b/include/net-snmp/agent/agent_read_config.h
+@@ -25,6 +25,8 @@
+     void            snmpd_unregister_config_handler(const char *);
+     void            snmpd_store_config(const char *);
+ 
++    void            netsnmp_set_agent_user_id(int uid);
++    void            netsnmp_set_agent_group_id(int gid);
+ #ifdef __cplusplus
+ }
+ #endif
+--- a/agent/snmpd.c
++++ b/agent/snmpd.c
+@@ -615,8 +615,7 @@
+                     fprintf(stderr, "Bad group id: %s\n", optarg);
+                     exit(1);
+                 }
+-                netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID, 
+-				   NETSNMP_DS_AGENT_GROUPID, gid);
++                netsnmp_set_agent_group_id(gid);
+             } else {
+                 usage(argv[0]);
+             }
+@@ -793,8 +792,7 @@
+                     fprintf(stderr, "Bad user id: %s\n", optarg);
+                     exit(1);
+                 }
+-                netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID, 
+-				   NETSNMP_DS_AGENT_USERID, uid);
++                netsnmp_set_agent_user_id(uid);
+             } else {
+                 usage(argv[0]);
+             }

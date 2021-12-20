@@ -1,0 +1,5 @@
+*.sho
+libbz2.so*
+bzip2.info*
+manual.fmt
+manual.texi

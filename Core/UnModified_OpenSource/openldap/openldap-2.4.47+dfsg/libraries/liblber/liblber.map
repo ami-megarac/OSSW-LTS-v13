@@ -1,0 +1,8 @@
+OPENLDAP_2.4_2 {
+  global:
+    ber_*;
+    der_alloc;
+    lutil_*;
+  local:
+    *;
+};

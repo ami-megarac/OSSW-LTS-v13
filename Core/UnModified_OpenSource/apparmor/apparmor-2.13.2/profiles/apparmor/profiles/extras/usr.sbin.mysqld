@@ -1,0 +1,45 @@
+# Last Modified: Mon Dec  1 22:23:12 2014
+
+# ------------------------------------------------------------------
+#
+#    Copyright (C) 2002-2005 Novell/SUSE
+#    Copyright (C) 2014 Christian Boltz
+#
+#    This program is free software; you can redistribute it and/or
+#    modify it under the terms of version 2 of the GNU General Public
+#    License published by the Free Software Foundation.
+#
+# ------------------------------------------------------------------
+# vim:syntax=apparmor
+
+#include <tunables/global>
+
+/usr/sbin/mysqld {
+  #include <abstractions/base>
+  #include <abstractions/mysql>
+  #include <abstractions/nameservice>
+  #include <abstractions/user-tmp>
+
+  capability dac_override,
+  capability setgid,
+  capability setuid,
+
+  /etc/hosts.allow r,
+  /etc/hosts.deny r,
+  /etc/my.cnf r,
+  /etc/my.cnf.d/ r,
+  /etc/my.cnf.d/*.cnf r,
+  /root/.my.cnf r,
+  /usr/lib{,32,64}/**.so mr,
+  /usr/sbin/mysqld r,
+  /usr/share/mariadb/*/errmsg.sys r,
+  /usr/share/mysql-community-server/*/errmsg.sys r,
+  /usr/share/mysql/** r,
+  /var/lib/mysql/ r,
+  /var/lib/mysql/** rwl,
+  /var/log/mysql/mysqld-upgrade-run.log w,
+  /var/log/mysql/mysqld.log w,
+  /var/log/mysql/mysqld.log-20* w,
+  /{,var/}run/mysql/mysqld.pid w,
+
+}

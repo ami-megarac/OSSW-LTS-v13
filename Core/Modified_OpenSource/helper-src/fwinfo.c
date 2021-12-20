@@ -52,7 +52,7 @@ extern unsigned long UsedFlashSize;
 #define MAX_BANKS CONFIG_SPX_FEATURE_GLOBAL_FLASH_BANKS
 #endif
 
-extern struct mtd_info *ractrends_mtd[MAX_BANKS];
+static struct mtd_info *_ractrends_mtd[MAX_BANKS];
 
 #ifdef CONFIG_SPX_FEATURE_DISABLE_MTD_SUPPORT
 unsigned int g_MTDSupport = 0;
@@ -101,16 +101,21 @@ ScanFirmwareModule(unsigned long FlashStartOffset, unsigned long FlashSize,
 		if (le16_to_host(mod->Module_Type) == MODULE_FMH_FIRMWARE)
 			break;
 
-		if(le16_to_host(mod->Module_Type) == MODULE_BOOTLOADER)
+		if( (le16_to_host(mod->Module_Type) == MODULE_BOOTLOADER) && (strncmp(mod->Module_Name,"pfm",sizeof("pfm")) != 0) )
 		{
 			i = prev_fmh_sec_loc + (le32_to_host(fmh.FMH_AllocatedSize)/SectorSize);
 			prev_fmh_sec_loc = i;   
+		}
+		else if(strncmp(mod->Module_Name,"pfm",sizeof("pfm")) == 0)
+		{
+			i+=1;
 		}
 		else
 		{
 			i+=(le32_to_host(fmh.FMH_AllocatedSize)/SectorSize);
 			prev_fmh_sec_loc = i;
 		}
+		memset(&fmh,0,sizeof(FMH));
 	}
 
 	if (i >= SectorCount)
@@ -229,7 +234,7 @@ int mtd_read_thunk(unsigned long Offset,unsigned long NumBytes,size_t* NumBytesR
      struct mtd_info *ractrendsmtd = NULL;
 
 	ractrendsmtd = get_mtd_device(NULL,0);
-	if(ractrendsmtd == NULL || IS_ERR(ractrends_mtd))
+	if(ractrendsmtd == NULL || IS_ERR(_ractrends_mtd))
 	{
 		g_MTDSupport = 0;
 		return -1;
@@ -300,9 +305,9 @@ flashbanksize_read(char *buf, char **start, off_t offset, int count, int *eof, v
 #endif
         for (bank = 0 ; bank < MAX_BANKS ; bank ++)
         {
-            if(ractrends_mtd[bank]!=NULL)
+            if(_ractrends_mtd[bank]!=NULL)
             {
-                sprintf(flahbankinfo+flashbank_size,"bank%dsize=%lx\n",bank,(long unsigned int)ractrends_mtd[bank]->size);
+                sprintf(flahbankinfo+flashbank_size,"bank%dsize=%lx\n",bank,(long unsigned int)_ractrends_mtd[bank]->size);
             }
             else
             {
@@ -826,3 +831,4 @@ fwinfo_read(char *buf, char **start, off_t offset, int count, int *eof, void *da
 }
 #endif
 
+EXPORT_SYMBOL(_ractrends_mtd);

@@ -1,0 +1,164 @@
+#! /bin/sh
+#  -*- Mode: Shell-script -*-
+# ----------------------------------------------------------------------
+# nls.test      ---  test NLS, sort-of
+#
+# Author:            Bruce Korb <bkorb@gnu.org>
+##
+##  This file is part of AutoOpts, a companion to AutoGen.
+##  AutoOpts is free software.
+##  AutoOpts is Copyright (C) 1992-2015 by Bruce Korb - all rights reserved
+##
+##  AutoOpts is available under any one of two licenses.  The license
+##  in use must be one of these two and the choice is under the control
+##  of the user of the license.
+##
+##   The GNU Lesser General Public License, version 3 or later
+##      See the files "COPYING.lgplv3" and "COPYING.gplv3"
+##
+##   The Modified Berkeley Software Distribution License
+##      See the file "COPYING.mbsd"
+##
+##  These files have the following sha256 sums:
+##
+##  8584710e9b04216a394078dc156b781d0b47e1729104d666658aecef8ee32e95  COPYING.gplv3
+##  4379e7444a0e2ce2b12dd6f5a52a27a4d02d39d247901d3285c88cf0d37f477b  COPYING.lgplv3
+##  13aa749a5b0a454917a944ed8fffc530b784f5ead522b1aacaf4ec8aa55a6239  COPYING.mbsd
+#
+# ----------------------------------------------------------------------
+
+. ./defs
+for f in HAVE_LIBINTL_H DEBUG_ENABLED
+do
+    grep "#define.*$f" ${top_builddir}/config.h >/dev/null || {
+	echo "$f is not defined -- skiping $0"
+        exit 0
+    }
+done
+AUTOGEN_TEMPL_DIRS=`cd ${srcdir}/..;pwd`
+export AUTOGEN_TEMPL_DIRS
+
+# # # # # # # # # # DEFINITIONS FILE # # # # # # # # #
+
+echo "creating ${testname}.def in `pwd`"
+testname="${testname}" test_main="YES" \
+argument="${argument}" long_opts="YES" \
+${SHELLX} ${stdopts} option:'opt init' second=020 || \
+    failure "Could not run stdopts.def"
+
+echo 'export = "extern char* gettext( char const* );";' >> ${testname}.def
+CC="${CC} ${CFLAGS} -DENABLE_NLS=1 ${INC}"
+CFLAGS=''
+INC=''
+
+compile_with_nls() {
+
+  echo ${AG_L} ${testname}.def
+  ${AG_L} ${testname}.def || \
+    failure AutoGen could not process
+
+  chmod u+w ${testname}.[ch]
+  # a "gettext" that reverses the text lines and characters.
+  # Leading white space is stripped from each line so that
+  # output lines do not have trailing white space.
+  #
+  cat >> ${testname}.c <<'_EOF_'
+#include <ctype.h>
+char*
+gettext(char const* pzS)
+{
+    static char z[4096];
+    char* pzD = z + sizeof(z) - 1;
+    int ct = 0;
+    int found_nl = 0;
+    if (pzS == NULL)
+        return NULL;
+    if (strchr(pzS, '%') != NULL)
+        return VOIDP(pzS);
+    *--pzD = '\0';
+    while ((*pzS == ' ') || (*pzS == '\t'))  pzS++;
+    for (;;) {
+        char ch = *(pzS++);
+        if (ch == '\0')
+            break;
+        *(--pzD) = ch;
+        ct++;
+        if (ch != '\n')
+            continue;
+        found_nl = 1;
+        while ((*pzS == ' ') || (*pzS == '\t'))  pzS++;
+    }
+    if (found_nl)
+        strcpy(z + sizeof(z) - 2, "\n");
+    while (*pzD == '\n')
+        pzD++;
+    return pzD;
+}
+_EOF_
+
+  sedcmd='/ot sgub .* tropeR$/d;/ yb degakcaP/d'
+  compile "--help"
+  mv ${testname}.help ${testname}-${1}.help
+  cmp -s ${testname}-${1}.help ${testname}-${1}.hlp || { set +x ; \
+    failure "`diff -c ${testname}-${1}.hlp ${testname}-${1}.help`" ; }
+}
+
+# # # # # # # # # # HELP OUTPUT FILE # # # # # # # # #
+
+echo creating ${testname}.hlp
+clean_help > ${testname}-1.hlp <<'_EOF_'
+test_nls - Test AutoOpts for nls
+Usage:  nls [ -<flag> [<val>] | --<name>[{=| }<val>] ]...
+noitpircseD    emaN-noitpO grA glF
+   -o Str option         pircsed noitpo noitpo ehT
+   -s Num second         pircsed noitpo dnoces ehT
+   -? no  help           tixe dna noitamrofni egasu dednetxe yalpsid
+   -! no  more-help      regap urht dessap noitamrofni egasu dednetxe
+.retcarahc galf eht dna nehpyh
+elgnis a yb ro eman rieht dna snehpyh delbuod yb deificeps era snoitpO
+_EOF_
+
+compile_with_nls 1
+
+mv ${testname}.def  ${testname}-1.def
+
+exec 3> ${testname}.def
+cat ${testname}-1.def >&3
+echo 'full-usage = <''<''- _EOF_' >&3
+clean_help >&3 <<'_EOF_'
+test_nls - Test AutoOpts for nls
+Usage:  nls [ -<flag> [<val>] | --<name>[{=| }<val>] ]...
+  Flg Arg Option-Name    Description
+   -o Str option         The option descrip
+   -s Num second         The second descrip
+   -? no  help           display extended usage information and exit
+   -! no  more-help      extended usage information passed thru pager
+
+Options are specified by doubled hyphens and their name or by a single
+hyphen and the flag character.
+_EOF_
+echo '_EOF_;' >&3
+exec 3>&-
+
+clean_help > ${testname}-2.hlp <<'_EOF_'
+...] ]>lav<} |={[>eman<-- | ]>lav<[ >galf<- [ sln  :egasU
+sln rof stpOotuA tseT - sln_tset
+pircsed noitpo ehT         noitpo rtS o-
+noitpircseD    emaN-noitpO grA glF
+pircsed dnoces ehT         dnoces muN s-
+.retcarahc galf eht dna nehpyh
+elgnis a yb ro eman rieht dna snehpyh delbuod yb deificeps era snoitpO
+regap urht dessap noitamrofni egasu dednetxe      pleh-erom  on !-
+tixe dna noitamrofni egasu dednetxe yalpsid           pleh  on ?-
+_EOF_
+
+compile_with_nls 2
+cleanup
+
+## Local Variables:
+## mode: shell-script
+## indent-tabs-mode: nil
+## sh-indentation: 2
+## End:
+
+# end of nls.test

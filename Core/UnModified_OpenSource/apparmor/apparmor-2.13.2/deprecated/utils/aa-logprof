@@ -1,0 +1,72 @@
+#!/usr/bin/perl
+# ----------------------------------------------------------------------
+#    Copyright (c) 2005 Novell, Inc. All Rights Reserved.
+#
+#    This program is free software; you can redistribute it and/or
+#    modify it under the terms of version 2 of the GNU General Public
+#    License as published by the Free Software Foundation.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program; if not, contact Novell, Inc.
+#
+#    To contact Novell about this file by physical or electronic mail,
+#    you may find current contact information at www.novell.com.
+# ----------------------------------------------------------------------
+
+use strict;
+use Data::Dumper;
+use Getopt::Long;
+use Locale::gettext;
+use POSIX;
+
+use Immunix::AppArmor;
+
+# force $PATH to be sane
+$ENV{PATH} = "/bin:/sbin:/usr/bin:/usr/sbin";
+
+# initialize the local poo
+setlocale(LC_MESSAGES, "");
+textdomain("apparmor-utils");
+
+setup_yast();
+
+# options variables
+my $help = '';
+my $logmark;
+
+GetOptions(
+    'file|f=s'    => \$filename,
+    'dir|d=s'     => \$profiledir,
+    'logmark|m=s' => \$logmark,
+    'help|h'      => \$help,
+);
+
+# tell 'em how to use it...
+&usage && exit if $help;
+
+# let's convert it to full path...
+$profiledir = get_full_path($profiledir);
+
+unless (-d $profiledir) {
+    fatal_error "Can't find AppArmor profiles in $profiledir.";
+}
+
+# load all the include files
+loadincludes();
+
+do_logprof_pass($logmark);
+
+shutdown_yast();
+
+exit 0;
+
+sub usage {
+    UI_Info(sprintf(gettext("usage: \%s [ -d /path/to/profiles ] [ -f /path/to/logfile ] [ -m \"mark in log to start processing after\""), $0));
+    exit 0;
+}
+

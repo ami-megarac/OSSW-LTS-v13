@@ -1,0 +1,33 @@
+From 8de3bd90e1d958147331882a51263216b5ea96d2 Mon Sep 17 00:00:00 2001
+From: Daiki Ueno <ueno@gnu.org>
+Date: Wed, 10 Mar 2021 16:11:29 +0100
+Subject: [PATCH 5/6] _gnutls_buffer_resize: account for unused area if
+ AGGRESSIVE_REALLOC
+
+Signed-off-by: Daiki Ueno <ueno@gnu.org>
+---
+ lib/str.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/lib/str.c b/lib/str.c
+index 506fe17210..bc20ebb04f 100644
+--- a/lib/str.c
++++ b/lib/str.c
+@@ -155,12 +155,12 @@ int _gnutls_buffer_resize(gnutls_buffer_st * dest, size_t new_size)
+ 
+ 	unused = MEMSUB(dest->data, dest->allocd);
+ 	dest->allocd =
+-	    gnutls_realloc_fast(dest->allocd, new_size);
++	    gnutls_realloc_fast(dest->allocd, new_size + unused);
+ 	if (dest->allocd == NULL) {
+ 		gnutls_assert();
+ 		return GNUTLS_E_MEMORY_ERROR;
+ 	}
+-	dest->max_length = new_size;
++	dest->max_length = new_size + unused;
+ 	dest->data = dest->allocd + unused;
+ 
+ 	return 0;
+-- 
+2.30.2
+

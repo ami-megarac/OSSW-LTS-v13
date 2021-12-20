@@ -1,0 +1,4 @@
+obj-legacy/lib/libncurses.so.* lib/${DEB_HOST_MULTIARCH}/
+obj-legacy/lib/libpanel.so.*   usr/lib/${DEB_HOST_MULTIARCH}
+obj-legacy/lib/libform.so.*    usr/lib/${DEB_HOST_MULTIARCH}
+obj-legacy/lib/libmenu.so.*    usr/lib/${DEB_HOST_MULTIARCH}

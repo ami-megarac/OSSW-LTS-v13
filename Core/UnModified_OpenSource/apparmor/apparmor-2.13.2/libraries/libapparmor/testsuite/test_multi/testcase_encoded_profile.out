@@ -1,0 +1,16 @@
+START
+File: testcase_encoded_profile.in
+Event type: AA_RECORD_ALLOWED
+Audit ID: 1322614912.304:857
+Operation: getattr
+Mask: r
+Denied Mask: r
+fsuid: 0
+ouid: 0
+Profile: test space
+Name: /lib/x86_64-linux-gnu/libdl-2.13.so
+Command: bash
+Parent: 16001
+PID: 17011
+Epoch: 1322614912
+Audit subid: 857

@@ -1,0 +1,10 @@
+#
+#=Description basic rules to test the "sync" mount option
+#=EXRESULT PASS
+/usr/bin/foo {
+  mount options=sync /a -> /1,
+  mount options=(sync) /b -> /2,
+  mount options=(rw,sync) /c -> /3,
+  mount options in (sync) /d -> /4,
+  mount options in (ro,sync) /e -> /5,
+}

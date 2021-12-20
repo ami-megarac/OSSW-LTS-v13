@@ -1,0 +1,13 @@
+#
+#=DESCRIPTION netdomain accept from port 65535 
+#=EXRESULT FAIL
+#
+/tmp/tcp/tcp_client {
+  tcp_accept to 10.0.0.17/16:1024-65535 from 127.0.0.1 via eth1,
+  tcp_accept to 10.0.0.18/16:65535 from 127.0.0.1 via eth1,
+  tcp_accept to 127.0.0.1,
+  /lib/libc.so.6	r,
+  /lib/ld-linux.so.2	r,
+  /etc/ld.so.cache	r,
+  /lib/libc-2.1.3.so	r,
+}

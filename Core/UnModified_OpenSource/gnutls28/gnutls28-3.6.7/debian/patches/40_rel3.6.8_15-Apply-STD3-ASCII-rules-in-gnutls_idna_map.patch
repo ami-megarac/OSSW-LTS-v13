@@ -1,0 +1,73 @@
+From b697e948b6f66440ee1f15337dfc83b6816bd21a Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Tim=20R=C3=BChsen?= <tim.ruehsen@gmx.de>
+Date: Mon, 20 May 2019 11:10:11 +0200
+Subject: [PATCH] Apply STD3 ASCII rules in gnutls_idna_map()
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Signed-off-by: Tim Rühsen <tim.ruehsen@gmx.de>
+---
+ NEWS             |  3 +++
+ lib/str-idna.c   | 10 +++++++---
+ tests/str-idna.c |  5 +++++
+ 3 files changed, 15 insertions(+), 3 deletions(-)
+
+--- a/NEWS
++++ b/NEWS
+@@ -53,6 +53,9 @@ See the end for copying conditions.
+ ** libgnutls: Fix calculation of Streebog digests (incorrect carry operation in
+    512 bit addition)
+ 
++** libgnutls: Apply STD3 ASCII rules in gnutls_idna_map() to prevent
++   hostname/domain crafting via IDNA conversion
++
+ ** API and ABI modifications:
+ No changes since last version.
+ 
+--- a/lib/str-idna.c
++++ b/lib/str-idna.c
+@@ -76,9 +76,13 @@ int gnutls_idna_map(const char *input, u
+ 	 * Since IDN2_NONTRANSITIONAL implicitly does NFC conversion, we don't need
+ 	 * the additional IDN2_NFC_INPUT. But just for the unlikely case that the linked
+ 	 * library is not matching the headers when building and it doesn't support TR46,
+-	 * we provide IDN2_NFC_INPUT. */
+-	idn2_flags |= IDN2_NONTRANSITIONAL;
+-	idn2_tflags |= IDN2_TRANSITIONAL;
++	 * we provide IDN2_NFC_INPUT.
++	 *
++	 * Without IDN2_USE_STD3_ASCII_RULES, the result could contain any ASCII characters,
++	 * e.g. 'evil.c\u2100.example.com' will be converted into
++	 * 'evil.ca/c.example.com', which seems no good idea. */
++	idn2_flags |= IDN2_NONTRANSITIONAL | IDN2_USE_STD3_ASCII_RULES;
++	idn2_tflags |= IDN2_TRANSITIONAL | IDN2_USE_STD3_ASCII_RULES;
+ #endif
+ 
+ 	/* This avoids excessive CPU usage with libidn2 < 2.1.1 */
+--- a/tests/str-idna.c
++++ b/tests/str-idna.c
+@@ -94,12 +94,16 @@ MATCH_FUNC(test_caps_german1, "Ü.ü", "
+ MATCH_FUNC(test_caps_german2, "Bücher.de", "xn--bcher-kva.de");
+ MATCH_FUNC(test_caps_german3, "Faß.de", "xn--fa-hia.de");
+ MATCH_FUNC(test_dots, "a.b.c。d。", "a.b.c.d.");
++
++/* without STD3 ASCII rules, the result is: evil.ca/c..example.com */
++MATCH_FUNC(test_evil, "evil.c\u2100.example.com", "evil.c.example.com");
+ # else
+ EMPTY_FUNC(test_caps_german1);
+ EMPTY_FUNC(test_caps_german2);
+ EMPTY_FUNC(test_caps_german3);
+ EMPTY_FUNC(test_caps_greek);
+ EMPTY_FUNC(test_dots);
++EMPTY_FUNC(test_evil);
+ # endif
+ 
+ int main(void)
+@@ -130,6 +134,7 @@ int main(void)
+ 		cmocka_unit_test(test_jp2),
+ 		cmocka_unit_test(test_jp2_reverse),
+ 		cmocka_unit_test(test_dots),
++		cmocka_unit_test(test_evil),
+ 		cmocka_unit_test(test_valid_idna2003)
+ 	};
+ 

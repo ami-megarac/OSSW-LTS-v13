@@ -1,0 +1,19 @@
+#!/bin/bash
+
+set -e
+
+ARCH="$1"
+
+# just make sure that gpg-error.exe works
+
+wine /usr/"${ARCH}"-w64-mingw32/bin/gpg-error.exe --version
+
+# just compare the first 200 error messages (not all of them, because
+# some errors have no available strings on windows):
+for x in $(seq 0 200); do
+    diff -u <(gpg-error $x) \
+         <(wine /usr/"${ARCH}"-w64-mingw32/bin/gpg-error.exe $x | sed 's/\r$//' )
+done
+
+# FIXME: it would be good to test building another windows binary
+# linking to libgpg-error and run it here.

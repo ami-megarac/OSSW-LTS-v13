@@ -1,0 +1,7 @@
+#
+#=DESCRIPTION simple stack size rlimit test
+#=EXRESULT PASS
+
+profile rlimit {
+  set rlimit stack <= 1024GB,
+}

@@ -1,0 +1,4 @@
+version=3
+opts=uversionmangle=s/(.*\.NC)$/0.0.$1/ \
+http://www.oracle.com/technetwork/products/berkeleydb/downloads/index-082944.html \
+(?:.*/|)db-(5\.3[\-\._]?\d\S*)\.(?:tar\.xz|txz|tar\.bz2|tbz2|tar\.gz|tgz)

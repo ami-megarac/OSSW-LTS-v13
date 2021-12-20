@@ -1,0 +1,30 @@
+#!/bin/sh
+
+set -e
+
+DATA=debian/tests/data
+
+echo "testing gz uncompression..."
+msg="gz uncompressed OK"
+echo "$msg" | gzip -c | perl -MIO::Uncompress::Gunzip=gunzip -e 'gunzip \*STDIN => \*STDOUT' | grep "$msg"
+
+for f in $DATA/*.gz; do
+    < $f perl -MIO::Uncompress::Gunzip=gunzip -e 'gunzip \*STDIN => \*STDOUT' | grep OK
+done
+
+echo "testing gz compression..."
+msg="gz compressed OK"
+echo "$msg" | perl -MIO::Compress::Gzip=gzip -e 'gzip \*STDIN => \*STDOUT' | gzip -dc | grep "$msg"
+
+echo "testing bz2 uncompression"
+msg="bz2 uncompressed OK"
+echo "$msg" | bzip2 -c | perl -MIO::Uncompress::Bunzip2=bunzip2 -e 'bunzip2 \*STDIN => \*STDOUT' | grep "$msg"
+
+for f in $DATA/*.bz2; do
+    < $f perl -MIO::Uncompress::Bunzip2=bunzip2 -e 'bunzip2 \*STDIN => \*STDOUT' | grep OK
+done
+
+echo "testing bz2 compression..."
+msg="bz2 compressed OK"
+echo "$msg" | perl -MIO::Compress::Bzip2=bzip2 -e 'bzip2 \*STDIN => \*STDOUT' | bzip2 -dc | grep "$msg"
+

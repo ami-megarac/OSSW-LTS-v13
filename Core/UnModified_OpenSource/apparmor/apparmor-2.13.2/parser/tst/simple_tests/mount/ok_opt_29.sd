@@ -1,0 +1,10 @@
+#
+#=Description basic rules to test the "loud" mount option
+#=EXRESULT PASS
+/usr/bin/foo {
+  mount options=loud /a -> /1,
+  mount options=(loud) /b -> /2,
+  mount options=(rw,loud) /c -> /3,
+  mount options in (loud) /d -> /4,
+  mount options in (ro,loud) /e -> /5,
+}

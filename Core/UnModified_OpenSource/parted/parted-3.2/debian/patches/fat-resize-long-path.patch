@@ -1,0 +1,38 @@
+From 554e2a4393017518f562f80121b760595ee01e98 Mon Sep 17 00:00:00 2001
+From: Mike Fleetwood <mike.fleetwood@googlemail.com>
+Date: Sun, 28 Feb 2016 15:36:10 +0000
+Subject: lib-fs-resize: Prevent crash resizing FAT with very deep directories
+
+Resizing a FAT file system crashes in libparted/fs/r/fat/count.c
+flag_traverse_dir() if the length of any path name in the file system
+overflows the 512 byte file_name local buffer.  Increase buffer to 4096,
+PATH_MAX on Linux.
+
+Reported in
+https://bugzilla.gnome.org/show_bug.cgi?id=762448
+
+Signed-off-by: Brian C. Lane <bcl@redhat.com>
+
+Origin: backport, https://git.savannah.gnu.org/cgit/parted.git/commit/?id=6242ad71d855be62d99ec345e52393be86ca9900
+Bug: https://bugzilla.gnome.org/show_bug.cgi?id=762448
+Bug-Debian: https://bugs.debian.org/840709
+Last-Update: 2018-04-09
+
+Patch-Name: fat-resize-long-path.patch
+---
+ libparted/fs/r/fat/count.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/libparted/fs/r/fat/count.c b/libparted/fs/r/fat/count.c
+index 7949e470..a5837c0a 100644
+--- a/libparted/fs/r/fat/count.c
++++ b/libparted/fs/r/fat/count.c
+@@ -219,7 +219,7 @@ flag_traverse_dir (FatTraverseInfo* trav_info) {
+ 	PedFileSystem*		fs = trav_info->fs;
+ 	FatDirEntry*		this_entry;
+ 	FatTraverseInfo*	subdir_trav_info;
+-	char			file_name [512];
++	char			file_name [4096];
+ 	char*			file_name_start;
+ 	FatCluster		first_cluster;
+ 	PedSector		size;

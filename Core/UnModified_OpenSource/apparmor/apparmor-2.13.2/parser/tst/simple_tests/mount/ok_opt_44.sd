@@ -1,0 +1,10 @@
+#
+#=Description basic rules to test the "runbindable" mount option
+#=EXRESULT PASS
+/usr/bin/foo {
+  mount options=runbindable -> /1,
+  mount options=(runbindable) -> /2,
+  mount options=(rw,runbindable) -> /3,
+  mount options in (runbindable) -> /4,
+  mount options in (ro,runbindable) -> /5,
+}

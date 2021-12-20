@@ -1,0 +1,392 @@
+#! /bin/echo this_file_should_be_sourced,_not_executed
+#  -*- Mode: Shell-script -*-
+#
+# defs --- define the environment for autogen tests.
+#
+# Author:         Bruce Korb <bkorb@gnu.org>
+#
+##  This file is part of AutoOpts, a companion to AutoGen.
+##  AutoOpts is free software.
+##  AutoOpts is Copyright (C) 1992-2016 by Bruce Korb - all rights reserved
+##
+##  AutoOpts is available under any one of two licenses.  The license
+##  in use must be one of these two and the choice is under the control
+##  of the user of the license.
+##
+##   The GNU Lesser General Public License, version 3 or later
+##      See the files "COPYING.lgplv3" and "COPYING.gplv3"
+##
+##   The Modified Berkeley Software Distribution License
+##      See the file "COPYING.mbsd"
+##
+##  These files have the following sha256 sums:
+##
+##  8584710e9b04216a394078dc156b781d0b47e1729104d666658aecef8ee32e95  COPYING.gplv3
+##  4379e7444a0e2ce2b12dd6f5a52a27a4d02d39d247901d3285c88cf0d37f477b  COPYING.lgplv3
+##  13aa749a5b0a454917a944ed8fffc530b784f5ead522b1aacaf4ec8aa55a6239  COPYING.mbsd
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+#
+#  C O N F I G U R E D   V A L U E S
+#
+# Make sure srcdir is an absolute path.  Supply the variable
+# if it does not exist.  We want to be able to run the tests
+# stand-alone!!
+#
+cfg_vals()
+{
+  case `uname -s` in
+  SunOS )
+    if test "X$BASH_VERSION" = X
+    then
+      # On Solaris, make certain we do not use /bin/sh
+      sh=`which bash`
+      test "X$sh" = X && sh=/usr/xpg4/bin/sh
+      BASH_VERSION=not-good-enough
+      export BASH_VERSION
+      exec $sh "$0" "$@"
+    fi
+    ;;
+  esac
+
+  set -a
+  TESTS=''
+  builddir=`pwd`
+  progpid=$$
+  : ${top_builddir=@top_builddir@}
+  top_builddir=`cd ${top_builddir} >/dev/null ; pwd`
+  : ${top_srcdir=@top_srcdir@}
+  top_srcdir=`cd ${top_srcdir} >/dev/null ; pwd`
+  : ${srcdir=@srcdir@}
+  srcdir=`cd $srcdir >/dev/null && pwd`
+  . ${top_builddir}/config/shdefs "${builddir}/`
+        echo $0|${SED:-sed} 's@.*/@@'`"
+  progname=`echo "$1" | ${SED} 's,^.*/,,'`
+  testname=`echo "$progname" | ${SED} 's,\..*$,,'`
+  testsubdir=${testname}-testd
+  tstdir=${builddir}/${testsubdir}
+  PS4=">${testname}-\${FUNCNAME}> "
+  test_name=`echo ${testname} | ${SED} 's/-/_/g'`
+  ( exec 2>/dev/null; ulimit -c unlimited ) && \
+    ulimit -c unlimited
+
+  CFLAGS="${CFLAGS} ${DEFS}"
+  : ${PAGER=more}
+
+  stdopts=${top_srcdir}/autoopts/test/stdopts.def
+  test_main=yes
+  use_flags=true
+  sed_omit_license="/-\*- buffer-read-only:/,/^ \*\//d"
+  TERM=''
+  set +a
+
+  (
+    test_local() {
+      local local_works=yes
+    }
+    test_local
+  ) || eval 'local() { : ; }'
+
+  vars=`set | ${SED} -n '/^\(LANG\|LC_[A-Z_]*\)=/s/=.*//p'` 2>/dev/null
+  unset AUTOOPTS_USAGE $vars CONTENT_LENGTH REQUEST_METHOD QUERY_STRING
+}
+
+#  If only the "rm(1)" command could be relied upon....
+#
+purge()
+{
+  rm -rf ${*} 2>/dev/null
+  bad=''
+  for f
+  do test -f ${f} -o -d ${f} && bad="${bad} ${f}"
+  done
+  test -z "$bad" && return 0
+
+  # NFS "busy" files and MS-DOS fs sometimes fail.
+  #
+  set -- $bad
+  test "x${RANDOM}" = "x${RANDOM}" && RANDOM=`expr 0${RANDOM} + 1 2>/dev/null`
+
+  f=ZZPURGE-${1}-${RANDOM}-${progpid}
+  if test $# -gt 1
+  then mkdir "${f}"
+       mv $* "${f}/."
+  else mv $1 "${f}"
+  fi
+}
+
+init_tests()
+{
+  exec 8>&2
+  BASH_XTRACEFD=8
+
+  TMPDIR="${tstdir}/${testname}-tmpd"
+  mkdir -p ${TMPDIR}
+  CFLAGS=`echo ${CFLAGS} | \
+    ${SED} "s/-Werror[^ ${ht}]*//g;s/-Wextra//g"`
+
+  lo_dir=${top_builddir}/autoopts
+  lo_lib=`find ${lo_dir} -type f -name "*libopts.${OBJEXT}" | head -n1`
+  test -f "$lo_lib" || {
+    lo_lib=`find ${lo_dir} -type f -name "*libopts.lo" | head -n1`
+    test -f "$lo_lib" || die "no libopts lib"
+  }
+  lo_dir=${lo_lib%/*}
+  test "X${LD_LIBRARY_PATH}" = X || \
+    LD_LIBRARY_PATH=:${LD_LIBRARY_PATH}
+  LD_LIBRARY_PATH=${lo_dir}:${LIBGUILE_PATH}${LD_LIBRARY_PATH}
+
+  case ${AG_VERSION} in
+  *pre* ) GUILE_WARN_DEPRECATED=detailed ;;
+  *     ) GUILE_WARN_DEPRECATED=no ;;
+  esac
+
+  case "$LIB" in
+  *-lgen* ) : ;;
+  * )
+    for f in /usr/lib*/libgen.so /lib*/libgen.so
+    do
+      test -f $f && {
+        LIB="${LIB} -lgen"
+        break
+      }
+    done
+    ;;
+  esac
+  LIB="${lo_lib} ${LIB}"
+
+  AG_L=run_ag\ ao
+  agl_opts="-L${top_builddir}/autoopts/tpl"
+  test "L${top_builddir}" = "L${top_srcdir}" || \
+    agl_opts="$agl_opts -L${top_srcdir}/autoopts/tpl"
+  export TMPDIR PATH LD_LIBRARY_PATH \
+         GUILE_WARN_DEPRECATED LIB AG_L agl_opts \
+         CC LIBGUILE AG_VERSION
+}
+
+be_silent()
+{
+  setx=:
+  msg=echo
+  VERBOSE=false
+  purge ${testsubdir}
+
+  run_ag()
+  {
+    local opts=
+    opts=''
+    shift
+
+    case " $* " in
+    *' -L'* ) : ;;
+    * ) opts="${agl_opts}" ;;
+    esac
+
+    ${AGexe} ${opts} "$@"
+  }
+
+  init_tests
+}
+
+be_verbose()
+{
+  set -x
+  setx='set -x'
+  msg=:
+  VERBOSE=true
+  test -d ${testsubdir} || mkdir ${testsubdir} || exit 1
+
+  run_ag()
+  {
+    local opts= tfile=${testname}-aglog-${1}-${progpid}.log
+    ${verb_ok:-true} && {
+      case " $* " in
+      *' --trace'* ) : ;;
+      * )
+        opts="--trace=every --trace-out=>>${tfile}"
+        ;;
+      esac
+      AUTOGEN_TRACE=every
+      AUTOGEN_TRACE_OUT=">>`pwd`/${tfile}"
+      export AUTOGEN_TRACE_OUT AUTOGEN_TRACE
+    }
+    shift
+
+    case " $* " in
+    *' -L'* ) : ;;
+    * ) opts="${opts} ${agl_opts}" ;;
+    esac
+
+    MALLOC_CHECK_=3 ${AGexe} ${opts} "$@"
+  }
+
+  init_tests
+}
+
+cfg_inc()
+{
+  test_src=$srcdir/${testname}.test
+  cd ${testsubdir} || {
+    echo "Cannot make or change into ${testsubdir}"
+    exit 1
+  }
+
+  dirs=`
+  for f in ${top_builddir} ${top_srcdir}
+  do
+    for d in . autoopts agen5
+    do
+      cd $f/$d
+      pwd >&9
+      cd -
+    done 9>&1 1>/dev/null
+  done | sort -u | ${SED} 's/^/-I/'`
+
+  INC=`echo ${dirs} ${CPPFLAGS}`
+
+  : "=== Running $progname for ${testname} using ${SHELL} ==="
+  chmod +w * > /dev/null 2>&1 || :
+  ${VERBOSE} && SHELLX="${SHELL} -x" || SHELLX="${SHELL}"
+}
+
+# # # #
+#
+# "clean_help" -- remove variable parts so results can be compared
+#
+nl='
+'
+ht='	'
+basic_help_clean="/^Packaged by/d
+/^Report .* bugs to/d
+/[Pp]lease send bug reports/d
+/^exit [0-9]/d
+/^[ ${ht}]*\$/d"
+TR=`command -v tr`
+test -x "$TR" || die "cannot run tests without 'tr' program"
+
+export   nl ht basic_help_clean TR
+readonly nl ht basic_help_clean TR
+
+clean_help() {
+  test -z "$sedcmd" && \
+    s=${basic_help_clean} || \
+    s="${sedcmd}${nl}${basic_help_clean}"
+
+  ${SED} "${s}" ${1+"$@"}
+}
+
+compile()
+{
+  ${setx}
+  test "X${Csrc}"  = "X" && Csrc="${testname}"
+  test "X${Cexe}"  = "X" && Cexe="${Csrc}"
+  test "X${Dnam}"  = "X" && Dnam="${testname}"
+
+  d=`echo TEST_TEST_${Dnam}_OPTS | ${TR} '[a-z]-' '[A-Z]_'`
+  cc_cmd="${CC} ${CFLAGS} -D$d ${INC} -o ${Cexe} ${Csrc}.c ${LIB}"
+  eval ${cc_cmd} || \
+    failure cannot compile ${Csrc}.c
+  if test $# -gt 0
+  then
+    ( set +xe
+      exec 2>&1
+      ./${Cexe} ${*} ${dosed}
+    ) || failure cannot obtain help output for ${Csrc}
+  fi > ${Cexe}.RAW-HELP
+  clean_help ${Cexe}.RAW-HELP > ${Csrc}.help
+  Csrc='' Cexe='' Dnam=''
+}
+
+cleanup()
+{
+  kill -9 $THUMPER_PID
+  trap '' 15
+  ${setx}
+  ${VERBOSE} || {
+    cd ${builddir}
+    purge ${testsubdir}
+  }
+  ${msg} ${testname} done
+  exit 0
+}
+
+# A standard failure function
+#
+failure()
+{
+  kill -9 $THUMPER_PID
+  trap '' 15
+  set -x
+  cd ${tstdir}/..
+  if test -d FAILURES
+  then test -d "FAILURES/${testsubdir}" && \
+    purge "FAILURES/${testsubdir}"
+  else mkdir FAILURES
+  fi
+
+  mv "${testsubdir}" "FAILURES/${testsubdir}"
+  test -f "${testname}.log" && {
+    mv "${testname}.log" "FAILURES/${testsubdir}/amtest-${testname}.log"
+    ln -s "FAILURES/${testsubdir}/amtest-${testname}.log" "${testname}.log"
+  }
+  echo FAILURE: "$*"
+  exit 1
+}
+
+thumper()
+{
+  exec > /dev/null 2>&1 </dev/null
+  set +x
+  bdir=`cd "$builddir" >/dev/null ; pwd`
+  cd /
+  rpid=${progpid}
+  test -z "${kill_delay}" && kill_delay=3
+  kill_delay=`expr $kill_delay '*' $AG_TIMEOUT`
+  while test ${kill_delay} -gt 0
+  do  sleep 1
+      ps -p ${rpid} || exit 0
+      kill_delay=`expr $kill_delay - 1`
+  done
+  kill -15 ${rpid}
+  sleep 1
+  ps -p ${rpid} || exit
+  test -d "$bdir" && {
+    test -d ${bdir}/FAILURES || \
+      mkdir ${bdir}/FAILURES
+    mv -f "${tstdir}" "${bdir}/FAILURES/."
+  }
+  kill -9 ${rpid}
+}
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+cfg_vals $0
+
+case "${VERBOSE}" in
+'' | [Nn]* | 0 | [Ff]* )
+    be_silent ;;
+
+[Yy]* | [0-9] | [Tt]* )
+    be_verbose ;;
+
+* )
+    case "$-" in
+    *x* ) be_verbose ;;
+     *  ) be_silent ;;
+    esac
+esac
+
+thumper &
+THUMPER_PID=$!
+cfg_inc
+
+trap "failure 'test ${testname} killed on timeout'" 15
+
+## Local Variables:
+## mode: shell-script
+## indent-tabs-mode: nil
+## sh-indentation: 2
+## sh-basic-offset: 2
+## End:
+
+# defs.in ends here

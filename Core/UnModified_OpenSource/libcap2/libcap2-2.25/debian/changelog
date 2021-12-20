@@ -1,0 +1,546 @@
+libcap2 (1:2.25-2) unstable; urgency=medium
+
+  * Acknowledge NMUs.
+    Thanks, Matthias Klose and Helmut Grohne!
+
+  * d/upstream/signing-key.asc:
+    - Add Andrew G. Morgan's public OpenPGP key
+  * d/watch:
+    - Update to format version 4
+    - Check vor a valid signature
+  * d/control:
+    - Bump Standards-Version to 4.3.0
+    - Drop Priority of libcap2
+      Priority for this library should be "optional", which is already the
+      Priority of the source package
+    - Switch Build-Depends from debhelper to debhelper-compat
+    - Bump Build-Depends for debhelper to 12
+    - Update Vcs-* URLs to point to Salsa
+    - Switch Homepage to https
+  * d/compat:
+    - Drop, as made obsolete by debhelper-compat
+  * d/rules:
+    - Switch from dh_install to dh_missing
+    - Drop override_dh_strip
+      It was only needed for the dbgsym migration
+  * d/tests/executables:
+    - Rename ADTTMP to AUTOPKGTEST_TMP
+      ADT* variables were renamed in autopkgtest (4.0)
+  * d/manpages/getpcaps.1:
+    - Reproduce section "TEXTUAL REPRESENTATION" from cap_from_text(3)
+      Closes: #826733
+    - Fix program name get_pcaps -> getpcaps
+  * d/copyright:
+    - Add patches/*, and bump copyrights
+    - Switch MRCF Policy URI to https
+
+ -- Christian Kastner <ckk@debian.org>  Wed, 06 Feb 2019 21:12:36 +0100
+
+libcap2 (1:2.25-1.2) unstable; urgency=medium
+
+  * Non-maintainer upload.
+
+  [ Helmut Grohne ]
+  * Fix for FTCBFS, libcap.pc has bad libdir (Closes: #871714)
+
+ -- Manuel A. Fernandez Montecelo <mafm@debian.org>  Fri, 17 Nov 2017 00:35:52 +0100
+
+libcap2 (1:2.25-1.1) unstable; urgency=medium
+
+  * Non-maintainer upload.
+  * Fix FTBFS with gperf 3.1 (Helmut Grohne). Closes: #869588.
+
+ -- Matthias Klose <doko@debian.org>  Wed, 11 Oct 2017 10:26:50 +0200
+
+libcap2 (1:2.25-1) unstable; urgency=medium
+
+  * New upstream release. LP: #1451601
+  * Drop package libcap2-dbg in favor of automatic dbgsym packages, as per
+    https://lists.debian.org/debian-devel/2015/12/msg00262.html.
+  * d/control:
+    - Bump Standards-Version to 3.9.8 (no changes needed)
+    - Increase Priority of libcap2{,-bin} to important. Closes: #815566
+    - Drop libattr1-dev from Build-Depends. Upstream no longer uses this
+      library and instead uses the kernel API directly
+    - Switch Vcs-Browser from gitweb to cgit
+    - Switch to secure URIs in Vcs-* fields
+  * d/rules:
+    - Add hardening=+all to DEB_BUILD_MAINT_OPTIONS
+  * d/tests:
+    - executables:
+      + Fix typos
+      + Don't mount over ADTTMP, use a subdir instead. ADTTMP could already be
+        a mount point for another filesystem, which could make things slightly
+        more confusing
+      + Improve output
+  * d/copyright:
+    - Bump copyright years
+  * d/patches (added):
+    - Avoid-sys-capability.h-on-build-architecture.patch
+      Fixes a FTCBFS on kFreeBSD. Thanks, Helmut Grohne! Closes: #809467
+    - Filter-out-PIE-flags-when-building-shared-objects.patch
+      Filters out -pie, -fpie, and -fPIE from CFLAGS/LDFLAGS when building the
+      shared library and the PAM module
+    - Spelling-fixes.patch
+  * d/patches (updated):
+    - setcap-error-message.patch
+    - Update Don-t-hardcode-build-flags.patch
+  * d/patches (dropped):
+    - Drop include-sys-xattr.patch
+      The reason it was initially created for ceased to exist in 2.25
+  * libcap2-bin:
+    -  lintian override for spelling-error-in-readme-debian (false positive)
+
+ -- Christian Kastner <ckk@debian.org>  Sat, 30 Apr 2016 14:30:26 +0200
+
+libcap2 (1:2.24-12) unstable; urgency=medium
+
+  * d/tests:
+    - Amend stderr redirection to fix autopkgtest failures
+
+ -- Christian Kastner <ckk@debian.org>  Fri, 02 Oct 2015 15:30:03 +0200
+
+libcap2 (1:2.24-11) unstable; urgency=medium
+
+  * d/rules:
+    - Provide BUILD_LDFLAGS and BUILD_CPPFLAGS. Thanks, Helmut Grohne!
+  * d/patches:
+    - Drop patch numbers from .patch filenames
+  * d/patches (updated):
+    - Don-t-hardcode-build-flags.patch
+      When using BUILD_CC, use BUILD_LDFLAGS and BUILD_CPPFLAGS instead of the
+      host ones. Thanks, Helmut Grohne! Closes: #796886
+  * Add package-specific d/gbp.conf
+
+ -- Christian Kastner <ckk@kvr.at>  Tue, 25 Aug 2015 20:40:33 +0200
+
+libcap2 (1:2.24-10) unstable; urgency=medium
+
+  * d/control:
+    - Drop XS-Testsuite. dpkg now recognizes the Testsuite header, and
+      dpkg-source automatically adds one when an autopkgtest suite is found
+    - Add gperf to Build-Depends. The build proceeds slightly differently when
+      gperf is present in the build environment, so make sure it is present in
+      all build environments
+    - Switch Maintainer email to my @debian.org address
+  * d/rules:
+    - Pass --version-info to dh_makeshlibs to match .symbols. Thanks, KiBi!
+  * d/copyright:
+    - Bump copyright years
+  * d/tests:
+    - Add missing dependencies for gcc and libc-dev
+    - Test "executables": Redirect stderr to stdout on test with expected
+      failure
+  * d/patches (updated):
+    - 0004-Don-t-hardcode-build-flags
+      Add LDFLAGS to a target to silence a hardening flags warning, even though
+      the target is not shipped, but only used at build-time.
+  * d/patches (added):
+    - 0006-Hide-private-symbols.patch
+
+ -- Christian Kastner <ckk@debian.org>  Sun, 23 Aug 2015 23:16:07 +0200
+
+libcap2 (1:2.24-9) unstable; urgency=medium
+
+  [ Matthias Klumpp ]
+  * Add udeb package for libcap2 to be used in d-i, since
+    the libudev1-udeb package depends on libcap2 now.
+
+ -- Christian Kastner <debian@kvr.at>  Sun, 07 Jun 2015 18:38:54 +0200
+
+libcap2 (1:2.24-8) unstable; urgency=medium
+
+  * debian/libcap2-bin.maintscript:
+    - Drop, because using rm_conffile to clean up an obsolete conffile that
+      was moved to another package can lead to breakage, see:  Closes: #781050
+  * debian/watch:
+    - Drop stray empty opts= (invalid syntax breaks uscan checks)
+
+ -- Christian Kastner <debian@kvr.at>  Sun, 29 Mar 2015 15:00:39 +0200
+
+libcap2 (1:2.24-7) unstable; urgency=medium
+
+  * debian/libcap2-bin.maintscript:
+    - Remove obsolete conffile capability.conf. Closes: #768229
+  * debian/control:
+    - Add Breaks+Replaces for libcap-bin. libcap-bin was removed after lenny,
+      but the transition to libcap2-bin was not fully handled. Closes: #780411
+
+ -- Christian Kastner <debian@kvr.at>  Fri, 13 Mar 2015 21:28:23 +0100
+
+libcap2 (1:2.24-6) unstable; urgency=medium
+
+  * debian/rules:
+    - Use proper assignment for CC. It has a default value, so ?= assignment
+      does not make sense. Using := fixes a FTCBFS. Thanks, Helmut Grohne.
+      Closes: #762575
+  * debian/control:
+    - Add XS-Testsuite for autopkgtest
+  * debian/tests/executables:
+    - Add an autopkgtest for getcap(8) and setcap(8) functionality
+
+ -- Christian Kastner <debian@kvr.at>  Thu, 25 Sep 2014 01:41:47 +0200
+
+libcap2 (1:2.24-5) unstable; urgency=medium
+
+  * debian/libcap2-bin.lintian-overrides:
+    - Drop this file; it only contained an unused lintian override for
+      statically-linked-binary
+  * debian/control:
+    - Bump Standards-Version to 3.9.6 (no changes needed)
+    - Add binary package libcap2-dbg for debugging symbols
+  * debian/rules:
+    - Use dpkg/architecture.mk instead of manual assignment
+    - Rework the cross-compiling support. Less code, and less assumptions about
+      the environment
+    - Create dirs in override_dh_installdirs
+    - Simplify installation stage
+    - Add override_dh_strip to place symbols in libcap2-dbg
+  * Package libcap-dev:
+    - Move the static library from /lib/ to /usr/lib/, where development files
+      belong according to the FHS. /lib/ is only for essential shared
+      libraries.
+  * debian/TODO:
+    - Drop file (all items were either dropped or completed)
+
+ -- Christian Kastner <debian@kvr.at>  Fri, 19 Sep 2014 13:52:51 +0200
+
+libcap2 (1:2.24-4) unstable; urgency=low
+
+  * debian/control:
+    - Set myself to maintainer. Closes: #756091
+    - Drop redundant Section
+    - Drop redundant Priority fields
+    - Add Multi-Arch field for libcap2-bin
+    - Point Vcs-* URLs to collab-maint
+  * debian/rules:
+    - Drop dh_builddeb override, xz is now default
+    - Drop override_dh_makeshlibs; a symbols file is provided now
+  * debian/copyright:
+    - Add myself
+    - Add missing copyright for manpages
+    - Add missing copyright for contrib/*
+  * debian/symbols:
+    - Create symbols file
+  * debian/watch:
+    - Create watch file
+  * debian/manpages:
+    - Fix typo in manpage name (getcaps -> getpcaps)
+    - Drop capsh.8, upstream ships capsh.1 now
+  * debian/source/options:
+    - Remove, as xz is now the default compression algo
+  * debian/patches (refreshed):
+    - Update headers to play more nicely with gbp-pq
+  * debian/patches (added):
+    - 0004-Don-t-hardcode-build-flags
+      Needed so that hardening flags get honored
+    - 0005-Syntax-fixes-for-man-pages
+
+ -- Christian Kastner <debian@kvr.at>  Sat, 26 Jul 2014 20:06:24 +0200
+
+libcap2 (1:2.24-3) unstable; urgency=medium
+
+  * I don't care anymore, not worth it.. orphaning.
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Fri, 25 Jul 2014 20:51:41 +0200
+
+libcap2 (1:2.24-2) unstable; urgency=low
+
+  * Adding provides for libcap2-dev that got lost during rebase (Closes:
+    #755559).
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Tue, 22 Jul 2014 10:55:23 +0200
+
+libcap2 (1:2.24-1) unstable; urgency=low
+
+  * Merging upstream version 2.24 (Closes: #734633): - in sync with
+    current kernels (Closes: #689035)
+  * Dropping unused orig-tar.sh.
+  * Marking package as linux-any only (Closes: #745186).
+  * Moving local manpages to subdirectory.
+  * Applied patch from Loïc Minier <loic.minier@linaro.org> to fix cross-
+    building by passing CC and BUILD_CC to dh_auto_make, based on a patch
+    by Colin Watson for the previous CDBS packaging, but adapted for the
+    new dh-based packaging (Closes: #645908).
+  * Adding manpages for capability.conf, getcaps, and pam_cap from Scott
+    Schaefer <saschaefer@neurodiverse.org> (Closes: #504606).
+  * Using xz explizitly for source tarballs.
+  * Adding dpkg-source local options to abort on upstream changes.
+  * Moving local pam-configs to local subdirectory.
+  * Dropping watch file.
+  * Dropping old README.source.
+  * Updating to standards version 3.9.5.
+  * Sorting fields in control.
+  * Doubling some fields in control for binary packages in order to avoid
+    implicit use.
+  * Removing useless whitespaces at EOL/EOF.
+  * Dropping pre-wheezy conflicts/replaces etc.
+  * Updating to debhelper version 9.
+  * Wrapping build-depends.
+  * Wrapping and sorting depends.
+  * Adding vcs fields.
+  * Harmonizing package descriptions.
+  * Building debian binary packages explicitly with xz compression.
+  * Rewriting copyright file in copyright format 1.0.
+  * Reworking debhelper install files.
+  * Dropping pre-wheezy libcap2-bin.preinst.
+  * Reworking debhelper maintainer scripts.
+  * Adding todo file.
+  * Refreshing fix-Makefiles.patch.
+  * Refresh refine-setcap-error-message.patch.
+  * Renaming and renumbering patches consistently.
+  * Adding patch from Adam Conrad <adconrad@ubuntu.com> to include
+    sys/xattr.h in sys/capability.h.
+  * Using curly braces in rules where appropriate.
+  * Running dh_install with --fail-missing.
+  * Correctly moving .so symlink to /usr in libcap-dev where it should be.
+  * Dropping useless suggests on libcap-dev.
+  * Prefixing readme with package name.
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Fri, 18 Jul 2014 10:58:46 +0200
+
+libcap2 (1:2.22-2) unstable; urgency=low
+
+  * Taking over package from Torsten with thanks for his past work on it.
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Wed, 09 Jul 2014 11:26:11 +0200
+
+libcap2 (1:2.22-1.2) unstable; urgency=low
+
+  * Non-maintainer upload.
+  * Add preinst script for libcap2-bin to properly remove PAM module
+    on upgrade from libcap2-bin <= 1:2.22-1. (Closes: #673770)
+
+ -- Tobias Hansen <tobias.han@gmx.de>  Fri, 06 Jul 2012 20:02:14 +0200
+
+libcap2 (1:2.22-1.1) unstable; urgency=low
+
+  * Non-maintainer upload with permission from Torsten Werner.
+  * Apply Multiarch patch from Kees Cook.  Closes: #653186.
+  * debian/{control,rules,compat}: Build for Multi-arch.
+  * debian/{control,libpam-cap.*}: Split PAM module into separate binary
+    package so it can be built for Multi-arch separate from the -bins pkg.
+
+ -- Mark Hymers <mhy@debian.org>  Sun, 13 May 2012 10:28:44 +0100
+
+libcap2 (1:2.22-1) unstable; urgency=low
+
+  * New upstream released
+
+ -- Zhi Li <lizhi1215@gmail.com>  Thu, 28 Jul 2011 12:50:30 +0800
+
+libcap2 (1:2.21-3) unstable; urgency=low
+
+  * Non-maintainer upload.
+  * 0003-refine-setcap-error-message.patch:refine setcap output on errors
+    (Closes: #633075)
+
+ -- Zhi Li <lizhi1215@gmail.com>  Wed, 20 Jul 2011 09:35:48 +0800
+
+libcap2 (1:2.21-2) unstable; urgency=low
+
+  [ Serge Hallyn ]
+  * 0002-support-getting-setting-capabilities-on-large-files.patch: patch from
+    upstream to enable setting capabilities on large files.
+    (Closes: #631134)
+
+  [ Torsten Werner ]
+  * Move package to alioth's collab-maint project.
+    * Use git instead of svn.
+    * Update Vcs-* headers in debian/control.
+
+  [ Zhi Li ]
+  * Modify long description in libcap2-bin/debian/control, remove those files that were not generated.
+    (Closes: #620345)
+
+ -- Torsten Werner <twerner@debian.org>  Mon, 11 Jul 2011 22:11:41 +0200
+
+libcap2 (1:2.21-1) unstable; urgency=low
+
+  * New upstream release.
+  * debian/patches/0001-fix-Makefiles.patch: link pam_cap against -lpam.
+    (Closes: #591410) (LP: #582769)
+
+ -- Serge Hallyn <serge.hallyn@ubuntu.com>  Fri, 20 May 2011 08:28:55 -0500
+
+libcap2 (1:2.20-1) unstable; urgency=low
+
+  * New upstream release.
+  * Remove all patches because they have been included upstream.
+
+ -- Torsten Werner <twerner@debian.org>  Fri, 11 Feb 2011 20:31:45 +0100
+
+libcap2 (1:2.19-3) unstable; urgency=high
+
+  * Add a versioned dependency on libpam-runtime to libcap2-bin because
+    pam-auth-update is needed in postinst. (Closes: #593250)
+  * Set urgency to high because we are fixing a RC bug.
+
+ -- Torsten Werner <twerner@debian.org>  Mon, 16 Aug 2010 23:13:50 +0200
+
+libcap2 (1:2.19-2) unstable; urgency=medium
+
+  * Add -lpam to LDLIBS. Thanks to Sebastian Ramacher for suggesting the patch!
+    (Closes: 591410)
+  * Set urgency to medium.
+  * Improve patch description.
+
+ -- Torsten Werner <twerner@debian.org>  Wed, 04 Aug 2010 05:22:23 +0200
+
+libcap2 (1:2.19-1) unstable; urgency=low
+
+  [ Kees Cook ]
+  * Add pam_cap.so to the default PAM auth stack. (Closes: #573089)
+
+  [ Torsten Werner ]
+  * New upstream release.
+  * Convert package to source format 3.0.
+  * Remove quilt from Build-Depends.
+  * Add static library to -dev package. Thanks to Stephan Sürken. (Closes:
+    #589840)
+  * Fix typo in Description. Thanks to Pascal De Vuyst. (Closes: #557496)
+  * Add a patch to fix the man page cap_from_text(3). Thanks to Roland
+    Koebler. (Closes: #567350)
+  * Update Standards-Version: 3.9.0 (no changes).
+
+ -- Torsten Werner <twerner@debian.org>  Thu, 22 Jul 2010 23:50:25 +0200
+
+libcap2 (1:2.17-2) unstable; urgency=low
+
+  * Explain in the long description of the -bin package that the manpage
+    cap_from_text(3) is part of -dev package. (Closes: #548080)
+
+ -- Torsten Werner <twerner@debian.org>  Sun, 18 Oct 2009 19:55:39 +0200
+
+libcap2 (1:2.17-1) unstable; urgency=low
+
+  * new upstream release
+  * Switch from cdbs to dh.
+  * Update Standards-Version: 3.8.3 (no changes).
+  * Use gbp-pq to edit quilt patch.
+  * Change Build-Depends: debhelper (>= 7.0.50~).
+  * Add README.source.
+  * Add man page capsh.8.
+
+ -- Torsten Werner <twerner@debian.org>  Wed, 30 Sep 2009 22:26:51 +0200
+
+libcap2 (1:2.16-5) unstable; urgency=low
+
+  * Remove reference to kernel version 2.2 in debian/control. (Closes:
+    #260005)
+  * Add Suggests: libcap-dev to binary package libcap2-bin. (Closes: #433782)
+
+ -- Torsten Werner <twerner@debian.org>  Wed, 01 Apr 2009 23:32:37 +0200
+
+libcap2 (1:2.16-4) unstable; urgency=low
+
+  * Add Conflicts: and Replaces: libcap2-dev to binary package libcap-dev.
+  * Add epoch to version number because the old package had an epoch.
+  * Add missing files to package libcap-dev which got lost in the previous
+    version.
+
+ -- Torsten Werner <twerner@debian.org>  Sun, 22 Mar 2009 21:23:50 +0100
+
+libcap2 (2.16-3) unstable; urgency=low
+
+  * Rename binary package libcap2-dev to libcap-dev as requested by the
+    release team to continue the transition from libcap1. (Closes: #520553)
+  * Add Provides: libcap2-dev to binary package libcap-dev to ease transition
+    from older versions of libcap2.
+  * Remove Conflicts: libcap-dev.
+
+ -- Torsten Werner <twerner@debian.org>  Sat, 21 Mar 2009 21:22:24 +0100
+
+libcap2 (2.16-2) unstable; urgency=low
+
+  * upload to unstable
+
+ -- Torsten Werner <twerner@debian.org>  Sun, 15 Feb 2009 22:09:04 +0100
+
+libcap2 (2.16-1) experimental; urgency=low
+
+  * new upstream release
+  * Always install libraries into /lib (never /lib64).
+    (Closes: #508315)
+
+ -- Torsten Werner <twerner@debian.org>  Sun, 14 Dec 2008 12:24:50 +0100
+
+libcap2 (2.15-3) experimental; urgency=low
+
+  * Set Priority: standard for binary package libcap2. (Closes: #507781)
+
+ -- Torsten Werner <twerner@debian.org>  Thu, 04 Dec 2008 14:15:48 +0100
+
+libcap2 (2.15-2) experimental; urgency=low
+
+  * Update shlibs file libcap2 (>= 2.10). (Closes: #464712)
+
+ -- Torsten Werner <twerner@debian.org>  Wed, 03 Dec 2008 23:42:19 +0100
+
+libcap2 (2.15-1) experimental; urgency=low
+
+  * new upstream release
+  * Add Homepage header.
+  * Bump Up Standards-Version: 3.8.0.
+  * Update patch build.diff.
+
+ -- Torsten Werner <twerner@debian.org>  Mon, 01 Dec 2008 00:26:09 +0100
+
+libcap2 (2.11-2) unstable; urgency=low
+
+  * Call dh_makeshlibs with -V. (Closes: #492467)
+  * Reformat debian/copyright.
+  * Add Build-Depends: libpam0g-dev to build the pam module.
+  * Ship the pam module in the package libcap2-bin.
+
+ -- Torsten Werner <twerner@debian.org>  Sat, 26 Jul 2008 15:40:42 +0200
+
+libcap2 (2.11-1) unstable; urgency=low
+
+  * new upstream release
+  * Remove patch bug487223.diff because it is not needed anymore.
+  * Refresh patch build.diff.
+
+ -- Torsten Werner <twerner@debian.org>  Thu, 24 Jul 2008 20:42:41 +0200
+
+libcap2 (2.10-3) unstable; urgency=low
+
+  * Add patch from upstream author to fix 'cap_copy_int() always returns NULL
+    (EINVAL)'. (Closes: #487223)
+
+ -- Torsten Werner <twerner@debian.org>  Mon, 07 Jul 2008 23:03:52 +0200
+
+libcap2 (2.10-2) unstable; urgency=medium
+
+  * Add Build-Depends: indent because it is needed on alpha. (Closes: #489477)
+  * Set urgency to medium because we are fixing a FTBFS bug.
+
+ -- Torsten Werner <twerner@debian.org>  Sun, 06 Jul 2008 11:34:15 +0200
+
+libcap2 (2.10-1) unstable; urgency=low
+
+  * new upstream release
+
+ -- Torsten Werner <twerner@debian.org>  Wed, 11 Jun 2008 23:37:06 +0200
+
+libcap2 (2.09-1) unstable; urgency=low
+
+  * new upstream release
+  * Change Priority: optional of package libcap2.
+
+ -- Torsten Werner <twerner@debian.org>  Sat, 10 May 2008 11:48:53 +0200
+
+libcap2 (2.08-2) unstable; urgency=low
+
+  * Do not install the old manpages capget(2) and capset(2) because the
+    package manpages-dev ships more recent ones.
+  * Replace Conflicts: manpages-dev by Suggests: manpages-dev.
+    (Closes: #473072)
+
+ -- Torsten Werner <twerner@debian.org>  Sat, 29 Mar 2008 10:19:58 +0100
+
+libcap2 (2.08-1) unstable; urgency=low
+
+  * Initial Release. (Closes: #464727)
+
+ -- Torsten Werner <twerner@debian.org>  Fri, 21 Mar 2008 16:26:04 +0100

@@ -1,0 +1,7 @@
+#
+#=DESCRIPTION simple nproc rlimit test
+#=EXRESULT PASS
+
+profile rlimit {
+  set rlimit nproc <= 1,
+}

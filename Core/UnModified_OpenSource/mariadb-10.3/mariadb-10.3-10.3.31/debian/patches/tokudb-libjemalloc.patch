@@ -1,0 +1,20 @@
+Description: tokudb: fix linking with jemalloc
+ RPM building seems to do some trickery instead of
+ linking with jemalloc.
+ .
+ The "OR DEB" looks bogus, and resulted in tokudb not being
+ linked with jemalloc and therefore also no dependency on
+ libjemalloc generated.
+Author: Adrian Bunk <bunk@debian.org>
+
+--- a/storage/tokudb/CMakeLists.txt
++++ b/storage/tokudb/CMakeLists.txt
+@@ -69,7 +69,7 @@ ELSEIF(LIBJEMALLOC STREQUAL jemalloc)
+   ENDIF()
+   GET_FILENAME_COMPONENT(LIBJEMALLOC_PATH ${LIBJEMALLOC_SO} REALPATH CACHE)
+ 
+-  IF(RPM OR DEB)
++  IF(RPM)
+     UNSET(LIBJEMALLOC)
+     GET_DIRECTORY_PROPERTY(V DIRECTORY ${CMAKE_SOURCE_DIR} DEFINITION CPACK_RPM_tokudb-engine_PACKAGE_REQUIRES)
+     SET(CPACK_RPM_tokudb-engine_PACKAGE_REQUIRES "${V} jemalloc" PARENT_SCOPE)

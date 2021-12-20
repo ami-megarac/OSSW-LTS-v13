@@ -16,7 +16,7 @@ extern void fpconv_init();
 #endif
 
 extern int fpconv_g_fmt(char*, double, int);
-extern double fpconv_strtod(const char*, char**);
+extern double fpconv_strtod(const char*, char**, char*);
 
 /* vi:ai et sw=4 ts=4:
  */

@@ -1,0 +1,1 @@
+type=APPARMOR msg=audit(1173790298.651:1662): REJECTING access to syscall 'ptrace' (syscall_ptrace(25210) profile /home/steve/svn/trunk-forge/tests/regression/subdomain/syscall_ptrace active /home/steve/svn/trunk-forge/tests/regression/subdomain/syscall_ptrace)

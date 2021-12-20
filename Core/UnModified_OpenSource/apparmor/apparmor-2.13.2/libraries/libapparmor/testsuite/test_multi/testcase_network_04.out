@@ -1,0 +1,18 @@
+START
+File: testcase_network_04.in
+Event type: AA_RECORD_DENIED
+Audit ID: 1333697181.284:273901
+Operation: recvmsg
+Profile: /home/ubuntu/tmp/nc
+Command: nc
+Parent: 1596
+PID: 1056
+Network family: inet6
+Socket type: stream
+Protocol: tcp
+Local addr: ::1
+Foreign addr: ::1
+Local port: 2048
+Foreign port: 33986
+Epoch: 1333697181
+Audit subid: 273901

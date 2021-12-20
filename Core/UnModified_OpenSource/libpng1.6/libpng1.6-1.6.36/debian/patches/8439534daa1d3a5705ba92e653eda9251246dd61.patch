@@ -1,0 +1,54 @@
+From 8439534daa1d3a5705ba92e653eda9251246dd61 Mon Sep 17 00:00:00 2001
+From: Cosmin Truta <ctruta@gmail.com>
+Date: Sun, 3 Feb 2019 21:00:49 -0500
+Subject: [PATCH] Fix a memory leak in pngtest.c
+
+Ensure that row_buf is deallocated not only after a read error, but
+also after a write error.
+
+Use the format "%p" instead of "0x%08lx" for printf-ing row_buf in
+a portable manner.
+---
+ pngtest.c | 8 +++++---
+ 1 file changed, 5 insertions(+), 3 deletions(-)
+
+diff --git a/pngtest.c b/pngtest.c
+index e196fdaf5..f305d08dc 100644
+--- a/pngtest.c
++++ b/pngtest.c
+@@ -1,7 +1,7 @@
+ 
+ /* pngtest.c - a simple test program to test libpng
+  *
+- * Copyright (c) 2018 Cosmin Truta
++ * Copyright (c) 2018-2019 Cosmin Truta
+  * Copyright (c) 1998-2002,2004,2006-2018 Glenn Randers-Pehrson
+  * Copyright (c) 1996-1997 Andreas Dilger
+  * Copyright (c) 1995-1996 Guy Eric Schalnat, Group 42, Inc.
+@@ -957,6 +957,8 @@ test_one_file(const char *inname, const char *outname)
+    if (setjmp(png_jmpbuf(write_ptr)))
+    {
+       fprintf(STDERR, "%s -> %s: libpng write error\n", inname, outname);
++      png_free(read_ptr, row_buf);
++      row_buf = NULL;
+       if (verbose != 0)
+         fprintf(STDERR, "   destroying read structs\n");
+       png_destroy_read_struct(&read_ptr, &read_info_ptr, &end_info_ptr);
+@@ -1436,7 +1438,7 @@ test_one_file(const char *inname, const char *outname)
+    row_buf = (png_bytep)png_malloc(read_ptr,
+        png_get_rowbytes(read_ptr, read_info_ptr));
+ 
+-   pngtest_debug1("\t0x%08lx", (unsigned long)row_buf);
++   pngtest_debug1("\t%p", row_buf);
+ #endif /* SINGLE_ROWBUF_ALLOC */
+    pngtest_debug("Writing row data");
+ 
+@@ -1490,7 +1492,7 @@ test_one_file(const char *inname, const char *outname)
+          row_buf = (png_bytep)png_malloc(read_ptr,
+              png_get_rowbytes(read_ptr, read_info_ptr));
+ 
+-         pngtest_debug2("\t0x%08lx (%lu bytes)", (unsigned long)row_buf,
++         pngtest_debug2("\t%p (%lu bytes)", row_buf,
+              (unsigned long)png_get_rowbytes(read_ptr, read_info_ptr));
+ 
+ #endif /* !SINGLE_ROWBUF_ALLOC */

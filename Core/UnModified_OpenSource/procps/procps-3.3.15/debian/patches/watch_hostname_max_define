@@ -1,0 +1,13 @@
+--- a/watch.c
++++ b/watch.c
+@@ -61,6 +61,10 @@
+ #endif
+ 
+ 
++#ifndef HOST_NAME_MAX
++#define HOST_NAME_MAX 64
++#endif
++
+ /* Boolean command line options */
+ static int flags;
+ #define WATCH_DIFF	(1 << 1)

@@ -1,0 +1,9 @@
+#
+#=DESCRIPTION abi testing - abi path
+#=EXRESULT FAIL
+#=TODO
+
+abi <abi/4.19,
+
+/does/not/exist {
+}

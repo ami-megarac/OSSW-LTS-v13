@@ -1,0 +1,8 @@
+START
+File: old_style_log_08.in
+Event type: AA_RECORD_INVALID
+Audit ID: 1168662182.495:58
+Operation: APPARMOR
+Info: PERMITTING r access to /home/matt/projects/change_hat_test/test (test_hat(27871) profile /home/matt/projects/change_hat_test/test_hat active null-complain-profile)
+Epoch: 1168662182
+Audit subid: 58

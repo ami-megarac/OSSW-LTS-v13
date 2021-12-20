@@ -1,0 +1,59 @@
+?RCS: $Id$
+?RCS:
+?RCS: Copyright (c) 2000, Andy Dougherty
+?RCS:
+?RCS: You may redistribute only under the terms of the Artistic License,
+?RCS: as specified in the README file that comes with the distribution.
+?RCS: You may reuse parts of this distribution only within the terms of
+?RCS: that same Artistic License; a copy of which may be found at the root
+?RCS: of the source tree for dist 3.0.
+?RCS:
+?MAKE:versiononly: cat Myread Setvar Devel
+?MAKE:	-pick add $@ %<
+?LINT:set versiononly
+?Y:TOP
+?S:versiononly:
+?S:	If set, this symbol indicates that only the version-specific
+?S:	components of a perl installation should be installed.
+?S:	This may be useful for making a test installation of a new
+?S:	version without disturbing the existing installation.
+?S:	Setting versiononly is equivalent to setting installperl's -v option.
+?S:	In particular, the non-versioned scripts and programs such as
+?S:	a2p, c2ph, h2xs, pod2*, and perldoc are not installed
+?S:	(see INSTALL for a more complete list).  Nor are the man
+?S:	pages installed.
+?S:	Usually, this is undef.
+?S:.
+?LINT:extern inc_version_list
+?LINT:change inc_version_list
+?LINT:extern inc_version_list_init
+?LINT:change inc_version_list_init
+?LINT:extern version
+: determine whether to use a version number suffix for installed binaries
+echo " "
+$cat <<EOM
+Do you want to use a version number suffix for installed binaries? This
+will install 'perl$version' instead of 'perl', and likewise for other
+binaries like 'perldoc' and 'cpan'. This allows many versions of perl
+to be installed side-by-side. Unless you are a developer, you probably
+do *not* want to do this.
+EOM
+case "$versiononly" in
+"$define"|[Yy]*|true) dflt='y' ;;
+*) dflt='n';
+esac
+rp="Do you want to use a version number suffix for installed binaries?"
+. ./myread
+case "$ans" in
+[yY]*)	val="$define";;
+*)	val="$undef" ;;
+esac
+set versiononly
+eval $setvar
+
+case "$versiononly" in
+"$define") inc_version_list=''
+           inc_version_list_init=0
+           ;;
+esac
+

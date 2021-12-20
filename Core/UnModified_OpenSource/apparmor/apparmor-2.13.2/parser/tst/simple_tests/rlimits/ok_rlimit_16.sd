@@ -1,0 +1,7 @@
+#
+#=DESCRIPTION simple nice rlimit test
+#=EXRESULT PASS
+
+profile rlimit {
+  set rlimit nice <= -10,
+}

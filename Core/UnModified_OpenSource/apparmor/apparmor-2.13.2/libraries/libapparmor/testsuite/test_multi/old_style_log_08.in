@@ -1,0 +1,1 @@
+type=APPARMOR msg=audit(1168662182.495:58): PERMITTING r access to /home/matt/projects/change_hat_test/test (test_hat(27871) profile /home/matt/projects/change_hat_test/test_hat active null-complain-profile)

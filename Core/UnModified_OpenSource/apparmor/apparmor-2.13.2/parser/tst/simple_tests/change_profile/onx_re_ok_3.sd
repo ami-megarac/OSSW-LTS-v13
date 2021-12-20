@@ -1,0 +1,67 @@
+#
+#=DESCRIPTION change_profile /onexec with name space
+#=EXRESULT PASS
+#
+/usr/bin/foo {
+   change_profile /onexec -> :foo:/bin/foo,
+}
+
+/usr/bin/foo2 {
+   change_profile /onexec -> :foo:/bin/fo*,
+}
+
+/usr/bin/foo3 {
+   change_profile /onexec -> :foo:/bin/fo**,
+}
+
+/usr/bin/foo4 {
+   change_profile /onexec -> :foo:/bin/fo?,
+}
+
+/usr/bin/foo5 {
+   change_profile /onexec -> :foo:/bin/fo[ab],
+}
+
+/usr/bin/foo6 {
+   change_profile /onexec -> :foo:/bin/fo[^ab],
+}
+
+/usr/bin/foo7 {
+   change_profile /onexec -> :fo*:/bin/foo,
+}
+
+/usr/bin/foo8 {
+   change_profile /onexec -> :fo**:/bin/foo,
+}
+
+/usr/bin/foo9 {
+   change_profile /onexec -> :fo?:/bin/foo,
+}
+
+/usr/bin/foo10 {
+   change_profile /onexec -> :fo[ab]:/bin/foo,
+}
+
+/usr/bin/foo11 {
+   change_profile /onexec -> :fo[^ab]:/bin/foo,
+}
+
+/usr/bin/foo12 {
+   change_profile /onexec -> :fo*:/bin/fo*,
+}
+
+/usr/bin/foo13 {
+   change_profile /onexec -> :fo**:/bin/fo**,
+}
+
+/usr/bin/foo14 {
+   change_profile /onexec -> :fo?:/bin/fo?,
+}
+
+/usr/bin/foo15 {
+   change_profile /onexec -> :fo[ab]:/bin/fo[ab],
+}
+
+/usr/bin/foo16 {
+   change_profile /onexec -> :fo[^ab]:/bin/fo[^ab],
+}

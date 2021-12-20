@@ -1,0 +1,5 @@
+usr/bin/traptoemail
+usr/sbin/snmptrapd
+debian/snmptrapd.conf etc/snmp/
+usr/share/snmp/snmpconf-data/snmptrapd-data
+usr/share/snmp/snmp_perl_trapd.pl

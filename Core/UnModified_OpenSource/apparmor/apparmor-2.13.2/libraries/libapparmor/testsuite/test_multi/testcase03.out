@@ -1,0 +1,10 @@
+START
+File: testcase03.in
+Event type: AA_RECORD_DENIED
+Audit ID: 1236891550.807:870
+Operation: capable
+Profile: /bin/ping
+Name: setuid
+PID: 3593
+Epoch: 1236891550
+Audit subid: 870

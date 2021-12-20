@@ -1,0 +1,93 @@
+# This publication is intellectual property of Canonical Ltd. Its contents
+# can be duplicated, either in part or in whole, provided that a copyright
+# label is visibly located on each copy.
+#
+# All information found in this book has been compiled with utmost
+# attention to detail. However, this does not guarantee complete accuracy.
+# Neither Canonical Ltd, the authors, nor the translators shall be held
+# liable for possible errors or the consequences thereof.
+#
+# Many of the software and hardware descriptions cited in this book
+# are registered trademarks. All trade names are subject to copyright
+# restrictions and may be registered trade marks. Canonical Ltd
+# essentially adheres to the manufacturer's spelling.
+#
+# Names of products and trademarks appearing in this book (with or without
+# specific notation) are likewise subject to trademark and trade protection
+# laws and may thus fall under copyright restrictions.
+#
+
+
+=pod
+
+=head1 NAME
+
+aa-exec - confine a program with the specified AppArmor profile
+
+=head1 SYNOPSIS
+
+B<aa-exec> [options] [--] [I<E<lt>commandE<gt>> ...]
+
+=head1 DESCRIPTION
+
+B<aa-exec> is used to launch a program confined by the specified profile
+and or namespace.  If both a profile and namespace are specified command
+will be confined by profile in the new policy namespace.  If only a namespace
+is specified, the profile name of the current confinement will be used.  If
+neither a profile or namespace is specified command will be run using
+standard profile attachment (ie. as if run without the aa-exec command).
+
+If the arguments are to be pasted to the I<E<lt>commandE<gt>> being invoked
+by aa-exec then -- should be used to separate aa-exec arguments from the
+command.
+  aa-exec -p profile1 -- ls -l
+
+=head1 OPTIONS
+B<aa-exec> accepts the following arguments:
+
+=over 4
+
+=item -p PROFILE, --profile=PROFILE
+
+confine I<E<lt>commandE<gt>> with PROFILE. If the PROFILE is not specified
+use the current profile name (likely unconfined).
+
+=item -n NAMESPACE, --namespace=NAMESPACE
+
+use profiles in NAMESPACE.  This will result in confinement transitioning
+to using the new profile namespace.
+
+=item -i, --immediate
+
+transition to PROFILE before doing executing I<E<lt>commandE<gt>>.  This
+subjects the running of I<E<lt>commandE<gt>> to the exec transition rules
+of the current profile.
+
+=item -v, --verbose
+
+show commands being performed
+
+=item -d, --debug
+
+show commands and error codes
+
+=item --
+
+Signal the end of options and disables further option processing. Any
+arguments after the -- are treated as arguments of the command.  This is
+useful when passing arguments to the I<E<lt>commandE<gt>> being invoked by
+aa-exec.
+
+=back
+
+=head1 BUGS
+
+If you find any bugs, please report them at
+L<https://bugs.launchpad.net/apparmor/+filebug>.
+
+=head1 SEE ALSO
+
+aa-stack(8), aa-namespace(8), apparmor(7), apparmor.d(5), aa_change_profile(3),
+aa_change_onexec(3) and L<https://wiki.apparmor.net>.
+
+=cut

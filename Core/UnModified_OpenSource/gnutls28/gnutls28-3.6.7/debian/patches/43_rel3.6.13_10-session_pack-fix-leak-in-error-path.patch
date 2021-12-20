@@ -1,0 +1,30 @@
+From 05ace838b3f67836a29a53282ec5a9b3cffd5680 Mon Sep 17 00:00:00 2001
+From: Michael Catanzaro <mcatanzaro@gnome.org>
+Date: Sun, 2 Feb 2020 09:47:25 -0600
+Subject: [PATCH] session_pack: fix leak in error path
+
+If called at the wrong time, it allocates the buffer sb and forgets to
+clear it.
+
+Signed-off-by: Michael Catanzaro <mcatanzaro@gnome.org>
+---
+ lib/session_pack.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/lib/session_pack.c b/lib/session_pack.c
+index b655b7128..e5c21f24b 100644
+--- a/lib/session_pack.c
++++ b/lib/session_pack.c
+@@ -143,7 +143,8 @@ _gnutls_session_pack(gnutls_session_t session,
+ 		}
+ 		break;
+ 	default:
+-		return gnutls_assert_val(GNUTLS_E_INTERNAL_ERROR);
++		ret = gnutls_assert_val(GNUTLS_E_INTERNAL_ERROR);
++		goto fail;
+ 
+ 	}
+ 
+-- 
+2.26.2
+

@@ -1,0 +1,51 @@
+#
+#=DESCRIPTION change_profile with a variable (LP: #390810)
+#=EXRESULT PASS
+#
+
+@{LIBVIRT}="libvirt"
+@{LIBVIRT_RE}="libvirt*"
+
+/usr/bin/foo {
+   change_profile -> @{LIBVIRT}-fo*,
+}
+
+/usr/bin/foo2 {
+   change_profile -> @{LIBVIRT}-fo**,
+}
+
+/usr/bin/foo3 {
+   change_profile -> @{LIBVIRT}-fo[ab],
+}
+
+/usr/bin/foo4 {
+   change_profile -> @{LIBVIRT}-fo[^ab],
+}
+
+/usr/bin/foo5 {
+   change_profile -> @{LIBVIRT}-fo?,
+}
+
+/usr/bin/foo6 {
+   change_profile -> @{LIBVIRT_RE}-foo,
+}
+
+/usr/bin/foo7 {
+   change_profile -> @{LIBVIRT_RE}-fo*,
+}
+
+/usr/bin/foo8 {
+   change_profile -> @{LIBVIRT_RE}-fo**,
+}
+
+/usr/bin/foo9 {
+   change_profile -> @{LIBVIRT_RE}-fo?,
+}
+
+/usr/bin/foo10 {
+   change_profile -> @{LIBVIRT_RE}-fo[ab],
+}
+
+/usr/bin/foo11 {
+   change_profile -> @{LIBVIRT_RE}-fo[^ab],
+}

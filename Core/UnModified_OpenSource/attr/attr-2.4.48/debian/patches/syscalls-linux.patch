@@ -1,0 +1,69 @@
+Author: Guillem Jover <guillem@debian.org>
+Description: Only include the compat syscall stubs on Linux systems
+ These are Linux specific syscalls. Other systems either already have
+ these function on their libc, or would need different implementations.
+ This restores the previous behavior before the build system modernization.
+
+---
+ configure.ac          |    6 ++++++
+ libattr/Makemodule.am |   17 ++++++++++++++---
+ 2 files changed, 20 insertions(+), 3 deletions(-)
+
+--- a/configure.ac
++++ b/configure.ac
+@@ -24,6 +24,7 @@ AC_PREFIX_DEFAULT(/usr)
+ AM_INIT_AUTOMAKE([-Wall foreign 1.11 dist-xz subdir-objects])
+ AM_SILENT_RULES([yes])
+ 
++AC_CANONICAL_HOST
+ AC_PROG_CC
+ AM_PROG_CC_C_O
+ AC_USE_SYSTEM_EXTENSIONS
+@@ -49,6 +50,11 @@ dnl Automatically increment the revision
+ LT_REVISION=$(echo "${PACKAGE_VERSION}" | tr -d .)
+ AC_SUBST(LT_REVISION)
+ 
++AS_CASE([$host_os],
++	[linux*], [os_linux=yes],
++)
++AM_CONDITIONAL([OS_LINUX], [test "x$os_linux" = "xyes"])
++
+ AC_CONFIG_COMMANDS([include/attr],
+ 	[dnl
+ 	rm -rf include/attr
+--- a/libattr/Makemodule.am
++++ b/libattr/Makemodule.am
+@@ -8,19 +8,30 @@ LT_CURRENT = 2
+ LT_AGE = 1
+ LTVERSION = $(LT_CURRENT):$(LT_REVISION):$(LT_AGE)
+ 
+-libattr_la_DEPENDENCIES = exports libattr/libattr.lds
++libattr_la_DEPENDENCIES = \
++	exports
++if OS_LINUX
++libattr_la_DEPENDENCIES += \
++	libattr/libattr.lds
++endif
+ libattr_la_SOURCES = \
+ 	libattr/attr_copy_action.c \
+ 	libattr/attr_copy_check.c \
+ 	libattr/attr_copy_fd.c \
+ 	libattr/attr_copy_file.c \
+ 	libattr/libattr.c \
+-	libattr/syscalls.c \
+ 	libattr/libattr.h
++if OS_LINUX
++libattr_la_SOURCES += \
++	libattr/syscalls.c
++endif
+ libattr_la_CFLAGS = -include libattr/libattr.h
+ libattr_la_LDFLAGS = \
+ 	-Wl,--version-script,$(top_srcdir)/exports \
+-	-Wl,$(top_srcdir)/libattr/libattr.lds \
+ 	-version-info $(LTVERSION)
++if OS_LINUX
++libattr_la_LDFLAGS += \
++	-Wl,$(top_srcdir)/libattr/libattr.lds
++endif
+ 
+ EXTRA_DIST += libattr/libattr.lds

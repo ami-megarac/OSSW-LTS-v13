@@ -1,0 +1,7 @@
+Tests: smoke
+Depends: @
+Restrictions: allow-stderr
+
+Tests: build-test
+Depends: libicu-dev, pkg-config
+Restrictions: allow-stderr

@@ -1,0 +1,51 @@
+#
+#=DESCRIPTION audit change_profile with a variable (LP: #390810)
+#=EXRESULT PASS
+#
+
+@{LIBVIRT}="libvirt"
+@{LIBVIRT_RE}="libvirt*"
+
+/usr/bin/foo {
+   audit change_profile -> @{LIBVIRT}-fo*,
+}
+
+/usr/bin/foo2 {
+   audit change_profile -> @{LIBVIRT}-fo**,
+}
+
+/usr/bin/foo3 {
+   audit change_profile -> @{LIBVIRT}-fo[ab],
+}
+
+/usr/bin/foo4 {
+   audit change_profile -> @{LIBVIRT}-fo[^ab],
+}
+
+/usr/bin/foo5 {
+   audit change_profile -> @{LIBVIRT}-fo?,
+}
+
+/usr/bin/foo6 {
+   audit change_profile -> @{LIBVIRT_RE}-foo,
+}
+
+/usr/bin/foo7 {
+   audit change_profile -> @{LIBVIRT_RE}-fo*,
+}
+
+/usr/bin/foo8 {
+   audit change_profile -> @{LIBVIRT_RE}-fo**,
+}
+
+/usr/bin/foo9 {
+   audit change_profile -> @{LIBVIRT_RE}-fo?,
+}
+
+/usr/bin/foo10 {
+   audit change_profile -> @{LIBVIRT_RE}-fo[ab],
+}
+
+/usr/bin/foo11 {
+   audit change_profile -> @{LIBVIRT_RE}-fo[^ab],
+}

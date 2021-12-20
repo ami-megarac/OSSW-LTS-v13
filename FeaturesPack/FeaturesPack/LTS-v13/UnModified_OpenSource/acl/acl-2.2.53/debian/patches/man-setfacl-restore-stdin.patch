@@ -1,0 +1,39 @@
+Description: Document setfacl --restore=-
+Author: Guillem Jover <guillem@debian.org>
+Bug-Debian: https://bugs.debian.org/544716
+Origin: vendor
+Forwarded: no
+Last-Modified: 2019-02-28
+
+
+---
+ man/man1/setfacl.1 |    5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+--- a/man/man1/setfacl.1
++++ b/man/man1/setfacl.1
+@@ -30,7 +30,7 @@ setfacl \- set file access control lists
+ [\-bkndRLPvh] [{\-m|\-x} acl_spec] [{\-M|\-X} acl_file] file ...
+ 
+ .B setfacl
+-\-\-restore=file
++\-\-restore={file|-}
+ 
+ .SH DESCRIPTION
+ This utility sets Access Control Lists (ACLs) of files and directories.
+@@ -107,13 +107,14 @@ All operations apply to the Default ACL.
+ input set are promoted to Default ACL entries. Default ACL entries in
+ the input set are discarded. (A warning is issued if that happens).
+ .TP 4
+-.I \-\-restore=file
++.I \-\-restore={file|-}
+ Restore a permission backup created by `getfacl \-R' or similar. All permissions
+ of a complete directory subtree are restored using this mechanism. If the input
+ contains owner comments or group comments, setfacl attempts to restore the
+ owner and owning group. If the input contains flags comments (which define the setuid,
+ setgid, and sticky bits), setfacl sets those three bits accordingly; otherwise,
+ it clears them. This option cannot be mixed with other options except `\-\-test'.
++If the file specified is '\fB-\fP', then it will be read from standard input.
+ .TP 4
+ .I \-\-test
+ Test mode. Instead of changing the ACLs of any files, the resulting ACLs are listed.

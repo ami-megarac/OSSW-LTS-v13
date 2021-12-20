@@ -1,0 +1,24 @@
+#!/bin/sh
+# preinst script for auditd
+
+set -e
+
+case "$1" in
+    upgrade)
+        if dpkg --compare-versions "$2" le "1:2.2.1-1"; then
+            pam-auth-update --package --remove auditd
+        fi
+    ;;
+
+    install|abort-upgrade)
+    ;;
+
+    *)
+        echo "preinst called with unknown argument \`$1'" >&2
+        exit 1
+    ;;
+esac
+
+#DEBHELPER#
+
+exit 0

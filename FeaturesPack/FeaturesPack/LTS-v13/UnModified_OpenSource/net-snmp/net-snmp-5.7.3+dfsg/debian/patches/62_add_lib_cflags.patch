@@ -1,0 +1,37 @@
+From: Net-SNMP Packaging Team <pkg-net-snmp-devel@lists.alioth.debian.org>
+Date: Thu, 18 Jun 2015 06:12:05 +0900
+Subject: _add_lib_cflags
+
+Patch to add option "--base-lib-cflags" to net-snmp-config. This flag returns options needed to link
+against libnetsnmp. In particular, no perl specific options are provided.
+
+It was reported in
+"libsnmp-base: forcing perl headers in net-snmp-config --cflags breaks perl builds"
+http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=502806
+---
+ net-snmp-config.in | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/net-snmp-config.in b/net-snmp-config.in
+index d55872c..0831fa0 100644
+--- a/net-snmp-config.in
++++ b/net-snmp-config.in
+@@ -140,6 +140,9 @@ else
+     --base-cflags)
+       echo @CFLAGS@ @CPPFLAGS@ -I${NSC_INCLUDEDIR}
+       ;;
++    --base-lib-cflags)
++      echo @LIBCFLAGS@ @CPPFLAGS@ -I${NSC_INCLUDEDIR}
++      ;;
+     --cflags|--cf*)
+       echo @CFLAGS@ @DEVFLAGS@ @CPPFLAGS@ -I. -I${NSC_INCLUDEDIR}
+       ;;
+@@ -643,6 +646,8 @@ if test "x$usage" = "xyes"; then
+   echo "  These options produce the various compilation flags needed when"
+   echo "  building external SNMP applications:"
+   echo ""
++  echo "    --base-lib-cflags lists additional compilation flags needed for linking"
++  echo "                      against libsnmp"
+   echo "    --base-cflags     lists additional compilation flags needed"
+   echo "    --cflags          lists additional compilation flags needed"
+   echo "                      (includes -I. and extra developer warning flags)"

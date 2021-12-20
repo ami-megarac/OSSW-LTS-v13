@@ -1,0 +1,12 @@
+START
+File: testcase_pivotroot_01.in
+Event type: AA_RECORD_DENIED
+Audit ID: 1409700678.384:547594
+Operation: pivotroot
+Profile: /home/ubuntu/bzr/apparmor/tests/regression/apparmor/pivot_root
+Name: /tmp/sdtest.21082-7446-EeefO6/new_root/
+Command: pivot_root
+PID: 21162
+Src name: /tmp/sdtest.21082-7446-EeefO6/new_root/put_old/
+Epoch: 1409700678
+Audit subid: 547594

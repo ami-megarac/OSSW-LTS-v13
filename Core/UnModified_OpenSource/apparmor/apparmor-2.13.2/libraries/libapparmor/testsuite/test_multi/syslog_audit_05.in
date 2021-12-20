@@ -1,0 +1,1 @@
+Oct 29 08:00:01 jory01-ubuntu kernel: [82789.550826] type=1502 audit(1225263601.980:37699): operation="inode_permission" requested_mask="r::" denied_mask="r::" fsuid=0 name="/bin/dash" pid=1144 profile="/bin/dash"

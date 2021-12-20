@@ -1,0 +1,15 @@
+START
+File: testcase_network_03.in
+Event type: AA_RECORD_ALLOWED
+Audit ID: 1333648169.009:11707146
+Operation: accept
+Profile: /usr/lib/dovecot/imap-login
+Command: imap-login
+Parent: 25932
+PID: 5049
+Network family: inet6
+Socket type: stream
+Protocol: tcp
+Local port: 143
+Epoch: 1333648169
+Audit subid: 11707146

@@ -1,0 +1,20 @@
+#=DESCRIPTION stress test (32448 items, 5408 unique)
+#=EXRESULT PASS
+
+@{FOO}=a b c d e f g h i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z
+@{BAR}=a b c d e f g h i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z
+@{BAZ}=a b c d e f g h i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z
+
+# 52^2 * 3 --> many duplicates --> 52^2
+@{FBB}=@{FOO}/@{BAR} @{BAR}/@{BAZ} @{FOO}/@{BAZ}
+# 52^2 * 3 --> many duplicates --> 52^2
+@{BBF}=@{FOO}/FBB/@{BAR} @{BAR}/FBB/@{BAZ} @{FOO}/FBB/@{BAZ}
+
+# (52^2) * 2 --> 5408 total entries.
+# To really up the stress factor, replace the " " with / to give
+# (52 ^ 2) ^ 2 unique entries, i.e. 7311616 unique entries, 65804544 total
+@{MEGAFBB}=@{FBB} @{BBF}
+
+/bin/foo {
+  /@{MEGAFBB} r,
+}

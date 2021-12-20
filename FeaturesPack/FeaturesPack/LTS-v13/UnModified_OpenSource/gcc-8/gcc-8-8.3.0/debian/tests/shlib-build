@@ -1,0 +1,46 @@
+#!/bin/sh
+# autopkgtest check: Build and link against a simple shared library, to test
+# basic binutils compile-time and run-time linking functionality.
+#
+# (C) 2012 Canonical Ltd.
+# Author: Martin Pitt <martin.pitt@ubuntu.com>
+
+set -e
+
+CC=gcc-8
+
+WORKDIR=$(mktemp -d)
+trap "rm -rf $WORKDIR" 0 INT QUIT ABRT PIPE TERM
+cd $WORKDIR
+cat <<EOF > testlib.c
+
+int ultimate_answer()
+{
+    return 42;
+}
+EOF
+
+$CC -Wall -Werror -shared -o libultimate.so testlib.c
+echo "library build: OK"
+
+# should export the symbol
+nm -D libultimate.so | grep -q 'T ultimate_answer'
+
+# link it against a program
+cat <<EOF > testprog.c
+#include <assert.h>
+
+int ultimate_answer();
+
+int main()
+{
+    assert (ultimate_answer() == 42);
+    return 0;
+}
+EOF
+
+$CC -Wall -Werror -L . -o testprog testprog.c -lultimate
+echo "program build: OK"
+[ -x testprog ]
+LD_LIBRARY_PATH=. ./testprog
+echo "run: OK"

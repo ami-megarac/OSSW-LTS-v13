@@ -1,0 +1,97 @@
+From: Net-SNMP Packaging Team <pkg-net-snmp-devel@lists.alioth.debian.org>
+Date: Mon, 5 Mar 2018 21:13:51 +1100
+Subject: fix_perl_bulk_gets
+
+===================================================================
+---
+ perl/SNMP/SNMP.pm | 53 ++++++++++++++++++++++++-----------------------------
+ 1 file changed, 24 insertions(+), 29 deletions(-)
+
+diff --git a/perl/SNMP/SNMP.pm b/perl/SNMP/SNMP.pm
+index aa90ac5..5416f2e 100644
+--- a/perl/SNMP/SNMP.pm
++++ b/perl/SNMP/SNMP.pm
+@@ -866,22 +866,11 @@ sub _gettable_do_it() {
+ 
+     $vbl = $_[$#_] if ($state->{'options'}{'callback'});
+ 
+-    while ($#$vbl > -1 && !$this->{ErrorNum}) {
+-	if (($#$vbl + 1) % ($#{$state->{'stopconds'}} + 1) != 0) {
+-	    if ($vbl->[$#$vbl][2] ne 'ENDOFMIBVIEW') {
+-		# unless it's an end of mib view we didn't get the
+-		# proper number of results back.
+-		print STDERR "ack: gettable results not appropriate\n";
+-	    }
+-	    my @k = keys(%{$state->{'result_hash'}});
+-	    last if ($#k > -1);  # bail with what we have
+-	    return;
+-	}
+-
+-	$state->{'varbinds'} = [];
+-	my $newstopconds;
++    my $num_vbls = defined($vbl) ? scalar @$vbl : 0;
++    my $num_stopconds = scalar @{$state->{'stopconds'}};
+ 
+-	my $lastsetstart = ($state->{'repeatcount'}-1) * ($#{$state->{'stopconds'}}+1);
++    while ($num_vbls > 0 && !$this->{ErrorNum}) {
++	my @found_eof = (0) x $num_stopconds;
+ 
+ 	for (my $i = 0; $i <= $#$vbl; $i++) {
+ 	    my $row_oid = SNMP::translateObj($vbl->[$i][0]);
+@@ -890,9 +879,11 @@ sub _gettable_do_it() {
+ 	    my $row_value = $vbl->[$i][2];
+ 	    my $row_type = $vbl->[$i][3];
+ 
+-	    if ($row_oid =~ 
+-		/^$state->{'stopconds'}[$i % ($#{$state->{'stopconds'}}+1)]/ &&
+-		$row_value ne 'ENDOFMIBVIEW' ){
++	    my $stopcond_num = $i % $num_stopconds;
++	    my $stopcond = $state->{'stopconds'}[$stopcond_num];
++	    if ($row_oid !~ /^\Q$stopcond\E/ || $row_value eq 'ENDOFMIBVIEW') {
++		$found_eof[$stopcond_num] = 1;
++	    } else {
+ 
+ 		if ($row_type eq "OBJECTID") {
+ 
+@@ -903,26 +894,30 @@ sub _gettable_do_it() {
+ 
+ 		}
+ 
++		# continue past this next time
++
++		$state->{'varbinds'}[$stopcond_num] = [ $row_text, $row_index ];
++
+ 		# Place the results in a hash
+ 
+ 		$state->{'result_hash'}{$row_index}{$row_text} = $row_value;
++	    }
++	}
+ 
+-		# continue past this next time
+-		if ($i >= $lastsetstart) {
+-		    push @$newstopconds,
+-		      $state->{'stopconds'}->[$i%($#{$state->{'stopconds'}}+1)];
+-		    push @{$state->{'varbinds'}},[$vbl->[$i][0],$vbl->[$i][1]];
+-		}
++	my @newstopconds = ();
++	my @newvarbinds = ();
++	for (my $i = 0; $i < $num_stopconds; ++$i) {
++	    unless ($found_eof[$i]) {
++		push @newstopconds, $state->{'stopconds'}[$i];
++		push @newvarbinds, $state->{'varbinds'}[$i];
+ 	    }
+ 	}
+-	if ($#$newstopconds == -1) {
++	if ($#newstopconds == -1) {
+ 	    last;
+ 	}
+-	if ($#{$state->{'varbinds'}} == -1) {
+-	    print "gettable ack.  shouldn't get here\n";
+-	}
++	$state->{'varbinds'} = \@newvarbinds;
++	$state->{'stopconds'} = \@newstopconds;
+ 	$vbl = $state->{'varbinds'};
+-	$state->{'stopconds'} = $newstopconds;
+ 
+         #
+         # if we've been configured with a callback, then call the

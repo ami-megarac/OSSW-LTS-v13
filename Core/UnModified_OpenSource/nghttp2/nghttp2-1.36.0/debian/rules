@@ -1,0 +1,60 @@
+#!/usr/bin/make -f
+
+# this makes the tests fail
+# LDFLAGS += -Wl,--default-symver
+
+override_dh_auto_configure:
+	dh_auto_configure -- \
+		--enable-python-bindings=no --disable-failmalloc --enable-app
+
+override_dh_auto_build-arch:
+	dh_auto_build
+
+override_dh_auto_build-indep:
+	$(MAKE) html
+
+# don't run tests when building indep packages
+override_dh_auto_test-indep:
+
+override_dh_auto_clean:
+	dh_auto_clean
+	rm -rf doc/manual/html doc/manual/doctrees doc/apiref.rst
+
+override_dh_auto_install-arch: custom_install_init_scripts custom_install_systemd
+	dh_auto_install
+
+override_dh_auto_install-indep: custom_install_manual
+
+override_dh_installinit:
+	dh_installinit -pnghttp2-proxy --onlyscripts --name=nghttpx
+
+.PHONY: custom_install_manual custom_install_init_scripts custom_install_systemd
+
+DOCDIR="debian/libnghttp2-doc/usr/share/doc/libnghttp2-doc"
+custom_install_manual:
+	mkdir -p $(DOCDIR)
+	cp -pr doc/manual/html/* $(DOCDIR)
+	rm $(DOCDIR)/objects.inv
+	ln -sf /usr/share/javascript/jquery/jquery.js $(DOCDIR)/_static/jquery.js
+	ln -sf /usr/share/javascript/underscore/underscore.js $(DOCDIR)/_static/underscore.js
+
+ETCDIR="debian/nghttp2-proxy/etc"
+custom_install_init_scripts:
+	install -d $(ETCDIR)/init.d
+	sed -e 's,^DAEMON=.*/,DAEMON=/usr/sbin/,' contrib/nghttpx-init > $(ETCDIR)/init.d/nghttpx
+	chmod 755 $(ETCDIR)/init.d/nghttpx
+	install -d $(ETCDIR)/nghttpx
+	# we install our own version of config
+	install -m644 debian/nghttpx.conf $(ETCDIR)/nghttpx/nghttpx.conf
+	install -d $(ETCDIR)/logrotate.d
+	install -p -m644 contrib/nghttpx-logrotate $(ETCDIR)/logrotate.d/nghttpx
+
+# Currently we install our own systemd unit because
+# the original one is slightly broken
+SYSTEMD="debian/nghttp2-proxy/lib/systemd/system"
+custom_install_systemd:
+	install -d $(SYSTEMD)
+	install -p -m644 debian/nghttpx.service $(SYSTEMD)/nghttpx.service
+
+%:
+	dh $@

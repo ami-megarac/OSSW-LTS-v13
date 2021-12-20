@@ -1,0 +1,5 @@
+debian/tmp-udeb/usr/bin/dbus-daemon    usr/bin
+debian/tmp-udeb/usr/bin/dbus-launch    usr/bin
+debian/tmp-udeb/usr/bin/dbus-run-session usr/bin
+debian/tmp-udeb/usr/bin/dbus-uuidgen   usr/bin
+usr/share/dbus-1/session.conf

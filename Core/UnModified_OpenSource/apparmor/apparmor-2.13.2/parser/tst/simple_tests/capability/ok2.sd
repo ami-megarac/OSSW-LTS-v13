@@ -1,0 +1,160 @@
+#
+#=DESCRIPTION validate some uses of capabilties.
+#=EXRESULT PASS
+# vim:syntax=subdomain
+# Last Modified: Sun Apr 17 19:44:44 2005
+#
+/does/not/exist {
+  audit capability chown,
+  audit capability dac_override,
+  audit capability dac_read_search,
+  audit capability fowner,
+  audit capability fsetid,
+  audit capability kill,
+  audit capability setgid,
+  audit capability setuid,
+  audit capability setpcap,
+  audit capability linux_immutable,
+  audit capability net_bind_service,
+  audit capability net_broadcast,
+  audit capability net_admin,
+  audit capability net_raw,
+  audit capability ipc_lock,
+  audit capability ipc_owner,
+  audit capability sys_module,
+  audit capability sys_rawio,
+  audit capability sys_chroot,
+  audit capability sys_ptrace,
+  audit capability sys_pacct,
+  audit capability sys_admin,
+  audit capability sys_boot,
+  audit capability sys_nice,
+  audit capability sys_resource,
+  audit capability sys_time,
+  audit capability sys_tty_config,
+  audit capability mknod,
+  audit capability lease,
+  audit capability audit_write,
+  audit capability audit_control,
+  audit capability setfcap,
+  audit capability mac_override,
+}
+
+/does/not/exist2 {
+  ^chown {
+    deny capability chown,
+  }
+  ^dac_override {
+    deny capability dac_override,
+  }
+  ^dac_read_search {
+    deny capability dac_read_search,
+  }
+  ^fowner {
+    deny capability fowner,
+  }
+  ^fsetid {
+    deny capability fsetid,
+  }
+  ^kill {
+    deny capability kill,
+  }
+  ^setgid {
+    deny capability setgid,
+  }
+  ^setuid {
+    deny capability setuid,
+  }
+  ^setpcap {
+    deny capability setpcap,
+  }
+  ^linux_immutable {
+    deny capability linux_immutable,
+  }
+  ^net_bind_service {
+    deny capability net_bind_service,
+  }
+  ^net_broadcast {
+    deny capability net_broadcast,
+  }
+  ^net_admin {
+    deny capability net_admin,
+  }
+  ^net_raw {
+    deny capability net_raw,
+  }
+  ^ipc_lock {
+    deny capability ipc_lock,
+  }
+  ^ipc_owner {
+    deny capability ipc_owner,
+  }
+  ^sys_module {
+    deny capability sys_module,
+  }
+  ^sys_rawio {
+    deny capability sys_rawio,
+  }
+  ^sys_chroot {
+    deny capability sys_chroot,
+  }
+  ^sys_ptrace {
+    deny capability sys_ptrace,
+  }
+  ^sys_pacct {
+    deny capability sys_pacct,
+  }
+  ^sys_admin {
+    deny capability sys_admin,
+  }
+  ^sys_boot {
+    deny capability sys_boot,
+  }
+  ^sys_nice {
+    deny capability sys_nice,
+  }
+  ^sys_resource {
+    deny capability sys_resource,
+  }
+  ^sys_time {
+    deny capability sys_time,
+  }
+  ^sys_tty_config {
+    deny capability sys_tty_config,
+  }
+  ^mknod {
+    deny capability mknod,
+  }
+  ^lease {
+    deny capability lease,
+  }
+  ^audit_write {
+    deny capability audit_write,
+  }
+  ^audit_control {
+    deny capability audit_control,
+  }
+}
+
+# Test for duplicates?
+/does/not/exist3 {
+  capability mknod,
+  audit capability mknod,
+  deny capability mknod,
+  audit capability mknod,
+  deny capability mknod,
+  capability mknod,
+}
+
+/does/not/exit101 {
+  capability chown dac_override dac_read_search fowner fsetid kill setgid setuid setpcap linux_immutable net_bind_service net_broadcast net_admin net_raw ipc_lock ipc_owner sys_module sys_rawio sys_chroot sys_ptrace sys_pacct sys_admin sys_boot sys_nice sys_resource sys_time sys_tty_config mknod lease audit_write audit_control,
+
+}
+
+/does/not/exit102 {
+  audit deny capability chown dac_override dac_read_search fowner fsetid kill setgid setuid setpcap linux_immutable net_bind_service net_broadcast net_admin net_raw ipc_lock ipc_owner sys_module sys_rawio sys_chroot sys_ptrace sys_pacct sys_admin sys_boot sys_nice sys_resource sys_time sys_tty_config mknod lease audit_write audit_control,
+
+  deny capability chown dac_override dac_read_search fowner fsetid kill setgid setuid setpcap linux_immutable net_bind_service net_broadcast net_admin net_raw ipc_lock ipc_owner sys_module sys_rawio sys_chroot sys_ptrace sys_pacct sys_admin sys_boot sys_nice sys_resource sys_time sys_tty_config mknod lease audit_write audit_control,
+
+}
+

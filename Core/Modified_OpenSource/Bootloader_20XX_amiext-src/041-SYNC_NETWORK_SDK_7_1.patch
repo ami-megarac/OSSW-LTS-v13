@@ -1,0 +1,54 @@
+diff -Naur uboot_org/cmd/aspeed/nettest/phy_tbl.h uboot/cmd/aspeed/nettest/phy_tbl.h
+--- uboot_org/cmd/aspeed/nettest/phy_tbl.h	2021-09-13 16:35:02.870650718 +0800
++++ uboot/cmd/aspeed/nettest/phy_tbl.h	2021-09-13 11:34:42.638173205 +0800
+@@ -41,7 +41,7 @@
+ 	PHY_ENGINE cfg;
+ };
+ 
+-#define PHY_LOOKUP_N 33
++#define PHY_LOOKUP_N 34
+ static const struct phy_desc phy_lookup_tbl[PHY_LOOKUP_N] = {
+ 	{ .id1 = 0x001c,
+ 	  .id2 = 0xc916,
+@@ -50,6 +50,12 @@
+ 	  .cfg.fp_set = phy_realtek5,
+ 	  .cfg.fp_clr = recov_phy_realtek5 },
+ 	{ .id1 = 0x001c,
++	  .id2 = 0xc859,
++	  .id2_mask = 0xffff,
++	  .name = "RTL8211FD-VX",
++	  .cfg.fp_set = phy_realtek5,
++	  .cfg.fp_clr = recov_phy_realtek5 },	  
++	{ .id1 = 0x001c,
+ 	  .id2 = 0xc915,
+ 	  .id2_mask = 0xffff,
+ 	  .name = "RTL8211E",
+diff -Naur uboot_org/drivers/net/phy/realtek.c uboot/drivers/net/phy/realtek.c
+--- uboot_org/drivers/net/phy/realtek.c	2021-09-13 16:35:01.210719346 +0800
++++ uboot/drivers/net/phy/realtek.c	2021-09-13 11:34:43.198138909 +0800
+@@ -378,11 +378,25 @@
+ 	.writeext = &rtl8211f_phy_extwrite,
+ };
+ 
++/* Support for RTL8211FD-VX PHY */
++static struct phy_driver RTL8211FD_VX_driver = {
++	.name = "RealTek RTL8211FD-VX",
++	.uid = 0x1cc859,
++	.mask = 0xffffff,
++	.features = PHY_GBIT_FEATURES,
++	.config = &rtl8211f_config,
++	.startup = &rtl8211f_startup,
++	.shutdown = &genphy_shutdown,
++	.readext = &rtl8211f_phy_extread,
++	.writeext = &rtl8211f_phy_extwrite,
++};
++
+ int phy_realtek_init(void)
+ {
+ 	phy_register(&RTL8211B_driver);
+ 	phy_register(&RTL8211E_driver);
+ 	phy_register(&RTL8211F_driver);
++	phy_register(&RTL8211FD_VX_driver);
+ 	phy_register(&RTL8211DN_driver);
+ 
+ 	return 0;

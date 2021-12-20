@@ -1,0 +1,5 @@
+#=DESCRIPTION reassignment of set
+#=EXRESULT FAIL
+
+@{FOO}=foo
+@{FOO}=bar

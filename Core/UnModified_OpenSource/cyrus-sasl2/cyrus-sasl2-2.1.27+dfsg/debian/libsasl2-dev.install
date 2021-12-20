@@ -1,0 +1,5 @@
+usr/include/sasl
+usr/lib/*/libsasl2.a
+usr/lib/*/libsasl2.so
+usr/lib/*/pkgconfig
+usr/share/man/man3

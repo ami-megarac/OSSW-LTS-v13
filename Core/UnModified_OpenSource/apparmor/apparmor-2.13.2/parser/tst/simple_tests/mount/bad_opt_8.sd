@@ -1,0 +1,6 @@
+#
+#=Description basic rule to test the valid "remount" mount opt and an invalid src
+#=EXRESULT FAIL
+/usr/bin/foo {
+  mount options=(remount) /a -> /1,
+  }

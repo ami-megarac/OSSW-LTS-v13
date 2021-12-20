@@ -153,22 +153,22 @@ static void route_uart_to_uart(int source_port, int destination_port, int *shift
 				break;
 			}
 		break;
-		case UART5:
-			*shift_pos = SEL_5_DW;
-			*bits_mask = 0xF0000000;							
+		case UART10: // A2 silicon. UART6 is for A1 silicon  
+			*shift_pos = SEL_10_DW;
+			*bits_mask = 0x0000F000;							
 			switch(source_port)
 			{
 				case UART1:
-					*shift_val = 0x05;
+					*shift_val = 0x06;
 				break;
 				case UART2:
-					*shift_val = 0x06;
+					*shift_val = 0x07;
 				break;				
 				case UART3:
-					*shift_val = 0x07;
+					*shift_val = 0x08;
 				break;
 				case UART4:
-					*shift_val = 0x08;
+					*shift_val = 0x09;
 				break;
 			}
 		break;
@@ -265,13 +265,13 @@ static void route_io_to_uart(int source_port, int destination_port, int *shift_p
 					*shift_val = 0x00;
 				break;
 				case IO6:
-					*shift_val = 0x09;
+					*shift_val = 0x07;
 				break;
 			}
 		break;
-		case UART5:
-			*shift_pos = SEL_5_DW;
-			*bits_mask = 0xF0000000;				
+		case UART6: // UART6 for A1 silicon. UART10 for A2 silicon.
+			*shift_pos = SEL_6_DW;
+			*bits_mask = 0x0000F000;				
 			switch(source_port)
 			{
 				case IO1:
@@ -286,11 +286,8 @@ static void route_io_to_uart(int source_port, int destination_port, int *shift_p
 				case IO4:
 					*shift_val = 0x04;
 					break;
-				case IO5:
-					*shift_val = 0x00;
-				break;
 				case IO6:
-					*shift_val = 0x09;
+					*shift_val = 0x00;
 				break;
 			}
 		break;
@@ -318,7 +315,7 @@ static void route_uart_to_io(int source_port, int destination_port, int *shift_p
 				case UART4:
 					*shift_val = 0x03;
 				break;
-				case UART5:
+				case UART10: // UART10 for A2 silicon. 
 					*shift_val = 0x04;
 				break;
 			}
@@ -340,7 +337,7 @@ static void route_uart_to_io(int source_port, int destination_port, int *shift_p
 				case UART4:
 					*shift_val = 0x02;
 				break;
-				case UART5:
+				case UART10: // UART10 for A2 silicon
 					*shift_val = 0x03;
 				break;
 			}
@@ -362,7 +359,7 @@ static void route_uart_to_io(int source_port, int destination_port, int *shift_p
 				case UART4:
 					*shift_val = 0x01;
 				break;
-				case UART5:
+				case UART10: // UART10 for A2 silicon
 					*shift_val = 0x02;
 				break;
 			}
@@ -384,30 +381,30 @@ static void route_uart_to_io(int source_port, int destination_port, int *shift_p
 				case UART4:
 					*shift_val = 0x00;
 				break;
-				case UART5:
+				case UART10: // UART10 for A2 silicon
 					*shift_val = 0x01;
 				break;
 			}
 		break;
-		case IO5:
-			*shift_pos = SEL_5_IO;
-			*bits_mask = 0x00007000;								
+		case IO10: // IO6 for A1 silicon. IO10 for A2 silicon
+			*shift_pos = SEL_10_IO;
+			*bits_mask = 0x00000F00;								
 			switch(source_port)
 			{
 				case UART1:
-					*shift_val = 0x01;
+					*shift_val = 0x00;
 				break;
 				case UART2:
-					*shift_val = 0x02;
+					*shift_val = 0x01;
 				break;
 				case UART3:
-					*shift_val = 0x03;
+					*shift_val = 0x02;
 				break;
 				case UART4:
-					*shift_val = 0x04;
+					*shift_val = 0x03;
 				break;
-				case UART5:
-					*shift_val = 0x00;
+				case UART10: // UART6 for A1 silicon. UART10 for A2 silicon.
+					*shift_val = 0x0A;
 				break;
 			}
 		break;
@@ -427,54 +424,72 @@ static void route_uart(int source_port, int destination_port, int source_port_ty
 
 	if(source_port_type == SOURCE_PORT_UART)
 	{
-#if defined(SOC_AST2600)
-		reg_old_val=ioread32((void * __iomem)ast_lpc_reg_virt_base + AST_LPC_HICRA);	
-#else
-		reg_old_val=ioread32((void * __iomem)AST_LPC_VA_BASE + AST_LPC_HICRA);	
-#endif
+		if(destination_port == UART10 || destination_port == IO6 )
+		{
+			reg_old_val=ioread32((void * __iomem)ast_lpc_reg_virt_base + AST_LPC_HICR9);	
+		}
+		else
+		{
+			reg_old_val=ioread32((void * __iomem)ast_lpc_reg_virt_base + AST_LPC_HICRA);	
+		}
 		route_uart_to_io(source_port, destination_port, &shift_pos, &shift_val, &bits_mask);
 		reg_old_val&=(~bits_mask);
 		reg_tmp_val = shift_val << shift_pos;
 		reg_val = reg_old_val|reg_tmp_val;		
-#if defined(SOC_AST2600)
-		iowrite32(reg_val, (void * __iomem)ast_lpc_reg_virt_base + AST_LPC_HICRA);
-#else
-		iowrite32(reg_val, (void * __iomem)AST_LPC_VA_BASE + AST_LPC_HICRA);
-#endif
+		if(destination_port == UART10 || destination_port == IO6)
+		{
+			iowrite32(reg_val, (void * __iomem)ast_lpc_reg_virt_base + AST_LPC_HICR9);
+		}
+		else
+		{
+			iowrite32(reg_val, (void * __iomem)ast_lpc_reg_virt_base + AST_LPC_HICRA);
+		}
 	}
 	else if(source_port_type == SOURCE_PORT_COM)
 	{
-#if defined(SOC_AST2600)
-		reg_old_val=ioread32((void * __iomem)ast_lpc_reg_virt_base + AST_LPC_HICRA);	
-#else
-		reg_old_val=ioread32((void * __iomem)AST_LPC_VA_BASE + AST_LPC_HICRA);	
-#endif
+		if(destination_port == UART10 || destination_port == IO6)
+		{
+			reg_old_val=ioread32((void * __iomem)ast_lpc_reg_virt_base + AST_LPC_HICR9);	
+		}
+		else
+		{
+			reg_old_val=ioread32((void * __iomem)ast_lpc_reg_virt_base + AST_LPC_HICRA);
+		}
 		route_io_to_uart(source_port, destination_port, &shift_pos, &shift_val, &bits_mask);
 		reg_old_val&=(~bits_mask);
 		reg_tmp_val = shift_val << shift_pos;
 		reg_val = reg_old_val|reg_tmp_val;
-#if defined(SOC_AST2600)
-		iowrite32(reg_val, (void * __iomem)ast_lpc_reg_virt_base + AST_LPC_HICRA);
-#else
-		iowrite32(reg_val, (void * __iomem)AST_LPC_VA_BASE + AST_LPC_HICRA);
-#endif
+		if(destination_port == UART10 || destination_port == IO6)
+		{
+			iowrite32(reg_val, (void * __iomem)ast_lpc_reg_virt_base + AST_LPC_HICR9);
+		}
+		else
+		{
+			iowrite32(reg_val, (void * __iomem)ast_lpc_reg_virt_base + AST_LPC_HICRA);
+		}
 	}
 	else if(source_port_type == SOURCE_PORT_BOTH)
 	{
-#if defined(SOC_AST2600)
-		reg_old_val=ioread32((void * __iomem)ast_lpc_reg_virt_base + AST_LPC_HICRA);	
-#else
-		reg_old_val=ioread32((void * __iomem)AST_LPC_VA_BASE + AST_LPC_HICRA);	
-#endif
+		if(destination_port == UART10 || destination_port == IO6)
+		{
+			reg_old_val=ioread32((void * __iomem)ast_lpc_reg_virt_base + AST_LPC_HICR9);	
+		}
+		else
+		{
+			reg_old_val=ioread32((void * __iomem)ast_lpc_reg_virt_base + AST_LPC_HICRA);
+		}
 		route_uart_to_uart(source_port, destination_port, &shift_pos, &shift_val, &bits_mask);
 		reg_old_val&=(~bits_mask);
 		reg_tmp_val = shift_val << shift_pos;
 		reg_val = reg_old_val|reg_tmp_val;
-#if defined(SOC_AST2600)
-		iowrite32(reg_val, (void * __iomem)ast_lpc_reg_virt_base + AST_LPC_HICRA);
-#else
-		iowrite32(reg_val, (void * __iomem)AST_LPC_VA_BASE + AST_LPC_HICRA);
-#endif
+		if(destination_port == UART10 || destination_port == IO6)
+		{
+			iowrite32(reg_val, (void * __iomem)ast_lpc_reg_virt_base + AST_LPC_HICR9);
+		}
+		else
+		{
+			iowrite32(reg_val, (void * __iomem)ast_lpc_reg_virt_base + AST_LPC_HICRA);
+		}
 	}
 	
 }

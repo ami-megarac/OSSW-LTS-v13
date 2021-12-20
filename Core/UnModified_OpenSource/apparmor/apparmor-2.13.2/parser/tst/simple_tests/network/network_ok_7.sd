@@ -1,0 +1,9 @@
+#
+#=DESCRIPTION basic unspec network tests
+#=EXRESULT PASS
+#
+/usr/bin/foo {
+  network unspec stream,
+  network unspec dgram,
+  network unspec raw,
+}

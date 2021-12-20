@@ -1,0 +1,28 @@
+From: =?UTF-8?q?Tim=20R=C3=BChsen?= <tim.ruehsen@gmx.de>
+Date: Sat, 5 Jan 2019 22:49:13 +0100
+Subject: Fix free of random (stack) value in idn2_to_ascii_4i()
+Origin: https://github.com/libidn/libidn2/commit/dfedd4024b01bf08d5b55ed8fb29c009b887f083
+
+---
+ lib/lookup.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/lib/lookup.c b/lib/lookup.c
+index 14e87daf9cf1..7c5b52bb7bc8 100644
+--- a/lib/lookup.c
++++ b/lib/lookup.c
+@@ -619,9 +619,10 @@ idn2_to_ascii_4i (const uint32_t * input, size_t inlen, char * output, int flags
+        */
+       if (output)
+ 	strcpy (output, (const char *) output_u8);
++
++      free(output_u8);
+     }
+ 
+-  free(output_u8);
+   return rc;
+ }
+ 
+-- 
+2.25.0
+

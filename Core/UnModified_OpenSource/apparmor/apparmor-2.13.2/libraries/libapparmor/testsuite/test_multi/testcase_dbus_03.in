@@ -1,0 +1,1 @@
+Jul 31 17:11:58 dbusdev-saucy-amd64 dbus[1692]: apparmor="DENIED" operation="dbus_signal"  bus="session" name="com.apparmor.Test" path="/com/apparmor/Test" interface="com.apparmor.Test" member="Signal" mask="receive" pid=2945 profile="/tmp/apparmor-2.8.0/tests/regression/apparmor/dbus_service" peer_pid=2947 peer_profile="unconfined"

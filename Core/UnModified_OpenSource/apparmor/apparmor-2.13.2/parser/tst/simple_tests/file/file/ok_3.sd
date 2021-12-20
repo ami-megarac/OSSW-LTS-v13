@@ -1,0 +1,9 @@
+#
+#=DESCRIPTION A simple successful profile
+#=EXRESULT PASS
+#
+/usr/bin/foo {
+  file /usr/bin/foo r,
+  file /usr/bin/blah rix,
+}
+

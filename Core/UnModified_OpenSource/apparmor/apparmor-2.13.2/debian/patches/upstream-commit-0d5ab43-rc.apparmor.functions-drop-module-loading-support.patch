@@ -1,0 +1,72 @@
+From: John Johansen <john.johansen@canonical.com>
+Date: Sat, 3 Nov 2018 07:15:16 -0700
+Subject: rc.apparmor.functions: drop module loading support
+
+The apparmor kernel "module" has not been a loadable module for more
+than a decade, it must be built into the kernel and due configuration
+requirements it will never go back to being a loadable module.
+
+Remove the long unfunctioning load_module support from the init script.
+
+PR: https://gitlab.com/apparmor/apparmor/merge_requests/257
+Signed-off-by: John Johansen <john.johansen@canonical.com>
+Acked-by: seth.arnold@canonical.com
+---
+ parser/rc.apparmor.functions | 42 ++++++++----------------------------------
+ 1 file changed, 8 insertions(+), 34 deletions(-)
+
+diff --git a/parser/rc.apparmor.functions b/parser/rc.apparmor.functions
+index c9086a6..521cfe7 100644
+--- a/parser/rc.apparmor.functions
++++ b/parser/rc.apparmor.functions
+@@ -327,42 +327,16 @@ unmount_subdomainfs() {
+ 	fi
+ }
+ 
+-load_module() {
+-	local rc=0
+-	if modinfo -F filename apparmor > /dev/null 2>&1 ; then
+-		MODULE=apparmor
+-	elif modinfo -F filename ${OLD_MODULE} > /dev/null 2>&1 ; then
+-		MODULE=${OLD_MODULE}
+-	fi
+-
+-	if ! is_apparmor_present apparmor subdomain ; then
+-		aa_action "Loading AppArmor module" /sbin/modprobe -q $MODULE $1
+-		rc=$?
+-		if [ $rc -ne 0 ] ; then
+-			module_panic
+-			rc=$?
+-			if [ $rc -ne 0 ] ; then
+-				exit $rc
+-			fi
+-		fi
+-	fi
+-
+-	if ! is_apparmor_loaded ; then
+-		return 1
+-	fi
+-
+-	return $rc
+-}
+-
+ apparmor_start() {
+ 	aa_log_daemon_msg "Starting AppArmor"
+-	if ! is_apparmor_loaded ; then
+-		load_module
+-		rc=$?
+-		if [ $rc -ne 0 ] ; then
+-			aa_log_end_msg $rc
+-			return $rc
+-		fi
++	if ! is_apparmor_present ; then
++		aa_log_failure_msg "Starting AppArmor - failed, To enable AppArmor, ensure your kernel is configured with CONFIG_SECURITY_APPARMOR=y then add 'security=apparmor apparmor=1' to the kernel command line"
++		aa_log_end_msg 1
++		return 1
++	elif ! is_apparmor_loaded ; then
++		aa_log_failure_msg "Starting AppArmor - AppArmor control files aren't available under /sys/kernel/security/, please make sure securityfs is mounted."
++		aa_log_end_msg 1
++		return 1
+ 	fi
+ 
+ 	if [ ! -w "$SFS_MOUNTPOINT/.load" ] ; then

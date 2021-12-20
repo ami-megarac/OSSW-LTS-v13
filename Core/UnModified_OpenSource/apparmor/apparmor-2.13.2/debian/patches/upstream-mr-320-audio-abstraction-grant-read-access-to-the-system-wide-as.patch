@@ -1,0 +1,27 @@
+From: intrigeri <intrigeri@boum.org>
+Date: Thu, 31 Jan 2019 09:27:10 +0000
+Subject: audio abstraction: grant read access to the system-wide asound.conf.
+
+Bug-Debian: https://bugs.debian.org/920669
+Origin: https://gitlab.com/apparmor/apparmor/merge_requests/320
+
+Relevant documentation: http://www.alsa-project.org/main/index.php/Asoundrc
+
+We already grant read access to the corresponding per-user configuration file
+(~/.asoundrc) so it makes sense to also grant access to the system-wide one.
+---
+ profiles/apparmor.d/abstractions/audio | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/profiles/apparmor.d/abstractions/audio b/profiles/apparmor.d/abstractions/audio
+index 6964a66..5f202d2 100644
+--- a/profiles/apparmor.d/abstractions/audio
++++ b/profiles/apparmor.d/abstractions/audio
+@@ -41,6 +41,7 @@
+ /usr/share/sounds/** r,
+ 
+ owner @{HOME}/.esd_auth r,
++/etc/asound.conf r,
+ owner @{HOME}/.asoundrc r,
+ /etc/esound/esd.conf r,
+ 

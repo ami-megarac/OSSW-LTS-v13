@@ -1,0 +1,8 @@
+#
+#=DESCRIPTION include if exists testing - non-existent include should pass
+#=EXRESULT PASS
+#
+/does/not/exist {
+  #include <includes/base>
+  #include if exists "../does-not-exist/does-not-exist"
+}

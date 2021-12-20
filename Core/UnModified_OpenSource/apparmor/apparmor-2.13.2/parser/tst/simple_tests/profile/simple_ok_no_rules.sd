@@ -1,0 +1,14 @@
+#
+#=DESCRIPTION simple syntax test -- no actual rules.
+#=EXRESULT PASS
+#
+/does/not/exist {
+}
+
+/does/not/exist2 {
+  ^hat1 {
+  }
+
+  ^hat2 {
+  }
+}

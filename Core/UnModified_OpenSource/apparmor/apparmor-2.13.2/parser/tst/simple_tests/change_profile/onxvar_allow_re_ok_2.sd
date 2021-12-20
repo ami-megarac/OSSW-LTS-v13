@@ -1,0 +1,70 @@
+#
+#=DESCRIPTION allow change_profile @{var} to a hat
+#=EXRESULT PASS
+#
+@{var}=/test
+/usr/bin/foo {
+   allow change_profile @{var} -> /bin/foo//bar,
+}
+
+/usr/bin/foo2 {
+   allow change_profile @{var} -> /bin/foo//ba*,
+}
+
+/usr/bin/foo3 {
+   allow change_profile @{var} -> /bin/foo//ba**,
+}
+
+/usr/bin/foo4 {
+   allow change_profile @{var} -> /bin/foo//ba?,
+}
+
+/usr/bin/foo5 {
+   allow change_profile @{var} -> /bin/foo//ba[ab],
+}
+
+/usr/bin/foo6 {
+   allow change_profile @{var} -> /bin/foo//ba[^ab],
+}
+
+/usr/bin/foo7 {
+   allow change_profile @{var} -> /bin/fo*//bar,
+}
+
+/usr/bin/foo8 {
+   allow change_profile @{var} -> /bin/fo**//bar,
+}
+
+/usr/bin/foo9 {
+   allow change_profile @{var} -> /bin/fo?//bar,
+}
+
+/usr/bin/foo10 {
+   allow change_profile @{var} -> /bin/fo[ab]//bar,
+}
+
+/usr/bin/foo11 {
+   allow change_profile @{var} -> /bin/fo[^ab]//bar,
+}
+
+/usr/bin/foo12 {
+   allow change_profile @{var} -> /bin/fo*//ba*,
+}
+
+/usr/bin/foo13 {
+   allow change_profile @{var} -> /bin/fo**//ba**,
+}
+
+/usr/bin/foo14 {
+   allow change_profile @{var} -> /bin/fo?//ba?,
+}
+
+/usr/bin/foo15 {
+   allow change_profile @{var} -> /bin/fo[ab]//ba[ab],
+}
+
+/usr/bin/foo16 {
+   allow change_profile @{var} -> /bin/fo[^ab]//ba[^ab],
+}
+
+

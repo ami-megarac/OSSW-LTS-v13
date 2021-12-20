@@ -1,0 +1,92 @@
+util-linux (2.32-0.4) unstable; urgency=medium
+
+  The util-linux implementation of /bin/su is now used, replacing the
+  one previously supplied by src:shadow (shipped in login package), and
+  bringing Debian in line with other modern distributions. The two
+  implementations are very similar but have some minor differences (and
+  there might be more that was not yet noticed ofcourse), e.g.
+
+  - new 'su' (with no args, i.e. when preserving the environment) also
+    preserves PATH and IFS, while old su would always reset PATH and IFS
+    even in 'preserve environment' mode.
+  - new 'su -' (creating new environment) will do just that, while old
+    su would always preserve content of DISPLAY and XAUTHORITY
+    environment variables. Set them as needed (but beware X doesn't give
+    you any real privileges separation anyway if you can access an X
+    server of another user). See pam_xauth(8) if you want to reconfigure
+    pam for seamless xauth keys.
+  - su '' (empty user string) used to give root, but now returns an error.
+  - previously su only had one pam config, but now 'su -' is configured
+    separately in /etc/pam.d/su-l. This file additionally invokes
+    'pam_keyinit' to revoke the session keyring.
+
+  The first difference is probably the most user visible one. Doing
+  plain 'su' is a really bad idea for many reasons, so using 'su -' is
+  strongly recommended to always get a newly set up environment similar
+  to a normal login. If you want to restore behaviour more similar to
+  the previous one you can add 'ALWAYS_SET_PATH yes' in /etc/login.defs.
+
+ -- Andreas Henriksson <andreas@fatal.se>  Fri, 03 Aug 2018 10:52:22 +0200
+
+util-linux (2.29.2-3) experimental; urgency=medium
+
+  * The cfdisk, fdisk and sfdisk utilities has been split out into a
+    separate fdisk package. Any package needing these utilities should
+    add a dependency on: fdisk | util-linux (<< 2.29.2-3~)
+    (The second part of it makes the dependency also be fulfilled in case
+     of stretch-backports and should be considered optional.)
+
+ -- Andreas Henriksson <andreas@fatal.se>  Sun, 06 Aug 2017 14:59:02 +0200
+
+util-linux (2.29.2-2) unstable; urgency=medium
+
+  * The deprecated 'pg' utility is no longer shipped.
+    (Please use either 'more' or 'less' instead.)
+  * The deprecated 'tunelp' utility is no longer shipped.
+    (Parallell port printers are suspected to be extinct by now.)
+  * The deprecated 'line' utility is no longer shipped.
+    (Please use the 'head' utility instead.)
+  * The deprecated 'tailf' utility is no longer shipped.
+    (Please use 'tail -f' instead.)
+
+ -- Andreas Henriksson <andreas@fatal.se>  Mon, 13 Mar 2017 19:27:14 +0100
+
+util-linux (2.25.1~rc1-1) experimental; urgency=medium
+
+  * This version adds a number of patches which again makes
+    fsck available on non-linux architectures like kfreebsd.
+
+ -- Andreas Henriksson <andreas@fatal.se>  Sat, 30 Aug 2014 18:32:25 -0700
+
+util-linux (2.25-1) experimental; urgency=medium
+
+  * The cytune command is no longer available since it has
+    been removed upstream.
+
+  * Upstream Release Notes also includes these highlights:
+
+    The "swapon --summary" output format is deprecated in favor of the
+    "swapon --show[=<columns>]" that provides better control on output
+    formatting.
+
+    cfdisk(8):
+    - the code been completely rewritten, now it uses libfdisk and
+      libsmartcols, supports GPT, SUN, SGI and BSD disk labels
+    - the command is no more based on CHS addressing
+
+  * WARNING! The fsck command is no longer built on non-linux.
+    It relies on libmount, which needs porting.
+
+ -- Andreas Henriksson <andreas@fatal.se>  Wed, 23 Jul 2014 14:05:13 +0200
+
+util-linux (2.24.2-1) experimental; urgency=low
+
+  This is a major update which is long overdue.
+  This release attempts to unify the work that has happened upstream
+  with the work that has gone on in parallell in the Debian package.
+
+  A few things are no longer shipped since they have been removed upstream:
+  ddate - convert Gregorian dates to Discordian dates
+  chkdupexe - report dangling symlinks and duplicately-named binaries
+
+ -- Andreas Henriksson <andreas@fatal.se>  Wed, 11 Jun 2014 12:00:48 +0200

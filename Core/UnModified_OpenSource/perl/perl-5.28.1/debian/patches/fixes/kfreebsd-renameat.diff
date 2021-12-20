@@ -1,0 +1,35 @@
+From ce9fad507857f60694f2f9a7be95477317a7533d Mon Sep 17 00:00:00 2001
+From: James Clarke <jrtc27@jrtc27.com>
+Date: Mon, 19 Nov 2018 14:25:56 +0000
+Subject: Also work around renameat() kernel bug on GNU/kFreeBSD
+
+Bug: https://rt.perl.org/Public/Bug/Display.html?id=133668
+Bug-Debian: https://bugs.debian.org/912521
+Patch-Name: fixes/kfreebsd-renameat.diff
+Origin: upstream, https://perl5.git.perl.org/perl.git/commit/a3c63a9402266c2f0e3bb0f421763d96ea1bd856
+---
+ doio.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/doio.c b/doio.c
+index 16daf9fd11..309326b27a 100644
+--- a/doio.c
++++ b/doio.c
+@@ -1461,7 +1461,7 @@ Perl_nextargv(pTHX_ GV *gv, bool nomagicopen)
+ }
+ 
+ #ifdef ARGV_USE_ATFUNCTIONS
+-#  if defined(__FreeBSD__)
++#  if defined(__FreeBSD__) || defined(__FreeBSD_kernel__)
+ 
+ /* FreeBSD 11 renameat() mis-behaves strangely with absolute paths in cases where the
+  * equivalent rename() succeeds
+@@ -1481,7 +1481,7 @@ S_my_renameat(int olddfd, const char *oldpath, int newdfd, const char *newpath)
+ 
+ #  else
+ #    define S_my_renameat(dh1, pv1, dh2, pv2) renameat((dh1), (pv1), (dh2), (pv2))
+-#  endif /* if defined(__FreeBSD__) */
++#  endif /* if defined(__FreeBSD__) || defined(__FreeBSD_kernel__) */
+ #endif
+ 
+ static bool

@@ -1,0 +1,132 @@
+#!/usr/bin/perl
+# ----------------------------------------------------------------------
+#    Copyright (c) 2005 Novell, Inc. All Rights Reserved.
+#    Copyright (c) 2011 Canonical, Ltd.
+#
+#    This program is free software; you can redistribute it and/or
+#    modify it under the terms of version 2 of the GNU General Public
+#    License as published by the Free Software Foundation.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program; if not, contact Novell, Inc.
+#
+#    To contact Novell about this file by physical or electronic mail,
+#    you may find current contact information at www.novell.com.
+# ----------------------------------------------------------------------
+
+use strict;
+use FindBin;
+use Getopt::Long;
+
+use Immunix::AppArmor;
+
+use Data::Dumper;
+
+use Locale::gettext;
+use POSIX;
+
+# initialize the local poo
+setlocale(LC_MESSAGES, "");
+textdomain("apparmor-utils");
+
+$UI_Mode = "text";
+
+# options variables
+my $help = '';
+
+GetOptions(
+    'dir|d=s' => \$profiledir,
+    'help|h'  => \$help,
+);
+
+# tell 'em how to use it...
+&usage && exit if $help;
+
+# let's convert it to full path...
+$profiledir = get_full_path($profiledir);
+
+unless (-d $profiledir) {
+    UI_Important("Can't find AppArmor profiles in $profiledir.");
+    exit 1;
+}
+
+# what are we profiling?
+my @profiling = @ARGV;
+
+unless (@profiling) {
+    @profiling = (UI_GetString("Please enter the program to switch to audit mode: ", ""));
+}
+
+for my $profiling (@profiling) {
+
+    next unless $profiling;
+
+    my $fqdbin;
+    if (-e $profiling) {
+        $fqdbin = get_full_path($profiling);
+        chomp($fqdbin);
+    } else {
+        if ($profiling !~ /\//) {
+	    opendir(DIR,$profiledir);
+	    my @tmp_fqdbin = grep ( /$profiling/, readdir(DIR));
+	    closedir(DIR);
+	    if (scalar @tmp_fqdbin eq 1) {
+		    $fqdbin = "$profiledir/$tmp_fqdbin[0]";
+	    } else {
+	            my $which = which($profiling);
+        	    if ($which) {
+                	$fqdbin = get_full_path($which);
+            	}
+	    }
+        }
+    }
+
+    if (-e $fqdbin) {
+
+        my $filename;
+        if ($fqdbin =~ /^$profiledir\//) {
+            $filename = $fqdbin;
+        } else {
+            $filename = getprofilefilename($fqdbin);
+        }
+
+        # argh, skip directories
+        next unless -f $filename;
+
+        # skip rpm backup files
+        next if isSkippableFile($filename);
+
+        printf(gettext('Setting %s to audit mode.'), $fqdbin);
+        print "\n";
+        setprofileflags($filename, "audit");
+
+        my $cmd_info = qx(cat $filename | $parser -I$profiledir -r 2>&1 1>/dev/null);
+	if ($? != 0) {
+	    UI_Info($cmd_info);
+	    exit $?;
+	}
+
+#          if check_for_subdomain();
+    } else {
+        if ($profiling =~ /^[^\/]+$/) {
+            UI_Info(sprintf(gettext('Can\'t find %s in the system path list.  If the name of the application is correct, please run \'which %s\' as a user with the correct PATH environment set up in order to find the fully-qualified path.'), $profiling, $profiling));
+            exit 1;
+        } else {
+            UI_Info(sprintf(gettext('%s does not exist, please double-check the path.'), $profiling));
+            exit 1;
+        }
+    }
+}
+
+exit 0;
+
+sub usage {
+    UI_Info(sprintf(gettext("usage: \%s [ -d /path/to/profiles ] [ program to switch to audit mode ]"), $0));
+    exit 0;
+}
+

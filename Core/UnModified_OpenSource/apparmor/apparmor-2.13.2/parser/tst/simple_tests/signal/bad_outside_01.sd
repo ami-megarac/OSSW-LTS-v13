@@ -1,0 +1,7 @@
+#
+#=Description signal rule outside of a profile
+#=EXRESULT FAIL
+#
+
+  signal,
+

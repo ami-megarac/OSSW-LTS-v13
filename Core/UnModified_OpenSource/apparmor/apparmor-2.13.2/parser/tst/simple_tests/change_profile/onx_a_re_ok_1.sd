@@ -1,0 +1,24 @@
+#
+#=DESCRIPTION audit change_profile /onexec
+#=EXRESULT PASS
+#
+/usr/bin/foo {
+   audit change_profile /onexec -> /bin/*,
+}
+
+/usr/bin/foo2 {
+   audit change_profile /onexec -> /bin/**,
+}
+
+/usr/bin/foo3 {
+   audit change_profile /onexec -> /bin/?,
+}
+
+/usr/bin/foo4 {
+   audit change_profile /onexec -> /bin/[ab],
+}
+
+/usr/bin/foo5 {
+   audit change_profile /onexec -> /bin/[^ab],
+}
+

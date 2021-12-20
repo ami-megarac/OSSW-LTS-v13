@@ -1,0 +1,107 @@
+{
+  "_args": [
+    [
+      {
+        "raw": "file-saver",
+        "scope": null,
+        "escapedName": "file-saver",
+        "name": "file-saver",
+        "rawSpec": "",
+        "spec": "latest",
+        "type": "tag"
+      },
+      "/home/web/dk"
+    ]
+  ],
+  "_from": "file-saver@latest",
+  "_hasShrinkwrap": false,
+  "_id": "file-saver@2.0.5",
+  "_inCache": true,
+  "_location": "/file-saver",
+  "_nodeVersion": "15.2.0",
+  "_npmOperationalInternal": {
+    "host": "s3://npm-registry-packages",
+    "tmp": "tmp/file-saver_2.0.5_1605792660969_0.048298419102172696"
+  },
+  "_npmUser": {
+    "name": "endless",
+    "email": "jimmy@warting.se"
+  },
+  "_npmVersion": "7.0.8",
+  "_phantomChildren": {},
+  "_requested": {
+    "raw": "file-saver",
+    "scope": null,
+    "escapedName": "file-saver",
+    "name": "file-saver",
+    "rawSpec": "",
+    "spec": "latest",
+    "type": "tag"
+  },
+  "_requiredBy": [
+    "#USER"
+  ],
+  "_resolved": "https://registry.npmjs.org/file-saver/-/file-saver-2.0.5.tgz",
+  "_shasum": "d61cfe2ce059f414d899e9dd6d4107ee25670c38",
+  "_shrinkwrap": null,
+  "_spec": "file-saver",
+  "_where": "/home/web/dk",
+  "author": {
+    "name": "Eli Grey",
+    "email": "me@eligrey.com"
+  },
+  "bugs": {
+    "url": "https://github.com/eligrey/FileSaver.js/issues"
+  },
+  "dependencies": {},
+  "description": "An HTML5 saveAs() FileSaver implementation",
+  "devDependencies": {
+    "@babel/cli": "^7.1.0",
+    "@babel/core": "^7.1.0",
+    "@babel/plugin-transform-modules-umd": "^7.1.0",
+    "babel-preset-minify": "^0.4.3"
+  },
+  "directories": {},
+  "dist": {
+    "integrity": "sha512-P9bmyZ3h/PRG+Nzga+rbdI4OEpNDzAVyy74uVO9ATgzLK6VtAsYybF/+TOCvrc0MO793d6+42lLyZTw7/ArVzA==",
+    "shasum": "d61cfe2ce059f414d899e9dd6d4107ee25670c38",
+    "tarball": "https://registry.npmjs.org/file-saver/-/file-saver-2.0.5.tgz",
+    "fileCount": 8,
+    "unpackedSize": 35990,
+    "npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.13\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJftnOVCRA9TVsSAnZWagAADg4QAItXySE52wWlMZYexGBS\nJl4HXCauUirg1xExaH+UME6avf2hbxUGSPJKFDGwhvdSA1m7hF8DBBq7oVBN\nnHImSAF2nEYlc6u7OvUXB/KZO4gXUjJck6XPuUS8W44CPAa2b9eoPbOV/7T1\nbcM3ok57VfN4t9kYkefS/U2MaZoMp6hiUxov1mspExKtFryx8neuMmxXqGi9\nwOMC49Uim15Pwv/vni7VS+gquwMWgCvsWdn1gONPUL+aPoYlqZnmE/8ZZdpa\noC47hhSrerXyKwU3XSuIMdk2yW0iDsqpr9N1zbS/QRdgz7oQ+SEm9+6d0f3M\ndTzvtE/DKjLFvYegs14VoQQM6i7M27JyUzzkIPvczF6GNduOZZLNIFEVhpSG\nuaI94G0K7ebwgiD1t8CF3ClBW98+GcoJ6GF2r+DnV5eYngwZDKOtHiymEkJE\nIOAU6DfGC1CsDImBbtlkGqTiYgorgG0PrIc84izVL5oDrcbyuvywkC6XPKSm\nzTDy8HsD+rOPTLtoqunH3KOdRaEsEmJ6CwNzn+Rv2OMmYpds1I15GkZd25xN\ny2GqyREiQrQBbpL5o6dvmQ9chLq9BxfYCus7bPf33oJv2+mMT3iHTz2YBo2/\nZZiu3FAx+KRzbDVmk9pavd8dlfwJ7FGUNEFsMc0Xt5g+LUCRXM8KgTK1Sxl6\nWCk7\r\n=XCtT\r\n-----END PGP SIGNATURE-----\r\n"
+  },
+  "gitHead": "5bb701bd6ea05a02836daf8ef88ec350a1dd4d83",
+  "homepage": "https://github.com/eligrey/FileSaver.js#readme",
+  "keywords": [
+    "filesaver",
+    "saveas",
+    "blob"
+  ],
+  "license": "MIT",
+  "main": "dist/FileSaver.min.js",
+  "maintainers": [
+    {
+      "name": "eli",
+      "email": "~@eligrey.com"
+    },
+    {
+      "name": "endless",
+      "email": "jimmy@warting.se"
+    }
+  ],
+  "name": "file-saver",
+  "optionalDependencies": {},
+  "readme": "ERROR: No README data found!",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eligrey/FileSaver.js.git"
+  },
+  "scripts": {
+    "build": "npm run build:development && npm run build:production",
+    "build:development": "babel -o dist/FileSaver.js --plugins @babel/plugin-transform-modules-umd src/FileSaver.js",
+    "build:production": "babel -o dist/FileSaver.min.js -s --plugins @babel/plugin-transform-modules-umd --presets minify src/FileSaver.js",
+    "prepublishOnly": "npm run build",
+    "test": "echo \"Error: no test specified\" && exit 0"
+  },
+  "version": "2.0.5"
+}

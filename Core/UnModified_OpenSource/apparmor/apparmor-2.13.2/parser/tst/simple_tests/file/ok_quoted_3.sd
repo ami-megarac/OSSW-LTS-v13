@@ -1,0 +1,9 @@
+#
+#=DESCRIPTION simple quoted carriage return expansion
+#=EXRESULT PASS
+#
+
+profile test {
+  "/bin/alpha\rbeta" rix,
+}
+

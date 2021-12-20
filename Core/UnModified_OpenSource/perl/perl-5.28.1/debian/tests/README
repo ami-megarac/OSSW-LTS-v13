@@ -1,0 +1,15 @@
+This directory holds rudimentary autopkgtest regression checks for
+src:perl. We mostly test backwards compatibility with things like reading
+in old binary files (zlib, Berkeley DB etc.) and making sure we can still
+retrieve their contents.
+
+We also run an existing maintainer test for checking the status of 
+separately packaged dual life modules in the archive. This is expected
+to regress when somebody e.g. packages a new dual life module, and
+the fix is to add corresponding Breaks/Provides/Replaces or special
+case it in the test.
+
+This is work in progress, and suggestions for further tests are very
+welcome.
+
+ -- Niko Tyni <ntyni@debian.org> Fri, 18 May 2018 16:45:10 +0300

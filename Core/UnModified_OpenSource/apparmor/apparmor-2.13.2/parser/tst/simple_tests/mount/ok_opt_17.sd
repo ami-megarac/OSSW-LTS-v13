@@ -1,0 +1,10 @@
+#
+#=Description basic rules to test the "noatime" mount option
+#=EXRESULT PASS
+/usr/bin/foo {
+  mount options=noatime /a -> /1,
+  mount options=(noatime) /b -> /2,
+  mount options=(rw,noatime) /c -> /3,
+  mount options in (noatime) /d -> /4,
+  mount options in (ro,noatime) /e -> /5,
+}

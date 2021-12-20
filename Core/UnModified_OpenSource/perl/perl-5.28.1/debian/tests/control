@@ -1,0 +1,23 @@
+Tests: hello
+Depends: perl-base
+
+Tests: perl-base-self-contained
+Depends: perl-base
+
+Tests: compression db gdbm ndbm storable
+Depends: perl, db-util, gdbmtool
+Restrictions: skippable
+
+Tests: embed
+Depends: libperl-dev, build-essential
+Restrictions: allow-stderr
+
+Test-Command: prove debian/t/control.t
+Depends: perl, libapt-pkg-perl
+
+Test-Command: prove debian/t/released-versions.t
+Depends: perl, dpkg-dev
+
+Test-Command: /usr/share/pkg-perl-autopkgtest/runtime-deps-and-recommends.d/syntax.t
+Depends: @, pkg-perl-autopkgtest
+Restrictions: allow-stderr

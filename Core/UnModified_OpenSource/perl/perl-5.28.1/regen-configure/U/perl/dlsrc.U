@@ -1,0 +1,390 @@
+?RCS: $Id: dlsrc.U,v$
+?RCS:
+?RCS: Copyright (c) 1996-1998, Andy Dougherty
+?RCS:
+?RCS: You may distribute under the terms of either the GNU General Public
+?RCS: License or the Artistic License, as specified in the README file.
+?RCS:
+?RCS: $Log: dlsrc.U,v $
+?RCS:
+?X:  hpux support thanks to Jeff Okamoto <okamoto@hpcc101.corp.hp.com>
+?X:
+?X:  To create a shared library, you must compile ALL source files in the
+?X:  library with +z (or possibly +Z if the library is whopping huge),
+?X:  then link the library with -b.  Example:
+?X:	  cc -c +z module_a.c
+?X:	  cc -c +z module_b.c
+?X:	  ld -b module_a.o module_b.o -o module.sl
+?X:
+?MAKE:usedl ld dlsrc cccdlflags lddlflags ccdlflags bin_ELF ld_can_script: \
+	rm_try Getfile Myread test osname sed d_dlopen Findhdr Setvar \
+	src run cc ccflags ldflags optimize ls gccversion cat rsrc i_stdlib \
+	i_unistd osvers sysroot
+?MAKE:	-pick add $@ %<
+?Y:BOTTOM
+?S:usedl:
+?S:	This variable indicates if the system supports dynamic
+?S:	loading of some sort.  See also dlsrc and dlobj.
+?S:.
+?S:ld:
+?S:	This variable indicates the program to be used to link
+?S:	libraries for dynamic loading.  On some systems, it is 'ld'.
+?S:	On ELF systems, it should be $cc.  Mostly, we'll try to respect
+?S:	the hint file setting.
+?S:.
+?S:dlsrc:
+?S:	This variable contains the name of the dynamic loading file that
+?S:	will be used with the package.
+?S:.
+?S:cccdlflags:
+?S:	This variable contains any special flags that might need to be
+?S:	passed with 'cc -c' to compile modules to be used to create a shared
+?S:	library that will be used for dynamic loading.  For hpux, this
+?S:	should be +z.  It is up to the makefile to use it.
+?S:.
+?S:lddlflags:
+?S:	This variable contains any special flags that might need to be
+?S:	passed to $ld to create a shared library suitable for dynamic
+?S:	loading.  It is up to the makefile to use it.  For hpux, it
+?S:	should be '-b'.  For sunos 4.1, it is empty.
+?S:.
+?S:ccdlflags:
+?S:	This variable contains any special flags that might need to be
+?S:	passed to cc to link with a shared library for dynamic loading.
+?S:	It is up to the makefile to use it.  For sunos 4.1, it should
+?S:	be empty.
+?S:.
+?S:bin_ELF:
+?S:	This variable saves the result from configure if generated binaries
+?S:	are in ELF format. Only set to defined when the test has actually
+?S:	been performed, and the result was positive.
+?S:.
+?S:ld_can_script:
+?S:	This variable shows if the loader accepts scripts in the form of
+?S:	-Wl,--version-script=ld.script. This is currently only supported
+?S:	for GNU ld on ELF in dynamic loading builds.
+?S:.
+?C:USE_DYNAMIC_LOADING ~ %<:
+?C:	This symbol, if defined, indicates that dynamic loading of
+?C:	some sort is available.
+?C:.
+?H:?%<:#$usedl USE_DYNAMIC_LOADING		/**/
+?H:.
+?W:%<:dlopen
+?T:dldir thisflag tdir
+?F:!a.out
+: determine which dynamic loading, if any, to compile in
+echo " "
+dldir="ext/DynaLoader"
+case "$usedl" in
+    $define|y|true)
+	dflt='y'
+	usedl="$define"
+	;;
+    $undef|n|false)
+	dflt='n'
+	usedl="$undef"
+	;;
+    *)
+	dflt='n'
+	case "$d_dlopen" in
+	    $define) dflt='y' ;;
+	esac
+	: Does a dl_xxx.xs file exist for this operating system
+	$test -f $rsrc/$dldir/dl_${osname}.xs && dflt='y'
+	;;
+esac
+rp="Do you wish to use dynamic loading?"
+. ./myread
+usedl="$ans"
+bin_ELF="$undef"
+case "$ans" in
+    y*) usedl="$define"
+	case "$dlsrc" in
+	    '') if $test -f $rsrc/$dldir/dl_${osname}.xs ; then
+		    dflt="$dldir/dl_${osname}.xs"
+		elif $test "$d_dlopen" = "$define" ; then
+		    dflt="$dldir/dl_dlopen.xs"
+		else
+		    dflt=''
+		fi
+		;;
+	    *)  dflt="$dldir/$dlsrc"
+		;;
+	esac
+	echo "The following dynamic loading files are available:"
+	: Can not go over to $dldir because getfile has path hard-coded in.
+	tdir=`pwd`; cd "$rsrc"; $ls -C $dldir/dl*.xs; cd "$tdir"
+	rp="Source file to use for dynamic loading"
+	fn="fne"
+	gfpth="$src"
+	. ./getfile
+	usedl="$define"
+	: emulate basename
+	dlsrc=`echo $ans | $sed -e 's%.*/\([^/]*\)$%\1%'`
+
+	$cat << EOM
+
+Some systems may require passing special flags to $cc -c to
+compile modules that will be used to create a shared library.
+To use no flags, say "none".
+
+EOM
+	case "$cccdlflags" in
+	    '') case "$gccversion" in
+		'') case "$osname" in
+			hpux)	dflt='+z' ;;
+			irix*)	dflt='-KPIC' ;;
+			svr4*|esix*|solaris|nonstopux) dflt='-KPIC' ;;
+			sunos)	dflt='-pic' ;;
+			*)	dflt='none' ;;
+		    esac
+		    ;;
+		*)  case "$osname" in
+			darwin) dflt='none' ;;
+			*linux*|svr4*|esix*|solaris|nonstopux) dflt='-fPIC' ;;
+			*)	dflt='-fpic' ;;
+		    esac ;;
+		esac ;;
+	    ' ') dflt='none' ;;
+	    *)   dflt="$cccdlflags" ;;
+	esac
+
+	case "$dflt" in
+	    none) dflt='' ;;
+	esac
+
+	# If -Dsysroot was specified, now's the time to add it
+	# to cccdlflags
+	if test "X$sysroot" != X; then
+	    case "$gccversion" in
+		'') ;;
+		*)  case "$dflt" in
+			*sysroot*) ;;
+			'undef'|*)
+			    dflt="$dflt --sysroot=$sysroot" ;;
+		    esac
+		    ;;
+	    esac
+	fi
+
+	case "$dflt" in
+	    '') dflt='none';;
+	esac
+
+	rp="Any special flags to pass to $cc -c to compile shared library modules?"
+	. ./myread
+	case "$ans" in
+?X: Use ' ' so that a subsequent Configure run preserves the old state.
+	    none) cccdlflags=' ' ;;
+	    *)    cccdlflags="$ans" ;;
+	esac
+
+	cat << EOM
+
+Some systems use ld to create libraries that can be dynamically loaded,
+while other systems (such as those using ELF) use $cc.
+
+EOM
+
+: Determine if this is ELF
+	$cat >try.c <<EOM
+/* Test for whether ELF binaries are produced */
+#include <fcntl.h>
+#$i_stdlib I_STDLIB
+#ifdef I_STDLIB
+#include <stdlib.h>
+#endif
+#$i_unistd I_UNISTD
+#ifdef I_UNISTD
+#include <unistd.h>
+#endif
+int main() {
+    char b[4];
+    int i = open("a.out",O_RDONLY);
+    if(i == -1)
+	exit(1); /* fail */
+    if(read(i,b,4)==4 && b[0]==127 && b[1]=='E' && b[2]=='L' && b[3]=='F')
+	exit(0); /* succeed (yes, it is ELF) */
+    exit(1); /* fail */
+}
+EOM
+	if $cc $ccflags $ldflags -o a.out try.c >/dev/null 2>&1 && $run ./a.out; then
+	    bin_ELF="$define"
+	fi
+	$rm_try
+
+	case "$ld" in
+	    '') if $test $bin_ELF = "$define"; then
+		    cat <<EOM
+You appear to have ELF support.  I'll use $cc to build dynamic libraries.
+EOM
+		    dflt="$cc"
+		else
+		    echo "I'll use ld to build dynamic libraries."
+		    dflt='ld'
+		fi
+		;;
+	    *)  dflt="$ld"
+		;;
+	esac
+
+	rp="What command should be used to create dynamic libraries?"
+	. ./myread
+	ld="$ans"
+
+	cat << EOM
+
+Some systems may require passing special flags to $ld to create a
+library that can be dynamically loaded.  If your ld flags include
+-L/other/path options to locate libraries outside your loader's normal
+search path, you may need to specify those -L options here as well.  To
+use no flags, say "none".
+
+EOM
+	case "$lddlflags" in
+	    '') case "$osname" in
+		    haiku) dflt='-shared' ;;
+		    hpux) dflt='-b';
+			  case "$gccversion" in
+			      '') dflt="$dflt +vnocompatwarnings" ;;
+			  esac
+			  ;;
+		    *linux*|irix*|gnu*)  dflt="-shared $optimize" ;;
+		    solaris) # See [perl #66604].
+			    # On Solaris 11, gcc -m64 on amd64
+			    # appears not to understand -G.  gcc versions at
+			    # least as old as 3.4.3 support -shared, so just
+			    # use that with Solaris 11 and later, but keep
+			    # the old behavior for older Solaris versions.
+			    case "$gccversion" in
+				'') dflt='-G' ;;
+				*)  case "$osvers" in
+					2.?|2.10) dflt='-G' ;;
+					*) dflt='-shared' ;;
+				    esac
+				    ;;
+			    esac
+			    ;;
+		    sunos) dflt='-assert nodefinitions' ;;
+		    svr4*|esix*|nonstopux) dflt="-G $ldflags" ;;
+		    *)     dflt='none' ;;
+		esac
+		;;
+	    *) dflt="$lddlflags" ;;
+	esac
+
+	: Only do this for gcc, since, for example, qcc has no concept
+	: of --sysroot.
+	if $test "X$sysroot" != X; then
+	    case "$gccversion" in
+		'') ;;
+		*)  dflt="$dflt --sysroot $sysroot" ;;
+	    esac
+	fi
+
+	: Try to guess additional flags to pick up local libraries.
+	: Be careful not to append to a plain 'none'
+	case "$dflt" in
+	    none) dflt='' ;;
+	esac
+	for thisflag in $ldflags; do
+	    case "$thisflag" in
+		-L*|-R*|-Wl,-R*)
+		    case " $dflt " in
+			*" $thisflag "*) ;;
+			*) dflt="$dflt $thisflag" ;;
+		    esac
+		    ;;
+	    esac
+	done
+
+	case "$dflt" in
+	    ''|' ') dflt='none' ;;
+	esac
+
+	case "$ldflags" in
+	    *-fstack-protector-strong*)
+		case "$dflt" in
+		    *-fstack-protector-strong*) ;; # Don't add it again
+		    *) dflt="$dflt -fstack-protector-strong" ;;
+		esac
+		;;
+	    *-fstack-protector*)
+		case "$dflt" in
+		    *-fstack-protector*) ;; # Don't add it again
+		    *) dflt="$dflt -fstack-protector" ;;
+		esac
+		;;
+	esac
+
+	rp="Any special flags to pass to $ld to create a dynamically loaded library?"
+	. ./myread
+	case "$ans" in
+?X: Use ' ' so that a subsequent Configure run preserves the old state.
+	    none) lddlflags=' ' ;;
+	    *) lddlflags="$ans" ;;
+	esac
+
+	cat <<EOM
+
+Some systems may require passing special flags to $cc to indicate that
+the resulting executable will use dynamic linking.  To use no flags,
+say "none".
+
+EOM
+	case "$ccdlflags" in
+	    '') case "$osname" in
+		    *linux*|hpux|gnu*) dflt='-Wl,-E' ;;
+		    sunos)             dflt='none'   ;;
+		    *)                 dflt='none'   ;;
+		esac ;;
+	    ' ') dflt='none' ;;
+	    *)   dflt="$ccdlflags" ;;
+	esac
+	rp="Any special flags to pass to $cc to use dynamic linking?"
+	. ./myread
+	case "$ans" in
+?X: Use ' ' so that a subsequent Configure run preserves the old state.
+	    none) ccdlflags=' ' ;;
+	    *)    ccdlflags="$ans" ;;
+	esac
+	;;
+?X: End of usedl=y section
+
+    *)  usedl="$undef"
+	ld='ld'
+	dlsrc='dl_none.xs'
+	lddlflags=''
+	ccdlflags=''
+	;;
+esac
+
+ld_can_script="$undef"
+case "$bin_ELF$usedl" in
+    $define$define)
+	# Abuse try.h and a.out names for neat cleanup
+	$cat >try.c <<EOM
+void foo() {}
+void bar() {}
+EOM
+	$cat >try.h <<EOM
+LIBTEST_42 {
+ global:
+  foo;
+ local: *;
+ };
+EOM
+	if $cc $cccdlflags $ccdlflags $ccflags \
+	       $ldflags $lddlflags -o a.out try.c \
+	       -Wl,--version-script=try.h >/dev/null 2>&1 \
+	   &&  $test -s a.out ; then
+	    echo "ld supports scripting" >&4
+	    ld_can_script="$define"
+	else
+	    echo "ld does not support scripting" >&4
+	fi
+	$rm_try
+	;;
+esac
+

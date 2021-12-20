@@ -1,0 +1,12 @@
+START
+File: testcase_syslog_capability.in
+Event type: AA_RECORD_DENIED
+Audit ID: 1284061910.975:672
+Operation: capable
+Profile: /home/ubuntu/bzr/apparmor/tests/regression/apparmor/syscall_setpriority
+Name: sys_nice
+Command: syscall_setprio
+Parent: 2663
+PID: 7292
+Epoch: 1284061910
+Audit subid: 672

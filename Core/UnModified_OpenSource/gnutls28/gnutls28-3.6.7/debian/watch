@@ -1,0 +1,4 @@
+version=3
+opts=uversionmangle=s/(.*\d)(pre\d*)$/$1~$2/,pgpsigurlmangle=s/$/.sig/ \
+https://www.gnupg.org/ftp/gcrypt/gnutls/v3.(\d+)/ \
+gnutls-(3\.\d.*)\.(?:tgz|zip|tar\.(?:gz|bz2|xz))

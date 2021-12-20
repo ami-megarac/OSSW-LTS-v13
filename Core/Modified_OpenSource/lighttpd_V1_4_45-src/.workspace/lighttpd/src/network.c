@@ -1210,6 +1210,24 @@ int network_init(server *srv) {
                 }
 	}
 
+#ifdef CONFIG_SPX_FEATURE_USB_PORT_B_SUPPORT
+	if (g_corefeatures.ethernet_over_usb_support == ENABLED &&
+		strncmp(g_serviceconf.InterfaceName, "both", strlen("both")) != 0 &&
+		strncmp(InterfaceName, "FFFFFFFFFFFFFFFF", MAX_SERVICE_IFACE_NAME_SIZE) != 0)
+	{
+		struct stat sb;
+		/* Check if USB Port B is already in use by RMedia */
+		if (stat((const char *)"/tmp/port_b_hd0", &sb) == -1)
+		{
+			if (0 != network_server_init(srv, b, srv->config_storage[0], "usb1"))
+			{
+				buffer_free(b);
+				return -1;
+			}
+		}
+	}
+#endif
+
 	buffer_free(b);
 
 #ifdef USE_OPENSSL
@@ -1304,6 +1322,24 @@ int network_init(server *srv) {
 					return -1;
 				}
 			}
+
+#ifdef CONFIG_SPX_FEATURE_USB_PORT_B_SUPPORT
+			if (g_corefeatures.ethernet_over_usb_support == ENABLED &&
+				strncmp(g_serviceconf.InterfaceName, "both", strlen("both")) != 0 &&
+				strncmp(InterfaceName, "FFFFFFFFFFFFFFFF", MAX_SERVICE_IFACE_NAME_SIZE) != 0)
+			{
+				struct stat sb;
+				/* Check if USB Port B is already in use by RMedia */
+				if (stat((const char *)"/tmp/port_b_hd0", &sb) == -1)
+				{
+					if (0 != network_server_init(srv, dc->string, s, "usb1"))
+					{
+						return -1;
+					}
+				}
+			}
+#endif
+
 		}
 	}
 

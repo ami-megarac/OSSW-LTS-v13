@@ -1,0 +1,79 @@
+# This publication is intellectual property of Novell Inc. and Canonical
+# Ltd. Its contents can be duplicated, either in part or in whole, provided
+# that a copyright label is visibly located on each copy.
+#
+# All information found in this book has been compiled with utmost
+# attention to detail. However, this does not guarantee complete accuracy.
+# Neither SUSE LINUX GmbH, Canonical Ltd, the authors, nor the translators
+# shall be held liable for possible errors or the consequences thereof.
+#
+# Many of the software and hardware descriptions cited in this book
+# are registered trademarks. All trade names are subject to copyright
+# restrictions and may be registered trade marks. SUSE LINUX GmbH
+# and Canonical Ltd. essentially adhere to the manufacturer's spelling.
+#
+# Names of products and trademarks appearing in this book (with or without
+# specific notation) are likewise subject to trademark and trade protection
+# laws and may thus fall under copyright restrictions.
+#
+
+
+=pod
+
+=head1 NAME
+
+aa-unconfined - output a list of processes with tcp or udp ports that do
+not have AppArmor profiles loaded
+
+=head1 SYNOPSIS
+
+B<aa-unconfined [I<--paranoid>] [I<--with-ss> | I<--with-netstat>]>
+
+=head1 OPTIONS
+
+=over 4
+
+=item B<--paranoid>
+
+Displays all processes from F</proc> filesystem with tcp or udp ports
+that do not have AppArmor profiles loaded.
+
+=item B<--with-ss>
+
+Use the ss(8) command to find processes listening on network sockets
+(the default).
+
+=item B<--with-netstat>
+
+Use the netstat(8) command to find processes listening on network
+sockets. This is also what aa-unconfined will fall back to when ss(8)
+is not available.
+
+=back
+
+=head1 DESCRIPTION
+
+B<aa-unconfined> will use netstat(8) to determine which processes have open
+network sockets and do not have AppArmor profiles loaded into the kernel.
+
+=head1 BUGS
+
+B<aa-unconfined> must be run as root to retrieve the process executable
+link from the F</proc> filesystem. This program is susceptible to race
+conditions of several flavours: an unlinked executable will be mishandled;
+an executable started before an AppArmor profile is loaded will not
+appear in the output, despite running without confinement; a process that dies
+between the netstat(8) and further checks will be mishandled. This
+program only lists processes using TCP and UDP. In short, this
+program is unsuitable for forensics use and is provided only as an aid
+to profiling all network-accessible processes in the lab.
+
+If you find any bugs, please report them at
+L<https://bugs.launchpad.net/apparmor/+filebug>.
+
+=head1 SEE ALSO
+
+ss(8), netstat(8), apparmor(7), apparmor.d(5), aa_change_hat(2), and
+L<https://wiki.apparmor.net>.
+
+=cut

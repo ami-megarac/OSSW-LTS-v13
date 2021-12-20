@@ -1,0 +1,126 @@
+# README for Debian packaging contributors #
+
+This documentation describes how to contribute to the official Debian packages
+of MariaDB. The packaging in Debian repositories is not identical to the packaging
+in mariadb.org repositories, but whatever is in Debian repositories will eventually
+be upstreamed.
+
+
+## Development environment and tools
+
+Use a recent version of Debian or Ubuntu as the environment for Debian packaging
+testing and development. Preferred environment is Debian Sid (unstable).
+
+Install the tool used to manage and build the source
+  sudo apt-get install git-buildpackage
+
+
+## Getting the source
+
+The official Debian package source is hosted on the Debian Gitlab server under
+the MariaDB/MySQL packaging team at https://salsa.debian.org/mariadb-team/. You
+are welcome to fork it and make merge requests.
+
+To get the latest official Debian packaging source of mariadb-10.3, clone the
+source repository with all relevant branches (master, upstream, pristine-tar) to
+your local environment using _git-buildpackage_:
+  gbp clone --pristine-tar https://salsa.debian.org/mariadb-team/mariadb-10.3.git
+
+If you have your own fork and SSH keys set up on Salsa, you can run:
+  gbp clone --pristine-tar git@salsa.debian.org:<username>/mariadb-10.3.git
+
+
+The clone needs to be run only once. On later runs you can refresh your clone with
+relevant branches using
+  gbp pull --pristine-tar --force
+
+
+## Building the packages
+
+Build binaries, run testsuite and build Debian packages with
+  gbp buildpackage
+
+On the first run git-buildpackage will complain if some of the build dependencies
+defined in debian/control are missing. Simply install those packages and run the
+build again.
+
+A quick command to install all dependencies:
+  sudo mk-build-deps -r -i debian/control -t "apt-get -y -o Debug::pkgProblemResolver=yes --no-install-recommends"
+
+If the build fails, the easiest way to clean up before a new run is
+  git clean -fdx && git reset --hard
+
+
+### Build options
+
+If you want to skip the mysql-test-run step (which takes a lot of time) set
+the following environment variable:
+  export DEB_BUILD_OPTIONS="nocheck"
+
+If you want to run the build in parallel on 2 CPUs and have verbose output:
+  export DEB_BUILD_OPTIONS="parallel=2 verbose"
+
+The options above can also be combined freely to get desired behavior.
+
+
+## Creating a feature or bugfix branch
+
+The repository has the following branch layout:
+  * upstream - contains the upstream source releases without modifications
+  * pristine-tar - contains extra delta needed to re-create the original
+    tarballs with the exactly same SHA-1 hash as the original tarballs by upstream
+  * master - packaging for Debian Sid (unstable)
+  * jessie - release branch for Debian 8 (jessie)
+  * stretch - release branch for Debian 9 (stretch)
+  * ubuntu-16.04 - release branch for Ubuntu 16.04 (xenial)
+  * ubuntu-18.04 - release branch for Ubuntu 18.04 (bionic)
+
+All new features and also bugfixes are done only in the master branch. The
+release branches for Debian and Ubuntu are only used for security updates.
+
+To prepare the Salsa pull request, create a bugfix branch from master with:
+  git checkout -b fix-example-name
+
+After this you can develop with all the usual git commit and push commands
+until you have in your fork at Salsa the desired change and you are ready
+to open the merge request.
+
+
+### Notes about how to make changes in the proper way
+
+First consider submitting your patch upstream. Upstream MariaDB makes frequent
+maintenance releases and any fix done upstream will therefore be included in
+Debian relatively quickly. You can send email to the developers mailing list
+or open a pull request at https://github.com/MariaDB/server.
+
+Follow these instructions if your fix is about packaging in Debian specifically.
+Start by using gitk or similar tool to browse the previous changes. Try to follow
+similar pattern in your new changes.
+
+Keep in mind that all changes must done only for files residing in the debian/
+subdirectory. If you need to create changes outside the debian/ directory,
+then you need to create a patch file using the same pattern as the patches
+found in debian/patches and activated by a line in debian/patches/series
+
+Do not bundle in your commit any changes to debian/changelog. The correct changelog
+entries will be created later by the maintainer using git-dch in an automated fashion.
+
+For an example of a patch adding commit see https://github.com/ottok/mariadb-10.0/commit/8d2a7c909
+
+# Using Docker
+
+First make a working directory for the build artefacts. Inside that directory
+clone the repository. Then start a Docker session using whatever Debian/Ubuntu
+image you want with the command:
+  docker run -it -v ${PWD}:/build -w /build debian:sid bash
+
+This will start a session, where you are as the root user in the path /build
+inside the Docker container. Here you can cd into the source directory, install
+dependencies and start the build. Note that when you exit the session,
+everything will be lost apart from the files you had inside the mounted volume
+in /build.
+
+# Using sbuild
+
+If you prefer sbuild, you can build with something like:
+  gbp buildpackage --git-builder=sbuild -A -v -d unstable

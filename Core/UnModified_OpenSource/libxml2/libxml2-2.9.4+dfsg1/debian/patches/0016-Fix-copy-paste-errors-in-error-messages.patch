@@ -1,0 +1,46 @@
+From: Nick Wellnhofer <wellnhofer@aevum.de>
+Date: Sun, 11 Jun 2017 17:12:21 +0200
+Subject: Fix copy-paste errors in error messages
+Origin: https://git.gnome.org/browse/libxml2/commit/?id=ed48d65b4d6c5cec7be035ad5eebeba873b4b955
+Bug-Debian: https://bugs.debian.org/880000
+Bug-Debian-Security: https://security-tracker.debian.org/tracker/CVE-2017-5130
+
+Thanks to David Kilzer for the review.
+---
+ xmlmemory.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/xmlmemory.c b/xmlmemory.c
+index c53141fb..58de2eda 100644
+--- a/xmlmemory.c
++++ b/xmlmemory.c
+@@ -250,7 +250,7 @@ xmlMallocAtomicLoc(size_t size, const char * file, int line)
+ 
+     if (size > (MAX_SIZE_T - RESERVE_SIZE)) {
+ 	xmlGenericError(xmlGenericErrorContext,
+-		"xmlMallocAtomicLoc : Unsigned overflow prevented\n");
++		"xmlMallocAtomicLoc : Unsigned overflow\n");
+ 	xmlMemoryDump();
+ 	return(NULL);
+     }
+@@ -361,7 +361,7 @@ xmlReallocLoc(void *ptr,size_t size, const char * file, int line)
+ 
+     if (size > (MAX_SIZE_T - RESERVE_SIZE)) {
+ 	xmlGenericError(xmlGenericErrorContext,
+-		"xmlMallocLoc : Unsigned overflow\n");
++		"xmlReallocLoc : Unsigned overflow\n");
+ 	xmlMemoryDump();
+ 	return(NULL);
+     }
+@@ -515,7 +515,7 @@ xmlMemStrdupLoc(const char *str, const char *file, int line)
+ 
+     if (size > (MAX_SIZE_T - RESERVE_SIZE)) {
+ 	xmlGenericError(xmlGenericErrorContext,
+-		"xmlMallocLoc : Unsigned overflow\n");
++		"xmlMemStrdupLoc : Unsigned overflow\n");
+ 	xmlMemoryDump();
+ 	return(NULL);
+     }
+-- 
+2.15.0
+

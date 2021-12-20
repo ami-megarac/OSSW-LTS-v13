@@ -1,0 +1,69 @@
+#!/bin/sh
+
+# wrapper to download a binary package from a full APT repository
+# (hopefully checking the archive signatures while at it)
+#
+# Copyright 2016 Niko Tyni <ntyni@debian.org>
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the same terms as Perl itself.
+#
+# TODO: apt-key handling?
+#
+
+set -e
+
+while getopts s:p:d:v: f
+do
+    case $f in
+    p) package="$OPTARG";;
+    s) sources="$OPTARG";;
+    d) debdir="$OPTARG";;
+    v) version="$OPTARG";;
+    esac
+done
+shift `expr $OPTIND - 1`
+
+if [ ! -n "$package" ] && [ -r debian/control ]; then
+    package=$(sed -n 's/^Package: *\(libperl5\..*\)/\1/ p' debian/control)
+fi
+
+if [ ! -n "$package" ]; then
+    echo "cannot guess name of package to download, aborting" 1>&2
+    exit 1
+fi
+
+if [ ! -n "$sources" ]; then
+    sources="deb http://httpredir.debian.org/debian unstable main"
+fi
+
+if [ ! -n "$version" ]; then
+    version=$(dpkg-parsechangelog -Sversion)
+fi
+
+if [ ! -n "$debdir" ]; then
+    debdir=.
+fi
+
+if [ $# = 0 ]; then
+    echo "Usage: $0 [ -p <package>[,<package2>,...] ] [ -d <debdir> ] [ -v <version> ] [ -s '<full sources.list line>' ] <arch> [...]" 1>&2
+    exit 1
+fi
+
+EXITCODE=0
+
+for ARCH in "$@"
+do
+    APTTMP=$(mktemp -d)
+    echo "$sources" > $APTTMP/sources.list
+    APTOPTIONS="-o APT::Architecture=$ARCH -o Dir::State=$APTTMP \
+                -o Dir::Cache=$APTTMP -o Debug::NoLocking=true \
+                -o Acquire::Languages=none \
+                -o Dir::Etc::Sourcelist=$APTTMP/sources.list"
+    apt-get $APTOPTIONS update
+    for p in $(echo $package | sed 's/,/ /g'); do
+        (cd "$debdir"; apt-get $APTOPTIONS download $p:$ARCH=$version) || EXITCODE=$?
+    done
+    rm -rf "$APTTMP"
+done
+exit $EXITCODE

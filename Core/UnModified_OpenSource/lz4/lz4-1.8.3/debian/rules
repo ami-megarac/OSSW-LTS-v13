@@ -1,0 +1,43 @@
+#!/usr/bin/make -f
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+CPPFLAGS:= $(shell dpkg-buildflags --get CPPFLAGS) -DLZ4F_PUBLISH_STATIC_FUNCTIONS
+CFLAGS:= $(shell dpkg-buildflags --get CFLAGS) $(CPPFLAGS)
+CXXFLAGS:= $(shell dpkg-buildflags --get CXXFLAGS) $(CPPFLAGS)
+LDFLAGS:= $(shell dpkg-buildflags --get LDFLAGS)
+DEB_HOST_MULTIARCH ?= $(shell dpkg-architecture -qDEB_HOST_MULTIARCH)
+DEB_HOST_GNU_TYPE ?= $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
+PREFIX:= /usr
+
+ifeq ($(origin CC),default)
+CC := $(DEB_HOST_GNU_TYPE)-gcc
+endif
+
+export CFLAGS
+export CPPFLAGS
+export LDFLAGS
+export PREFIX
+
+disable_test=0
+ifneq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
+disable_test=1
+endif
+
+%:
+	dh $@
+
+override_dh_auto_build:
+	dh_auto_build -- CC=$(CC)
+
+override_dh_auto_install:
+	dh_auto_install -- CC=$(CC)
+
+override_dh_install:
+	make install DESTDIR=$$(pwd)/debian/tmp LIBDIR=$(DESTDIR)/usr/lib/$(DEB_HOST_MULTIARCH) CC=$(CC)
+	dh_install
+
+override_dh_auto_test:
+ifeq "$(disable_test)" "0"
+	make test
+endif

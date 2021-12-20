@@ -1,0 +1,180 @@
+# This publication is intellectual property of Canonical Ltd. Its contents
+# can be duplicated, either in part or in whole, provided that a copyright
+# label is visibly located on each copy.
+#
+# All information found in this book has been compiled with utmost
+# attention to detail. However, this does not guarantee complete accuracy.
+# Neither Canonical Ltd, the authors, nor the translators shall be held
+# liable for possible errors or the consequences thereof.
+#
+# Many of the software and hardware descriptions cited in this book
+# are registered trademarks. All trade names are subject to copyright
+# restrictions and may be registered trade marks. Canonical Ltd.
+# essentially adhere to the manufacturer's spelling.
+#
+# Names of products and trademarks appearing in this book (with or without
+# specific notation) are likewise subject to trademark and trade protection
+# laws and may thus fall under copyright restrictions.
+#
+
+
+=pod
+
+=head1 NAME
+
+aa_policy_cache - an opaque object representing an AppArmor policy cache
+
+aa_policy_cache_new - create a new aa_policy_cache object from a path
+
+aa_policy_cache_ref - increments the ref count of an aa_policy_cache object
+
+aa_policy_cache_unref - decrements the ref count and frees the aa_policy_cache object when 0
+
+aa_policy_cache_remove - removes all policy cache files under a path
+
+aa_policy_cache_replace_all - performs a kernel policy replacement of all cached policies
+
+aa_policy_cache_dir_path - returns the path to the aa_policy_cache directory
+
+aa_policy_cache_dir_path_preview - returns a preview of the path to the aa_policy_cache directory without an existing aa_policy_cache object
+
+=head1 SYNOPSIS
+
+B<#include E<lt>sys/apparmor.hE<gt>>
+
+B<typedef struct aa_policy_cache aa_policy_cache;>
+
+B<int aa_policy_cache_new(aa_policy_cache **policy_cache, aa_features *kernel_features, int dirfd, const char *path, uint16_t max_caches);>
+
+B<int aa_policy_cache_add_ro_dir(aa_policy_cache *policy_cache, int dirfd, const char *path);>
+
+B<aa_policy_cache *aa_policy_cache_ref(aa_policy_cache *policy_cache);>
+
+B<void aa_policy_cache_unref(aa_policy_cache *policy_cache);>
+
+B<int aa_policy_cache_remove(int dirfd, const char *path);>
+
+B<int aa_policy_cache_replace_all(aa_policy_cache *policy_cache, aa_kernel_interface *kernel_interface);>
+
+B<char *aa_policy_cache_dir_path(aa_policy_cache *policy_cache, int level);>
+
+B<char *aa_policy_cache_dir_path_preview(aa_features *kernel_features, int dirfd, const char *path);>
+
+Link with B<-lapparmor> when compiling.
+
+=head1 DESCRIPTION
+
+The I<aa_policy_cache> object contains information about a set of AppArmor
+policy cache files. The policy cache files are the binary representation of a
+human-readable AppArmor profile. The binary representation is the form that is
+loaded into the kernel.
+
+The aa_policy_cache_new() function creates an I<aa_policy_cache>
+object based upon a directory file descriptor and path. See the
+openat(2) man page for examples of I<dirfd> and I<path>. The I<path>
+must point to a directory and it will be used as the basis for the
+location of policy cache files. See I<aa_policy_cache_dir_path> to
+find out which directory will be used to store the binary policy cache
+files. If additional overlay cache directories are used (see
+I<aa_policy_cache_add_ro_dir>) the directory specified in
+I<aa_policy_cache_new> is the first directory searched and is the
+writable overlay. If I<kernel_features> is NULL, then the features of
+the current kernel are used. When specifying a valid
+I<kernel_features> object, it must be compatible with the features
+of the kernel of interest.  The value of I<max_caches> should be equal
+to the number of caches that should be allowed before old caches are
+automatically reaped. The definition of what is considered to be an
+old cache is private to libapparmor. Specifying 0 means that no new
+caches should be created and only existing, valid caches may be used.
+Specifying UINT16_MAX means that a new cache may be created and that
+the reaping of old caches is disabled. The allocated
+I<aa_policy_cache> object must be freed using aa_policy_cache_unref().
+
+The aa_policy_cache_add_ro_dir() function adds an existing cache directory
+to the policy cache, as a readonly layer under the primary directory
+the cache was created with. When the cache is searched for an existing
+cache file the primary directory will be searched and then the readonly
+directories in the order that they were added to the policy cache.
+This allows the policy cache to be seeded with precompiled policy
+that can be updated by overlaying the read only cache file with one
+written to the primary cache dir.
+
+aa_policy_cache_ref() increments the reference count on the I<policy_cache>
+object.
+
+aa_policy_cache_unref() decrements the reference count on the I<policy_cache>
+object and releases all corresponding resources when the reference count
+reaches zero.
+
+The aa_policy_cache_remove() function deletes all of the policy cache files
+based upon a directory file descriptor and path. The I<path> must point to a 
+directory. See the openat(2) man page for examples of I<dirfd> and I<path>.
+
+The aa_policy_cache_replace_all() function can be used to perform a policy
+replacement of all of the cache policies in the cache directory represented by
+the I<policy_cache> object. If I<kernel_interface> is NULL, then the current
+kernel interface is used. When specifying a valid I<kernel_interface> object,
+it must be the interface of the currently running kernel.
+
+The aa_policy_cache_dir_path() function provides the path to the cache
+directory for a I<policy_cache> object at I<level> in the policy cache
+overlay of cache directories. A I<level> of 0 will always be present
+and is the first directory to search in an overlay of cache
+directories, and will also be the writable cache directory
+layer. Binary policy cache files will be located in the directory
+returned by this function.
+
+The aa_policy_cache_dir_levels() function provides access to the number
+of directories that are being overlayed to create the policy cache.
+
+
+=head1 RETURN VALUE
+
+The aa_policy_cache_new() function returns 0 on success and I<*policy_cache>
+will point to an I<aa_policy_cache> object that must be freed by
+aa_policy_cache_unref(). -1 is returned on error, with errno set appropriately,
+and I<*policy_cache> will be set to NULL.
+
+aa_policy_cache_ref() returns the value of I<policy_cache>.
+
+aa_policy_cache_remove() and aa_policy_cache_replace_all() return 0 on success.
+-1 is returned on error, with errno set appropriately.
+
+aa_policy_cache_dir_path() returns a path string which must be freed by the
+caller. NULL is returned on error, with errno set appropriately.
+
+aa_policy_cache_dir_levels() returns a number indicating the number of
+directory levels there are associated with the I<policy_cache>.
+
+aa_policy_cache_dir_path_preview() is the same as
+aa_policy_cache_dir_path() except that it doesn't require an existing
+I<aa_policy_cache> object. This is useful if the calling program cannot
+create an I<aa_policy_cache> object due to lack of privileges needed to
+create the cache directory.
+
+=head1 ERRORS
+
+The errno value will be set according to the underlying error in the
+I<aa_policy_cache> family of functions that return -1 or NULL on error.
+
+=head1 NOTES
+
+All aa_policy_cache functions described above, except for the
+aa_policy_cache_dir_path() function was added in libapparmor version
+2.13. All the other aa_policy_cache functions described above are
+present in libapparmor version 2.10.
+
+aa_policy_cache_unref() saves the value of errno when called and restores errno
+before exiting in libapparmor version 2.12 and newer.
+
+=head1 BUGS
+
+None known. If you find any, please report them at
+L<https://bugs.launchpad.net/apparmor/+filebug>.
+
+=head1 SEE ALSO
+
+aa_features(3), aa_kernel_interface(3), openat(2) and
+L<https://wiki.apparmor.net>.
+
+=cut

@@ -1,0 +1,23 @@
+usr/lib32/libncurses.so
+usr/lib32/libncursesw.so
+obj-32/lib/libtic.so usr/lib32
+obj-32/lib/libform.so usr/lib32
+obj-32/lib/libmenu.so usr/lib32
+obj-32/lib/libpanel.so usr/lib32
+obj-32/lib/libtinfo.so usr/lib32
+obj-32/lib/libncurses.a usr/lib32
+obj-32/lib/libncurses++.a usr/lib32
+obj-32/lib/libtic.a usr/lib32
+obj-32/lib/libform.a usr/lib32
+obj-32/lib/libmenu.a usr/lib32
+obj-32/lib/libpanel.a usr/lib32
+obj-32/lib/libtinfo.a usr/lib32
+obj-wide-32/lib/libformw.so usr/lib32
+obj-wide-32/lib/libmenuw.so usr/lib32
+obj-wide-32/lib/libpanelw.so usr/lib32
+obj-wide-32/lib/libncursesw.a usr/lib32
+obj-wide-32/lib/libncurses++w.a usr/lib32
+obj-wide-32/lib/libformw.a usr/lib32
+obj-wide-32/lib/libmenuw.a usr/lib32
+obj-wide-32/lib/libpanelw.a usr/lib32
+debian/libtermcap.so  usr/lib32

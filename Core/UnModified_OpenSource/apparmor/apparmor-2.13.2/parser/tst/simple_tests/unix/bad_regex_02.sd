@@ -1,0 +1,8 @@
+#
+#=DESCRIPTION unix rule with a bad expansion
+#=EXRESULT FAIL
+#
+
+profile foo {
+  unix bind addr=abcd]efg,
+}

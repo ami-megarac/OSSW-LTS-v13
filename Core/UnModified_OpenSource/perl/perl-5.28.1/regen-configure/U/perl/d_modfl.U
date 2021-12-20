@@ -1,0 +1,90 @@
+?RCS: $Id$
+?RCS:
+?RCS: Copyright (c) 2000 Jarkko Hietaniemi
+?RCS:
+?RCS: You may distribute under the terms of either the GNU General Public
+?RCS: License or the Artistic License, as specified in the README file.
+?RCS:
+?MAKE:d_modfl d_modflproto: Inlibc Compile Hasproto cat \
+	test ccflags uselongdouble \
+	d_sqrtl d_aintl d_copysignl d_ilogbl d_scalbnl d_frexpl d_ldexpl \
+	d_truncl
+?MAKE:	-pick add $@ %<
+?S:d_modfl:
+?S:	This variable conditionally defines the HAS_MODFL symbol, which
+?S:	indicates to the C program that the modfl() routine is available.
+?S:.
+?S:d_modflproto:
+?S:	This symbol, if defined, indicates that the system provides
+?S:	a prototype for the modfl() function.  Otherwise, it is up
+?S:	to the program to supply one.  C99 says it should be
+?S:		long double modfl(long double, long double *);
+?S:.
+?C:HAS_MODFL:
+?C:	This symbol, if defined, indicates that the modfl routine is
+?C:	available to split a long double x into a fractional part f and
+?C:	an integer part i such that |f| < 1.0 and (f + i) = x.
+?C:.
+?C:HAS_MODFL_PROTO:
+?C:	This symbol, if defined, indicates that the system provides
+?C:	a prototype for the modfl() function.  Otherwise, it is up
+?C:	to the program to supply one.
+?C:.
+?H:#$d_modfl HAS_MODFL		/**/
+?H:#$d_modflproto HAS_MODFL_PROTO		/**/
+?H:.
+?T:message
+?LINT:set d_modfl
+?LINT:set d_modflproto
+?LINT:change ccflags
+: see if modfl exists
+set modfl d_modfl
+eval $inlibc
+
+: see if prototype for modfl is available
+echo " "
+set d_modflproto modfl define math.h
+eval $hasproto
+
+if $test "$uselongdouble" = "$define"; then
+    message=""
+    if $test "$d_sqrtl" != "$define"; then
+	message="$message sqrtl"
+    fi
+    if $test "$d_modfl" != "$define"; then
+	if $test "$d_truncl:$d_copysignl" = "$define:$define"; then
+	    echo "You have both truncl and copysignl, so I can emulate modfl."
+	else
+	    if $test "$d_aintl:$d_copysignl" = "$define:$define"; then
+		echo "You have both aintl and copysignl, so I can emulate modfl."
+	    else
+		message="$message modfl"
+	    fi
+	fi
+    fi
+    if $test "$d_frexpl" != "$define"; then
+	if $test "$d_ilogbl:$d_scalbnl" = "$define:$define"; then
+	    echo "You have both ilogbl and scalbnl, so I can emulate frexpl."
+	else
+	    message="$message frexpl"
+	fi
+    fi
+    if $test "$d_ldexpl" != "$define"; then
+	message="$message ldexpl"
+    fi
+
+    if $test "$message" != ""; then
+	$cat <<EOM >&4
+
+*** You requested the use of long doubles but you do not seem to have
+*** the following mathematical functions needed for long double support:
+***    $message
+*** Please rerun Configure without -Duselongdouble and/or -Dusemorebits.
+*** Cannot continue, aborting.
+
+EOM
+
+	exit 1
+    fi
+fi
+

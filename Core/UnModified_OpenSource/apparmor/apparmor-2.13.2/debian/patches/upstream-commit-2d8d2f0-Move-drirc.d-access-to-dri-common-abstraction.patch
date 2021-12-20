@@ -1,0 +1,42 @@
+From: Vincas Dargis <vindrg@gmail.com>
+Date: Sun, 27 Jan 2019 17:34:54 +0200
+Subject: Move drirc.d access to dri-common abstraction
+
+Commit b5be5964609b4e0927af7c9e4f0276e50ccdc3e3 added ability to read
+/usr/share/drirc.d/ directory to mesa abstraction.
+
+This seems to be a mistake, as it was noted that not all GUI
+applications, that need access to drirc.d, also need whole mesa-related
+rules (including writing caches).
+
+Move /usr/share/drirc.d/ access to different abstraction. This is not a
+breaking change, because any GUI application will have included X
+abstraction already, and in the end result - dri-common abstraction too.
+---
+ profiles/apparmor.d/abstractions/dri-common | 1 +
+ profiles/apparmor.d/abstractions/mesa       | 1 -
+ 2 files changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/profiles/apparmor.d/abstractions/dri-common b/profiles/apparmor.d/abstractions/dri-common
+index d633772..efa389f 100644
+--- a/profiles/apparmor.d/abstractions/dri-common
++++ b/profiles/apparmor.d/abstractions/dri-common
+@@ -8,5 +8,6 @@
+   /usr/lib/fglrx/dri/**           mr,
+   /dev/dri/**                     rw,
+   /etc/drirc                      r,
++  /usr/share/drirc.d/{,*.conf}    r,
+   owner @{HOME}/.drirc            r,
+ 
+diff --git a/profiles/apparmor.d/abstractions/mesa b/profiles/apparmor.d/abstractions/mesa
+index 6e4a8c9..68e7579 100644
+--- a/profiles/apparmor.d/abstractions/mesa
++++ b/profiles/apparmor.d/abstractions/mesa
+@@ -3,7 +3,6 @@
+ 
+   # System files
+   /dev/dri/ r, # libGLX_mesa.so calls drmGetDevice2()
+-  /usr/share/drirc.d/{,*.conf} r,
+ 
+   # User files
+   owner @{HOME}/.cache/ w, # if user clears all caches

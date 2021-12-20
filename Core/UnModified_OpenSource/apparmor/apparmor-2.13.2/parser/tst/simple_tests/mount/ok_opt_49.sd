@@ -1,0 +1,10 @@
+#
+#=Description basic rules to test the "make-private" mount option
+#=EXRESULT PASS
+/usr/bin/foo {
+  mount options=make-private -> /1,
+  mount options=(make-private) -> /2,
+  mount options=(rw,make-private) -> /3,
+  mount options in (make-private) -> /4,
+  mount options in (ro,make-private) -> /5,
+}

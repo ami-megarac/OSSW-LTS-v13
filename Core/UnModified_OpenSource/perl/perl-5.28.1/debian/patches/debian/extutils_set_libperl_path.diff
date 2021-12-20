@@ -1,0 +1,26 @@
+From 28f28de9bef2c3329b5f39eabf16f92f51dd206b Mon Sep 17 00:00:00 2001
+From: Niko Tyni <ntyni@debian.org>
+Date: Sat, 10 May 2014 23:34:14 +0300
+Subject: EU:MM: set location of libperl.a under /usr/lib
+
+The Debian packaging moves libperl.a a couple of levels up from the
+CORE directory to match other static libraries.
+
+Patch-Name: debian/extutils_set_libperl_path.diff
+---
+ cpan/ExtUtils-MakeMaker/lib/ExtUtils/MM_Unix.pm | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/cpan/ExtUtils-MakeMaker/lib/ExtUtils/MM_Unix.pm b/cpan/ExtUtils-MakeMaker/lib/ExtUtils/MM_Unix.pm
+index dbb8651a9f..780e390cd9 100644
+--- a/cpan/ExtUtils-MakeMaker/lib/ExtUtils/MM_Unix.pm
++++ b/cpan/ExtUtils-MakeMaker/lib/ExtUtils/MM_Unix.pm
+@@ -2564,7 +2564,7 @@ MAP_PRELIBS   = $Config{perllibs} $Config{cryptlib}
+ 	($lperl = $libperl) =~ s/\$\(A\)/$self->{LIB_EXT}/;
+     }
+     unless ($libperl && -f $lperl) { # Ilya's code...
+-	my $dir = $self->{PERL_SRC} || "$self->{PERL_ARCHLIB}/CORE";
++	my $dir = $self->{PERL_SRC} || "$self->{PERL_ARCHLIB}/../..";
+ 	$dir = "$self->{PERL_ARCHLIB}/.." if $self->{UNINSTALLED_PERL};
+ 	$libperl ||= "libperl$self->{LIB_EXT}";
+ 	$libperl   = "$dir/$libperl";
